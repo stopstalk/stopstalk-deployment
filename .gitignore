@@ -1,0 +1,13 @@
+/cache/*
+/databases/*
+/errors/*
+/sessions/*
+/uploads/*
+.~lock.*.csv#
+*.log
+*.pyc
+*.~*~
+.directory
+.pythonhistory
+.idea
+.sass-cache
