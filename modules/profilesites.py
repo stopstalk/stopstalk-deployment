@@ -131,10 +131,13 @@ class Profile(object):
                         continue
                     submissions[handle][page][it] = {}
                     if row == 0:
-                        currid = i.contents[1].contents[1].contents[0]
-                        if currid == previd:
-                            flag = 1
-                            break
+                        try:
+                            currid = i.contents[1].contents[1].contents[0]
+                            if currid == previd:
+                                flag = 1
+                                break
+                        except IndexError:
+                            continue
                     previd = currid
                     row += 1
 
