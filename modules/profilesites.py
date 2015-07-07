@@ -1,5 +1,6 @@
 import requests, ast, time
 import parsedatetime as pdt
+import datetime
 import bs4
 
 class Profile(object):
@@ -14,10 +15,14 @@ class Profile(object):
 
     @staticmethod
     def parsetime(time_str):
-        cal = pdt.Calendar()
-        dt, flags = cal.parseDT(time_str)
-        assert flags
-        return dt
+        try:
+            dt = datetime.datetime.strptime(time_str, "%H:%M %p %d/%m/%y")
+            return dt
+        except ValueError:
+            cal = pdt.Calendar()
+            dt, flags = cal.parseDT(time_str)
+            assert flags
+            return dt
 
     def codechef(self):
 
@@ -53,18 +58,19 @@ class Profile(object):
             for i in x.find_all("tr"):
                 try:
                     if i['class'][0] == "kol":
-                        submissions[handle][page][it] = {}
+                        submissions[handle][page][it] = []
+                        submission = submissions[handle][page][it]
                         # tos = time_of_submission
                         tos = i.contents[0].contents[0]
                         tos = str(ast.literal_eval(repr(tos).replace("\\", "")))
                         tos = Profile.parsetime(tos)
-                        submissions[handle][page][it]["time"] = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
+                        submission.append(time.strptime(str(tos), "%Y-%m-%d %H:%M:%S"))
 
                         # Problem name/url
                         prob = i.contents[1].contents[0]
                         prob["href"] = "http://www.codechef.com" + prob["href"]
-                        submissions[handle][page][it]["problem_link"] = eval(repr(prob["href"]).replace("\\", ""))
-                        submissions[handle][page][it]["problem_name"] = prob.contents[0]
+                        submission.append(eval(repr(prob["href"]).replace("\\", "")))
+                        submission.append(prob.contents[0])
     
                         # Submission status
                         stat = i.contents[2].contents[0]
@@ -82,7 +88,7 @@ class Profile(object):
                             st = "RE"
                         elif stat == "clock_error":
                             st = "TLE"
-                        submissions[handle][page][it]["status"] = st
+                        submission.append(st)
     
                         # Question points
                         pts = i.contents[2].contents[0].contents
@@ -96,10 +102,10 @@ class Profile(object):
                                 points = "100"
                             else:
                                 points = "0"
-                        submissions[handle][page][it]["points"] = points
+                        submission.append(points)
 
                         # Language
-                        submissions[handle][page][it]["language"] = i.contents[3].contents[0].strip()
+                        submission.append(i.contents[3].contents[0].strip())
                         it += 1
                 except KeyError:
                     pass
@@ -129,7 +135,10 @@ class Profile(object):
 
                     if i.contents[1].contents[0] == "#":
                         continue
-                    submissions[handle][page][it] = {}
+
+                    submissions[handle][page][it] = []
+                    submission = submissions[handle][page][it]
+
                     if row == 0:
                         try:
                             currid = i.contents[1].contents[1].contents[0]
@@ -143,17 +152,13 @@ class Profile(object):
 
                     # Time of submission
                     tos = i.contents[3].contents[0].strip()
-                    submissions[handle][page][it]["time"] = time.strptime(tos, "%Y-%m-%d %H:%M:%S") 
+                    submission.append(time.strptime(tos, "%Y-%m-%d %H:%M:%S"))
 
                     # Problem
                     prob = i.contents[7].contents[1]
                     prob["href"] = "http://codeforces.com" + prob["href"]
-                    submissions[handle][page][it]["problem_link"] = eval(repr(prob["href"]).replace("\\", ""))
-                    submissions[handle][page][it]["problem_name"] = prob.contents[0].strip()
-
-                    # Language
-                    lang = i.contents[9].contents[0].strip()
-                    submissions[handle][page][it]["language"] = lang
+                    submission.append(eval(repr(prob["href"]).replace("\\", "")))
+                    submission.append(prob.contents[0].strip())
 
                     # Submission Status
                     status = i.contents[11].contents[1].attrs["submissionverdict"]
@@ -170,14 +175,18 @@ class Profile(object):
                         st = "RE"
                     elif status == "TIME_LIMIT_EXCEEDED":
                         st = "TLE"
-                    submissions[handle][page][it]["status"] = st
+                    submission.append(st)
                     
                     if st == "AC":
                         points = "100"
                     else:
                         points = "0"
-                    submissions[handle][page][it]["points"] = points
+                    submission.append(points)
                     it += 1
+
+                    # Language
+                    lang = i.contents[9].contents[0].strip()
+                    submission.append(lang)
     
             if flag == 1:
                 break
@@ -202,7 +211,10 @@ class Profile(object):
             row = 0
             submissions[handle][page] = {}
             for i in soup.find("tbody"):
-                submissions[handle][page][it] = {}
+
+                submissions[handle][page][it] = []
+                submission = submissions[handle][page][it]
+
                 if isinstance(i, bs4.element.Tag):
                     if row == 0:
                         currid = i.contents[1].contents[0]
@@ -213,13 +225,13 @@ class Profile(object):
                     previd = currid
                     # Time of submission
                     tos = i.contents[3].contents[1].contents[0]
-                    submissions[handle][page][it]["time"] = time.strptime(tos, "%Y-%m-%d %H:%M:%S")
+                    submission.append(time.strptime(tos, "%Y-%m-%d %H:%M:%S"))
 
                     # Problem URL
                     uri = i.contents[5].contents[0]
                     uri["href"] = "http://www.spoj.com" + uri["href"]
-                    submissions[handle][page][it]["problem_link"] = eval(repr(uri["href"]).replace("\\", ""))
-                    submissions[handle][page][it]["problem_name"] = uri.contents[0].strip()
+                    submission.append(eval(repr(uri["href"]).replace("\\", "")))
+                    submission.append(uri.contents[0].strip())
             
                     # Problem Status
                     status = i.contents[6].contents
@@ -238,17 +250,18 @@ class Profile(object):
                         st = "RE"
                     elif status == "time limit exceeded":
                         st = "TLE"
-                    submissions[handle][page][it]["status"] = st
+                    submission.append(st)
 
                     # Question Points
                     if st == "AC":
                         points = "100"
                     else:
                         points = "0"
-                    submissions[handle][page][it]["points"] = points    
+                    submission.append(points)
                 
                     # Language
-                    submissions[handle][page][it]["language"] = i.contents[12].contents[1].contents[0]
+                    submission.append(i.contents[12].contents[1].contents[0])
+
                     it += 1
             page += 1
             if flag == 1:
