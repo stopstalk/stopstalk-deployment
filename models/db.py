@@ -58,25 +58,30 @@ service = Service()
 plugins = PluginManager()
 
 ## create all tables needed by auth if not custom tables
+auth.settings.extra_fields['auth_user']= [Field('institute', requires=IS_NOT_EMPTY()),
+                                          Field('codechef_handle'),
+                                          Field('codeforces_handle'),
+                                          Field('spoj_handle'),
+                                          Field('stopstalk_handle',
+                                                requires=IS_NOT_IN_DB(db,
+                                                                      'auth_user.stopstalk_handle',
+                                                                      error_message=T("Handle taken")),
+                                                ),
+                                          ]
+
 auth.define_tables(username=False, signature=False)
 
 ## configure email
 mail = auth.settings.mailer
-mail.settings.server = 'logging' if request.is_local else myconf.take('smtp.server')
-mail.settings.sender = myconf.take('smtp.sender')
-mail.settings.login = myconf.take('smtp.login')
+mail.settings.server = 'smtp.gmail.com:587'
+mail.settings.sender = 'contactstopstalk@gmail.com'
+mail.settings.login = 'contactstopstalk@gmail.com:oeguglialwybazpf'
 
 ## configure auth policy
-auth.settings.registration_requires_verification = False
+auth.settings.registration_requires_verification = True
 auth.settings.registration_requires_approval = False
 auth.settings.reset_password_requires_verification = True
 
-from gluon.contrib.login_methods.rpx_account import RPXAccount
-auth.settings.actions_disabled=['register','change_password','request_reset_password']
-auth.settings.login_form = RPXAccount(request,
-            api_key='...',
-            domain='...',
-            url = "http://your-external-address/%s/default/user/login" % request.application)
 #########################################################################
 ## Define your tables below (or better in another model file) for example
 ##
@@ -96,4 +101,3 @@ auth.settings.login_form = RPXAccount(request,
 
 ## after defining tables, uncomment below to enable auditing
 # auth.enable_record_versioning(db)
-
