@@ -62,7 +62,7 @@
         </div>
         <div class="collapse navbar-collapse navbar-ex1-collapse">
           <ul class="nav navbar-nav navbar-right">
-            {{='auth' in globals() and auth.navbar('Welcome',mode='dropdown') or ''}}
+            {{=custom.navbar(auth.navbar(mode='bare'))}}
           </ul>
           {{if response.menu:}}
           {{=MENU(response.menu, _class='nav navbar-nav',li_class='dropdown',ul_class='dropdown-menu')}}
@@ -105,11 +105,6 @@
     {{block footer}} <!-- this is default footer -->      
     <footer class="footer">
       <div class="container-fluid">
-        <div class="copyright pull-left">{{=T('Copyright')}} &#169; {{=request.now.year}}</div>
-          <div id="poweredBy" class="pull-right">
-            {{=T('Powered by')}}
-            <a href="http://www.web2py.com/">web2py</a>
-          </div>
       </div>
     </footer>
     {{end}}
@@ -127,6 +122,5 @@
     </script>
     {{pass}}
     <!-- Share ============================y============ -->
-    <script src="{{=URL('static','js/share.js',vars=dict(static=URL('static','images')))}}"></script>
   </body>
 </html>

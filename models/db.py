@@ -14,10 +14,14 @@ from gluon.contrib.appconfig import AppConfig
 ## once in production, remove reload=True to gain full speed
 myconf = AppConfig(reload=True)
 
+import custom_layout as custom
 
 if not request.env.web2py_runtime_gae:
     ## if NOT running on Google App Engine use SQLite or other DB
-    db = DAL(myconf.take('db.uri'), pool_size=myconf.take('db.pool_size', cast=int), check_reserved=['all'])
+    db = DAL('mysql://' + current.mysql_user + \
+             ':' + current.mysql_password + \
+             '@' + current.mysql_server + \
+             '/' + current.mysql_dbname)
 else:
     ## connect to Google BigTable (optional 'google:datastore://namespace')
     db = DAL('google:datastore+ndb')
@@ -73,9 +77,9 @@ auth.define_tables(username=False, signature=False)
 
 ## configure email
 mail = auth.settings.mailer
-mail.settings.server = 'smtp.gmail.com:587'
-mail.settings.sender = 'contactstopstalk@gmail.com'
-mail.settings.login = 'contactstopstalk@gmail.com:oeguglialwybazpf'
+mail.settings.server = current.smtp_server
+mail.settings.sender = current.sender_mail
+mail.settings.login = current.sender_mail + ":" + current.sender_password
 
 ## configure auth policy
 auth.settings.registration_requires_verification = True
@@ -101,3 +105,22 @@ auth.settings.reset_password_requires_verification = True
 
 ## after defining tables, uncomment below to enable auditing
 # auth.enable_record_versioning(db)
+
+db.define_table("submission",
+                Field("handle", "reference auth_user"),
+                Field("time_stamp", "datetime"),
+                Field("problem_name"),
+                Field("problem_link"),
+                Field("lang"),
+                Field("status"),
+                Field("points"),
+                )
+
+db.define_table("friend_requests",
+                Field("from_h", "reference auth_user"),
+                Field("to_h", "reference auth_user"),
+                )
+
+db.define_table("friends",
+                Field("user_id", "reference auth_user"),
+                Field("friends_list", "text"))
