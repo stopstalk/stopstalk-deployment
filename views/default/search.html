@@ -1,0 +1,25 @@
+{{extend 'layout.html'}}
+<h1>Search for friends on StopStalk</h1>
+<br/><br/>
+<script>
+    $(document).ready(function() {
+        $('#searchInput').bind('keyup', function() {
+            $(this).val();
+            $.ajax({
+                method: 'GET',
+                url: 'retrieve_users.json',
+                data: {q: $(this).val()}
+            }).done(function(html) {
+                $('#responseDiv').html(html['t']);
+            });
+        });
+    });
+</script>
+<form class="center">
+    <div class="form-group">
+        <input class="form-control" id="searchInput" placeholder="Search by Name, StopStalk handle, Site handle" />
+    </div>
+</form>
+
+<div id="responseDiv">
+</div>

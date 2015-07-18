@@ -18,10 +18,11 @@ import custom_layout as custom
 
 if not request.env.web2py_runtime_gae:
     ## if NOT running on Google App Engine use SQLite or other DB
-    db = DAL('mysql://' + current.mysql_user + \
-             ':' + current.mysql_password + \
-             '@' + current.mysql_server + \
-             '/' + current.mysql_dbname)
+#    db = DAL('mysql://' + current.mysql_user + \
+#             ':' + current.mysql_password + \
+#             '@' + current.mysql_server + \
+#             '/' + current.mysql_dbname)
+    db = DAL(myconf.take('db.uri'), pool_size=myconf.take('db.pool_size', cast=int), check_reserved=['all'])
 else:
     ## connect to Google BigTable (optional 'google:datastore://namespace')
     db = DAL('google:datastore+ndb')
@@ -107,7 +108,10 @@ auth.settings.reset_password_requires_verification = True
 # auth.enable_record_versioning(db)
 
 db.define_table("submission",
-                Field("handle", "reference auth_user"),
+                Field("user_id", "reference auth_user"),
+                Field("stopstalk_handle"),
+                Field("site_handle"),
+                Field("site"),
                 Field("time_stamp", "datetime"),
                 Field("problem_name"),
                 Field("problem_link"),

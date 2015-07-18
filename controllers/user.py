@@ -1,3 +1,5 @@
+import utilities
+
 # -------------------------------------------------------------------------------
 @auth.requires_login()
 def index():
@@ -11,7 +13,9 @@ def profile():
 # -------------------------------------------------------------------------------
 @auth.requires_login()
 def submissions():
-    return dict()
+    submissions = db(db.submission.user_id == session.user_id).select(orderby=~db.submission.time_stamp)
+    table = utilities.render_table(submissions)        
+    return dict(table=table)
 
 # -------------------------------------------------------------------------------
 @auth.requires_login()

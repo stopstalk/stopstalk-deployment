@@ -17,6 +17,7 @@ response.menu = [
     (T('Home'), False, URL('default', 'index'), []),
     (T('Notifications'), False, URL('user', 'notifications'), []),
     (T('Friend Requests'), False, URL('user', 'friend_requests'), []),
+    (T('Search'), False, URL('default', 'search'), []),
 ]
 
 if "auth" in locals(): auth.wikimenu() 

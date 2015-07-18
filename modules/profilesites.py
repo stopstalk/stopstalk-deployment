@@ -24,7 +24,8 @@ class Profile(object):
             assert flags
             return dt
 
-    def codechef(self):
+    def codechef(self, last_retrieved):
+
 
         handle = self.codechef_handle
         user_url = "http://www.codechef.com/recent/user?user_handle=" + handle
@@ -64,7 +65,10 @@ class Profile(object):
                         tos = i.contents[0].contents[0]
                         tos = str(ast.literal_eval(repr(tos).replace("\\", "")))
                         tos = Profile.parsetime(tos)
-                        submission.append(time.strptime(str(tos), "%Y-%m-%d %H:%M:%S"))
+                        curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
+                        if curr <= last_retrieved:
+                            return submissions
+                        submission.append(str(tos))
 
                         # Problem name/url
                         prob = i.contents[1].contents[0]
@@ -111,7 +115,7 @@ class Profile(object):
                     pass
         return submissions
 
-    def codeforces(self):
+    def codeforces(self, last_retrieved):
         handle = self.codeforces_handle
         page = 1
         previd = -1
@@ -119,17 +123,27 @@ class Profile(object):
         it = 1
         submissions = {handle: {}}
         while 1:
+            while 1:
 
-            url = "http://codeforces.com/submissions/" + handle + "/page/" + str(page)
-            tmp = requests.get(url)
-            soup = bs4.BeautifulSoup(tmp.text)
+                url = "http://codeforces.com/submissions/" + handle + "/page/" + str(page)
+                try:
+                    tmp = requests.get(url)
+                    soup = bs4.BeautifulSoup(tmp.text)
+                    if tmp.status_code == 200:
+                        break
+                except:
+                    continue
 
+            tbody = None
             for i in soup.findAll("table", {"class": "status-frame-datatable"}):
                 tbody = i
+            if tbody is None:
+                break
             flag = 0
             page += 1
             row = 0
             submissions[handle][page] = {}
+
             for i in tbody:
                 if isinstance(i, bs4.element.Tag):
 
@@ -152,7 +166,10 @@ class Profile(object):
 
                     # Time of submission
                     tos = i.contents[3].contents[0].strip()
-                    submission.append(time.strptime(tos, "%Y-%m-%d %H:%M:%S"))
+                    curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
+                    if curr <= last_retrieved:
+                        return submissions
+                    submission.append(str(tos))
 
                     # Problem
                     prob = i.contents[7].contents[1]
@@ -192,7 +209,7 @@ class Profile(object):
                 break
         return submissions
 
-    def spoj(self):
+    def spoj(self, last_retrieved):
 	
         start = 0
         handle = self.spoj_handle
@@ -202,16 +219,22 @@ class Profile(object):
         previd = -1
         currid = 0
         page = 0
+        url = "https://www.spoj.com/users/" + handle
+        tmpreq = requests.get(url)
+
+        # Bad but correct way of checking if the handle exists
+        if tmpreq.text.find("History of submissions") == -1:
+            return submissions
+
         while 1:
             flag = 0
-            url = "http://www.spoj.com/status/" + handle + "/all/start=" + str(start)
+            url = "https://www.spoj.com/status/" + handle + "/all/start=" + str(start)
             start += 20
             t = requests.get(url)
             soup = bs4.BeautifulSoup(t.text)
             row = 0
             submissions[handle][page] = {}
             for i in soup.find("tbody"):
-
                 submissions[handle][page][it] = []
                 submission = submissions[handle][page][it]
 
@@ -225,7 +248,10 @@ class Profile(object):
                     previd = currid
                     # Time of submission
                     tos = i.contents[3].contents[1].contents[0]
-                    submission.append(time.strptime(tos, "%Y-%m-%d %H:%M:%S"))
+                    curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
+                    if curr <= last_retrieved:
+                        return submissions
+                    submission.append(str(tos))
 
                     # Problem URL
                     uri = i.contents[5].contents[0]

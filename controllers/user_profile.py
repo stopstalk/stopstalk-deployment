@@ -22,7 +22,7 @@ def user_submissions_table(submissions, handle, handle_url):
 
             tr = TR()
             tr.append(TD(A(handle, _href=handle_url)))
-            tr.append(TD(str(datetime.fromtimestamp(mktime(submission[0])))))
+            tr.append(TD(str(submission[0])))
             tr.append((TD(A(submission[2],
                             _href=str(submission[1])))))
             tr.append(TD(submission[3]))
