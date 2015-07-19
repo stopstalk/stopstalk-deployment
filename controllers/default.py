@@ -101,9 +101,9 @@ def retrieve_users():
 # -------------------------------------------------------------------------------
 @auth.requires_login()
 def submissions():
-    
+
     if len(request.args) == 0:
-        active = 0
+        active = "1"
     else:
         active = request.args[0]
 
@@ -118,26 +118,19 @@ def submissions():
     friends = db(query).select(db.friends.friends_list).first()
     friends = tuple(eval(friends.friends_list))
 
-
     query = db.submission.user_id.belongs(friends)
     query |= db.submission.custom_user_id.belongs(cusfriends)
     count = db(query).count()
+    count = count / 100 + 1
 
-    ul = UL(_class="pagination pagination-sm")
-    for i in xrange(count / 100 + 1):
-        if i == int(active):
-            li = LI(A(i + 1, _href=URL("default", "submissions", args=[i])),
-                    _class="active")
-        else:
-            li = LI(A(i + 1, _href=URL("default", "submissions", args=[i])),
-                    )
-        ul.append(li)
+    if request.extension == "json":
+        return dict(count=count)
 
     rows = db(query).select(orderby=~db.submission.time_stamp,
-                            limitby=(100 * int(active), int(active) * 100 + 100))
+                            limitby=(100 * (int(active) - 1), (int(active) - 1) * 100 + 100))
     
     table = utilities.render_table(rows)
-    return dict(table=table, ul=ul)
+    return dict(table=table)
 
 # -------------------------------------------------------------------------------
 def call():

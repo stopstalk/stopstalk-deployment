@@ -1,6 +1,30 @@
 {{extend 'layout.html'}}
+<script src="{{=URL('static', 'js/jquery.bootpag.min.js')}}"></script>
 <h1>Recent submissions</h1>
-<nav class="center">
-    {{=ul}}
-</nav>
+<div id="content"></div>
+<div id="page-selection" class="center"></div>
+    <script>
+        $.ajax({
+            method: 'GET',
+            url: '/stopstalk/default/submissions.json'
+        }).done(function(page) {
+            var pageCount = page['count'];
+            var currentUrl = window.location.href;
+            currentUrl = currentUrl.split("/").slice(-1);
+            var currPage;
+            if (currentUrl != "submissions") {
+                currPage = currentUrl;
+            } else {
+                currPage = "1";
+            }
+            console.log(parseInt(currPage));
+            $('#page-selection').bootpag({
+                total: pageCount,
+                page: parseInt(currPage),
+                maxVisible: 10
+            }).on("page", function(event, num) {
+                window.location.href = "http://localhost:8000/stopstalk/default/submissions/" + num.toString();
+            });
+        });
+    </script>
 {{=table}}
