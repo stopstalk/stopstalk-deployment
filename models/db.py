@@ -107,8 +107,25 @@ auth.settings.reset_password_requires_verification = True
 ## after defining tables, uncomment below to enable auditing
 # auth.enable_record_versioning(db)
 
+db.define_table("custom_friend",
+                Field("user_id", "reference auth_user"),
+                Field("first_name", requires=IS_NOT_EMPTY()),
+                Field("last_name", requires=IS_NOT_EMPTY()),
+                Field("institute", requires=IS_NOT_EMPTY()),
+                Field("stopstalk_handle", requires = [IS_NOT_IN_DB(db,
+                                                                   'auth_user.stopstalk_handle',
+                                                                   error_message=T("Handle already exists")),
+                                                      IS_NOT_IN_DB(db,
+                                                                   'custom_friend.stopstalk_handle',
+                                                                   error_message=T("Handle already exists"))]),
+                Field("codechef_handle"),
+                Field("spoj_handle"),
+                Field("codeforces_handle"),
+                )
+
 db.define_table("submission",
                 Field("user_id", "reference auth_user"),
+                Field("custom_user_id", "reference custom_friend"),
                 Field("stopstalk_handle"),
                 Field("site_handle"),
                 Field("site"),
@@ -128,3 +145,5 @@ db.define_table("friend_requests",
 db.define_table("friends",
                 Field("user_id", "reference auth_user"),
                 Field("friends_list", "text"))
+
+current.db = db

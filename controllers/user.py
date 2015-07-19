@@ -20,7 +20,7 @@ def submissions():
 # -------------------------------------------------------------------------------
 @auth.requires_login()
 def notifications():
-    return dict()
+    return locals()
 
 # -------------------------------------------------------------------------------
 @auth.requires_login()
@@ -45,6 +45,7 @@ def friend_requests():
     return dict(table=table)
 
 # -------------------------------------------------------------------------------
+@auth.requires_login()
 def add_friend(user_id, friend_id):
 
     user_friends = db(db.friends.user_id == user_id).select(db.friends.friends_list).first()
@@ -87,3 +88,29 @@ def reject_fr():
     db(db.friend_requests.id == fr_id).delete()
     redirect(URL("user", "friend_requests"))
     return locals()
+
+# -------------------------------------------------------------------------------
+@auth.requires_login()
+def custom_friend():
+
+    list_fields = ["first_name",
+                   "last_name",
+                   "institute",
+                   "stopstalk_handle",
+                   "codechef_handle",
+                   "codeforces_handle",
+                   "spoj_handle"]
+
+    form = SQLFORM(db.custom_friend,
+                   fields=list_fields,
+                   hidden=dict(user_id=session.user_id))
+
+    # Set the hidden field
+    form.vars.user_id = session.user_id
+    form.process()
+
+    if form.accepted:
+        response.flash = "Accepted"
+        utilities.retrieve_submissions(form.vars.id, True)
+        
+    return dict(form=form)

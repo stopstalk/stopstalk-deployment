@@ -1,69 +1,5 @@
-import profilesites as profile
-from datetime import datetime
-import time
 import utilities
 
-# -------------------------------------------------------------------------------
-def get_submissions(user_id, handle, stopstalk_handle, submissions, site):
-    """
-        Get the submissions and populate the database
-    """
-
-    for i in sorted(submissions[handle].iterkeys()):
-        for j in sorted(submissions[handle][i].iterkeys()):
-            submission = submissions[handle][i][j]
-            if len(submission) == 6:
-                db.submission.insert(user_id=user_id,
-                                     stopstalk_handle=stopstalk_handle,
-                                     site_handle=handle,
-                                     site=site,
-                                     time_stamp=submission[0],
-                                     problem_name=submission[2],
-                                     problem_link=submission[1],
-                                     lang=submission[5],
-                                     status=submission[3],
-                                     points=submission[4])
-
-# -------------------------------------------------------------------------------
-def retrieve_submissions(reg_user):
-    """
-        Retrieve submissions that are not already in the database
-    """
-
-    row = db(db.auth_user.id == reg_user).select().first()
-
-    # Start retrieving from this date if user registered the first time
-    initial_date = "2013-01-01 00:00:00"
-    last_retrieved = db(db.submission.user_id == reg_user).select(orderby=~db.submission.time_stamp).first()
-    if last_retrieved:
-        last_retrieved = last_retrieved.time_stamp
-    else:
-        last_retrieved = initial_date
-
-    last_retrieved = time.strptime(str(last_retrieved), "%Y-%m-%d %H:%M:%S")
-
-    # ToDo: Make this generalized and extensible if a site is added
-    if row.codechef_handle:
-
-        handle = row.codechef_handle
-        P = profile.Profile(codechef_handle=handle)
-        submissions = P.codechef(last_retrieved)
-        get_submissions(reg_user, handle, row.stopstalk_handle, submissions, "CodeChef")
-
-    if row.codeforces_handle:
-
-        handle = row.codeforces_handle
-        P = profile.Profile(codeforces_handle=handle)
-        submissions = P.codeforces(last_retrieved)
-        get_submissions(reg_user, handle, row.stopstalk_handle, submissions, "CodeForces")
-
-    if row.spoj_handle:
-        handle = row.spoj_handle
-        P = profile.Profile(spoj_handle=handle)
-        submissions = P.spoj(last_retrieved)
-        get_submissions(reg_user, handle, row.stopstalk_handle, submissions, "Spoj")
-
-        
 # -------------------------------------------------------------------------------
 def index():
 
@@ -82,7 +18,7 @@ def index():
     if desc.__contains__("Registered") or desc.__contains__("Verification"):
         reg_user = desc.split(" ")[1]
         r = db(db.friends.user_id == reg_user).select()
-        retrieve_submissions(int(reg_user))
+        utilities.retrieve_submissions(int(reg_user))
         
         # User has a `set` of friends' ids
         # If user does not exists then initialize it with empty set
@@ -97,9 +33,12 @@ def user():
     return dict(form=auth())
 
 # -------------------------------------------------------------------------------
+@auth.requires_login()
 def search():
     return dict()
 
+# -------------------------------------------------------------------------------
+@auth.requires_login()
 def mark_friend():
     if len(request.args) < 1:
         session.flash = "Friend Request sent"
@@ -109,7 +48,9 @@ def mark_friend():
     session.flash = "Friend Request sent"
     redirect(URL("default", "search.html"))
     return dict()
+
 # -------------------------------------------------------------------------------
+@auth.requires_login()
 def retrieve_users():
     q = request.get_vars.get("q", None)
     
@@ -161,15 +102,42 @@ def retrieve_users():
 @auth.requires_login()
 def submissions():
     
+    if len(request.args) == 0:
+        active = 0
+    else:
+        active = request.args[0]
+
+    custom_friends = db(db.custom_friend.user_id == session.user_id).select(db.custom_friend.id)
+
+    cusfriends = []
+    for f in custom_friends:
+        cusfriends.append(f.id)
+
+    # Get the friends of logged in user
     query = db.friends.user_id == session.user_id
     friends = db(query).select(db.friends.friends_list).first()
     friends = tuple(eval(friends.friends_list))
-       
+
+
     query = db.submission.user_id.belongs(friends)
-    rows = db(query).select(orderby=~db.submission.time_stamp)
+    query |= db.submission.custom_user_id.belongs(cusfriends)
+    count = db(query).count()
+
+    ul = UL(_class="pagination pagination-sm")
+    for i in xrange(count / 100 + 1):
+        if i == int(active):
+            li = LI(A(i + 1, _href=URL("default", "submissions", args=[i])),
+                    _class="active")
+        else:
+            li = LI(A(i + 1, _href=URL("default", "submissions", args=[i])),
+                    )
+        ul.append(li)
+
+    rows = db(query).select(orderby=~db.submission.time_stamp,
+                            limitby=(100 * int(active), int(active) * 100 + 100))
     
     table = utilities.render_table(rows)
-    return dict(table=table)
+    return dict(table=table, ul=ul)
 
 # -------------------------------------------------------------------------------
 def call():

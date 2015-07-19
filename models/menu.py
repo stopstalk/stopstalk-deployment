@@ -13,11 +13,12 @@ response.meta.generator = ''
 
 response.google_analytics_id = None
 
-response.menu = [
-    (T('Home'), False, URL('default', 'index'), []),
-    (T('Notifications'), False, URL('user', 'notifications'), []),
-    (T('Friend Requests'), False, URL('user', 'friend_requests'), []),
-    (T('Search'), False, URL('default', 'search'), []),
-]
+if session.user_id:
+    response.menu = [
+        (T('Notifications'), False, URL('user', 'notifications'), []),
+        (T('Friend Requests'), False, URL('user', 'friend_requests'), []),
+        (T('Find friends'), False, URL('default', 'search'), []),
+        (T('Make custom friend'), False, URL('user', 'custom_friend'), []),
+    ]
 
 if "auth" in locals(): auth.wikimenu() 
