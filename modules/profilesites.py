@@ -92,6 +92,8 @@ class Profile(object):
                             st = "RE"
                         elif stat == "clock_error":
                             st = "TLE"
+                        else:
+                            st = "OTH"
                         submission.append(st)
     
                         # Question points
@@ -192,12 +194,21 @@ class Profile(object):
                         st = "RE"
                     elif status == "TIME_LIMIT_EXCEEDED":
                         st = "TLE"
+                    elif status == "CHALLENGED":
+                        st = "HCK"
+                    elif status == "MEMORY_LIMIT_EXCEEDED":
+                        st = "MLE"
+                    else:
+                        st = "OTH"
                     submission.append(st)
                     
                     if st == "AC":
                         points = "100"
                     else:
-                        points = "0"
+                        if st == "HCK":
+                            points = "-50"
+                        else:
+                            points = "0"
                     submission.append(points)
                     it += 1
 
@@ -246,6 +257,7 @@ class Profile(object):
                             break
                     row += 1
                     previd = currid
+
                     # Time of submission
                     tos = i.contents[3].contents[1].contents[0]
                     curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
@@ -272,10 +284,13 @@ class Profile(object):
                         st = "WA"
                     elif status == "compilation error":
                         st = "CE"
-                    elif status == "runtime error    (NZEC)":
+                    elif status.split(" ")[0] == "runtime":
                         st = "RE"
                     elif status == "time limit exceeded":
                         st = "TLE"
+                    else:
+                        st = "OTH"
+
                     submission.append(st)
 
                     # Question Points

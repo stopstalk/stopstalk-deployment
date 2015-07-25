@@ -68,9 +68,12 @@ auth.settings.extra_fields['auth_user']= [Field('institute', requires=IS_NOT_EMP
                                           Field('codeforces_handle'),
                                           Field('spoj_handle'),
                                           Field('stopstalk_handle',
-                                                requires=IS_NOT_IN_DB(db,
+                                                requires=[IS_NOT_IN_DB(db,
                                                                       'auth_user.stopstalk_handle',
                                                                       error_message=T("Handle taken")),
+                                                          IS_NOT_IN_DB(db,
+                                                                       'custom_friend.stopstalk_handle',
+                                                                       error_message=T("Handle taken"))]
                                                 ),
                                           ]
 

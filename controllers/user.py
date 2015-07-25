@@ -6,13 +6,68 @@ def index():
     return dict()
 
 # -------------------------------------------------------------------------------
-@auth.requires_login()
+def get_dates():
+
+    if len(request.args) < 1:
+        if session.handle:
+            handle = str(session.handle)
+        else:
+            redirect(URL("default", "submissions"))
+    else:
+        handle = str(request.args[0])
+
+    stable = db.submission
+
+    row = db.executesql("SELECT status, time_stamp, COUNT(*) FROM submission WHERE submission.stopstalk_handle='" + handle + "' GROUP BY DATE(submission.time_stamp), submission.status;")
+
+    total_submissions = {}
+    for i in row:
+        sub_date = str(i[1]).split()[0]
+        if total_submissions.has_key(sub_date):
+            total_submissions[sub_date][i[0]] = i[2]
+            total_submissions[sub_date]["count"] += i[2]
+        else:
+            total_submissions[sub_date] = {}
+            total_submissions[sub_date][i[0]] = i[2]
+            total_submissions[sub_date]["count"] = i[2]
+
+    return dict(total=total_submissions)
+
+# -------------------------------------------------------------------------------
+def get_stats():
+    """
+        Current Implementation:
+        Logged in user can see only his profile
+    """
+
+    if request.extension != "json":
+        redirect(URL("default", "index"))
+
+    if len(request.args) < 1:
+        if session.handle:
+            handle = str(session.handle)
+        else:
+            redirect(URL("default", "index"))
+    else:
+        handle = str(request.args[0])
+
+    stable = db.submission
+    count = stable.id.count()
+    row = db(stable.stopstalk_handle == handle).select(stable.status, count,
+                                                       groupby=stable.status)
+    return dict(row=row)
+
+# -------------------------------------------------------------------------------
 def profile():
+    """
+        @ToDo: Prettify the page ;)
+    """
     return dict()
 
 # -------------------------------------------------------------------------------
 @auth.requires_login()
 def submissions():
+    utilities.retrieve_submissions(session.user_id)
     submissions = db(db.submission.user_id == session.user_id).select(orderby=~db.submission.time_stamp)
     table = utilities.render_table(submissions)        
     return dict(table=table)
@@ -110,7 +165,7 @@ def custom_friend():
     form.process()
 
     if form.accepted:
-        response.flash = "Accepted"
+        session.flash = "Submissions for custom user added"
         utilities.retrieve_submissions(form.vars.id, True)
-        
+        redirect(URL("default", "index"))
     return dict(form=form)

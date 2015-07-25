@@ -9,8 +9,8 @@ def _debug(first_name, last_name, site, custom=False):
     s = "Retrieving " + site + " submissions for "
     if custom:
         s += "CUSTOM USER "
-    s += name + " ..."
-    print s
+    s += name
+    print s,
 
 # -------------------------------------------------------------------------------
 def get_link(site, handle):
@@ -35,9 +35,11 @@ def render_table(submissions):
     for submission in submissions:
         tr = TR()
         if submission.user_id:
-            tr.append(TD(submission.user_id.first_name + " " + submission.user_id.last_name))
+            tr.append(TD(A(submission.user_id.first_name + " " + submission.user_id.last_name,
+                           _href=URL("user", "profile", args=[submission.stopstalk_handle]))))
         else:
-            tr.append(TD(submission.custom_user_id.first_name + " " + submission.custom_user_id.last_name))
+            tr.append(TD(A(submission.custom_user_id.first_name + " " + submission.custom_user_id.last_name,
+                           _href=URL("user", "profile", args=[submission.stopstalk_handle]))))
         tr.append(TD(submission.site))
         tr.append(TD(A(submission.site_handle,
                        _href=get_link(submission.site,
@@ -59,10 +61,12 @@ def get_submissions(user_id, handle, stopstalk_handle, submissions, site, custom
     """
 
     db = current.db
+    count = 0
     for i in sorted(submissions[handle].iterkeys()):
         for j in sorted(submissions[handle][i].iterkeys()):
             submission = submissions[handle][i][j]
             if len(submission) == 6:
+                count += 1
                 if custom is False:
                     db.submission.insert(user_id=user_id,
                                          stopstalk_handle=stopstalk_handle,
@@ -85,6 +89,8 @@ def get_submissions(user_id, handle, stopstalk_handle, submissions, site, custom
                                          lang=submission[5],
                                          status=submission[3],
                                          points=submission[4])
+
+    print "\t --> \t Added %s submissions to the database" % (count)
 
 # -------------------------------------------------------------------------------
 def retrieve_submissions(reg_user, custom=False):

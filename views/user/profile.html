@@ -1,0 +1,158 @@
+{{extend 'layout.html'}}
+<html>
+  <head>
+    <!--Load the AJAX API-->
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+   
+      // Load the Visualization API and the piechart package.
+      google.load('visualization', '1.0', {'packages':['corechart', 'calendar']});
+      
+      // Set a callback to run when the Google Visualization API is loaded.
+      google.setOnLoadCallback(drawChart);
+
+
+      // Callback that creates and populates a data table, 
+      // instantiates the pie chart, passes in the data and
+      // draws it.
+      function drawChart() {
+
+          var numJSON = {'AC': 0,
+                         'WA': 0,
+                         'TLE': 0,
+                         'MLE': 0,
+                         'CE': 0,
+                         'RE': 0,
+                         'SK': 0,
+                         'OTH': 0,
+                         'HCK': 0
+                         };
+
+          var handle = window.location.href.split("/").splice(-1)[0];
+          if (handle === "profile")
+              handle = ""
+
+          $.ajax({
+              method: 'GET',
+              url: '/stopstalk/user/get_stats.json/' + handle
+          }).done(function(data) {
+
+              var statuses = data['row'];
+              $.each(statuses, function(i) {
+                  numJSON[statuses[i]['submission']['status']] = statuses[i]['_extra']['COUNT(submission.id)'];
+              });
+              // Create the data table.
+              var data = new google.visualization.DataTable();
+              data.addColumn('string', 'resultType');
+              data.addColumn('number', 'numberOfSubmissions');
+              data.addRows([
+                  ['Accepted', numJSON['AC']],
+                  ['Compile Error', numJSON['CE']],
+                  ['Wrong Answer', numJSON['WA']],
+                  ['Time Limit Exceeded', numJSON['TLE']],
+                  ['Memory Limit Exceeded', numJSON['MLE']],
+                  ['Runtime Error', numJSON['RE']],
+                  ['Hacked', numJSON['HCK']],
+                  ['Skipped', numJSON['SK']],
+                  ['Others', numJSON['OTH']]
+              ]);
+
+              // Set chart options
+              var options = {'title':'Total Submissions',
+                             'width':900,
+                             'height':600,
+                             'pieHole': 0.5,
+                             'slices': {
+                                 0: {color: '#109618'},
+                                 1: {color: '#FF9900'},
+                                 2: {color: '#DC3912'},
+                                 3: {color: '#3366CC'},
+                                 4: {color: '#0099C6'},
+                                 5: {color: '#990099'}
+                             }
+                            };
+
+              // Instantiate and draw our chart, passing in some options.
+              var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+              chart.draw(data, options);
+          });
+        }
+    </script>
+    <script>
+        google.load("visualization", "1.1", {packages:["calendar"]});
+        google.setOnLoadCallback(drawCalendar);
+
+        function renderPieChart(key, val) {
+            return "<p>YO</p>";
+        }
+
+        function drawCalendar() {
+
+            var handle = window.location.href.split("/").splice(-1)[0];
+            if (handle === "profile")
+                handle = ""
+            $.ajax({
+                method: 'GET',
+                url: '/stopstalk/user/get_dates.json/' + handle
+            }).done(function(total){
+                var dataTable = new google.visualization.DataTable();
+                dataTable.addColumn({ type: 'date', id: 'Date' });
+                dataTable.addColumn({ type: 'number', id: 'Number' });
+
+                // @ToDo: Get the tooltip working
+                // dataTable.addColumn({type: 'string', role: 'tooltip'});
+
+                var dateList = [],
+                    dt;
+                $.each(total['total'], function(key, val) {
+                    dt = key.split('-');
+                    dateList.push([new Date(dt[0], --dt[1], dt[2]), val['count']]);
+                });
+
+                dataTable.addRows(dateList);
+
+                var chart = new google.visualization.Calendar(document.getElementById('calendar_basic'));
+
+                var options = {
+                    legend: 'none',
+                    tooltip: {isHtml: true},
+                    title: 'All Submissions',
+                    height: 650,
+                    colorAxis: {minValue: 1,
+                                colors: ['#dae7ab', '#d6e685', '#8cc665', '#44a340', '#005200', '#001A00'],
+                                values: [0, 4, 8, 12, 16, 20]},
+                    noDataPattern: {
+                        backgroundColor: '#eeeeee',
+                        color: '#eeeeee'
+                    },
+                    calendar: {
+                        monthOutlineColor: {
+                            stroke: '#ffffff',
+                            strokeWidth: 2
+                        },
+                        unusedMonthOutlineColor: {
+                            stroke: '#ffffff',
+                            strokeWidth: 2
+                        },
+                        focusedCellColor: {
+                            stroke: 'black',
+                            strokeOpacity: 0.8,
+                            strokeWidth: 0.2
+                        }
+                    }
+                };
+
+                chart.draw(dataTable, options);
+            });
+        }
+    </script>
+  </head>
+
+  <body>
+<!--Div that will hold the pie chart-->
+    <br/><br/><br/>
+    <div id="calendar_basic" style="width: 1000px; height: 350px;"></div>
+    <br/><br/><br/><br/><br/><br/><br/><br/>
+    <div id="chart_div" style="width:600; height:400;"></div>
+  </body>
+</html>

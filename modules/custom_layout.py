@@ -34,7 +34,8 @@ def navbar(auth_navbar):
 
         li_custom = LI(A(I(_class="icon-book"), ' ',
                          current.T("My Profile"),
-                         _href=URL("user", "profile"), rel="nofollow"))
+                         _href=URL("user", "profile"),
+                         rel="nofollow"))
         dropdown = UL(li_custom, _class="dropdown-menu", _role="menu")
 
         li_custom = LI(A(I(_class="icon-book"), ' ',
