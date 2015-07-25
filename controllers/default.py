@@ -15,7 +15,9 @@ def index():
         desc = row.description
     else:
         desc = ''
-    if desc.__contains__("Registered") or desc.__contains__("Verification"):
+
+    if desc.__contains__("Registered") or \
+       desc.__contains__("Verification"):
         reg_user = desc.split(" ")[1]
         r = db(db.friends.user_id == reg_user).select()
         utilities.retrieve_submissions(int(reg_user))
@@ -23,7 +25,8 @@ def index():
         # User has a `set` of friends' ids
         # If user does not exists then initialize it with empty set
         if len(r) == 0:
-            db.friends.insert(user_id=int(reg_user), friends_list=str(set([])))
+            db.friends.insert(user_id=int(reg_user),
+                              friends_list=str(set([])))
 
     response.flash = T("Please Login")
     return dict()
@@ -125,6 +128,12 @@ def submissions():
 
     if request.extension == "json":
         return dict(count=count)
+
+    for i in friends:
+        utilities.retrieve_submissions(i)
+
+    for i in cusfriends:
+        utilities.retrieve_submissions(i, custom=True)
 
     rows = db(query).select(orderby=~db.submission.time_stamp,
                             limitby=(100 * (int(active) - 1), (int(active) - 1) * 100 + 100))

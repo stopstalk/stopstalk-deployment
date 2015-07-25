@@ -4,6 +4,15 @@ import profilesites as profile
 from datetime import datetime
 
 # -------------------------------------------------------------------------------
+def _debug(first_name, last_name, site, custom=False):
+    name = first_name + " " + last_name
+    s = "Retrieving " + site + " submissions for "
+    if custom:
+        s += "CUSTOM USER "
+    s += name + " ..."
+    print s
+
+# -------------------------------------------------------------------------------
 def get_link(site, handle):
     site_dict = {"CodeChef": "http://www.codechef.com/users/",
                  "CodeForces": "http://www.codeforces.com/profile/",
@@ -106,20 +115,42 @@ def retrieve_submissions(reg_user, custom=False):
     # ToDo: Make this generalized and extensible if a site is added
     if row.codechef_handle:
 
+        _debug(row.first_name, row.last_name, "CodeChef", custom)
+
         handle = row.codechef_handle
         P = profile.Profile(codechef_handle=handle)
         submissions = P.codechef(last_retrieved)
-        get_submissions(reg_user, handle, row.stopstalk_handle, submissions, "CodeChef", custom)
+        get_submissions(reg_user,
+                        handle,
+                        row.stopstalk_handle,
+                        submissions,
+                        "CodeChef",
+                        custom)
 
     if row.codeforces_handle:
+
+        _debug(row.first_name, row.last_name, "CodeForces", custom)
 
         handle = row.codeforces_handle
         P = profile.Profile(codeforces_handle=handle)
         submissions = P.codeforces(last_retrieved)
-        get_submissions(reg_user, handle, row.stopstalk_handle, submissions, "CodeForces", custom)
+        get_submissions(reg_user,
+                        handle,
+                        row.stopstalk_handle,
+                        submissions,
+                        "CodeForces",
+                        custom)
 
     if row.spoj_handle:
+
+        _debug(row.first_name, row.last_name, "Spoj", custom)
+
         handle = row.spoj_handle
         P = profile.Profile(spoj_handle=handle)
         submissions = P.spoj(last_retrieved)
-        get_submissions(reg_user, handle, row.stopstalk_handle, submissions, "Spoj", custom)
+        get_submissions(reg_user,
+                        handle,
+                        row.stopstalk_handle,
+                        submissions,
+                        "Spoj",
+                        custom)
