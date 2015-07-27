@@ -10,7 +10,7 @@ def _debug(first_name, last_name, site, custom=False):
     if custom:
         s += "CUSTOM USER "
     s += name
-    print s,
+    print s
 
 # -------------------------------------------------------------------------------
 def get_link(site, handle):
@@ -67,30 +67,24 @@ def get_submissions(user_id, handle, stopstalk_handle, submissions, site, custom
             submission = submissions[handle][i][j]
             if len(submission) == 6:
                 count += 1
-                if custom is False:
-                    db.submission.insert(user_id=user_id,
-                                         stopstalk_handle=stopstalk_handle,
-                                         site_handle=handle,
-                                         site=site,
-                                         time_stamp=submission[0],
-                                         problem_name=submission[2],
-                                         problem_link=submission[1],
-                                         lang=submission[5],
-                                         status=submission[3],
-                                         points=submission[4])
-                else:
-                    db.submission.insert(custom_user_id=user_id,
-                                         stopstalk_handle=stopstalk_handle,
-                                         site_handle=handle,
-                                         site=site,
-                                         time_stamp=submission[0],
-                                         problem_name=submission[2],
-                                         problem_link=submission[1],
-                                         lang=submission[5],
-                                         status=submission[3],
-                                         points=submission[4])
+                args = dict(stopstalk_handle=stopstalk_handle,
+                            site_handle=handle,
+                            site=site,
+                            time_stamp=submission[0],
+                            problem_name=submission[2],
+                            problem_link=submission[1],
+                            lang=submission[5],
+                            status=submission[3],
+                            points=submission[4])
 
-    print "\t --> \t Added %s submissions to the database" % (count)
+                if custom is False:
+                    args["user_id"] = user_id
+                else:
+                    args["custom_user_id"] = user_id
+
+                db.submission.insert(**args)
+
+    print "\t --> Added %s submissions to the database" % (count)
 
 # -------------------------------------------------------------------------------
 def retrieve_submissions(reg_user, custom=False):

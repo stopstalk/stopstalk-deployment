@@ -59,7 +59,7 @@
 
               // Set chart options
               var options = {'title':'Total Submissions',
-                             'width':900,
+                             'width':800,
                              'height':600,
                              'pieHole': 0.5,
                              'slices': {
@@ -108,7 +108,7 @@
                     dt = key.split('-');
                     dateList.push([new Date(dt[0], --dt[1], dt[2]), val['count']]);
                 });
-
+                $('#max-streak').html(total['max_streak']);
                 dataTable.addRows(dateList);
 
                 var chart = new google.visualization.Calendar(document.getElementById('calendar_basic'));
@@ -146,13 +146,37 @@
             });
         }
     </script>
+    <style>
+        #user-details {
+            float: left;
+            margin-top: 15%;
+            margin-left: 15%;
+            width: 20%;
+        }
+    </style>
   </head>
 
   <body>
-<!--Div that will hold the pie chart-->
-    <br/><br/><br/>
-    <div id="calendar_basic" style="width: 1000px; height: 350px;"></div>
-    <br/><br/><br/><br/><br/><br/><br/><br/>
-    <div id="chart_div" style="width:600; height:400;"></div>
+    <div id="user-details">
+        <h1><strong><b>{{=name}}</b></strong></h1>
+        <br/>
+        <table class="table">
+        <tr>
+            <td>
+            <h3><strong>Accuracy</strong></h3>
+            <h5><b>Codechef:</b> {{=efficiency["CodeChef"]}}</h5>
+            <h5><b>CodeForces:</b> {{=efficiency["CodeForces"]}}</h5>
+            <h5><b>Spoj:</b> {{=efficiency["Spoj"]}}</h5>
+            </td>
+            <td class="center">
+            <h3><strong>Maximum Streak</strong></h4>
+            <h2><p id="max-streak"></p></h2>
+            </td>
+        </tr>
+        </table>
+    </div>
+    <div id="chart_div" style="margin-left:48%;padding:2%;overflow-x:hidden;"></div>
+    <br/>
+    <div id="calendar_basic" style="padding-left:16%;"></div>
   </body>
 </html>

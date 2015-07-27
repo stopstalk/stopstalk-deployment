@@ -16,7 +16,7 @@ class Profile(object):
     @staticmethod
     def parsetime(time_str):
         try:
-            dt = datetime.datetime.strptime(time_str, "%H:%M %p %d/%m/%y")
+            dt = datetime.datetime.strptime(time_str, "%I:%M %p %d/%m/%y")
             return dt
         except ValueError:
             cal = pdt.Calendar()
@@ -284,9 +284,9 @@ class Profile(object):
                         st = "WA"
                     elif status == "compilation error":
                         st = "CE"
-                    elif status.split(" ")[0] == "runtime":
+                    elif status.__contains__("runtime"):
                         st = "RE"
-                    elif status == "time limit exceeded":
+                    elif status.__contains__("time limit exceeded"):
                         st = "TLE"
                     else:
                         st = "OTH"

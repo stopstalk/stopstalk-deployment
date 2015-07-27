@@ -1,4 +1,6 @@
 import utilities
+import time
+from datetime import date
 
 # -------------------------------------------------------------------------------
 @auth.requires_login()
@@ -21,7 +23,28 @@ def get_dates():
     row = db.executesql("SELECT status, time_stamp, COUNT(*) FROM submission WHERE submission.stopstalk_handle='" + handle + "' GROUP BY DATE(submission.time_stamp), submission.status;")
 
     total_submissions = {}
+    streak = 0
+    max_streak = 0
+    prev = None
+    curr = None
     for i in row:
+        if streak == 0:
+            streak = 1
+            prev = time.strptime(str(i[1]), "%Y-%m-%d %H:%M:%S")
+            prev = date(prev.tm_year, prev.tm_mon, prev.tm_mday)
+        else:
+            curr = time.strptime(str(i[1]), "%Y-%m-%d %H:%M:%S")
+            curr = date(curr.tm_year, curr.tm_mon, curr.tm_mday)
+            delta = (curr - prev).days
+            if delta == 1:
+                streak += 1
+            elif delta != 0:
+                streak = 0
+            prev = curr
+
+        if streak > max_streak:
+            max_streak = streak
+
         sub_date = str(i[1]).split()[0]
         if total_submissions.has_key(sub_date):
             total_submissions[sub_date][i[0]] = i[2]
@@ -31,7 +54,8 @@ def get_dates():
             total_submissions[sub_date][i[0]] = i[2]
             total_submissions[sub_date]["count"] = i[2]
 
-    return dict(total=total_submissions)
+    return dict(total=total_submissions,
+                max_streak=max_streak)
 
 # -------------------------------------------------------------------------------
 def get_stats():
@@ -59,16 +83,84 @@ def get_stats():
 
 # -------------------------------------------------------------------------------
 def profile():
-    """
-        @ToDo: Prettify the page ;)
-    """
-    return dict()
+
+    if len(request.args) < 1:
+        if session.handle:
+            handle = str(session.handle)
+        else:
+            redirect(URL("default", "index"))
+    else:
+        handle = str(request.args[0])
+
+    query = db.auth_user.stopstalk_handle == handle
+    row = db(query).select().first()
+    if row is None:
+        row = db(db.custom_friend.stopstalk_handle == handle).select().first()
+
+    stable = db.submission
+    name = row.first_name + " " + row.last_name
+    group_by = []
+    query = stable.stopstalk_handle == handle
+    rows = db(query).select(stable.site,
+                            stable.status,
+                            stable.id.count(),
+                            groupby=[stable.site, stable.status])
+
+    data = {"CodeChef": [0, 0],
+            "CodeForces": [0, 0],
+            "Spoj": [0, 0]}
+    for i in rows:
+        submission = i.as_dict()
+        cnt = submission["_extra"]["COUNT(submission.id)"]
+        status = submission["submission"]["status"]
+        site = submission["submission"]["site"]
+
+        if status == "AC":
+            data[site][0] += cnt
+        data[site][1] += cnt
+
+    efficiency = {}
+    for i in data:
+        if data[i][0] == 0 or data[i][1] == 0:
+            efficiency[i] = "-"
+            continue
+        else:
+            efficiency[i] = "%.3f" % (data[i][0] * 100.0 / data[i][1])
+
+    return dict(name=name,
+                efficiency=efficiency)
 
 # -------------------------------------------------------------------------------
-@auth.requires_login()
 def submissions():
-    utilities.retrieve_submissions(session.user_id)
-    submissions = db(db.submission.user_id == session.user_id).select(orderby=~db.submission.time_stamp)
+    """
+        @ToDo: Bootstrap Pagination
+    """
+
+    custom = False
+
+    if len(request.args) < 1:
+        user_id = session.user_id
+    else:
+        row = db(db.auth_user.stopstalk_handle==request.args[0]).select().first()
+        if row:
+            user_id = row.id
+        else:
+            row = db(db.custom_friend.stopstalk_handle==request.args[0]).select().first()
+            if row:
+                user_id = row.id
+                custom = True
+            else:
+                redirect(URL("default", "index"))
+    
+    stable = db.submission
+    utilities.retrieve_submissions(user_id, custom)
+
+    if custom:
+        query = stable.custom_user_id == user_id
+    else:
+        query = stable.user_id == user_id
+
+    submissions = db(query).select(orderby=~stable.time_stamp)
     table = utilities.render_table(submissions)        
     return dict(table=table)
 
