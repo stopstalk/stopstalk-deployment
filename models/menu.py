@@ -21,4 +21,6 @@ if session.user_id:
         (T('Make custom friend'), False, URL('user', 'custom_friend'), []),
     ]
 
+response.menu += [(T('Leaderboard'), False, URL('default', 'leaderboard'), [])]
+
 if "auth" in locals(): auth.wikimenu() 

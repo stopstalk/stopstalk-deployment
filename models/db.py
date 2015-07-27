@@ -35,7 +35,7 @@ else:
 
 ## by default give a view/generic.extension to all actions from localhost
 ## none otherwise. a pattern can be 'controller/function.extension'
-response.generic_patterns = ['*'] if request.is_local else []
+response.generic_patterns = ['*']
 ## choose a style for forms
 response.formstyle = myconf.take('forms.formstyle')  # or 'bootstrap3_stacked' or 'bootstrap2' or other
 response.form_label_separator = myconf.take('forms.separator')
@@ -75,6 +75,8 @@ auth.settings.extra_fields['auth_user']= [Field('institute', requires=IS_NOT_EMP
                                                                        'custom_friend.stopstalk_handle',
                                                                        error_message=T("Handle taken"))]
                                                 ),
+                                          Field('rating',
+                                                default=0)
                                           ]
 
 auth.define_tables(username=False, signature=False)
@@ -124,6 +126,8 @@ db.define_table("custom_friend",
                 Field("codechef_handle"),
                 Field("spoj_handle"),
                 Field("codeforces_handle"),
+                Field('rating',
+                      default=0)
                 )
 
 db.define_table("submission",
