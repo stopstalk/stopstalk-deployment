@@ -57,11 +57,13 @@ response.form_label_separator = myconf.take('forms.separator')
 #########################################################################
 
 from gluon.tools import Auth, Service, PluginManager
+from datetime import datetime
 
 auth = Auth(db)
 service = Service()
 plugins = PluginManager()
 
+initial_date = datetime.strptime("2013-01-01 00:00:00", "%Y-%m-%d %H:%M:%S")
 ## create all tables needed by auth if not custom tables
 auth.settings.extra_fields['auth_user']= [Field('institute', requires=IS_NOT_EMPTY()),
                                           Field('codechef_handle'),
@@ -76,7 +78,9 @@ auth.settings.extra_fields['auth_user']= [Field('institute', requires=IS_NOT_EMP
                                                                        error_message=T("Handle taken"))]
                                                 ),
                                           Field('rating',
-                                                default=0)
+                                                default=0),
+                                          Field('last_retrieved', 'datetime',
+                                                default=initial_date)
                                           ]
 
 auth.define_tables(username=False, signature=False)
@@ -127,7 +131,9 @@ db.define_table("custom_friend",
                 Field("spoj_handle"),
                 Field("codeforces_handle"),
                 Field('rating',
-                      default=0)
+                      default=0),
+                Field('last_retrieved', 'datetime',
+                      default=initial_date)
                 )
 
 db.define_table("submission",

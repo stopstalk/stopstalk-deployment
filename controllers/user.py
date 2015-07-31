@@ -1,6 +1,6 @@
 import utilities
 import time
-from datetime import date
+from datetime import datetime, date
 
 # -------------------------------------------------------------------------------
 @auth.requires_login()
@@ -25,8 +25,8 @@ def get_dates():
     total_submissions = {}
     streak = 0
     max_streak = 0
-    prev = None
-    curr = None
+    prev = curr = start = None
+
     for i in row:
         if streak == 0:
             streak = 1
@@ -53,7 +53,6 @@ def get_dates():
             total_submissions[sub_date] = {}
             total_submissions[sub_date][i[0]] = i[2]
             total_submissions[sub_date]["count"] = i[2]
-
     return dict(total=total_submissions,
                 max_streak=max_streak)
 
@@ -250,7 +249,8 @@ def custom_friend():
 
     form = SQLFORM(db.custom_friend,
                    fields=list_fields,
-                   hidden=dict(user_id=session.user_id))
+                   hidden=dict(user_id=session.user_id,
+                               last_retrieved=datetime.now()))
 
     # Set the hidden field
     form.vars.user_id = session.user_id
@@ -258,6 +258,5 @@ def custom_friend():
 
     if form.accepted:
         session.flash = "Submissions for custom user added"
-        utilities.retrieve_submissions(form.vars.id, True)
         redirect(URL("default", "index"))
     return dict(form=form)

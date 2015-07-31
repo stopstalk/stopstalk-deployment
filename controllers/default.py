@@ -4,6 +4,7 @@ from datetime import date
 """
     @ToDo: Loads of cleanup :D
 """
+
 # -------------------------------------------------------------------------------
 def index():
 
@@ -41,14 +42,15 @@ def get_max_streak(handle):
 
     streak = 0
     max_streak = 0
-    prev = None
-    curr = None
+    prev = curr = start = None
     total_submissions = 0
+
     for i in row:
         total_submissions += i[1]
         if streak == 0:
             streak = 1
             prev = time.strptime(str(i[0]), "%Y-%m-%d %H:%M:%S")
+            start = prev
             prev = date(prev.tm_year, prev.tm_mon, prev.tm_mday)
         else:
             curr = time.strptime(str(i[0]), "%Y-%m-%d %H:%M:%S")
@@ -62,7 +64,6 @@ def get_max_streak(handle):
 
         if streak > max_streak:
             max_streak = streak
-
     return max_streak, total_submissions
 
 # -------------------------------------------------------------------------------

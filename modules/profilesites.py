@@ -1,7 +1,9 @@
 import requests, ast, time
 import parsedatetime as pdt
 import datetime
+from datetime import date
 import bs4
+import utilities
 
 class Profile(object):
     def __init__(self,
@@ -31,7 +33,7 @@ class Profile(object):
         user_url = "http://www.codechef.com/recent/user?user_handle=" + handle
         while 1:
             try:
-                tmp = requests.get(user_url, headers={"User-Agent": "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5"})
+                tmp = requests.get(user_url, headers={"User-Agent": "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5"}, proxies=utilities.PROXY)
                 if tmp.status_code == 200:
                     break
             except:
@@ -46,7 +48,7 @@ class Profile(object):
             user_url = "http://www.codechef.com/recent/user?user_handle=" + handle + "&page=" + str(page)
             while 1:
                 try:
-                    tmp = requests.get(user_url, headers={"User-Agent": "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5"})
+                    tmp = requests.get(user_url, headers={"User-Agent": "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5"}, proxies=utilities.PROXY)
                     if tmp.status_code == 200:
                         break
                 except:
@@ -66,7 +68,8 @@ class Profile(object):
                         tos = str(ast.literal_eval(repr(tos).replace("\\", "")))
                         tos = Profile.parsetime(tos)
                         curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
-                        if curr <= last_retrieved:
+
+                        if curr < last_retrieved:
                             return submissions
                         submission.append(str(tos))
 
@@ -129,7 +132,7 @@ class Profile(object):
 
                 url = "http://codeforces.com/submissions/" + handle + "/page/" + str(page)
                 try:
-                    tmp = requests.get(url)
+                    tmp = requests.get(url, proxies=utilities.PROXY)
                     soup = bs4.BeautifulSoup(tmp.text)
                     if tmp.status_code == 200:
                         break
@@ -169,7 +172,7 @@ class Profile(object):
                     # Time of submission
                     tos = i.contents[3].contents[0].strip()
                     curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
-                    if curr <= last_retrieved:
+                    if curr < last_retrieved:
                         return submissions
                     submission.append(str(tos))
 
@@ -231,7 +234,7 @@ class Profile(object):
         currid = 0
         page = 0
         url = "https://www.spoj.com/users/" + handle
-        tmpreq = requests.get(url)
+        tmpreq = requests.get(url, proxies=utilities.PROXY)
 
         # Bad but correct way of checking if the handle exists
         if tmpreq.text.find("History of submissions") == -1:
@@ -241,7 +244,7 @@ class Profile(object):
             flag = 0
             url = "https://www.spoj.com/status/" + handle + "/all/start=" + str(start)
             start += 20
-            t = requests.get(url)
+            t = requests.get(url, proxies=utilities.PROXY)
             soup = bs4.BeautifulSoup(t.text)
             row = 0
             submissions[handle][page] = {}
@@ -261,7 +264,7 @@ class Profile(object):
                     # Time of submission
                     tos = i.contents[3].contents[1].contents[0]
                     curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
-                    if curr <= last_retrieved:
+                    if curr < last_retrieved:
                         return submissions
                     submission.append(str(tos))
 

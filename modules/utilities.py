@@ -1,7 +1,10 @@
 from gluon import *
 import time
 import profilesites as profile
-from datetime import datetime
+from datetime import datetime, date
+
+PROXY = {"http": "http://proxy.iiit.ac.in:8080/",
+         "https": "https://proxy.iiit.ac.in:8080/"}
 
 # -------------------------------------------------------------------------------
 def _debug(first_name, last_name, site, custom=False):
@@ -93,24 +96,31 @@ def retrieve_submissions(reg_user, custom=False):
     """
 
     db = current.db
-    if custom:
-        row = db(db.custom_friend.id == reg_user).select().first()
-    else:
-        row = db(db.auth_user.id == reg_user).select().first()
+    stable = db.submission
 
     # Start retrieving from this date if user registered the first time
     initial_date = "2013-01-01 00:00:00"
     if custom:
-        last_retrieved = db(db.submission.custom_user_id == reg_user).select(orderby=~db.submission.time_stamp).first()
+        query = db.custom_friend.id == reg_user
+        row = db(query).select().first()
+        table = db.custom_friend
     else:
-        last_retrieved = db(db.submission.user_id == reg_user).select(orderby=~db.submission.time_stamp).first()
+        query = (db.auth_user.id == reg_user)
+        row = db(query).select().first()
+        table = db.auth_user
+
+    last_retrieved = db(query).select(table.last_retrieved).first()
 
     if last_retrieved:
-        last_retrieved = last_retrieved.time_stamp
+        last_retrieved = str(last_retrieved.last_retrieved)
     else:
         last_retrieved = initial_date
 
     last_retrieved = time.strptime(str(last_retrieved), "%Y-%m-%d %H:%M:%S")
+
+    # Update the last retrieved of the user
+    today = time.strftime("%Y-%m-%d %H:%M:%S")
+    db(query).update(last_retrieved=datetime.now())
 
     # ToDo: Make this generalized and extensible if a site is added
     if row.codechef_handle:
