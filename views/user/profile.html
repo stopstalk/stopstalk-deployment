@@ -109,6 +109,7 @@
                     dateList.push([new Date(dt[0], --dt[1], dt[2]), val['count']]);
                 });
                 $('#max-streak').html(total['max_streak']);
+                $('#curr-streak').html(total['curr_streak']);
                 dataTable.addRows(dateList);
 
                 var chart = new google.visualization.Calendar(document.getElementById('calendar_basic'));
@@ -171,6 +172,10 @@
             <td class="center">
             <h3><strong>Maximum Streak</strong></h4>
             <h2><p id="max-streak"></p></h2>
+            </td>
+            <td class="center">
+            <h3><strong>Current Streak</strong></h4>
+            <h2><p id="curr-streak"></p></h2>
             </td>
         </tr>
         </table>

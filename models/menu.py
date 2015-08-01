@@ -15,7 +15,7 @@ response.google_analytics_id = None
 
 if session.user_id:
     response.menu = [
-        (T('Notifications'), False, URL('user', 'notifications'), []),
+        (T('Notifications'), False, URL('default', 'notifications'), []),
         (T('Friend Requests'), False, URL('user', 'friend_requests'), []),
         (T('Find friends'), False, URL('default', 'search'), []),
         (T('Make custom friend'), False, URL('user', 'custom_friend'), []),

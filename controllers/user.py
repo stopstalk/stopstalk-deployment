@@ -32,6 +32,7 @@ def get_dates():
             streak = 1
             prev = time.strptime(str(i[1]), "%Y-%m-%d %H:%M:%S")
             prev = date(prev.tm_year, prev.tm_mon, prev.tm_mday)
+            start = prev
         else:
             curr = time.strptime(str(i[1]), "%Y-%m-%d %H:%M:%S")
             curr = date(curr.tm_year, curr.tm_mon, curr.tm_mday)
@@ -53,8 +54,16 @@ def get_dates():
             total_submissions[sub_date] = {}
             total_submissions[sub_date][i[0]] = i[2]
             total_submissions[sub_date]["count"] = i[2]
+
+    today = datetime.today().date()
+
+    # If last streak does not match the current day
+    if (today - start).days + 1 != streak:
+        streak = 0
+
     return dict(total=total_submissions,
-                max_streak=max_streak)
+                max_streak=max_streak,
+                curr_streak=streak)
 
 # -------------------------------------------------------------------------------
 def get_stats():
@@ -162,11 +171,6 @@ def submissions():
     submissions = db(query).select(orderby=~stable.time_stamp)
     table = utilities.render_table(submissions)        
     return dict(table=table)
-
-# -------------------------------------------------------------------------------
-@auth.requires_login()
-def notifications():
-    return locals()
 
 # -------------------------------------------------------------------------------
 @auth.requires_login()

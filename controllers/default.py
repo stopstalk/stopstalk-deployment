@@ -50,8 +50,8 @@ def get_max_streak(handle):
         if streak == 0:
             streak = 1
             prev = time.strptime(str(i[0]), "%Y-%m-%d %H:%M:%S")
-            start = prev
             prev = date(prev.tm_year, prev.tm_mon, prev.tm_mday)
+            start = prev
         else:
             curr = time.strptime(str(i[0]), "%Y-%m-%d %H:%M:%S")
             curr = date(curr.tm_year, curr.tm_mon, curr.tm_mday)
@@ -64,17 +64,62 @@ def get_max_streak(handle):
 
         if streak > max_streak:
             max_streak = streak
-    return max_streak, total_submissions
+
+    today = datetime.today().date()
+
+    # If last streak does not match the current day
+    if (today - start).days + 1 != streak:
+        streak = 0
+
+    return max_streak, total_submissions, streak
+
+# -------------------------------------------------------------------------------
+@auth.requires_login()
+def notifications():
+    if session["user_id"] is None:
+        redirect(URL("default", "index"))
+
+    ftable = db.friends
+    atable = db.auth_user
+    ctable = db.custom_friend
+
+    row = db(ftable.user_id == session["user_id"]).select(ftable.friends_list).first()
+    handles = []
+    for user in eval(row.friends_list):
+        user_data = db(atable.id == user).select(atable.first_name,
+                                                 atable.last_name,
+                                                 atable.stopstalk_handle).first()
+
+        handles.append((user_data.stopstalk_handle,
+                        user_data.first_name + " " + user_data.last_name))
+
+    rows = db(ctable.user_id == session["user_id"]).select(ctable.first_name,
+                                                           ctable.last_name,
+                                                           ctable.stopstalk_handle)
+    for user in rows:
+        handles.append((user.stopstalk_handle,
+                        user.first_name + " " + user.last_name))
+
+    table = TABLE(_class="table")
+    for handle in handles:
+        max_streak, total_submissions, curr_streak = get_max_streak(handle[0])
+        if curr_streak:
+            tr = TR(TD(H3(A(handle[1],
+                            _href=URL("user", "profile", args=[handle[0]])),
+                          " is on a streak of " + str(curr_streak))))
+            table.append(tr)
+
+    return dict(table=table)
 
 # -------------------------------------------------------------------------------
 def compute_row(user, custom=False):
 
-    max_streak, total_submissions = get_max_streak(user.stopstalk_handle)
+    max_streak, total_submissions, curr_streak = get_max_streak(user.stopstalk_handle)
     query = db.submission.stopstalk_handle == user.stopstalk_handle
     query &= (db.submission.status == "AC")
     accepted = db(query).count()
     rating = max_streak * 200 + \
-             total_submissions * 70 + \
+             total_submissions * 50 + \
              (accepted * 100.0 / total_submissions) * 100 + \
              ((total_submissions - accepted) / total_submissions) * 20
     rating = int(rating)
