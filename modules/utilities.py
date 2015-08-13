@@ -25,6 +25,17 @@ def get_link(site, handle):
 # -------------------------------------------------------------------------------
 def render_table(submissions):
 
+    status_dict = {"AC": "Accepted",
+                   "WA": "Wrong Answer",
+                   "TLE": "Time Limit Exceeded",
+                   "MLE": "Memory Limit Exceeded",
+                   "RE": "Runtime Error",
+                   "CE": "Compile Error",
+                   "SK": "Skipped",
+                   "HCK": "Hacked",
+                   "OTH": "Others",
+                   }
+
     table = TABLE(_class="table")
     table.append(TR(TH("User Name"),
                     TH("Site"),
@@ -51,7 +62,9 @@ def render_table(submissions):
         tr.append(TD(A(submission.problem_name,
                        _href=submission.problem_link)))
         tr.append(TD(submission.lang))
-        tr.append(TD(submission.status))
+        tr.append(TD(IMG(_src=URL("static", "images/" + submission.status + ".jpg"),
+                         _title=status_dict[submission.status],
+                         _style="height: 25px; width: 25px;")))
         tr.append(TD(submission.points))
         table.append(tr)
 

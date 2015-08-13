@@ -172,6 +172,7 @@ class Profile(object):
                     # Time of submission
                     tos = i.contents[3].contents[0].strip()
                     curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
+
                     if curr < last_retrieved:
                         return submissions
                     submission.append(str(tos))
