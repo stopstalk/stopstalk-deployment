@@ -69,7 +69,7 @@ class Profile(object):
                         tos = Profile.parsetime(tos)
                         curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
 
-                        if curr < last_retrieved:
+                        if curr <= last_retrieved:
                             return submissions
                         submission.append(str(tos))
 
@@ -173,7 +173,7 @@ class Profile(object):
                     tos = i.contents[3].contents[0].strip()
                     curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
 
-                    if curr < last_retrieved:
+                    if curr <= last_retrieved:
                         return submissions
                     submission.append(str(tos))
 
@@ -265,7 +265,7 @@ class Profile(object):
                     # Time of submission
                     tos = i.contents[3].contents[1].contents[0]
                     curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
-                    if curr < last_retrieved:
+                    if curr <= last_retrieved:
                         return submissions
                     submission.append(str(tos))
 

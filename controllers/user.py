@@ -14,7 +14,7 @@ def get_dates():
         if session.handle:
             handle = str(session.handle)
         else:
-            redirect(URL("default", "submissions"))
+            redirect(URL("default", "submissions", args=[1]))
     else:
         handle = str(request.args[0])
 
@@ -262,5 +262,5 @@ def custom_friend():
 
     if form.accepted:
         session.flash = "Submissions for custom user added"
-        redirect(URL("default", "index"))
+        redirect(URL("default", "submissions", args=[1]))
     return dict(form=form)

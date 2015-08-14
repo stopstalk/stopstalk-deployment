@@ -12,7 +12,7 @@ def index():
         session["handle"] = session["auth"]["user"]["stopstalk_handle"]
         session["user_id"] = session["auth"]["user"]["id"]
         session.flash = "Logged in successfully"
-        redirect(URL("default", "submissions"))
+        redirect(URL("default", "submissions", args=[1]))
 
     # Detect a registration has taken place
     row = db(db.auth_event.id > 0).select().last()
