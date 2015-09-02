@@ -6,14 +6,23 @@ from datetime import datetime, date
 PROXY = {"http": "http://proxy.iiit.ac.in:8080/",
          "https": "https://proxy.iiit.ac.in:8080/"}
 
+RED = "\x1b[1;31m"
+GREEN = "\x1b[1;32m"
+YELLOW = "\x1b[1;33m"
+BLUE = "\x1b[1;34m"
+MAGENTA = "\x1b[1;35m"
+CYAN = "\x1b[1;36m"
+RESET_COLOR = "\x1b[0m"
+
 # -------------------------------------------------------------------------------
 def _debug(first_name, last_name, site, custom=False):
+
     name = first_name + " " + last_name
-    s = "Retrieving " + site + " submissions for "
+    s = "Retrieving " + CYAN + site + RESET_COLOR + " submissions for "
     if custom:
         s += "CUSTOM USER "
-    s += name
-    print s
+    s += BLUE + name + RESET_COLOR
+    print s,
 
 # -------------------------------------------------------------------------------
 def get_link(site, handle):
@@ -100,7 +109,10 @@ def get_submissions(user_id, handle, stopstalk_handle, submissions, site, custom
 
                 db.submission.insert(**args)
 
-    print "\t --> Added %s submissions to the database" % (count)
+    if count != 0:
+        print RED + "[+%s] " % (count) + RESET_COLOR
+    else:
+        print "[0]"
 
 # -------------------------------------------------------------------------------
 def retrieve_submissions(reg_user, custom=False):
