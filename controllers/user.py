@@ -159,7 +159,7 @@ def submissions():
                 custom = True
             else:
                 redirect(URL("default", "index"))
-    
+
     stable = db.submission
     utilities.retrieve_submissions(user_id, custom)
 
@@ -169,7 +169,7 @@ def submissions():
         query = stable.user_id == user_id
 
     submissions = db(query).select(orderby=~stable.time_stamp)
-    table = utilities.render_table(submissions)        
+    table = utilities.render_table(submissions)
     return dict(table=table)
 
 # -------------------------------------------------------------------------------
@@ -218,13 +218,13 @@ def accept_fr():
 
     # Add user ID to friend's friends list
     add_friend(friend_id, user_id)
-    
+
     # Delete the friend request row
     db(db.friend_requests.id == row_id).delete()
 
     redirect(URL("user", "friend_requests"))
     return locals()
-    
+
 # -------------------------------------------------------------------------------
 @auth.requires_login()
 def reject_fr():

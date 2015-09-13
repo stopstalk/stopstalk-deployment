@@ -78,7 +78,7 @@ class Profile(object):
                         prob["href"] = "http://www.codechef.com" + prob["href"]
                         submission.append(eval(repr(prob["href"]).replace("\\", "")))
                         submission.append(prob.contents[0])
-    
+
                         # Submission status
                         stat = i.contents[2].contents[0]
                         stat = stat.find("img")["src"]
@@ -98,7 +98,7 @@ class Profile(object):
                         else:
                             st = "OTH"
                         submission.append(st)
-    
+
                         # Question points
                         pts = i.contents[2].contents[0].contents
                         try:
@@ -205,7 +205,7 @@ class Profile(object):
                     else:
                         st = "OTH"
                     submission.append(st)
-                    
+
                     if st == "AC":
                         points = "100"
                     else:
@@ -219,13 +219,13 @@ class Profile(object):
                     # Language
                     lang = i.contents[9].contents[0].strip()
                     submission.append(lang)
-    
+
             if flag == 1:
                 break
         return submissions
 
     def spoj(self, last_retrieved):
-	
+
         start = 0
         handle = self.spoj_handle
         submissions = {handle: {}}
@@ -247,9 +247,15 @@ class Profile(object):
             start += 20
             t = requests.get(url, proxies=utilities.PROXY)
             soup = bs4.BeautifulSoup(t.text)
+            table_body = soup.find("tbody")
+
+            # Check if the page retrieved has no submissions
+            if len(table_body) == 1:
+                return submissions
+
             row = 0
             submissions[handle][page] = {}
-            for i in soup.find("tbody"):
+            for i in table_body:
                 submissions[handle][page][it] = []
                 submission = submissions[handle][page][it]
 
@@ -274,7 +280,7 @@ class Profile(object):
                     uri["href"] = "http://www.spoj.com" + uri["href"]
                     submission.append(eval(repr(uri["href"]).replace("\\", "")))
                     submission.append(uri.contents[0].strip())
-            
+
                     # Problem Status
                     status = i.contents[6].contents
                     st = "AC"
@@ -303,7 +309,7 @@ class Profile(object):
                     else:
                         points = "0"
                     submission.append(points)
-                
+
                     # Language
                     submission.append(i.contents[12].contents[1].contents[0])
 
