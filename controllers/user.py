@@ -136,7 +136,8 @@ def profile():
             efficiency[i] = "%.3f" % (data[i][0] * 100.0 / data[i][1])
 
     return dict(name=name,
-                efficiency=efficiency)
+                efficiency=efficiency,
+                handle=handle)
 
 # -------------------------------------------------------------------------------
 def submissions():

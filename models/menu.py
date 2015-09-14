@@ -15,12 +15,12 @@ response.google_analytics_id = None
 
 if session.user_id:
     response.menu = [
-        (T('Notifications'), False, URL('default', 'notifications'), []),
-        (T('Friend Requests'), False, URL('user', 'friend_requests'), []),
-        (T('Find friends'), False, URL('default', 'search'), []),
-        (T('Make custom friend'), False, URL('user', 'custom_friend'), []),
+        (I(_class="fa fa-inbox fa-2x"), False, URL('default', 'notifications'), []),
+        (I(_class="fa fa-users fa-2x"), False, URL('user', 'friend_requests'), []),
+        (I(_class="fa fa-search fa-2x"), False, URL('default', 'search'), []),
+        (I(_class="fa fa-plus-circle fa-2x"), False, URL('user', 'custom_friend'), []),
     ]
 
-response.menu += [(T('Leaderboard'), False, URL('default', 'leaderboard'), [])]
+response.menu += [(I(_class="fa fa-bar-chart fa-2x"), False, URL('default', 'leaderboard'), [])]
 
-if "auth" in locals(): auth.wikimenu() 
+if "auth" in locals(): auth.wikimenu()

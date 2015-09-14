@@ -26,7 +26,7 @@ def index():
         reg_user = desc.split(" ")[1]
         r = db(db.friends.user_id == reg_user).select()
         utilities.retrieve_submissions(int(reg_user))
-        
+
         # User has a `set` of friends' ids
         # If user does not exists then initialize it with empty set
         if len(r) == 0:
@@ -105,9 +105,12 @@ def notifications():
         max_streak, total_submissions, curr_streak = get_max_streak(handle[0])
         if curr_streak:
             tr = TR(TD(H3(A(handle[1],
-                            _href=URL("user", "profile", args=[handle[0]])),
-                          " is on a streak of " + str(curr_streak))))
-            table.append(tr)
+                            _href=URL("user", "profile", args=[handle[0]])))),
+                    TD(H3(str(curr_streak) + " ",
+                       I(_class="fa fa-bolt",
+                         _style="color:red"))
+                       ))
+    table.append(tr)
 
     return dict(table=table)
 
@@ -190,7 +193,7 @@ def mark_friend():
 @auth.requires_login()
 def retrieve_users():
     q = request.get_vars.get("q", None)
-    
+
     # ToDo: improve this
     query = db.auth_user.first_name.like("%" + q + "%", case_sensitive=False)
     query |= db.auth_user.last_name.like("%" + q + "%", case_sensitive=False)
@@ -271,7 +274,7 @@ def submissions():
 
     rows = db(query).select(orderby=~db.submission.time_stamp,
                             limitby=(100 * (int(active) - 1), (int(active) - 1) * 100 + 100))
-    
+
     table = utilities.render_table(rows)
     return dict(table=table)
 

@@ -4,15 +4,15 @@
     <!--Load the AJAX API-->
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
-   
+
       // Load the Visualization API and the piechart package.
       google.load('visualization', '1.0', {'packages':['corechart', 'calendar']});
-      
+
       // Set a callback to run when the Google Visualization API is loaded.
       google.setOnLoadCallback(drawChart);
 
 
-      // Callback that creates and populates a data table, 
+      // Callback that creates and populates a data table,
       // instantiates the pie chart, passes in the data and
       // draws it.
       function drawChart() {
@@ -159,8 +159,16 @@
 
   <body>
     <div id="user-details">
-        <h1><strong><b>{{=name}}</b></strong></h1>
-        <br/>
+        <div class="row">
+            <div class="left"><h2><strong><b>{{=name}}</b></strong></h2></div>
+            <div class="right">
+                <h4>
+                    <a href="{{=URL('user', 'submissions', args=[handle])}}" style="color: lightseagreen;" target="_blank">
+                        <i class="fa fa-chevron-circle-right fa-2x"></i>
+                    </a>
+                </h4>
+            </div>
+        </div>
         <table class="table">
         <tr>
             <td>
