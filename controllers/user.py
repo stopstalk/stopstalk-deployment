@@ -116,7 +116,8 @@ def profile():
 
     data = {"CodeChef": [0, 0],
             "CodeForces": [0, 0],
-            "Spoj": [0, 0]}
+            "Spoj": [0, 0],
+            "HackerEarth": [0, 0]}
     for i in rows:
         submission = i.as_dict()
         cnt = submission["_extra"]["COUNT(submission.id)"]

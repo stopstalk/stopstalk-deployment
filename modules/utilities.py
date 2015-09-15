@@ -28,7 +28,8 @@ def _debug(first_name, last_name, site, custom=False):
 def get_link(site, handle):
     site_dict = {"CodeChef": "http://www.codechef.com/users/",
                  "CodeForces": "http://www.codeforces.com/profile/",
-                 "Spoj": "http://www.spoj.com/users/"}
+                 "Spoj": "http://www.spoj.com/users/",
+                 "HackerEarth": "https://hackerearth.com/users/"}
     return site_dict[site] + handle
 
 # -------------------------------------------------------------------------------
@@ -189,3 +190,18 @@ def retrieve_submissions(reg_user, custom=False):
                         submissions,
                         "Spoj",
                         custom)
+
+    if row.hackerearth_handle:
+
+        _debug(row.first_name, row.last_name, "HackerEarth", custom)
+
+        handle = row.hackerearth_handle
+        P = profile.Profile(hackerearth_handle=handle)
+        submissions = P.hackerearth(last_retrieved)
+        get_submissions(reg_user,
+                        handle,
+                        row.stopstalk_handle,
+                        submissions,
+                        "HackerEarth",
+                        custom)
+

@@ -10,7 +10,7 @@ p5
 I00
 sS'sortable'
 p6
-I10
+I11
 sS'sql'
 p7
 S'CHAR(512)'
@@ -150,7 +150,7 @@ I512
 sg5
 I00
 sg6
-I9
+I8
 sg7
 S'CHAR(512)'
 p43
@@ -166,7 +166,7 @@ I512
 sg5
 I00
 sg6
-I11
+I12
 sg7
 S'TIMESTAMP'
 p46
@@ -175,7 +175,7 @@ I00
 sg10
 S'datetime'
 p47
-ssS'spoj_handle'
+ssS'hackerearth_handle'
 p48
 (dp49
 g4
@@ -183,7 +183,7 @@ I512
 sg5
 I00
 sg6
-I8
+I10
 sg7
 S'CHAR(512)'
 p50
@@ -191,9 +191,25 @@ sg9
 I00
 sg10
 g11
-ssS'id'
+ssS'spoj_handle'
 p51
 (dp52
+g4
+I512
+sg5
+I00
+sg6
+I9
+sg7
+S'CHAR(512)'
+p53
+sg9
+I00
+sg10
+g11
+ssS'id'
+p54
+(dp55
 g4
 I512
 sg5
@@ -202,10 +218,10 @@ sg6
 I1
 sg7
 S'INTEGER PRIMARY KEY AUTOINCREMENT'
-p53
+p56
 sg9
 I00
 sg10
 S'id'
-p54
+p57
 ss.

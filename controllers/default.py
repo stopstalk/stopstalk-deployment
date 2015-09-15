@@ -211,6 +211,7 @@ def retrieve_users():
             TH("CodeChef Handle"),
             TH("CodeForces Handle"),
             TH("Spoj Handle"),
+            TH("HackerEarth Handle"),
             TH("Friendship Status"))
     t.append(tr)
 
@@ -224,6 +225,7 @@ def retrieve_users():
         tr.append(TD(user.codechef_handle))
         tr.append(TD(user.codeforces_handle))
         tr.append(TD(user.spoj_handle))
+        tr.append(TD(user.hackerearth_handle))
         if session.user_id not in friends:
             r = db((db.friend_requests.from_h == session.user_id) &
                    (db.friend_requests.to_h == user.id)).select()
