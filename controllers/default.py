@@ -7,7 +7,13 @@ from datetime import date
 
 # -------------------------------------------------------------------------------
 def index():
+    """
+        The main controller which redirects depending
+        on the login status of the user and does some
+        extra pre-processing
+    """
 
+    # If the user is logged in
     if session["auth"]:
         session["handle"] = session["auth"]["user"]["stopstalk_handle"]
         session["user_id"] = session["auth"]["user"]["id"]
@@ -15,12 +21,16 @@ def index():
         redirect(URL("default", "submissions", args=[1]))
 
     # Detect a registration has taken place
+    # This will be the case when submission on
+    # a register user form is done.
     row = db(db.auth_event.id > 0).select().last()
     if row:
         desc = row.description
     else:
-        desc = ''
+        desc = ""
 
+    # If the last auth_event record contains registered
+    # or verification then retrieve submissions
     if desc.__contains__("Registered") or \
        desc.__contains__("Verification"):
         reg_user = desc.split(" ")[1]
@@ -36,7 +46,13 @@ def index():
     response.flash = T("Please Login")
     return dict()
 
+# -------------------------------------------------------------------------------
 def get_max_streak(handle):
+    """
+        Get the maximum of all streaks
+
+        @Todo: There is some bug here
+    """
 
     row = db.executesql("SELECT time_stamp, COUNT(*) FROM submission WHERE submission.stopstalk_handle='" + handle + "' GROUP BY DATE(submission.time_stamp), submission.status;")
 
@@ -76,6 +92,11 @@ def get_max_streak(handle):
 # -------------------------------------------------------------------------------
 @auth.requires_login()
 def notifications():
+    """
+        Check if any of the friends(includes CUSTOM) of
+        the logged-in user is on a streak
+    """
+
     if session["user_id"] is None:
         redirect(URL("default", "index"))
 
@@ -83,8 +104,13 @@ def notifications():
     atable = db.auth_user
     ctable = db.custom_friend
 
+    # Check for streak of friends on stopstalk
     row = db(ftable.user_id == session["user_id"]).select(ftable.friends_list).first()
+
+    # Will contain list of handles of all the friends along
+    # with the Custom Users added by the logged-in user
     handles = []
+
     for user in eval(row.friends_list):
         user_data = db(atable.id == user).select(atable.first_name,
                                                  atable.last_name,
@@ -93,6 +119,7 @@ def notifications():
         handles.append((user_data.stopstalk_handle,
                         user_data.first_name + " " + user_data.last_name))
 
+    # Check for streak of custom friends
     rows = db(ctable.user_id == session["user_id"]).select(ctable.first_name,
                                                            ctable.last_name,
                                                            ctable.stopstalk_handle)
@@ -116,21 +143,30 @@ def notifications():
 
 # -------------------------------------------------------------------------------
 def compute_row(user, custom=False):
+    """
+        Computes rating and retrieves other
+        information of the specified user
+    """
 
     max_streak, total_submissions, curr_streak = get_max_streak(user.stopstalk_handle)
-    query = db.submission.stopstalk_handle == user.stopstalk_handle
+    query = (db.submission.stopstalk_handle == user.stopstalk_handle)
     query &= (db.submission.status == "AC")
     accepted = db(query).count()
-    rating = max_streak * 200 + \
-             total_submissions * 50 + \
-             (accepted * 100.0 / total_submissions) * 100 + \
-             ((total_submissions - accepted) / total_submissions) * 20
+
+    # Unique rating formula
+    # @ToDo: Improvement is always better
+    rating = max_streak * 100 + \
+             total_submissions * 20 + \
+             accepted * 5 + \
+             (accepted * 100.0 / total_submissions) * 150 + \
+             (total_submissions - accepted) * 1
     rating = int(rating)
 
     table = db.auth_user
     if custom:
         table = db.custom_friend
 
+    # Update the rating whenever leaderboard page is loaded
     db(table.stopstalk_handle == user.stopstalk_handle).update(rating=rating)
 
     return (user.first_name + " " + user.last_name,
@@ -140,6 +176,9 @@ def compute_row(user, custom=False):
 
 # -------------------------------------------------------------------------------
 def leaderboard():
+    """
+        Get a table with users sorted by rating
+    """
 
     reg_users = db(db.auth_user.id > 0).select()
     custom_users = db(db.custom_friend.id > 0).select()
@@ -152,6 +191,7 @@ def leaderboard():
     for user in custom_users:
         users.append(compute_row(user, True))
 
+    # Sort users according to the rating
     users = sorted(users, key=lambda x: x[3], reverse=True)
 
     table = TABLE(_class="table")
@@ -180,6 +220,10 @@ def search():
 # -------------------------------------------------------------------------------
 @auth.requires_login()
 def mark_friend():
+    """
+        Send a friend request
+    """
+
     if len(request.args) < 1:
         session.flash = "Friend Request sent"
         redirect(URL("default", "search"))
@@ -192,27 +236,30 @@ def mark_friend():
 # -------------------------------------------------------------------------------
 @auth.requires_login()
 def retrieve_users():
+    """
+        Show the list of registered users
+    """
+
     q = request.get_vars.get("q", None)
 
-    # ToDo: improve this
     query = db.auth_user.first_name.like("%" + q + "%", case_sensitive=False)
     query |= db.auth_user.last_name.like("%" + q + "%", case_sensitive=False)
     query |= db.auth_user.stopstalk_handle.like("%" + q + "%", case_sensitive=False)
-    query |= db.auth_user.codechef_handle.like("%" + q + "%", case_sensitive=False)
-    query |= db.auth_user.codeforces_handle.like("%" + q + "%", case_sensitive=False)
-    query |= db.auth_user.spoj_handle.like("%" + q + "%", case_sensitive=False)
+
+    for site in current.SITES:
+        query |= db.auth_user[site.lower() + "_handle"].like("%" + q + "%", case_sensitive=False)
+
     # Don't show the logged in user in the search
-    query &= db.auth_user.id != session.user_id
+    query &= (db.auth_user.id != session.user_id)
     rows = db(query).select()
 
     t = TABLE(_class="table")
     tr = TR(TH("Name"),
             TH("StopStalk Handle"),
-            TH("CodeChef Handle"),
-            TH("CodeForces Handle"),
-            TH("Spoj Handle"),
-            TH("HackerEarth Handle"),
             TH("Friendship Status"))
+
+    for site in current.SITES:
+        tr.append(TH(site + " Handle"))
     t.append(tr)
 
     for user in rows:
@@ -222,27 +269,34 @@ def retrieve_users():
         tr = TR()
         tr.append(TD(user.first_name + " " + user.last_name))
         tr.append(TD(user.stopstalk_handle))
-        tr.append(TD(user.codechef_handle))
-        tr.append(TD(user.codeforces_handle))
-        tr.append(TD(user.spoj_handle))
-        tr.append(TD(user.hackerearth_handle))
+
+        for site in current.SITES:
+            tr.append(TD(user[site.lower() + "_handle"]))
+
+        # Check if the current user is already a friend or not
         if session.user_id not in friends:
             r = db((db.friend_requests.from_h == session.user_id) &
                    (db.friend_requests.to_h == user.id)).select()
             if len(r) == 0:
-                tr.append(TD(FORM(INPUT(_type="submit", _value="Add Friend",
+                tr.append(TD(FORM(INPUT(_type="submit",
+                                        _value="Add Friend",
                                         _class="btn btn-warning"),
-                                  _action=URL("default", "mark_friend", args=[user.id]))))
+                                  _action=URL("default", "mark_friend",
+                                              args=[user.id]))))
             else:
                 tr.append(TD("Friend request sent"))
         else:
             tr.append(TD("Already friends"))
         t.append(tr)
+
     return dict(t=t)
 
 # -------------------------------------------------------------------------------
 @auth.requires_login()
 def submissions():
+    """
+        Retrieve submissions of the logged-in user
+    """
 
     if len(request.args) == 0:
         active = "1"
@@ -256,23 +310,24 @@ def submissions():
         cusfriends.append(f.id)
 
     # Get the friends of logged in user
-    query = db.friends.user_id == session.user_id
+    query = (db.friends.user_id == session.user_id)
     friends = db(query).select(db.friends.friends_list).first()
     friends = tuple(eval(friends.friends_list))
 
-    query = db.submission.user_id.belongs(friends)
-    query |= db.submission.custom_user_id.belongs(cusfriends)
+    query = (db.submission.user_id.belongs(friends))
+    query |= (db.submission.custom_user_id.belongs(cusfriends))
     count = db(query).count()
     count = count / 100 + 1
 
     if request.extension == "json":
         return dict(count=count)
 
-    for i in friends:
-        utilities.retrieve_submissions(i)
+    if active == "1":
+        for i in friends:
+            utilities.retrieve_submissions(i)
 
-    for i in cusfriends:
-        utilities.retrieve_submissions(i, custom=True)
+        for i in cusfriends:
+            utilities.retrieve_submissions(i, custom=True)
 
     rows = db(query).select(orderby=~db.submission.time_stamp,
                             limitby=(100 * (int(active) - 1), (int(active) - 1) * 100 + 100))

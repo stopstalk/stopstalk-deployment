@@ -64,25 +64,28 @@ service = Service()
 plugins = PluginManager()
 
 initial_date = datetime.strptime("2013-01-01 00:00:00", "%Y-%m-%d %H:%M:%S")
-## create all tables needed by auth if not custom tables
-auth.settings.extra_fields['auth_user']= [Field('institute', requires=IS_NOT_EMPTY()),
-                                          Field('codechef_handle'),
-                                          Field('codeforces_handle'),
-                                          Field('spoj_handle'),
-                                          Field("hackerearth_handle"),
-                                          Field('stopstalk_handle',
-                                                requires=[IS_NOT_IN_DB(db,
-                                                                      'auth_user.stopstalk_handle',
-                                                                      error_message=T("Handle taken")),
-                                                          IS_NOT_IN_DB(db,
-                                                                       'custom_friend.stopstalk_handle',
-                                                                       error_message=T("Handle taken"))]
-                                                ),
-                                          Field('rating',
-                                                default=0),
-                                          Field('last_retrieved', 'datetime',
-                                                default=initial_date)
-                                          ]
+
+extra_fields = [Field('institute', requires=IS_NOT_EMPTY()),
+                Field('stopstalk_handle',
+                      requires=[IS_NOT_IN_DB(db,
+                                             'auth_user.stopstalk_handle',
+                                             error_message=T("Handle taken")),
+                                             IS_NOT_IN_DB(db,
+                                                          'custom_friend.stopstalk_handle',
+                                                          error_message=T("Handle taken"))]
+                                             ),
+                Field('rating',
+                      default=0),
+                Field('last_retrieved', 'datetime',
+                      default=initial_date)
+                ]
+
+site_handles = []
+for site in current.SITES:
+    site_handles += [Field(site.lower() + "_handle")]
+
+extra_fields += site_handles
+auth.settings.extra_fields['auth_user'] = extra_fields
 
 auth.define_tables(username=False, signature=False)
 
@@ -117,26 +120,24 @@ auth.settings.reset_password_requires_verification = True
 ## after defining tables, uncomment below to enable auditing
 # auth.enable_record_versioning(db)
 
+custom_friend_fields = [Field("user_id", "reference auth_user"),
+                        Field("first_name", requires=IS_NOT_EMPTY()),
+                        Field("last_name", requires=IS_NOT_EMPTY()),
+                        Field("institute", requires=IS_NOT_EMPTY()),
+                        Field("stopstalk_handle", requires = [IS_NOT_IN_DB(db,
+                                                                           'auth_user.stopstalk_handle',
+                                                                           error_message=T("Handle already exists")),
+                                                              IS_NOT_IN_DB(db,
+                                                                           'custom_friend.stopstalk_handle',
+                                                                           error_message=T("Handle already exists"))]),
+                        Field("rating",
+                              default=0),
+                        Field("last_retrieved", "datetime",
+                              default=initial_date)]
+
+custom_friend_fields += site_handles
 db.define_table("custom_friend",
-                Field("user_id", "reference auth_user"),
-                Field("first_name", requires=IS_NOT_EMPTY()),
-                Field("last_name", requires=IS_NOT_EMPTY()),
-                Field("institute", requires=IS_NOT_EMPTY()),
-                Field("stopstalk_handle", requires = [IS_NOT_IN_DB(db,
-                                                                   'auth_user.stopstalk_handle',
-                                                                   error_message=T("Handle already exists")),
-                                                      IS_NOT_IN_DB(db,
-                                                                   'custom_friend.stopstalk_handle',
-                                                                   error_message=T("Handle already exists"))]),
-                Field("codechef_handle"),
-                Field("codeforces_handle"),
-                Field("spoj_handle"),
-                Field("hackerearth_handle"),
-                Field('rating',
-                      default=0),
-                Field('last_retrieved', 'datetime',
-                      default=initial_date)
-                )
+                *custom_friend_fields)
 
 db.define_table("submission",
                 Field("user_id", "reference auth_user"),

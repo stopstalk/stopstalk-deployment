@@ -9,6 +9,10 @@ def index():
 
 # -------------------------------------------------------------------------------
 def get_dates():
+    """
+        Return a dictionary containing count of submissions
+        on each date
+    """
 
     if len(request.args) < 1:
         if session.handle:
@@ -68,8 +72,7 @@ def get_dates():
 # -------------------------------------------------------------------------------
 def get_stats():
     """
-        Current Implementation:
-        Logged in user can see only his profile
+        Get statistics of the user
     """
 
     if request.extension != "json":
@@ -91,6 +94,9 @@ def get_stats():
 
 # -------------------------------------------------------------------------------
 def profile():
+    """
+        Controller to show user profile
+    """
 
     if len(request.args) < 1:
         if session.handle:
@@ -100,7 +106,7 @@ def profile():
     else:
         handle = str(request.args[0])
 
-    query = db.auth_user.stopstalk_handle == handle
+    query = (db.auth_user.stopstalk_handle == handle)
     row = db(query).select().first()
     if row is None:
         row = db(db.custom_friend.stopstalk_handle == handle).select().first()
@@ -114,10 +120,11 @@ def profile():
                             stable.id.count(),
                             groupby=[stable.site, stable.status])
 
-    data = {"CodeChef": [0, 0],
-            "CodeForces": [0, 0],
-            "Spoj": [0, 0],
-            "HackerEarth": [0, 0]}
+
+    data = {}
+    for site in current.SITES:
+        data[site] = [0, 0]
+
     for i in rows:
         submission = i.as_dict()
         cnt = submission["_extra"]["COUNT(submission.id)"]
@@ -143,6 +150,7 @@ def profile():
 # -------------------------------------------------------------------------------
 def submissions():
     """
+        Retrieve submissions of a specific user
         @ToDo: Bootstrap Pagination
     """
 
@@ -177,6 +185,9 @@ def submissions():
 # -------------------------------------------------------------------------------
 @auth.requires_login()
 def friend_requests():
+    """
+        Show friend requests to the logged-in user
+    """
 
     rows = db(db.friend_requests.to_h == session.user_id).select()
     table = TABLE(_class="table")
@@ -199,6 +210,9 @@ def friend_requests():
 # -------------------------------------------------------------------------------
 @auth.requires_login()
 def add_friend(user_id, friend_id):
+    """
+        Add a friend into friend-list
+    """
 
     user_friends = db(db.friends.user_id == user_id).select(db.friends.friends_list).first()
     user_friends = eval(user_friends["friends_list"])
@@ -208,6 +222,10 @@ def add_friend(user_id, friend_id):
 # -------------------------------------------------------------------------------
 @auth.requires_login()
 def accept_fr():
+    """
+        Helper function to accept friend request
+    """
+
     if len(request.args) < 2:
         redirect(URL("user", "friend_requests"))
 
@@ -230,6 +248,9 @@ def accept_fr():
 # -------------------------------------------------------------------------------
 @auth.requires_login()
 def reject_fr():
+    """
+        Helper function to reject friend request
+    """
 
     if request.args == []:
         redirect(URL("user", "friend_requests"))
@@ -244,14 +265,16 @@ def reject_fr():
 # -------------------------------------------------------------------------------
 @auth.requires_login()
 def custom_friend():
+    """
+        Controller to add a Custom Friend
+    """
 
     list_fields = ["first_name",
                    "last_name",
                    "institute",
-                   "stopstalk_handle",
-                   "codechef_handle",
-                   "codeforces_handle",
-                   "spoj_handle"]
+                   "stopstalk_handle"]
+    for site in current.SITES:
+        list_fields += [site.lower() + "_handle"]
 
     form = SQLFORM(db.custom_friend,
                    fields=list_fields,

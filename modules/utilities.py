@@ -5,7 +5,7 @@ from datetime import datetime, date
 
 PROXY = {"http": "http://proxy.iiit.ac.in:8080/",
          "https": "https://proxy.iiit.ac.in:8080/"}
-
+SITES = current.SITES
 RED = "\x1b[1;31m"
 GREEN = "\x1b[1;32m"
 YELLOW = "\x1b[1;33m"
@@ -26,11 +26,7 @@ def _debug(first_name, last_name, site, custom=False):
 
 # -------------------------------------------------------------------------------
 def get_link(site, handle):
-    site_dict = {"CodeChef": "http://www.codechef.com/users/",
-                 "CodeForces": "http://www.codeforces.com/profile/",
-                 "Spoj": "http://www.spoj.com/users/",
-                 "HackerEarth": "https://hackerearth.com/users/"}
-    return site_dict[site] + handle
+    return current.SITES[site] + handle
 
 # -------------------------------------------------------------------------------
 def render_table(submissions):
@@ -148,60 +144,17 @@ def retrieve_submissions(reg_user, custom=False):
     today = time.strftime("%Y-%m-%d %H:%M:%S")
     db(query).update(last_retrieved=datetime.now())
 
-    # ToDo: Make this generalized and extensible if a site is added
-    if row.codechef_handle:
+    for site in current.SITES:
+        site_handle = row[site.lower() + "_handle"]
+        if site_handle:
+            _debug(row.first_name, row.last_name, site, custom)
 
-        _debug(row.first_name, row.last_name, "CodeChef", custom)
-
-        handle = row.codechef_handle
-        P = profile.Profile(codechef_handle=handle)
-        submissions = P.codechef(last_retrieved)
-        get_submissions(reg_user,
-                        handle,
-                        row.stopstalk_handle,
-                        submissions,
-                        "CodeChef",
-                        custom)
-
-    if row.codeforces_handle:
-
-        _debug(row.first_name, row.last_name, "CodeForces", custom)
-
-        handle = row.codeforces_handle
-        P = profile.Profile(codeforces_handle=handle)
-        submissions = P.codeforces(last_retrieved)
-        get_submissions(reg_user,
-                        handle,
-                        row.stopstalk_handle,
-                        submissions,
-                        "CodeForces",
-                        custom)
-
-    if row.spoj_handle:
-
-        _debug(row.first_name, row.last_name, "Spoj", custom)
-
-        handle = row.spoj_handle
-        P = profile.Profile(spoj_handle=handle)
-        submissions = P.spoj(last_retrieved)
-        get_submissions(reg_user,
-                        handle,
-                        row.stopstalk_handle,
-                        submissions,
-                        "Spoj",
-                        custom)
-
-    if row.hackerearth_handle:
-
-        _debug(row.first_name, row.last_name, "HackerEarth", custom)
-
-        handle = row.hackerearth_handle
-        P = profile.Profile(hackerearth_handle=handle)
-        submissions = P.hackerearth(last_retrieved)
-        get_submissions(reg_user,
-                        handle,
-                        row.stopstalk_handle,
-                        submissions,
-                        "HackerEarth",
-                        custom)
-
+            P = profile.Profile(site, site_handle)
+            site_method = getattr(P, site.lower())
+            submissions = site_method(last_retrieved)
+            get_submissions(reg_user,
+                            site_handle,
+                            row.stopstalk_handle,
+                            submissions,
+                            site,
+                            custom)

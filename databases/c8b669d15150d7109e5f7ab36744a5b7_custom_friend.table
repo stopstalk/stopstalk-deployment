@@ -10,7 +10,7 @@ p5
 I00
 sS'sortable'
 p6
-I11
+I7
 sS'sql'
 p7
 S'CHAR(512)'
@@ -118,7 +118,7 @@ I512
 sg5
 I00
 sg6
-I7
+I12
 sg7
 S'CHAR(512)'
 p37
@@ -150,7 +150,7 @@ I512
 sg5
 I00
 sg6
-I8
+I11
 sg7
 S'CHAR(512)'
 p43
@@ -166,7 +166,7 @@ I512
 sg5
 I00
 sg6
-I12
+I8
 sg7
 S'TIMESTAMP'
 p46
@@ -183,7 +183,7 @@ I512
 sg5
 I00
 sg6
-I10
+I9
 sg7
 S'CHAR(512)'
 p50
@@ -199,7 +199,7 @@ I512
 sg5
 I00
 sg6
-I9
+I10
 sg7
 S'CHAR(512)'
 p53

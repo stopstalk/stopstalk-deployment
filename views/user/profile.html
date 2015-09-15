@@ -173,9 +173,9 @@
         <tr>
             <td>
             <h3><strong>Accuracy</strong></h3>
-            <h5><b>Codechef:</b> {{=efficiency["CodeChef"]}}</h5>
-            <h5><b>CodeForces:</b> {{=efficiency["CodeForces"]}}</h5>
-            <h5><b>Spoj:</b> {{=efficiency["Spoj"]}}</h5>
+            {{for site in current.SITES:}}
+                <h5><b>{{=site}}</b> {{=efficiency[site]}}</h5>
+            {{pass}}
             </td>
             <td class="center">
             <h3><strong>Maximum Streak</strong></h4>

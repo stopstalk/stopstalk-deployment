@@ -10,11 +10,8 @@
     Restart the web2py server
     Open the Index page again
 """
-deleted = db.submission.truncate()
-if deleted:
-    print "Successfully deleted all submissions"
-else:
-    print "No submissions deleted"
+db.submission.truncate()
+print "Successfully deleted all submissions"
 
 auth_user_update = db(db.auth_user.id > 0).update(last_retrieved="2013-01-01 00:00:00")
 if auth_user_update:

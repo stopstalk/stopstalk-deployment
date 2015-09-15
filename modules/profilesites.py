@@ -3,19 +3,17 @@ import parsedatetime as pdt
 import datetime
 from datetime import date
 import bs4
-PROXY = {"http": "http://proxy.iiit.ac.in:8080/"}
+import utilities
 
 class Profile(object):
-    def __init__(self,
-                 codechef_handle="",
-                 codeforces_handle="",
-                 spoj_handle="",
-                 hackerearth_handle=""):
+    def __init__(self, site="", handle=""):
 
-        self.codechef_handle = codechef_handle
-        self.codeforces_handle = codeforces_handle
-        self.spoj_handle = spoj_handle
-        self.hackerearth_handle = hackerearth_handle
+        self.site = None
+        self.handle = None
+
+        if site in utilities.SITES:
+            self.handle = handle
+            self.site = site
 
     @staticmethod
     def parsetime(time_str):
@@ -30,12 +28,15 @@ class Profile(object):
 
     def codechef(self, last_retrieved):
 
+        if self.handle:
+            handle = self.handle
+        else:
+            return {}
 
-        handle = self.codechef_handle
         user_url = "http://www.codechef.com/recent/user?user_handle=" + handle
         while 1:
             try:
-                tmp = requests.get(user_url, headers={"User-Agent": "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5"}, proxies=PROXY)
+                tmp = requests.get(user_url, headers={"User-Agent": "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5"}, proxies=utilities.PROXY)
                 if tmp.status_code == 200:
                     break
             except:
@@ -50,7 +51,7 @@ class Profile(object):
             user_url = "http://www.codechef.com/recent/user?user_handle=" + handle + "&page=" + str(page)
             while 1:
                 try:
-                    tmp = requests.get(user_url, headers={"User-Agent": "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5"}, proxies=PROXY)
+                    tmp = requests.get(user_url, headers={"User-Agent": "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5"}, proxies=utilities.PROXY)
                     if tmp.status_code == 200:
                         break
                 except:
@@ -123,7 +124,12 @@ class Profile(object):
         return submissions
 
     def codeforces(self, last_retrieved):
-        handle = self.codeforces_handle
+
+        if self.handle:
+            handle = self.handle
+        else:
+            return {}
+
         page = 1
         previd = -1
 
@@ -134,7 +140,7 @@ class Profile(object):
 
                 url = "http://codeforces.com/submissions/" + handle + "/page/" + str(page)
                 try:
-                    tmp = requests.get(url, proxies=PROXY)
+                    tmp = requests.get(url, proxies=utilities.PROXY)
                     soup = bs4.BeautifulSoup(tmp.text)
                     if tmp.status_code == 200:
                         break
@@ -228,16 +234,20 @@ class Profile(object):
 
     def spoj(self, last_retrieved):
 
-        start = 0
-        handle = self.spoj_handle
+        if self.handle:
+            handle = self.handle
+        else:
+            return {}
+
         submissions = {handle: {}}
+        start = 0
         it = 1
 
         previd = -1
         currid = 0
         page = 0
         url = "https://www.spoj.com/users/" + handle
-        tmpreq = requests.get(url, proxies=PROXY)
+        tmpreq = requests.get(url, proxies=utilities.PROXY)
 
         # Bad but correct way of checking if the handle exists
         if tmpreq.text.find("History of submissions") == -1:
@@ -247,7 +257,7 @@ class Profile(object):
             flag = 0
             url = "https://www.spoj.com/status/" + handle + "/all/start=" + str(start)
             start += 20
-            t = requests.get(url, proxies=PROXY)
+            t = requests.get(url, proxies=utilities.PROXY)
             soup = bs4.BeautifulSoup(t.text)
             table_body = soup.find("tbody")
 
@@ -284,21 +294,16 @@ class Profile(object):
                     submission.append(uri.contents[0].strip())
 
                     # Problem Status
-                    status = i.contents[6].contents
-                    st = "AC"
-                    if len(status) == 3:
-                        status = status[1].contents[0]
-                    else:
-                        status = status[0].strip()
-                    if status == "accepted":
+                    status = str(i.contents[6])
+                    if status.__contains__("accepted"):
                         st = "AC"
-                    elif status == "wrong answer":
+                    elif status.__contains__("wrong"):
                         st = "WA"
-                    elif status == "compilation error":
+                    elif status.__contains__("compilation"):
                         st = "CE"
                     elif status.__contains__("runtime"):
                         st = "RE"
-                    elif status.__contains__("time limit exceeded"):
+                    elif status.__contains__("time limit"):
                         st = "TLE"
                     else:
                         st = "OTH"
@@ -322,10 +327,14 @@ class Profile(object):
         return submissions
 
     def hackerearth(self, last_retrieved):
-        handle = self.hackerearth_handle
+
+        if self.handle:
+            handle = self.handle
+        else:
+            return {}
 
         url = "https://www.hackerearth.com/submissions/" + handle
-        t = requests.get(url, proxies=PROXY)
+        t = requests.get(url, proxies=utilities.PROXY)
         tmp_string = t.headers['set-cookie']
         csrf_token = re.findall("csrftoken=\w*", tmp_string)[0][10:]
         url = "https://www.hackerearth.com/AJAX/feed/newsfeed/submission/user/" + handle + "/"
@@ -353,7 +362,7 @@ class Profile(object):
 
             tmp = requests.post(url,
                                 data=data,
-                                proxies=PROXY,
+                                proxies=utilities.PROXY,
                                 headers=response)
 
             try:
