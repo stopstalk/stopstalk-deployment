@@ -80,7 +80,10 @@ class Profile(object):
                         prob = i.contents[1].contents[0]
                         prob["href"] = "http://www.codechef.com" + prob["href"]
                         submission.append(eval(repr(prob["href"]).replace("\\", "")))
-                        submission.append(prob.contents[0])
+                        try:
+                            submission.append(prob.contents[0])
+                        except IndexError:
+                            submission.append("")
 
                         # Submission status
                         stat = i.contents[2].contents[0]
@@ -384,7 +387,7 @@ class Profile(object):
 
                 all_as = final.find_all("a")
                 all_tds = final.find_all("td")
-                tos = all_as[3]["title"]
+                tos = all_tds[-1].contents[1]["title"]
                 time_stamp = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
 
                 if time_stamp <= last_retrieved:

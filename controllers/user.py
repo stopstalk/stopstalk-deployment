@@ -61,8 +61,12 @@ def get_dates():
 
     today = datetime.today().date()
 
+    # If last submission was yesterday make streak as 1
+    if streak == 0 and (today - prev).days == 1:
+        streak = 1
+
     # If last streak does not match the current day
-    if (today - start).days + 1 != streak:
+    elif (today - start).days != streak:
         streak = 0
 
     return dict(total=total_submissions,

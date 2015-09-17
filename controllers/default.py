@@ -83,8 +83,12 @@ def get_max_streak(handle):
 
     today = datetime.today().date()
 
+    # If last submission was yesterday make streak as 1
+    if streak == 0 and (today - prev).days == 1:
+        streak = 1
+
     # If last streak does not match the current day
-    if (today - start).days + 1 != streak:
+    elif (today - start).days != streak:
         streak = 0
 
     return max_streak, total_submissions, streak
@@ -129,6 +133,7 @@ def notifications():
 
     table = TABLE(_class="table")
     for handle in handles:
+
         max_streak, total_submissions, curr_streak = get_max_streak(handle[0])
         if curr_streak:
             tr = TR(TD(H3(A(handle[1],
@@ -137,7 +142,7 @@ def notifications():
                        I(_class="fa fa-bolt",
                          _style="color:red"))
                        ))
-    table.append(tr)
+            table.append(tr)
 
     return dict(table=table)
 
