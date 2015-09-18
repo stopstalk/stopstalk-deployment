@@ -183,10 +183,11 @@ class Profile(object):
                     # Time of submission
                     tos = i.contents[3].contents[0].strip()
                     curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
+                    curr = time.gmtime(time.mktime(curr) + 480 * 60)
 
                     if curr <= last_retrieved:
                         return submissions
-                    submission.append(str(tos))
+                    submission.append(str(time.strftime("%Y-%m-%d %H:%M:%S", curr)))
 
                     # Problem
                     prob = i.contents[7].contents[1]
