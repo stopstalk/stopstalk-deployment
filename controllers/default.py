@@ -62,20 +62,22 @@ def get_max_streak(handle):
     total_submissions = 0
 
     for i in row:
+
         total_submissions += i[1]
-        if streak == 0:
-            streak = 1
+        if prev is None and streak == 0:
             prev = time.strptime(str(i[0]), "%Y-%m-%d %H:%M:%S")
             prev = date(prev.tm_year, prev.tm_mon, prev.tm_mday)
+            streak = 1
             start = prev
         else:
             curr = time.strptime(str(i[0]), "%Y-%m-%d %H:%M:%S")
             curr = date(curr.tm_year, curr.tm_mon, curr.tm_mday)
-            delta = (curr - prev).days
-            if delta == 1:
+
+            if (curr - prev).days == 1:
                 streak += 1
-            elif delta != 0:
-                streak = 0
+            elif curr != prev:
+                streak = 1
+
             prev = curr
 
         if streak > max_streak:
@@ -83,12 +85,8 @@ def get_max_streak(handle):
 
     today = datetime.today().date()
 
-    # If last submission was yesterday make streak as 1
-    if streak == 0 and (today - prev).days == 1:
-        streak = 1
-
-    # If last streak does not match the current day
-    elif (today - start).days != streak:
+    # Check if the last streak is continued till today
+    if (today - prev).days > 1:
         streak = 0
 
     return max_streak, total_submissions, streak
@@ -131,18 +129,29 @@ def notifications():
         handles.append((user.stopstalk_handle,
                         user.first_name + " " + user.last_name))
 
-    table = TABLE(_class="table")
-    for handle in handles:
+    # List of users with non-zero streak
+    users_on_streak = []
 
+    for handle in handles:
         max_streak, total_submissions, curr_streak = get_max_streak(handle[0])
         if curr_streak:
-            tr = TR(TD(H3(A(handle[1],
-                            _href=URL("user", "profile", args=[handle[0]])))),
-                    TD(H3(str(curr_streak) + " ",
-                       I(_class="fa fa-bolt",
-                         _style="color:red"))
-                       ))
-            table.append(tr)
+            users_on_streak.append((handle, curr_streak))
+
+    # Sort the users on streak by their streak
+    users_on_streak.sort(key=lambda k: k[1], reverse=True)
+
+    table = TABLE(_class="table")
+    # Append all the users to the final table
+    for users in users_on_streak:
+        handle = users[0]
+        curr_streak = users[1]
+        tr = TR(TD(H3(A(handle[1],
+                        _href=URL("user", "profile", args=[handle[0]])))),
+                TD(H3(str(curr_streak) + " ",
+                      I(_class="fa fa-bolt",
+                        _style="color:red"))
+                   ))
+        table.append(tr)
 
     return dict(table=table)
 

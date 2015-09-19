@@ -18,33 +18,32 @@ def get_dates():
         if session.handle:
             handle = str(session.handle)
         else:
-            redirect(URL("default", "submissions", args=[1]))
+            redirect(URL("default", "index"))
     else:
         handle = str(request.args[0])
-
-    stable = db.submission
 
     row = db.executesql("SELECT status, time_stamp, COUNT(*) FROM submission WHERE submission.stopstalk_handle='" + handle + "' GROUP BY DATE(submission.time_stamp), submission.status;")
 
     total_submissions = {}
-    streak = 0
-    max_streak = 0
+    streak = max_streak = 0
     prev = curr = start = None
 
     for i in row:
-        if streak == 0:
-            streak = 1
+
+        if prev is None and streak == 0:
             prev = time.strptime(str(i[1]), "%Y-%m-%d %H:%M:%S")
             prev = date(prev.tm_year, prev.tm_mon, prev.tm_mday)
+            streak = 1
             start = prev
         else:
             curr = time.strptime(str(i[1]), "%Y-%m-%d %H:%M:%S")
             curr = date(curr.tm_year, curr.tm_mon, curr.tm_mday)
-            delta = (curr - prev).days
-            if delta == 1:
+
+            if (curr - prev).days == 1:
                 streak += 1
-            elif delta != 0:
-                streak = 0
+            elif curr != prev:
+                streak = 1
+
             prev = curr
 
         if streak > max_streak:
@@ -61,12 +60,8 @@ def get_dates():
 
     today = datetime.today().date()
 
-    # If last submission was yesterday make streak as 1
-    if streak == 0 and (today - prev).days == 1:
-        streak = 1
-
-    # If last streak does not match the current day
-    elif (today - start).days != streak:
+    # Check if the last streak is continued till today
+    if (today - prev).days > 1:
         streak = 0
 
     return dict(total=total_submissions,
