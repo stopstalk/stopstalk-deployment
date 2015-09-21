@@ -140,7 +140,8 @@ def notifications():
     # Sort the users on streak by their streak
     users_on_streak.sort(key=lambda k: k[1], reverse=True)
 
-    table = TABLE(_class="table")
+    table = TABLE(TR(TH(H3(STRONG("User"))), TH(H3(STRONG("Streak")))),
+                  _class="table")
     # Append all the users to the final table
     for users in users_on_streak:
         handle = users[0]

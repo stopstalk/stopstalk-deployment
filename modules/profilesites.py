@@ -373,6 +373,7 @@ class Profile(object):
                 final_json = tmp.json()
             except:
                 break
+
             if final_json["count"] == 0:
                 break
 
@@ -399,7 +400,11 @@ class Profile(object):
                 submission.append(problem_link)
                 problem_name = all_as[1].contents[0]
                 submission.append(problem_name)
-                status = all_tds[2].contents[1]["title"]
+
+                try:
+                    status = all_tds[2].contents[1]["title"]
+                except IndexError:
+                    status = "Others"
 
                 if status.__contains__("Accepted"):
                     status = "AC"
@@ -426,4 +431,40 @@ class Profile(object):
                 language = all_tds[5].contents[0]
                 submission.append(language)
                 it += 1
+        return submissions
+
+    def hackerrank(self, last_retrieved):
+
+        if self.handle:
+            handle = self.handle
+        else:
+            return {}
+
+        tmp = requests.get("https://www.hackerrank.com/rest/hackers/" + handle + "/recent_challenges?offset=0&limit=50000000")
+
+        all_submissions = tmp.json()["models"]
+
+        submissions = {handle: {1 : {}}}
+        it = 0
+        for row in all_submissions:
+
+            submission = submissions[handle][1]
+            submission[it] = []
+            submission = submission[it]
+
+            time_stamp = row["created_at"][:-5].split("T")
+            curr = time.strptime(time_stamp[0] + " " + time_stamp[1],
+                                 "%Y-%m-%d %H:%M:%S")
+
+            if curr <= last_retrieved:
+                return submissions
+            submission.append(" ".join(time_stamp))
+
+            submission.append("https://hackerrank.com/challenges/" + row["slug"])
+            submission.append(row["name"])
+            submission.append("AC")
+            submission.append("100")
+            submission.append("-")
+            it += 1
+
         return submissions
