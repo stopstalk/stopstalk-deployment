@@ -133,107 +133,68 @@ class Profile(object):
         else:
             return {}
 
-        page = 1
-        previd = -1
+        tmp = requests.get("http://codeforces.com/api/user.status?handle=" + handle + "&from=1&count=5000")
 
-        it = 1
-        submissions = {handle: {}}
-        while 1:
-            while 1:
+        submissions = {handle: {1: {}}}
+        all_submissions = tmp.json()
+        if all_submissions["status"] != "OK":
+            return submissions
+        all_submissions = all_submissions["result"]
+        it = 0
+        for row in all_submissions:
+            submissions[handle][1][it] = []
+            submission = submissions[handle][1][it]
 
-                url = "http://codeforces.com/submissions/" + handle + "/page/" + str(page)
-                try:
-                    tmp = requests.get(url, proxies=utilities.PROXY)
-                    soup = bs4.BeautifulSoup(tmp.text)
-                    if tmp.status_code == 200:
-                        break
-                except:
-                    continue
+            curr = time.gmtime(row["creationTimeSeconds"] + 330 * 60)
+            if curr <= last_retrieved:
+                return submissions
+            submission.append(str(time.strftime("%Y-%m-%d %H:%M:%S", curr)))
+            time_stamp = time.strftime("%Y-%m-%d %H:%M:%S", curr)
 
-            tbody = None
-            for i in soup.findAll("table", {"class": "status-frame-datatable"}):
-                tbody = i
-            if tbody is None:
-                break
-            flag = 0
-            page += 1
-            row = 0
-            submissions[handle][page] = {}
+            arg = "problem/"
+            if len(str(row["contestId"])) != 3:
+                arg = "gymProblem/"
 
-            for i in tbody:
-                if isinstance(i, bs4.element.Tag):
+            problem_link = "http://codeforces.com/problemset/" + arg + \
+                           str(row["contestId"]) + "/" + \
+                           row["problem"]["index"]
+            submission.append(problem_link)
+            problem_name = row["problem"]["name"]
+            submission.append(problem_name)
 
-                    if i.contents[1].contents[0] == "#":
-                        continue
+            status = row["verdict"]
+            st = "AC"
+            if status == "OK":
+                st = "AC"
+            elif status == "WRONG_ANSWER":
+                st = "WA"
+            elif status == "COMPILATION_ERROR":
+                st = "CE"
+            elif status == "SKIPPED":
+                st = "SK"
+            elif status == "RUNTIME_ERROR":
+                st = "RE"
+            elif status == "TIME_LIMIT_EXCEEDED":
+                st = "TLE"
+            elif status == "CHALLENGED":
+                st = "HCK"
+            elif status == "MEMORY_LIMIT_EXCEEDED":
+                st = "MLE"
+            else:
+                st = "OTH"
+            submission.append(st)
 
-                    submissions[handle][page][it] = []
-                    submission = submissions[handle][page][it]
+            if st == "AC":
+                points = "100"
+            elif st == "HCK":
+                points = "-50"
+            else:
+                points = "0"
+            submission.append(points)
 
-                    if row == 0:
-                        try:
-                            currid = i.contents[1].contents[1].contents[0]
-                            if currid == previd:
-                                flag = 1
-                                break
-                        except IndexError:
-                            continue
-                    previd = currid
-                    row += 1
+            submission.append(row["programmingLanguage"])
 
-                    # Time of submission
-                    tos = i.contents[3].contents[0].strip()
-                    curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
-                    curr = time.gmtime(time.mktime(curr) + 480 * 60)
-
-                    if curr <= last_retrieved:
-                        return submissions
-                    submission.append(str(time.strftime("%Y-%m-%d %H:%M:%S", curr)))
-
-                    # Problem
-                    prob = i.contents[7].contents[1]
-                    prob["href"] = "http://codeforces.com" + prob["href"]
-                    submission.append(eval(repr(prob["href"]).replace("\\", "")))
-                    submission.append(prob.contents[0].strip())
-
-                    # Submission Status
-                    status = i.contents[11].contents[1].attrs["submissionverdict"]
-                    st = "AC"
-                    if status == "OK":
-                        st = "AC"
-                    elif status == "WRONG_ANSWER":
-                        st = "WA"
-                    elif status == "COMPILATION_ERROR":
-                        st = "CE"
-                    elif status == "SKIPPED":
-                        st = "SK"
-                    elif status == "RUNTIME_ERROR":
-                        st = "RE"
-                    elif status == "TIME_LIMIT_EXCEEDED":
-                        st = "TLE"
-                    elif status == "CHALLENGED":
-                        st = "HCK"
-                    elif status == "MEMORY_LIMIT_EXCEEDED":
-                        st = "MLE"
-                    else:
-                        st = "OTH"
-                    submission.append(st)
-
-                    if st == "AC":
-                        points = "100"
-                    else:
-                        if st == "HCK":
-                            points = "-50"
-                        else:
-                            points = "0"
-                    submission.append(points)
-                    it += 1
-
-                    # Language
-                    lang = i.contents[9].contents[0].strip()
-                    submission.append(lang)
-
-            if flag == 1:
-                break
+            it += 1
         return submissions
 
     def spoj(self, last_retrieved):
