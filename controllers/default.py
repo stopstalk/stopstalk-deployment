@@ -5,7 +5,7 @@ from datetime import date
     @ToDo: Loads of cleanup :D
 """
 
-# -------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 def index():
     """
         The main controller which redirects depending
@@ -46,7 +46,7 @@ def index():
     response.flash = T("Please Login")
     return dict()
 
-# -------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 def get_max_streak(handle):
     """
         Get the maximum of all streaks
@@ -54,7 +54,19 @@ def get_max_streak(handle):
         @Todo: There is some bug here
     """
 
-    row = db.executesql("SELECT time_stamp, COUNT(*) FROM submission WHERE submission.stopstalk_handle='" + handle + "' GROUP BY DATE(submission.time_stamp), submission.status;")
+    # Build the complex SQL query
+    sql_query = """
+                    SELECT time_stamp, COUNT(*)
+                    FROM submission
+                    WHERE submission.stopstalk_handle=
+                """
+
+    sql_query += "'" + handle + "' "
+    sql_query += """
+                    GROUP BY DATE(submission.time_stamp), submission.status;
+                 """
+
+    row = db.executesql(sql_query)
 
     streak = 0
     max_streak = 0
@@ -85,13 +97,17 @@ def get_max_streak(handle):
 
     today = datetime.today().date()
 
+    # There are no submissions in the database for this user
+    if prev is None:
+        return (0, 0, 0)
+
     # Check if the last streak is continued till today
     if (today - prev).days > 1:
         streak = 0
 
     return max_streak, total_submissions, streak
 
-# -------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 @auth.requires_login()
 def notifications():
     """
@@ -107,24 +123,27 @@ def notifications():
     ctable = db.custom_friend
 
     # Check for streak of friends on stopstalk
-    row = db(ftable.user_id == session["user_id"]).select(ftable.friends_list).first()
+    query = (ftable.user_id == session["user_id"])
+    row = db(query).select(ftable.friends_list).first()
 
     # Will contain list of handles of all the friends along
     # with the Custom Users added by the logged-in user
     handles = []
 
     for user in eval(row.friends_list):
-        user_data = db(atable.id == user).select(atable.first_name,
-                                                 atable.last_name,
-                                                 atable.stopstalk_handle).first()
+        query = (atable.id == user)
+        user_data = db(query).select(atable.first_name,
+                                     atable.last_name,
+                                     atable.stopstalk_handle).first()
 
         handles.append((user_data.stopstalk_handle,
                         user_data.first_name + " " + user_data.last_name))
 
     # Check for streak of custom friends
-    rows = db(ctable.user_id == session["user_id"]).select(ctable.first_name,
-                                                           ctable.last_name,
-                                                           ctable.stopstalk_handle)
+    query = (ctable.user_id == session["user_id"])
+    rows = db(query).select(ctable.first_name,
+                            ctable.last_name,
+                            ctable.stopstalk_handle)
     for user in rows:
         handles.append((user.stopstalk_handle,
                         user.first_name + " " + user.last_name))
@@ -134,14 +153,20 @@ def notifications():
 
     for handle in handles:
         max_streak, total_submissions, curr_streak = get_max_streak(handle[0])
+
+        # If streak is non-zero append to users_on_streak list
         if curr_streak:
             users_on_streak.append((handle, curr_streak))
 
     # Sort the users on streak by their streak
     users_on_streak.sort(key=lambda k: k[1], reverse=True)
 
-    table = TABLE(TR(TH(H3(STRONG("User"))), TH(H3(STRONG("Streak")))),
+    # The table containing users on streak
+    table = TABLE(TR(TH(H3(STRONG("User"))),
+                     TH(H3(STRONG("Streak"),
+                        _class="center"))),
                   _class="table")
+
     # Append all the users to the final table
     for users in users_on_streak:
         handle = users[0]
@@ -150,13 +175,14 @@ def notifications():
                         _href=URL("user", "profile", args=[handle[0]])))),
                 TD(H3(str(curr_streak) + " ",
                       I(_class="fa fa-bolt",
-                        _style="color:red"))
-                   ))
+                        _style="color:red"),
+                      _class="center",
+                      )))
         table.append(tr)
 
     return dict(table=table)
 
-# -------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 def compute_row(user, custom=False):
     """
         Computes rating and retrieves other
@@ -164,6 +190,10 @@ def compute_row(user, custom=False):
     """
 
     max_streak, total_submissions, curr_streak = get_max_streak(user.stopstalk_handle)
+
+    if total_submissions == 0:
+        return ()
+
     query = (db.submission.stopstalk_handle == user.stopstalk_handle)
     query &= (db.submission.status == "AC")
     accepted = db(query).count()
@@ -189,7 +219,7 @@ def compute_row(user, custom=False):
             user.institute,
             rating)
 
-# -------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 def leaderboard():
     """
         Get a table with users sorted by rating
@@ -201,18 +231,30 @@ def leaderboard():
     users = []
 
     for user in reg_users:
-        users.append(compute_row(user))
+        tup = compute_row(user)
+        if tup is not ():
+            users.append(tup)
 
     for user in custom_users:
-        users.append(compute_row(user, True))
+        tup = compute_row(user, True)
+        if tup is not ():
+            users.append(tup)
 
     # Sort users according to the rating
     users = sorted(users, key=lambda x: x[3], reverse=True)
 
     table = TABLE(_class="table")
+    table.append(TR(TH("Name"),
+                    TH("StopStalk Handle"),
+                    TH("Institute"),
+                    TH("StopStalk Rating")))
 
-    table.append(TR(TH("Name"), TH("StopStalk Handle"), TH("Institute"), TH("StopStalk Rating")))
     for i in users:
+
+        # If there are no submissions of the user in the database
+        if i is ():
+            continue
+
         tr = TR()
         tr.append(TD(i[0]))
         tr.append(TD(A(i[1],
@@ -223,16 +265,19 @@ def leaderboard():
 
     return dict(table=table)
 
-# -------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 def user():
+    """
+        Use the standard auth for user
+    """
     return dict(form=auth())
 
-# -------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 @auth.requires_login()
 def search():
     return dict()
 
-# -------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 @auth.requires_login()
 def mark_friend():
     """
@@ -243,12 +288,13 @@ def mark_friend():
         session.flash = "Friend Request sent"
         redirect(URL("default", "search"))
 
+    # Insert a tuple of users' id into the friend_requests table
     db.friend_requests.insert(from_h=session.user_id, to_h=request.args[0])
     session.flash = "Friend Request sent"
     redirect(URL("default", "search.html"))
     return dict()
 
-# -------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 @auth.requires_login()
 def retrieve_users():
     """
@@ -257,12 +303,17 @@ def retrieve_users():
 
     q = request.get_vars.get("q", None)
 
-    query = db.auth_user.first_name.like("%" + q + "%", case_sensitive=False)
-    query |= db.auth_user.last_name.like("%" + q + "%", case_sensitive=False)
-    query |= db.auth_user.stopstalk_handle.like("%" + q + "%", case_sensitive=False)
+    query = (db.auth_user.first_name.like("%" + q + "%",
+                                          case_sensitive=False))
+    query |= (db.auth_user.last_name.like("%" + q + "%",
+                                          case_sensitive=False))
+    query |= (db.auth_user.stopstalk_handle.like("%" + q + "%",
+                                                 case_sensitive=False))
 
     for site in current.SITES:
-        query |= db.auth_user[site.lower() + "_handle"].like("%" + q + "%", case_sensitive=False)
+        field_name = site.lower() + "_handle"
+        query |= (db.auth_user[field_name].like("%" + q + "%",
+                                                case_sensitive=False))
 
     # Don't show the logged in user in the search
     query &= (db.auth_user.id != session.user_id)
@@ -306,7 +357,7 @@ def retrieve_users():
 
     return dict(t=t)
 
-# -------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 @auth.requires_login()
 def submissions():
     """
@@ -318,7 +369,9 @@ def submissions():
     else:
         active = request.args[0]
 
-    custom_friends = db(db.custom_friend.user_id == session.user_id).select(db.custom_friend.id)
+    # Retrieve all the custom users created by the logged-in user
+    query = (db.custom_friend.user_id == session.user_id)
+    custom_friends = db(query).select(db.custom_friend.id)
 
     cusfriends = []
     for f in custom_friends:
@@ -337,6 +390,7 @@ def submissions():
     if request.extension == "json":
         return dict(count=count)
 
+    # Retrieve user submissions only on page 1
     if active == "1":
         for i in friends:
             utilities.retrieve_submissions(i)
@@ -344,13 +398,15 @@ def submissions():
         for i in cusfriends:
             utilities.retrieve_submissions(i, custom=True)
 
+    offset = 100 * (int(active) - 1)
+    # Retrieve only 100 submissions from the offset
     rows = db(query).select(orderby=~db.submission.time_stamp,
-                            limitby=(100 * (int(active) - 1), (int(active) - 1) * 100 + 100))
+                            limitby=(offset, offset + 100))
 
     table = utilities.render_table(rows)
     return dict(table=table)
 
-# -------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 def call():
     """
     exposes services. for example:

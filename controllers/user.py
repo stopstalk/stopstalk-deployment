@@ -22,7 +22,15 @@ def get_dates():
     else:
         handle = str(request.args[0])
 
-    row = db.executesql("SELECT status, time_stamp, COUNT(*) FROM submission WHERE submission.stopstalk_handle='" + handle + "' GROUP BY DATE(submission.time_stamp), submission.status;")
+    sql_query = """
+                    SELECT status, time_stamp, COUNT(*)
+                    FROM submission
+                    WHERE submission.stopstalk_handle=
+                """
+
+    sql_query += "'" + handle + "' "
+    sql_query += "GROUP BY DATE(submission.time_stamp), submission.status;"
+    row = db.executesql(sql_query)
 
     total_submissions = {}
     streak = max_streak = 0
@@ -158,11 +166,13 @@ def submissions():
     if len(request.args) < 1:
         user_id = session.user_id
     else:
-        row = db(db.auth_user.stopstalk_handle==request.args[0]).select().first()
+        query = (db.auth_user.stopstalk_handle == request.args[0])
+        row = db(query).select().first()
         if row:
             user_id = row.id
         else:
-            row = db(db.custom_friend.stopstalk_handle==request.args[0]).select().first()
+            query = (db.custom_friend.stopstalk_handle == request.args[0])
+            row = db(query).select().first()
             if row:
                 user_id = row.id
                 custom = True
@@ -173,12 +183,13 @@ def submissions():
     utilities.retrieve_submissions(user_id, custom)
 
     if custom:
-        query = stable.custom_user_id == user_id
+        query = (stable.custom_user_id == user_id)
     else:
-        query = stable.user_id == user_id
+        query = (stable.user_id == user_id)
 
-    submissions = db(query).select(orderby=~stable.time_stamp)
-    table = utilities.render_table(submissions)
+    all_submissions = db(query).select(orderby=~stable.time_stamp)
+    table = utilities.render_table(all_submissions)
+
     return dict(table=table)
 
 # -------------------------------------------------------------------------------
@@ -199,11 +210,13 @@ def friend_requests():
         tr.append(TD(row.from_h.first_name + " " + row.from_h.last_name))
         tr.append(TD(row.from_h.institute))
         tr.append(TD(FORM(INPUT(_value="Accept", _type="submit"),
-                          _action=URL("user", "accept_fr", args=[row.from_h, row.id])),
+                          _action=URL("user", "accept_fr",
+                                      args=[row.from_h, row.id])),
                      FORM(INPUT(_value="Reject", _type="submit"),
                           _action=URL("user", "reject_fr", args=[row.id])),
                      ))
         table.append(tr)
+
     return dict(table=table)
 
 # -------------------------------------------------------------------------------
@@ -213,10 +226,13 @@ def add_friend(user_id, friend_id):
         Add a friend into friend-list
     """
 
-    user_friends = db(db.friends.user_id == user_id).select(db.friends.friends_list).first()
+    query = (db.friends.user_id == user_id)
+    user_friends = db(query).select(db.friends.friends_list).first()
+
     user_friends = eval(user_friends["friends_list"])
     user_friends.add(friend_id)
-    db(db.friends.user_id == user_id).update(friends_list=str(user_friends))
+
+    db(query).update(friends_list=str(user_friends))
 
 # -------------------------------------------------------------------------------
 @auth.requires_login()
@@ -242,7 +258,7 @@ def accept_fr():
     db(db.friend_requests.id == row_id).delete()
 
     redirect(URL("user", "friend_requests"))
-    return locals()
+    return dict()
 
 # -------------------------------------------------------------------------------
 @auth.requires_login()
@@ -258,8 +274,9 @@ def reject_fr():
 
     # Simply delete the friend request
     db(db.friend_requests.id == fr_id).delete()
+
     redirect(URL("user", "friend_requests"))
-    return locals()
+    return dict()
 
 # -------------------------------------------------------------------------------
 @auth.requires_login()
@@ -272,6 +289,7 @@ def custom_friend():
                    "last_name",
                    "institute",
                    "stopstalk_handle"]
+
     for site in current.SITES:
         list_fields += [site.lower() + "_handle"]
 

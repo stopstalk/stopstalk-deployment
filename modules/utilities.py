@@ -26,7 +26,7 @@ def _debug(first_name, last_name, site, custom=False):
 
 # -------------------------------------------------------------------------------
 def get_link(site, handle):
-    return current.SITES[site] + handle
+    return SITES[site] + handle
 
 # -------------------------------------------------------------------------------
 def render_table(submissions):
