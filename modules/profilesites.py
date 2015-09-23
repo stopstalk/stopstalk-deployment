@@ -180,6 +180,8 @@ class Profile(object):
                 st = "HCK"
             elif status == "MEMORY_LIMIT_EXCEEDED":
                 st = "MLE"
+            elif status == "TESTING":
+                continue
             else:
                 st = "OTH"
             submission.append(st)

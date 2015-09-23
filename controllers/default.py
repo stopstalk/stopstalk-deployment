@@ -200,10 +200,9 @@ def compute_row(user, custom=False):
 
     # Unique rating formula
     # @ToDo: Improvement is always better
-    rating = max_streak * 100 + \
-             total_submissions * 20 + \
-             accepted * 5 + \
-             (accepted * 100.0 / total_submissions) * 150 + \
+    rating = max_streak * 70 + \
+             accepted * 20 + \
+             (accepted * 100.0 / total_submissions) * 50 + \
              (total_submissions - accepted) * 1
     rating = int(rating)
 
@@ -321,11 +320,12 @@ def retrieve_users():
 
     t = TABLE(_class="table")
     tr = TR(TH("Name"),
-            TH("StopStalk Handle"),
-            TH("Friendship Status"))
+            TH("StopStalk Handle"))
 
     for site in current.SITES:
         tr.append(TH(site + " Handle"))
+
+    tr.append(TH("Friendship Status"))
     t.append(tr)
 
     for user in rows:
