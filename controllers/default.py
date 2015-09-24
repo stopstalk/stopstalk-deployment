@@ -194,16 +194,20 @@ def compute_row(user, custom=False):
     if total_submissions == 0:
         return ()
 
-    query = (db.submission.stopstalk_handle == user.stopstalk_handle)
-    query &= (db.submission.status == "AC")
-    accepted = db(query).count()
+    stable = db.submission
+
+    # Find the total solved problems(Lesser than total accepted)
+    query = (stable.stopstalk_handle == user.stopstalk_handle)
+    query &= (stable.status == "AC")
+    accepted = db(query).select(stable.problem_name, distinct=True)
+    accepted = len(accepted)
 
     # Unique rating formula
     # @ToDo: Improvement is always better
-    rating = max_streak * 70 + \
-             accepted * 20 + \
-             (accepted * 100.0 / total_submissions) * 50 + \
-             (total_submissions - accepted) * 1
+    rating = max_streak * 20 + \
+             accepted * 60 + \
+             (accepted * 100.0 / total_submissions) * 80 + \
+             (total_submissions - accepted) * 5
     rating = int(rating)
 
     table = db.auth_user

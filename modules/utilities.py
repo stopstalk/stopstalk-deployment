@@ -14,8 +14,11 @@ MAGENTA = "\x1b[1;35m"
 CYAN = "\x1b[1;36m"
 RESET_COLOR = "\x1b[0m"
 
-# -------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 def _debug(first_name, last_name, site, custom=False):
+    """
+        Advanced logging of submissions
+    """
 
     name = first_name + " " + last_name
     s = "Retrieving " + CYAN + site + RESET_COLOR + " submissions for "
@@ -24,12 +27,19 @@ def _debug(first_name, last_name, site, custom=False):
     s += BLUE + name + RESET_COLOR
     print s,
 
-# -------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 def get_link(site, handle):
+    """
+        Get the URL of site_handle
+    """
+
     return SITES[site] + handle
 
-# -------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 def render_table(submissions):
+    """
+        Create the HTML table from submissions
+    """
 
     status_dict = {"AC": "Accepted",
                    "WA": "Wrong Answer",
@@ -53,30 +63,35 @@ def render_table(submissions):
                     TH("Points")))
 
     for submission in submissions:
+
         tr = TR()
+        append = tr.append
+
+        person_id = submission.custom_user_id
         if submission.user_id:
-            tr.append(TD(A(submission.user_id.first_name + " " + submission.user_id.last_name,
-                           _href=URL("user", "profile", args=[submission.stopstalk_handle]))))
-        else:
-            tr.append(TD(A(submission.custom_user_id.first_name + " " + submission.custom_user_id.last_name,
-                           _href=URL("user", "profile", args=[submission.stopstalk_handle]))))
-        tr.append(TD(submission.site))
-        tr.append(TD(A(submission.site_handle,
-                       _href=get_link(submission.site,
-                                      submission.site_handle))))
-        tr.append(TD(submission.time_stamp))
-        tr.append(TD(A(submission.problem_name,
-                       _href=submission.problem_link)))
-        tr.append(TD(submission.lang))
-        tr.append(TD(IMG(_src=URL("static", "images/" + submission.status + ".jpg"),
-                         _title=status_dict[submission.status],
-                         _style="height: 25px; width: 25px;")))
-        tr.append(TD(submission.points))
+            person_id = submission.user_id
+
+        append(TD(A(person_id.first_name + " " + person_id.last_name,
+                    _href=URL("user", "profile",
+                              args=[submission.stopstalk_handle]))))
+        append(TD(submission.site))
+        append(TD(A(submission.site_handle,
+                    _href=get_link(submission.site,
+                                   submission.site_handle))))
+        append(TD(submission.time_stamp))
+        append(TD(A(submission.problem_name,
+                    _href=submission.problem_link)))
+        append(TD(submission.lang))
+        append(TD(IMG(_src=URL("static",
+                               "images/" + submission.status + ".jpg"),
+                      _title=status_dict[submission.status],
+                      _style="height: 25px; width: 25px;")))
+        append(TD(submission.points))
         table.append(tr)
 
     return table
 
-# -------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 def get_submissions(user_id, handle, stopstalk_handle, submissions, site, custom=False):
     """
         Get the submissions and populate the database
@@ -84,6 +99,7 @@ def get_submissions(user_id, handle, stopstalk_handle, submissions, site, custom
 
     db = current.db
     count = 0
+
     for i in sorted(submissions[handle].iterkeys()):
         for j in sorted(submissions[handle][i].iterkeys()):
             submission = submissions[handle][i][j]
@@ -111,7 +127,7 @@ def get_submissions(user_id, handle, stopstalk_handle, submissions, site, custom
     else:
         print "[0]"
 
-# -------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 def retrieve_submissions(reg_user, custom=False):
     """
         Retrieve submissions that are not already in the database
@@ -122,8 +138,9 @@ def retrieve_submissions(reg_user, custom=False):
 
     # Start retrieving from this date if user registered the first time
     initial_date = "2013-01-01 00:00:00"
+    time_conversion = "%Y-%m-%d %H:%M:%S"
     if custom:
-        query = db.custom_friend.id == reg_user
+        query = (db.custom_friend.id == reg_user)
         row = db(query).select().first()
         table = db.custom_friend
     else:
@@ -138,10 +155,10 @@ def retrieve_submissions(reg_user, custom=False):
     else:
         last_retrieved = initial_date
 
-    last_retrieved = time.strptime(str(last_retrieved), "%Y-%m-%d %H:%M:%S")
+    last_retrieved = time.strptime(str(last_retrieved), time_conversion)
 
     # Update the last retrieved of the user
-    today = time.strftime("%Y-%m-%d %H:%M:%S")
+    today = time.strftime(time_conversion)
     db(query).update(last_retrieved=datetime.now())
 
     for site in current.SITES:

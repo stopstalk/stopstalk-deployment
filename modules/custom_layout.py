@@ -1,6 +1,10 @@
 from gluon import *
 
 def navbar(auth_navbar):
+    """
+        Custom navbar dropdown
+    """
+
     bar = auth_navbar
     user = bar["user"]
 

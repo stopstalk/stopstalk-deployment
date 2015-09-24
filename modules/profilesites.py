@@ -6,6 +6,12 @@ import bs4
 import utilities
 
 class Profile(object):
+    """
+        Class containing methods for retrieving
+        submissions of user
+    """
+
+    # -------------------------------------------------------------------------
     def __init__(self, site="", handle=""):
 
         self.site = None
@@ -16,6 +22,7 @@ class Profile(object):
             self.site = site
 
     @staticmethod
+    # -------------------------------------------------------------------------
     def parsetime(time_str):
         try:
             dt = datetime.datetime.strptime(time_str, "%I:%M %p %d/%m/%y")
@@ -26,6 +33,7 @@ class Profile(object):
             assert flags
             return dt
 
+    # -------------------------------------------------------------------------
     def codechef(self, last_retrieved):
 
         if self.handle:
@@ -34,13 +42,14 @@ class Profile(object):
             return {}
 
         user_url = "http://www.codechef.com/recent/user?user_handle=" + handle
+        user_agent = "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5"
+
         while 1:
-            try:
-                tmp = requests.get(user_url, headers={"User-Agent": "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5"}, proxies=utilities.PROXY)
-                if tmp.status_code == 200:
-                    break
-            except:
-                continue
+            tmp = requests.get(user_url,
+                               headers={"User-Agent": user_agent},
+                               proxies=utilities.PROXY)
+            if tmp.status_code == 200:
+                break
 
         d = ast.literal_eval(tmp.text)
         max_page = d["max_page"]
@@ -48,24 +57,30 @@ class Profile(object):
         it = 1
 
         for page in xrange(0, max_page):
-            user_url = "http://www.codechef.com/recent/user?user_handle=" + handle + "&page=" + str(page)
-            while 1:
-                try:
-                    tmp = requests.get(user_url, headers={"User-Agent": "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5"}, proxies=utilities.PROXY)
-                    if tmp.status_code == 200:
-                        break
-                except:
-                    continue
-            d = ast.literal_eval(tmp.text)
+            user_url = "http://www.codechef.com/recent/user?user_handle=" + \
+                       handle + \
+                       "&page=" + \
+                       str(page)
 
-            d = d["content"]
+            while 1:
+                tmp = requests.get(user_url,
+                                   headers={"User-Agent": user_agent},
+                                   proxies=utilities.PROXY)
+                if tmp.status_code == 200:
+                    break
+
+            d = ast.literal_eval(tmp.text)["content"]
+
             submissions[handle][page] = {}
             x = bs4.BeautifulSoup(d)
             for i in x.find_all("tr"):
                 try:
                     if i['class'][0] == "kol":
+
                         submissions[handle][page][it] = []
                         submission = submissions[handle][page][it]
+                        append = submission.append
+
                         # tos = time_of_submission
                         tos = i.contents[0].contents[0]
                         tos = str(ast.literal_eval(repr(tos).replace("\\", "")))
@@ -74,16 +89,16 @@ class Profile(object):
 
                         if curr <= last_retrieved:
                             return submissions
-                        submission.append(str(tos))
+                        append(str(tos))
 
                         # Problem name/url
                         prob = i.contents[1].contents[0]
                         prob["href"] = "http://www.codechef.com" + prob["href"]
-                        submission.append(eval(repr(prob["href"]).replace("\\", "")))
+                        append(eval(repr(prob["href"]).replace("\\", "")))
                         try:
-                            submission.append(prob.contents[0])
+                            append(prob.contents[0])
                         except IndexError:
-                            submission.append("")
+                            append("")
 
                         # Submission status
                         stat = i.contents[2].contents[0]
@@ -103,7 +118,7 @@ class Profile(object):
                             st = "TLE"
                         else:
                             st = "OTH"
-                        submission.append(st)
+                        append(st)
 
                         # Question points
                         pts = i.contents[2].contents[0].contents
@@ -117,15 +132,16 @@ class Profile(object):
                                 points = "100"
                             else:
                                 points = "0"
-                        submission.append(points)
+                        append(points)
 
                         # Language
-                        submission.append(i.contents[3].contents[0].strip())
+                        append(i.contents[3].contents[0].strip())
                         it += 1
                 except KeyError:
                     pass
         return submissions
 
+    # -------------------------------------------------------------------------
     def codeforces(self, last_retrieved):
 
         if self.handle:
@@ -133,7 +149,9 @@ class Profile(object):
         else:
             return {}
 
-        tmp = requests.get("http://codeforces.com/api/user.status?handle=" + handle + "&from=1&count=5000")
+        tmp = requests.get("http://codeforces.com/api/user.status?handle=" + \
+                           handle + \
+                           "&from=1&count=5000")
 
         submissions = {handle: {1: {}}}
         all_submissions = tmp.json()
@@ -142,13 +160,15 @@ class Profile(object):
         all_submissions = all_submissions["result"]
         it = 0
         for row in all_submissions:
+
             submissions[handle][1][it] = []
             submission = submissions[handle][1][it]
+            append = submission.append
 
             curr = time.gmtime(row["creationTimeSeconds"] + 330 * 60)
             if curr <= last_retrieved:
                 return submissions
-            submission.append(str(time.strftime("%Y-%m-%d %H:%M:%S", curr)))
+            append(str(time.strftime("%Y-%m-%d %H:%M:%S", curr)))
             time_stamp = time.strftime("%Y-%m-%d %H:%M:%S", curr)
 
             arg = "problem/"
@@ -158,9 +178,9 @@ class Profile(object):
             problem_link = "http://codeforces.com/problemset/" + arg + \
                            str(row["contestId"]) + "/" + \
                            row["problem"]["index"]
-            submission.append(problem_link)
+            append(problem_link)
             problem_name = row["problem"]["name"]
-            submission.append(problem_name)
+            append(problem_name)
 
             status = row["verdict"]
             st = "AC"
@@ -184,7 +204,7 @@ class Profile(object):
                 continue
             else:
                 st = "OTH"
-            submission.append(st)
+            append(st)
 
             if st == "AC":
                 points = "100"
@@ -192,13 +212,14 @@ class Profile(object):
                 points = "-50"
             else:
                 points = "0"
-            submission.append(points)
+            append(points)
 
-            submission.append(row["programmingLanguage"])
+            append(row["programmingLanguage"])
 
             it += 1
         return submissions
 
+    # -------------------------------------------------------------------------
     def spoj(self, last_retrieved):
 
         if self.handle:
@@ -222,7 +243,11 @@ class Profile(object):
 
         while 1:
             flag = 0
-            url = "https://www.spoj.com/status/" + handle + "/all/start=" + str(start)
+            url = "https://www.spoj.com/status/" + \
+                  handle + \
+                  "/all/start=" + \
+                  str(start)
+
             start += 20
             t = requests.get(url, proxies=utilities.PROXY)
             soup = bs4.BeautifulSoup(t.text)
@@ -237,6 +262,7 @@ class Profile(object):
             for i in table_body:
                 submissions[handle][page][it] = []
                 submission = submissions[handle][page][it]
+                append = submission.append
 
                 if isinstance(i, bs4.element.Tag):
                     if row == 0:
@@ -252,13 +278,13 @@ class Profile(object):
                     curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
                     if curr <= last_retrieved:
                         return submissions
-                    submission.append(str(tos))
+                    append(str(tos))
 
                     # Problem URL
                     uri = i.contents[5].contents[0]
                     uri["href"] = "http://www.spoj.com" + uri["href"]
-                    submission.append(eval(repr(uri["href"]).replace("\\", "")))
-                    submission.append(uri.contents[0].strip())
+                    append(eval(repr(uri["href"]).replace("\\", "")))
+                    append(uri.contents[0].strip())
 
                     # Problem Status
                     status = str(i.contents[6])
@@ -275,17 +301,17 @@ class Profile(object):
                     else:
                         st = "OTH"
 
-                    submission.append(st)
+                    append(st)
 
                     # Question Points
                     if st == "AC":
                         points = "100"
                     else:
                         points = "0"
-                    submission.append(points)
+                    append(points)
 
                     # Language
-                    submission.append(i.contents[12].contents[1].contents[0])
+                    append(i.contents[12].contents[1].contents[0])
 
                     it += 1
             page += 1
@@ -293,6 +319,7 @@ class Profile(object):
                 break
         return submissions
 
+    # -------------------------------------------------------------------------
     def hackerearth(self, last_retrieved):
 
         if self.handle:
@@ -344,6 +371,7 @@ class Profile(object):
 
                 submissions[handle][i / 20][it] = []
                 submission = submissions[handle][i / 20][it]
+                append = submission.append
 
                 try:
                     final = bs4.BeautifulSoup((tmp.json()["feed" + str(feed_number)]))
@@ -357,12 +385,12 @@ class Profile(object):
 
                 if time_stamp <= last_retrieved:
                     return submissions
-                submission.append(str(tos))
+                append(str(tos))
 
                 problem_link = "https://hackerearth.com" + all_as[1]["href"]
-                submission.append(problem_link)
+                append(problem_link)
                 problem_name = all_as[1].contents[0]
-                submission.append(problem_name)
+                append(problem_name)
 
                 try:
                     status = all_tds[2].contents[1]["title"]
@@ -383,19 +411,20 @@ class Profile(object):
                     status = "TLE"
                 else:
                     status = "OTH"
-                submission.append(status)
+                append(status)
 
                 if status == "AC":
                     points = "100"
                 else:
                     points = "0"
-                submission.append(points)
+                append(points)
 
                 language = all_tds[5].contents[0]
-                submission.append(language)
+                append(language)
                 it += 1
         return submissions
 
+    # -------------------------------------------------------------------------
     def hackerrank(self, last_retrieved):
 
         if self.handle:
@@ -403,7 +432,9 @@ class Profile(object):
         else:
             return {}
 
-        tmp = requests.get("https://www.hackerrank.com/rest/hackers/" + handle + "/recent_challenges?offset=0&limit=50000000")
+        tmp = requests.get("https://www.hackerrank.com/rest/hackers/" + \
+                           handle + \
+                           "/recent_challenges?offset=0&limit=50000")
 
         all_submissions = tmp.json()["models"]
 
@@ -414,6 +445,7 @@ class Profile(object):
             submission = submissions[handle][1]
             submission[it] = []
             submission = submission[it]
+            append = submission.append
 
             time_stamp = row["created_at"][:-5].split("T")
             curr = time.strptime(time_stamp[0] + " " + time_stamp[1],
@@ -421,13 +453,13 @@ class Profile(object):
 
             if curr <= last_retrieved:
                 return submissions
-            submission.append(" ".join(time_stamp))
+            append(" ".join(time_stamp))
 
-            submission.append("https://hackerrank.com/challenges/" + row["slug"])
-            submission.append(row["name"])
-            submission.append("AC")
-            submission.append("100")
-            submission.append("-")
+            append("https://hackerrank.com/challenges/" + row["slug"])
+            append(row["name"])
+            append("AC")
+            append("100")
+            append("-")
             it += 1
 
         return submissions
