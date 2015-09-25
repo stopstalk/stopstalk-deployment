@@ -18,6 +18,7 @@ def index():
         session["handle"] = session["auth"]["user"]["stopstalk_handle"]
         session["user_id"] = session["auth"]["user"]["id"]
         session.flash = "Logged in successfully"
+        session.url_count = 0
         redirect(URL("default", "submissions", args=[1]))
 
     # Detect a registration has taken place
@@ -206,8 +207,8 @@ def compute_row(user, custom=False):
     # @ToDo: Improvement is always better
     rating = max_streak * 20 + \
              accepted * 60 + \
-             (accepted * 100.0 / total_submissions) * 80 + \
-             (total_submissions - accepted) * 5
+             (accepted * 100.0 / total_submissions) * 50 + \
+             (total_submissions - accepted) * 10
     rating = int(rating)
 
     table = db.auth_user

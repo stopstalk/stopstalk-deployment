@@ -4,7 +4,7 @@ import datetime
 from datetime import date
 import bs4
 import utilities
-
+from gluon import *
 class Profile(object):
     """
         Class containing methods for retrieving
@@ -84,6 +84,16 @@ class Profile(object):
                         # tos = time_of_submission
                         tos = i.contents[0].contents[0]
                         tos = str(ast.literal_eval(repr(tos).replace("\\", "")))
+
+                        # Do not retrieve any further because this leads to ambiguity
+                        # If 2 hours ago => 2 hours 20 mins or 2 hours 14 mins ...
+                        # Let the user come back later when the datetime is exact
+                        # This prevents from redundant addition into database
+                        # @ToDo: For now we are allowing redundant submissions
+                        #        for codechef :/ . Find a way to change it.
+                        #if tos.__contains__("hours"):
+                        #   continue
+
                         tos = Profile.parsetime(tos)
                         curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
 

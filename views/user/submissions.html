@@ -1,3 +1,7 @@
 {{extend 'layout.html'}}
-<h1>Your submissions</h1>
+{{if user == "Self":}}
+    <h1>Your submissions</h1>
+{{else:}}
+    <h1>Submissions of {{=user}}</h1>
+{{pass}}
 {{=table}}

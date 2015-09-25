@@ -190,7 +190,13 @@ def submissions():
     all_submissions = db(query).select(orderby=~stable.time_stamp)
     table = utilities.render_table(all_submissions)
 
-    return dict(table=table)
+    if user_id == session.user_id:
+        user = "Self"
+    else:
+        user = row["first_name"]
+
+    return dict(user=user,
+                table=table)
 
 # -------------------------------------------------------------------------------
 @auth.requires_login()
