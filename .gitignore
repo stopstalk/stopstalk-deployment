@@ -2,6 +2,7 @@
 /errors/*
 /sessions/*
 /uploads/*
+/databases/*
 .~lock.*.csv#
 *.log
 *.pyc
