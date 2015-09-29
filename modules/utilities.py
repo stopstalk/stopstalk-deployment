@@ -73,14 +73,17 @@ def render_table(submissions):
 
         append(TD(A(person_id.first_name + " " + person_id.last_name,
                     _href=URL("user", "profile",
-                              args=[submission.stopstalk_handle]))))
+                              args=[submission.stopstalk_handle]),
+                    _target="_blank")))
         append(TD(submission.site))
         append(TD(A(submission.site_handle,
                     _href=get_link(submission.site,
-                                   submission.site_handle))))
+                                   submission.site_handle),
+                    _target="_blank")))
         append(TD(submission.time_stamp))
         append(TD(A(submission.problem_name,
-                    _href=submission.problem_link)))
+                    _href=submission.problem_link,
+                    _target="_blank")))
         append(TD(submission.lang))
         append(TD(IMG(_src=URL("static",
                                "images/" + submission.status + ".jpg"),
