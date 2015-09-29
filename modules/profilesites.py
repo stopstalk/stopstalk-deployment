@@ -5,6 +5,12 @@ from datetime import date
 import bs4
 import utilities
 from gluon import *
+import gevent
+from gevent import monkey
+
+monkey.patch_all(thread=False)
+user_agent = "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5"
+
 class Profile(object):
     """
         Class containing methods for retrieving
@@ -16,6 +22,7 @@ class Profile(object):
 
         self.site = None
         self.handle = None
+        self.submissions = {handle: {}}
 
         if site in utilities.SITES:
             self.handle = handle
@@ -34,6 +41,89 @@ class Profile(object):
             return dt
 
     # -------------------------------------------------------------------------
+    def parallelize_codechef(self, handle, page):
+
+        url = "https://www.codechef.com/recent/user?user_handle=" + \
+               handle + \
+               "&page=" + \
+               str(page)
+
+        while True:
+            tmp = requests.get(url,
+                               headers={"User-Agent": user_agent},
+                               proxies=utilities.PROXY)
+            if tmp.status_code == 200:
+                break
+
+        d = ast.literal_eval(tmp.text)["content"]
+
+        it = 1
+        self.submissions[handle][page] = {}
+        x = bs4.BeautifulSoup(d)
+        for i in x.find_all("tr"):
+            try:
+                if i['class'][0] == "kol":
+
+                    self.submissions[handle][page][it] = []
+                    submission = self.submissions[handle][page][it]
+                    append = submission.append
+
+                    # tos = time_of_submission
+                    tos = i.contents[0].contents[0]
+                    tos = str(ast.literal_eval(repr(tos).replace("\\", "")))
+                    tos = Profile.parsetime(tos)
+                    append(str(tos))
+
+                    # Problem name/url
+                    prob = i.contents[1].contents[0]
+                    prob["href"] = "http://www.codechef.com" + prob["href"]
+                    append(eval(repr(prob["href"]).replace("\\", "")))
+                    try:
+                        append(prob.contents[0])
+                    except IndexError:
+                        append("")
+
+                    # Submission status
+                    stat = i.contents[2].contents[0]
+                    stat = stat.find("img")["src"]
+                    stat = repr(stat).replace("\\", "")
+                    stat = stat[7:-5]
+                    st = "AC"
+                    if stat == "tick-icon":
+                        st = "AC"
+                    elif stat == "cross-icon":
+                        st = "WA"
+                    elif stat == "alert-icon":
+                        st = "CE"
+                    elif stat == "runtime-error":
+                        st = "RE"
+                    elif stat == "clock_error":
+                        st = "TLE"
+                    else:
+                        st = "OTH"
+                    append(st)
+
+                    # Question points
+                    pts = i.contents[2].contents[0].contents
+                    try:
+                        if  len(pts) >= 5:
+                            points = pts[2] + " " + pts[4]
+                        else:
+                            points = pts[2]
+                    except IndexError:
+                        if st == "AC":
+                            points = "100"
+                        else:
+                            points = "0"
+                    append(points)
+
+                    # Language
+                    append(i.contents[3].contents[0].strip())
+                    it += 1
+            except KeyError:
+                pass
+
+    # -------------------------------------------------------------------------
     def codechef(self, last_retrieved):
 
         if self.handle:
@@ -42,7 +132,6 @@ class Profile(object):
             return {}
 
         user_url = "http://www.codechef.com/recent/user?user_handle=" + handle
-        user_agent = "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5"
 
         while 1:
             tmp = requests.get(user_url,
@@ -55,101 +144,108 @@ class Profile(object):
         max_page = d["max_page"]
         submissions = {handle: {}}
         it = 1
+        if time.strptime("2013-01-01 00:00:00", "%Y-%m-%d %H:%M:%S") == last_retrieved:
+            threads = []
+            for i in xrange(max_page):
+                threads.append(gevent.spawn(self.parallelize_codechef, handle, i))
+            gevent.joinall(threads)
+            return self.submissions
 
-        for page in xrange(0, max_page):
-            user_url = "http://www.codechef.com/recent/user?user_handle=" + \
-                       handle + \
-                       "&page=" + \
-                       str(page)
+        else:
+            for page in xrange(0, max_page):
+                user_url = "http://www.codechef.com/recent/user?user_handle=" + \
+                           handle + \
+                           "&page=" + \
+                           str(page)
 
-            while 1:
-                tmp = requests.get(user_url,
-                                   headers={"User-Agent": user_agent},
-                                   proxies=utilities.PROXY)
-                if tmp.status_code == 200:
-                    break
+                while 1:
+                    tmp = requests.get(user_url,
+                                       headers={"User-Agent": user_agent},
+                                       proxies=utilities.PROXY)
+                    if tmp.status_code == 200:
+                        break
 
-            d = ast.literal_eval(tmp.text)["content"]
+                d = ast.literal_eval(tmp.text)["content"]
 
-            submissions[handle][page] = {}
-            x = bs4.BeautifulSoup(d)
-            for i in x.find_all("tr"):
-                try:
-                    if i['class'][0] == "kol":
+                submissions[handle][page] = {}
+                x = bs4.BeautifulSoup(d)
+                for i in x.find_all("tr"):
+                    try:
+                        if i['class'][0] == "kol":
 
-                        submissions[handle][page][it] = []
-                        submission = submissions[handle][page][it]
-                        append = submission.append
+                            submissions[handle][page][it] = []
+                            submission = submissions[handle][page][it]
+                            append = submission.append
 
-                        # tos = time_of_submission
-                        tos = i.contents[0].contents[0]
-                        tos = str(ast.literal_eval(repr(tos).replace("\\", "")))
+                            # tos = time_of_submission
+                            tos = i.contents[0].contents[0]
+                            tos = str(ast.literal_eval(repr(tos).replace("\\", "")))
 
-                        # Do not retrieve any further because this leads to ambiguity
-                        # If 2 hours ago => 2 hours 20 mins or 2 hours 14 mins ...
-                        # Let the user come back later when the datetime is exact
-                        # This prevents from redundant addition into database
-                        # @ToDo: For now we are allowing redundant submissions
-                        #        for codechef :/ . Find a way to change it.
-                        #if tos.__contains__("hours"):
-                        #   continue
+                            # Do not retrieve any further because this leads to ambiguity
+                            # If 2 hours ago => 2 hours 20 mins or 2 hours 14 mins ...
+                            # Let the user come back later when the datetime is exact
+                            # This prevents from redundant addition into database
+                            # @ToDo: For now we are allowing redundant submissions
+                            #        for codechef :/ . Find a way to change it.
+                            #if tos.__contains__("hours"):
+                            #   continue
 
-                        tos = Profile.parsetime(tos)
-                        curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
+                            tos = Profile.parsetime(tos)
+                            curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
 
-                        if curr <= last_retrieved:
-                            return submissions
-                        append(str(tos))
+                            if curr <= last_retrieved:
+                                return submissions
+                            append(str(tos))
 
-                        # Problem name/url
-                        prob = i.contents[1].contents[0]
-                        prob["href"] = "http://www.codechef.com" + prob["href"]
-                        append(eval(repr(prob["href"]).replace("\\", "")))
-                        try:
-                            append(prob.contents[0])
-                        except IndexError:
-                            append("")
+                            # Problem name/url
+                            prob = i.contents[1].contents[0]
+                            prob["href"] = "http://www.codechef.com" + prob["href"]
+                            append(eval(repr(prob["href"]).replace("\\", "")))
+                            try:
+                                append(prob.contents[0])
+                            except IndexError:
+                                append("")
 
-                        # Submission status
-                        stat = i.contents[2].contents[0]
-                        stat = stat.find("img")["src"]
-                        stat = repr(stat).replace("\\", "")
-                        stat = stat[7:-5]
-                        st = "AC"
-                        if stat == "tick-icon":
+                            # Submission status
+                            stat = i.contents[2].contents[0]
+                            stat = stat.find("img")["src"]
+                            stat = repr(stat).replace("\\", "")
+                            stat = stat[7:-5]
                             st = "AC"
-                        elif stat == "cross-icon":
-                            st = "WA"
-                        elif stat == "alert-icon":
-                            st = "CE"
-                        elif stat == "runtime-error":
-                            st = "RE"
-                        elif stat == "clock_error":
-                            st = "TLE"
-                        else:
-                            st = "OTH"
-                        append(st)
-
-                        # Question points
-                        pts = i.contents[2].contents[0].contents
-                        try:
-                            if  len(pts) >= 5:
-                                points = pts[2] + " " + pts[4]
+                            if stat == "tick-icon":
+                                st = "AC"
+                            elif stat == "cross-icon":
+                                st = "WA"
+                            elif stat == "alert-icon":
+                                st = "CE"
+                            elif stat == "runtime-error":
+                                st = "RE"
+                            elif stat == "clock_error":
+                                st = "TLE"
                             else:
-                                points = pts[2]
-                        except IndexError:
-                            if st == "AC":
-                                points = "100"
-                            else:
-                                points = "0"
-                        append(points)
+                                st = "OTH"
+                            append(st)
 
-                        # Language
-                        append(i.contents[3].contents[0].strip())
-                        it += 1
-                except KeyError:
-                    pass
-        return submissions
+                            # Question points
+                            pts = i.contents[2].contents[0].contents
+                            try:
+                                if  len(pts) >= 5:
+                                    points = pts[2] + " " + pts[4]
+                                else:
+                                    points = pts[2]
+                            except IndexError:
+                                if st == "AC":
+                                    points = "100"
+                                else:
+                                    points = "0"
+                            append(points)
+
+                            # Language
+                            append(i.contents[3].contents[0].strip())
+                            it += 1
+                    except KeyError:
+                        pass
+            return submissions
 
     # -------------------------------------------------------------------------
     def codeforces(self, last_retrieved):
