@@ -257,7 +257,7 @@ class Profile(object):
 
         tmp = requests.get("http://codeforces.com/api/user.status?handle=" + \
                            handle + \
-                           "&from=1&count=5000")
+                           "&from=1&count=5000", proxies=utilities.PROXY)
 
         submissions = {handle: {1: {}}}
         all_submissions = tmp.json()

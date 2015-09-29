@@ -1,5 +1,11 @@
-# stopstalk
+# StopStalk
 Stop stalking and Start StopStalking :sunglasses:
+
+## Module Requirements
+1. parsedatetime `pip install parsedatetime` (Version 1.5)
+2. gevent `pip install greenlet` (Version 0.4.9)
+3. beautifulsoup `pip install beautifulsoup4` (Version 4.2.1)
+4. requests `pip install requests` (Version 2.7.0)
 
 ## Installation
 1. Install web2py in a directory
