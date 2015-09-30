@@ -147,7 +147,7 @@ class Profile(object):
         max_page = d["max_page"]
         submissions = {handle: {}}
         it = 1
-        if time.strptime("2013-01-01 00:00:00", "%Y-%m-%d %H:%M:%S") == last_retrieved:
+        if time.strptime(utilities.INITIAL_DATE, "%Y-%m-%d %H:%M:%S") == last_retrieved:
             threads = []
             for i in xrange(max_page):
                 threads.append(gevent.spawn(self.parallelize_codechef, handle, i))

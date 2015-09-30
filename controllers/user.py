@@ -53,14 +53,16 @@ def update_friend():
         session.flash = "Please click one of the buttons"
         redirect(URL("user", "edit_custom_friend_details"))
 
-    query = (db.custom_friend.user_id == session["user_id"])
-    query &= (db.custom_friend.id == request.args[0])
-    row = db(query).select(db.custom_friend.id)
+    cftable = db.custom_friend
+
+    query = (cftable.user_id == session["user_id"])
+    query &= (cftable.id == request.args[0])
+    row = db(query).select(cftable.id)
     if len(row) == 0:
         session.flash = "Please click one of the buttons"
         redirect(URL("user", "edit_custom_friend_details"))
 
-    record = db.custom_friend(request.args[0])
+    record = cftable(request.args[0])
     form_fields = ["first_name",
                    "last_name",
                    "institute",
@@ -69,9 +71,15 @@ def update_friend():
     for site in current.SITES:
         form_fields.append(site.lower() + "_handle")
 
-    form = SQLFORM(db.custom_friend, record, fields=form_fields)
+    form = SQLFORM(cftable,
+                   record,
+                   fields=form_fields,
+                   deletable=True)
+
     if form.process().accepted:
         response.flash = "User details updated"
+        db(cftable.id == request.args[0]).update(last_retrieved=utilities.INITIAL_DATE)
+        db(db.submission.custom_user_id == request.args[0]).delete()
         redirect(URL("user", "edit_custom_friend_details"))
     elif form.errors:
         response.flash = "Form has errors"

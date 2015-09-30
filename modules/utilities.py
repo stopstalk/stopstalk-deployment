@@ -6,6 +6,7 @@ from datetime import datetime, date
 PROXY = {"http": "http://proxy.iiit.ac.in:8080/",
          "https": "https://proxy.iiit.ac.in:8080/"}
 
+INITIAL_DATE = "2013-01-01 00:00:00"
 SITES = current.SITES
 RED = "\x1b[1;31m"
 GREEN = "\x1b[1;32m"
@@ -141,7 +142,7 @@ def retrieve_submissions(reg_user, custom=False):
     stable = db.submission
 
     # Start retrieving from this date if user registered the first time
-    initial_date = "2013-01-01 00:00:00"
+    initial_date = INITIAL_DATE
     time_conversion = "%Y-%m-%d %H:%M:%S"
     if custom:
         query = (db.custom_friend.id == reg_user)
@@ -162,8 +163,8 @@ def retrieve_submissions(reg_user, custom=False):
     last_retrieved = time.strptime(str(last_retrieved), time_conversion)
 
     # Update the last retrieved of the user
-    today = time.strftime(time_conversion)
-    db(query).update(last_retrieved=datetime.now())
+    today = datetime.now()
+    db(query).update(last_retrieved=today)
 
     for site in current.SITES:
         site_handle = row[site.lower() + "_handle"]
