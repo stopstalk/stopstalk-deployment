@@ -74,9 +74,11 @@ extra_fields = [Field('institute', requires=IS_NOT_EMPTY()),
                                                           error_message=T("Handle taken"))]
                                              ),
                 Field('rating',
-                      default=0),
+                      default=0,
+                      writable=False),
                 Field('last_retrieved', 'datetime',
-                      default=initial_date)
+                      default=initial_date,
+                      writable=False)
                 ]
 
 site_handles = []
@@ -130,9 +132,11 @@ custom_friend_fields = [Field("user_id", "reference auth_user"),
                                                                            'custom_friend.stopstalk_handle',
                                                                            error_message=T("Handle already exists"))]),
                         Field("rating",
-                              default=0),
+                              default=0,
+                              writable=False),
                         Field("last_retrieved", "datetime",
-                              default=initial_date)]
+                              default=initial_date,
+                              writable=False)]
 
 custom_friend_fields += site_handles
 db.define_table("custom_friend",

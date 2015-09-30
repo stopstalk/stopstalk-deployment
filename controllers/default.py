@@ -205,10 +205,10 @@ def compute_row(user, custom=False):
 
     # Unique rating formula
     # @ToDo: Improvement is always better
-    rating = max_streak * 20 + \
-             accepted * 60 + \
-             (accepted * 100.0 / total_submissions) * 50 + \
-             (total_submissions - accepted) * 10
+    rating = max_streak * 10 + \
+             accepted * 50 + \
+             (accepted * 100.0 / total_submissions) * 80 + \
+             (total_submissions - accepted) * 15
     rating = int(rating)
 
     table = db.auth_user

@@ -277,7 +277,7 @@ def friend_requests():
     """
 
     rows = db(db.friend_requests.to_h == session.user_id).select()
-    table = TABLE(_class="table")
+    table = TABLE(_class="table table-condensed")
     table.append(TR(TH(T("Name")),
                     TH(T("Institute")),
                     TH(T("Action"))))
@@ -286,12 +286,17 @@ def friend_requests():
         tr = TR()
         tr.append(TD(row.from_h.first_name + " " + row.from_h.last_name))
         tr.append(TD(row.from_h.institute))
-        tr.append(TD(FORM(INPUT(_value="Accept", _type="submit"),
-                          _action=URL("user", "accept_fr",
-                                      args=[row.from_h, row.id])),
-                     FORM(INPUT(_value="Reject", _type="submit"),
-                          _action=URL("user", "reject_fr", args=[row.id])),
-                     ))
+        tr.append(TD(UL(LI(FORM(INPUT(_value="Accept",
+                                      _type="submit",
+                                      _class="btn btn-success"),
+                                _action=URL("user", "accept_fr",
+                                            args=[row.from_h, row.id]))),
+                        LI(FORM(INPUT(_value="Reject",
+                                      _type="submit",
+                                      _class="btn btn-danger"),
+                                _action=URL("user", "reject_fr",
+                                            args=[row.id]))),
+                        _style="display: inline-flex;list-style-type: none;")))
         table.append(tr)
 
     return dict(table=table)
