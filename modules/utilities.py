@@ -5,6 +5,7 @@ from datetime import datetime, date
 
 PROXY = {"http": "http://proxy.iiit.ac.in:8080/",
          "https": "https://proxy.iiit.ac.in:8080/"}
+
 SITES = current.SITES
 RED = "\x1b[1;31m"
 GREEN = "\x1b[1;32m"

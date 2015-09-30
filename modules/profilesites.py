@@ -42,6 +42,9 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     def parallelize_codechef(self, handle, page):
+        """
+            Helper function for retrieving codechef submissions parallely
+        """
 
         url = "https://www.codechef.com/recent/user?user_handle=" + \
                handle + \

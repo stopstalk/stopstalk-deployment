@@ -8,6 +8,77 @@ def index():
     return dict()
 
 # -------------------------------------------------------------------------------
+@auth.requires_login()
+def edit_custom_friend_details():
+    """
+        Edit Custom User details
+    """
+
+    cftable = db.custom_friend
+    rows = db(cftable.user_id == session["user_id"]).select()
+
+    table = TABLE(_class="table")
+    tr = TR(TH("Name"),
+            TH("StopStalk Handle"))
+
+    for site in current.SITES:
+        tr.append(TH(site + " Handle"))
+    tr.append(TH("Update"))
+    table.append(tr)
+    for row in rows:
+        tr = TR()
+        tr.append(TD(A(row.first_name + " " + row.last_name,
+                       _href=URL("user", "profile", args=[row.stopstalk_handle]))))
+        tr.append(TD(row.stopstalk_handle))
+        for site in current.SITES:
+            tmp_handle = row[site.lower() + "_handle"]
+            if tmp_handle:
+                tr.append(TD(A(tmp_handle,
+                               _href=current.SITES[site] + tmp_handle)))
+            else:
+                tr.append(TD())
+        tr.append(TD(FORM(INPUT(_class="btn btn-warning",
+                                _value="Update",
+                                _type="submit"),
+                          _action=URL("user", "update_friend", args=[row.id]))))
+        table.append(tr)
+
+    return dict(table=table)
+
+# -------------------------------------------------------------------------------
+@auth.requires_login()
+def update_friend():
+
+    if len(request.args) < 1:
+        session.flash = "Please click one of the buttons"
+        redirect(URL("user", "edit_custom_friend_details"))
+
+    query = (db.custom_friend.user_id == session["user_id"])
+    query &= (db.custom_friend.id == request.args[0])
+    row = db(query).select(db.custom_friend.id)
+    if len(row) == 0:
+        session.flash = "Please click one of the buttons"
+        redirect(URL("user", "edit_custom_friend_details"))
+
+    record = db.custom_friend(request.args[0])
+    form_fields = ["first_name",
+                   "last_name",
+                   "institute",
+                   "stopstalk_handle"]
+
+    for site in current.SITES:
+        form_fields.append(site.lower() + "_handle")
+
+    form = SQLFORM(db.custom_friend, record, fields=form_fields)
+    if form.process().accepted:
+        response.flash = "User details updated"
+        redirect(URL("user", "edit_custom_friend_details"))
+    elif form.errors:
+        response.flash = "Form has errors"
+
+    return dict(form=form)
+
+# -------------------------------------------------------------------------------
 def get_dates():
     """
         Return a dictionary containing count of submissions

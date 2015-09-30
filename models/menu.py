@@ -19,6 +19,7 @@ if session.user_id:
         (I(_class="fa fa-users fa-2x"), False, URL('user', 'friend_requests'), []),
         (I(_class="fa fa-search fa-2x"), False, URL('default', 'search'), []),
         (I(_class="fa fa-plus-circle fa-2x"), False, URL('user', 'custom_friend'), []),
+        (I(_class="fa fa-edit fa-2x"), False, URL('user', 'edit_custom_friend_details'), []),
     ]
 
 response.menu += [(I(_class="fa fa-bar-chart fa-2x"), False, URL('default', 'leaderboard'), [])]
