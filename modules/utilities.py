@@ -97,7 +97,12 @@ def render_table(submissions):
     return table
 
 # -----------------------------------------------------------------------------
-def get_submissions(user_id, handle, stopstalk_handle, submissions, site, custom=False):
+def get_submissions(user_id,
+                    handle,
+                    stopstalk_handle,
+                    submissions,
+                    site,
+                    custom=False):
     """
         Get the submissions and populate the database
     """

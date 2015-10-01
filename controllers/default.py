@@ -305,22 +305,31 @@ def retrieve_users():
         Show the list of registered users
     """
 
+    atable = db.auth_user
+    frtable = db.friend_requests
     q = request.get_vars.get("q", None)
 
-    query = (db.auth_user.first_name.like("%" + q + "%",
-                                          case_sensitive=False))
-    query |= (db.auth_user.last_name.like("%" + q + "%",
-                                          case_sensitive=False))
-    query |= (db.auth_user.stopstalk_handle.like("%" + q + "%",
-                                                 case_sensitive=False))
+    query = (atable.first_name.like("%" + q + "%",
+                                    case_sensitive=False))
+    query |= (atable.last_name.like("%" + q + "%",
+                                    case_sensitive=False))
+    query |= (atable.stopstalk_handle.like("%" + q + "%",
+                                           case_sensitive=False))
 
     for site in current.SITES:
         field_name = site.lower() + "_handle"
-        query |= (db.auth_user[field_name].like("%" + q + "%",
-                                                case_sensitive=False))
+        query |= (atable[field_name].like("%" + q + "%",
+                                          case_sensitive=False))
 
     # Don't show the logged in user in the search
-    query &= (db.auth_user.id != session.user_id)
+    query &= (atable.id != session.user_id)
+
+    # Don't show users who have sent friend requests
+    # to the logged in user
+    tmprows = db(frtable.from_h != session.user_id).select(frtable.from_h)
+    for row in tmprows:
+        query &= (atable.id != row.from_h)
+
     rows = db(query).select()
 
     t = TABLE(_class="table")
@@ -346,8 +355,8 @@ def retrieve_users():
 
         # Check if the current user is already a friend or not
         if session.user_id not in friends:
-            r = db((db.friend_requests.from_h == session.user_id) &
-                   (db.friend_requests.to_h == user.id)).select()
+            r = db((frtable.from_h == session.user_id) &
+                   (frtable.to_h == user.id)).select()
             if len(r) == 0:
                 tr.append(TD(FORM(INPUT(_type="submit",
                                         _value="Add Friend",
@@ -379,8 +388,8 @@ def submissions():
     custom_friends = db(query).select(db.custom_friend.id)
 
     cusfriends = []
-    for f in custom_friends:
-        cusfriends.append(f.id)
+    for friend in custom_friends:
+        cusfriends.append(friend.id)
 
     # Get the friends of logged in user
     query = (db.friends.user_id == session.user_id)

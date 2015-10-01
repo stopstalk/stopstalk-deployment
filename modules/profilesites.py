@@ -147,10 +147,15 @@ class Profile(object):
         max_page = d["max_page"]
         submissions = {handle: {}}
         it = 1
-        if time.strptime(utilities.INITIAL_DATE, "%Y-%m-%d %H:%M:%S") == last_retrieved:
+
+        # Apply parallel processing only if retrieving from the INITIAL_DATE
+        tmp_const = time.strptime(utilities.INITIAL_DATE, "%Y-%m-%d %H:%M:%S")
+        if tmp_const == last_retrieved:
             threads = []
             for i in xrange(max_page):
-                threads.append(gevent.spawn(self.parallelize_codechef, handle, i))
+                threads.append(gevent.spawn(self.parallelize_codechef,
+                                            handle,
+                                            i))
             gevent.joinall(threads)
             return self.submissions
 
@@ -444,14 +449,14 @@ class Profile(object):
 
         response = {}
         response["host"] = "www.hackerearth.com"
-        response["user-agent"] = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:40.0) Gecko/20100101 Firefox/40.0"
+        response["user-agent"] = user_agent
         response["accept"] = "application/json, text/javascript, */*; q=0.01"
         response["accept-language"] = "en-US,en;q=0.5"
         response["accept-encoding"] = "gzip, deflate"
         response["content-type"] = "application/x-www-form-urlencoded"
         response["X-CSRFToken"] = csrf_token
         response["X-Requested-With"] = "XMLHttpRequest"
-        response["Referer"] = "https://www.hackerearth.com/submissions/raj454raj/"
+        response["Referer"] = "https://www.hackerearth.com/submissions/" + handle + "/"
         response["Connection"] = "keep-alive"
         response["Pragma"] = "no-cache"
         response["Cache-Control"] = "no-cache"

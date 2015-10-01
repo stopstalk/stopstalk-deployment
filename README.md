@@ -42,6 +42,10 @@ Stop stalking and Start StopStalking :sunglasses:
 3. Find any of the issues from here - [Issues] (https://github.com/raj454raj/stopstalk/issues) and try solving it
    or any other enhancements
 4. Solve the bug or enhance the code and send a Pull Request!
+
+   **Note:** Make sure to add the issue number in the commit message.
+
+   Example Commit message: `Solved Issue #5`
 5. I will review it as soon as possible.
 
 ##Contact

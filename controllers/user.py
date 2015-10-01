@@ -25,6 +25,7 @@ def edit_custom_friend_details():
         tr.append(TH(site + " Handle"))
     tr.append(TH("Update"))
     table.append(tr)
+
     for row in rows:
         tr = TR()
         tr.append(TD(A(row.first_name + " " + row.last_name,
@@ -195,12 +196,13 @@ def profile():
     query = (db.auth_user.stopstalk_handle == handle)
     row = db(query).select().first()
     if row is None:
-        row = db(db.custom_friend.stopstalk_handle == handle).select().first()
+        query = (db.custom_friend.stopstalk_handle == handle)
+        row = db(query).select().first()
 
     stable = db.submission
     name = row.first_name + " " + row.last_name
     group_by = []
-    query = stable.stopstalk_handle == handle
+    query = (stable.stopstalk_handle == handle)
     rows = db(query).select(stable.site,
                             stable.status,
                             stable.id.count(),
