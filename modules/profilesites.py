@@ -488,7 +488,8 @@ class Profile(object):
                 append = submission.append
 
                 try:
-                    final = bs4.BeautifulSoup((tmp.json()["feed" + str(feed_number)]))
+                    feed_key = "feed" + str(feed_number)
+                    final = bs4.BeautifulSoup((tmp.json()[feed_key]))
                 except KeyError:
                     break
 
@@ -497,9 +498,20 @@ class Profile(object):
                 tos = all_tds[-1].contents[1]["title"]
                 time_stamp = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
 
-                if time_stamp <= last_retrieved:
+                time_stamp = datetime.datetime(time_stamp.tm_year,
+                                               time_stamp.tm_mon,
+                                               time_stamp.tm_mday,
+                                               time_stamp.tm_hour,
+                                               time_stamp.tm_min,
+                                               time_stamp.tm_sec) + \
+                                               datetime.timedelta(minutes=630)
+
+                curr = time.strptime(str(time_stamp), "%Y-%m-%d %H:%M:%S")
+
+                if curr <= last_retrieved:
                     return submissions
-                append(str(tos))
+
+                append(str(time_stamp))
 
                 problem_link = "https://hackerearth.com" + all_as[1]["href"]
                 append(problem_link)
