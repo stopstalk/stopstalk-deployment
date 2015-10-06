@@ -3,6 +3,7 @@
 /sessions/*
 /uploads/*
 /databases/*
+/models/000_config.py
 .~lock.*.csv#
 *.log
 *.pyc
