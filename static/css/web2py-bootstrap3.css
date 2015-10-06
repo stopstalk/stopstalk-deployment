@@ -331,3 +331,15 @@ input[type=checkbox], input[type=radio] {
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
 }
+div.flash.alert {
+    background-color: black;
+    border-color: black;
+    border-radius: 0;
+    color: white;
+}
+div.flash.alert:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+#closeflash {
+    display: none;
+}
