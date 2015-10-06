@@ -79,7 +79,7 @@ def update_friend():
 
     if form.process().accepted:
         response.flash = "User details updated"
-        db(cftable.id == request.args[0]).update(last_retrieved=utilities.INITIAL_DATE)
+        db(cftable.id == request.args[0]).update(last_retrieved=current.INITIAL_DATE)
         db(db.submission.custom_user_id == request.args[0]).delete()
         redirect(URL("user", "edit_custom_friend_details"))
     elif form.errors:

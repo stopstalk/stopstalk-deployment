@@ -1,14 +1,12 @@
 import re, requests, ast, time
 import parsedatetime as pdt
 import datetime
-from datetime import date
 import bs4
-import utilities
-from gluon import *
 import gevent
 from gevent import monkey
+from gluon import current
 
-monkey.patch_all(thread=False)
+gevent.monkey.patch_all(thread=False)
 user_agent = "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5"
 
 class Profile(object):
@@ -24,7 +22,7 @@ class Profile(object):
         self.handle = None
         self.submissions = {handle: {}}
 
-        if site in utilities.SITES:
+        if site in current.SITES:
             self.handle = handle
             self.site = site
 
@@ -54,7 +52,7 @@ class Profile(object):
         while True:
             tmp = requests.get(url,
                                headers={"User-Agent": user_agent},
-                               proxies=utilities.PROXY)
+                               proxies=current.PROXY)
             if tmp.status_code == 200:
                 break
 
@@ -139,7 +137,7 @@ class Profile(object):
         while 1:
             tmp = requests.get(user_url,
                                headers={"User-Agent": user_agent},
-                               proxies=utilities.PROXY)
+                               proxies=current.PROXY)
             if tmp.status_code == 200:
                 break
 
@@ -149,7 +147,7 @@ class Profile(object):
         it = 1
 
         # Apply parallel processing only if retrieving from the INITIAL_DATE
-        tmp_const = time.strptime(utilities.INITIAL_DATE, "%Y-%m-%d %H:%M:%S")
+        tmp_const = time.strptime(current.INITIAL_DATE, "%Y-%m-%d %H:%M:%S")
         if tmp_const == last_retrieved:
             threads = []
             for i in xrange(max_page):
@@ -169,7 +167,7 @@ class Profile(object):
                 while 1:
                     tmp = requests.get(user_url,
                                        headers={"User-Agent": user_agent},
-                                       proxies=utilities.PROXY)
+                                       proxies=current.PROXY)
                     if tmp.status_code == 200:
                         break
 
@@ -265,7 +263,7 @@ class Profile(object):
 
         tmp = requests.get("http://codeforces.com/api/user.status?handle=" + \
                            handle + \
-                           "&from=1&count=5000", proxies=utilities.PROXY)
+                           "&from=1&count=5000", proxies=current.PROXY)
 
         submissions = {handle: {1: {}}}
         all_submissions = tmp.json()
@@ -349,7 +347,7 @@ class Profile(object):
         currid = 0
         page = 0
         url = "https://www.spoj.com/users/" + handle
-        tmpreq = requests.get(url, proxies=utilities.PROXY)
+        tmpreq = requests.get(url, proxies=current.PROXY)
 
         # Bad but correct way of checking if the handle exists
         if tmpreq.text.find("History of submissions") == -1:
@@ -363,7 +361,7 @@ class Profile(object):
                   str(start)
 
             start += 20
-            t = requests.get(url, proxies=utilities.PROXY)
+            t = requests.get(url, proxies=current.PROXY)
             soup = bs4.BeautifulSoup(t.text)
             table_body = soup.find("tbody")
 
@@ -442,7 +440,7 @@ class Profile(object):
             return {}
 
         url = "https://www.hackerearth.com/submissions/" + handle
-        t = requests.get(url, proxies=utilities.PROXY)
+        t = requests.get(url, proxies=current.PROXY)
         tmp_string = t.headers['set-cookie']
         csrf_token = re.findall("csrftoken=\w*", tmp_string)[0][10:]
         url = "https://www.hackerearth.com/AJAX/feed/newsfeed/submission/user/" + handle + "/"
@@ -470,7 +468,7 @@ class Profile(object):
 
             tmp = requests.post(url,
                                 data=data,
-                                proxies=utilities.PROXY,
+                                proxies=current.PROXY,
                                 headers=response)
 
             try:

@@ -3,11 +3,6 @@ import time
 import profilesites as profile
 from datetime import datetime, date
 
-PROXY = {"http": "http://proxy.iiit.ac.in:8080/",
-         "https": "https://proxy.iiit.ac.in:8080/"}
-
-INITIAL_DATE = "2013-01-01 00:00:00"
-SITES = current.SITES
 RED = "\x1b[1;31m"
 GREEN = "\x1b[1;32m"
 YELLOW = "\x1b[1;33m"
@@ -35,7 +30,7 @@ def get_link(site, handle):
         Get the URL of site_handle
     """
 
-    return SITES[site] + handle
+    return current.SITES[site] + handle
 
 # -----------------------------------------------------------------------------
 def render_table(submissions):
@@ -147,7 +142,7 @@ def retrieve_submissions(reg_user, custom=False):
     stable = db.submission
 
     # Start retrieving from this date if user registered the first time
-    initial_date = INITIAL_DATE
+    initial_date = current.INITIAL_DATE
     time_conversion = "%Y-%m-%d %H:%M:%S"
     if custom:
         query = (db.custom_friend.id == reg_user)

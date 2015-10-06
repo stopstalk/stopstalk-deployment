@@ -9,10 +9,3 @@ current.mysql_dbname = "migration"
 current.smtp_server = "smtp.gmail.com:587"
 current.sender_mail = "contactstopstalk@gmail.com"
 current.sender_password = "hulsbntklqnriskz"
-
-# Site Name => user profile url
-current.SITES = {"CodeChef": "http://www.codechef.com/users/",
-                 "CodeForces": "http://www.codeforces.com/profile/",
-                 "Spoj": "http://www.spoj.com/users/",
-                 "HackerEarth": "https://hackerearth.com/users/",
-                 "HackerRank": "https://hackerrank.com/"}
