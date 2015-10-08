@@ -261,7 +261,6 @@ def submissions():
                 redirect(URL("default", "index"))
 
     stable = db.submission
-    utilities.retrieve_submissions(user_id, custom)
 
     if custom:
         query = (stable.custom_user_id == user_id)
@@ -276,7 +275,13 @@ def submissions():
     else:
         user = row["first_name"]
 
-    return dict(user=user,
+    c = "0"
+    if custom:
+        c = "1"
+
+    return dict(c=c,
+                user=user,
+                user_id=user_id,
                 table=table)
 
 # -------------------------------------------------------------------------------

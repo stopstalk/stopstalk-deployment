@@ -1,29 +1,102 @@
 {{extend 'layout.html'}}
 <script src="{{=URL('static', 'js/jquery.bootpag.min.js')}}"></script>
+<script>
+    var clearSession = function() {
+        sessionStorage.clear();
+        window.location.href = "";
+    }
+</script>
 <h1>Recent submissions</h1>
+<button id="refresh-submissions" class="btn btn-info right" onclick="clearSession()">
+    Refresh
+    <i class="fa fa-refresh"></i>
+</button>
 <div id="content"></div>
 <div id="page-selection" class="center"></div>
     <script>
-        $.ajax({
-            method: 'GET',
-            url: '/stopstalk/default/submissions.json'
-        }).done(function(page) {
-            var pageCount = page['count'];
-            var currentUrl = window.location.href;
-            currentUrl = currentUrl.split("/").slice(-1);
-            var currPage;
-            if (currentUrl != "submissions") {
-                currPage = currentUrl;
-            } else {
-                currPage = "1";
+        $(function() {
+            if (sessionStorage.getItem("has_updated") != null) {
+                $('#refresh-submissions').show();
             }
-            console.log(parseInt(currPage));
-            $('#page-selection').bootpag({
-                total: pageCount,
-                page: parseInt(currPage),
-                maxVisible: 10
-            }).on("page", function(event, num) {
-                window.location.href = "http://localhost:8000/stopstalk/default/submissions/" + num.toString();
+            var check = function(user_count, flen, clen) {
+                if (user_count == flen + clen) {
+                    return true;
+                }
+                return false;
+            }
+            var startRetrieving = function (friends, cusfriends) {
+                var user_count = 0;
+                var updateStatus = $("#final_status").val();
+
+                if (updateStatus == "Completed")
+                    return;
+
+                $.each(friends, function(index, val) {
+
+                    $.ajax({
+                        method: 'GET',
+                        url: '/stopstalk/default/start_retrieving/' + val[0].toString() + "/0"
+                    }).done(function(response) {
+
+                        user_count++;
+                        if (check(user_count, friends.length, cusfriends.length)) {
+                            sessionStorage.setItem("has_updated", 1);
+                            window.location.href = "";
+                        }
+
+                        if (response != "Failure") {
+                            $('.flash').html("Database updated for " + val[1]).slideDown();
+                        }
+
+                    });
+                });
+
+                $.each(cusfriends, function(index, val) {
+
+                    $.ajax({
+                        method: 'GET',
+                        url: '/stopstalk/default/start_retrieving/' + val[0].toString() + "/1"
+                    }).done(function(response) {
+
+                        user_count++;
+                        if (check(user_count, friends.length, cusfriends.length)) {
+                            sessionStorage.setItem("has_updated", 1);
+                            window.location.href = "";
+                        }
+                        if (response != "Failure") {
+                            $('.flash').html("Database updated for " + val[1]).slideDown();
+                        }
+                    });
+                });
+            }
+
+            $.ajax({
+                method: 'GET',
+                url: '/stopstalk/default/submissions.json'
+            }).done(function(page) {
+                var pageCount = page['count'];
+                var friends = page['friends'];
+                var cfriends = page['cusfriends'];
+                if (sessionStorage.getItem("has_updated") == null) {
+                    startRetrieving(friends, cfriends);
+                    $('#refresh-submissions').hide();
+                }
+
+                var currentUrl = window.location.href;
+                currentUrl = currentUrl.split("/").slice(-1);
+                var currPage;
+                if (currentUrl != "submissions") {
+                    currPage = currentUrl;
+                } else {
+                    currPage = "1";
+                }
+                $('#page-selection').bootpag({
+                    total: pageCount,
+                    page: parseInt(currPage),
+                    maxVisible: 10
+                }).on("page", function(event, num) {
+                    window.location.href = "http://localhost:8000/stopstalk/default/submissions/" + num.toString();
+                });
             });
         });
     </script>

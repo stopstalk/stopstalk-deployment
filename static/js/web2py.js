@@ -164,7 +164,7 @@
         doc.on('click', '.flash', function(e) {
           var t = $(this);
           if(t.css('top') == '0px') t.slideUp('slow');
-          else t.fadeOut();
+          else t.slideUp();
         });
         doc.on('keyup', 'input.integer', function() {
           var nvalue = this.value.reverse().replace(/[^0-9\-]|\-(?=.)/g, '').reverse();
@@ -587,8 +587,8 @@
           eval(pre_call);
         }
         if(confirm_message) {
-            if(confirm_message == 'default') 
-                confirm_message = w2p_ajax_confirm_message || 
+            if(confirm_message == 'default')
+                confirm_message = w2p_ajax_confirm_message ||
                     'Are you sure you want to delete this object?';
             if(!web2py.confirm(confirm_message)) {
                 web2py.stopEverything(e);

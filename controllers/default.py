@@ -19,6 +19,7 @@ def index():
         session["user_id"] = session["auth"]["user"]["id"]
         session.flash = "Logged in successfully"
         session.url_count = 0
+        session.has_updated = "Incomplete"
         redirect(URL("default", "submissions", args=[1]))
 
     # Detect a registration has taken place
@@ -401,9 +402,24 @@ def submissions():
     count = db(query).count()
     count = count / 100 + 1
 
-    if request.extension == "json":
-        return dict(count=count)
+    all_friends = []
+    for friend_id in friends:
+        row = db(db.auth_user.id == friend_id).select().first()
+        all_friends.append([friend_id,
+                            row.first_name + " " + row.last_name])
 
+    all_custom_friends = []
+    for friend_id in cusfriends:
+        row = db(db.custom_friend.id == friend_id).select().first()
+        all_custom_friends.append([friend_id,
+                                   row.first_name + " " + row.last_name])
+
+    if request.extension == "json":
+        return dict(count=count,
+                    friends=all_friends,
+                    cusfriends=all_custom_friends)
+
+    """
     # Retrieve user submissions only on page 1
     if active == "1":
         for i in friends:
@@ -412,13 +428,36 @@ def submissions():
         for i in cusfriends:
             utilities.retrieve_submissions(i, custom=True)
 
+    """
+
     offset = 100 * (int(active) - 1)
     # Retrieve only 100 submissions from the offset
     rows = db(query).select(orderby=~db.submission.time_stamp,
                             limitby=(offset, offset + 100))
 
     table = utilities.render_table(rows)
-    return dict(table=table)
+    return dict(table=table,
+                friends=friends,
+                cusfriends=cusfriends)
+
+def start_retrieving():
+    """
+        AJAX helper function for starting retrieval
+        of a particular user
+    """
+
+    if len(request.args) < 2:
+        return "Failure"
+    else:
+        friend_id = int(request.args[0])
+        custom = int(request.args[1])
+        if custom == 1:
+            custom = True
+        else:
+            custom = False
+        utilities.retrieve_submissions(friend_id, custom)
+        session.has_updated = "Complete"
+        return friend_id
 
 # ----------------------------------------------------------------------------
 def call():

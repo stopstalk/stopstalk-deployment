@@ -1,7 +1,45 @@
 {{extend 'layout.html'}}
+<script>
+    var clearSession = function() {
+        sessionStorage.clear();
+        window.location.href = "";
+    }
+    $(function() {
+        if (sessionStorage.getItem("has_updated") != null) {
+            $('#refresh-submissions').show();
+        }
+
+        var startRetrieving = function (user_id, custom) {
+            $.ajax({
+                method: 'GET',
+                url: '/stopstalk/default/start_retrieving/' + user_id + "/" + custom
+            }).done(function(response) {
+
+                sessionStorage.setItem("has_updated", 1);
+                window.location.href = "";
+                if (response != "Failure") {
+                    $('.flash').html("Database updated").slideDown();
+                }
+
+            });
+        }
+        if (sessionStorage.getItem("has_updated") == null) {
+            $('.flash').html("Hang in Tight !!").slideDown();
+            var tmpList = $('#id_custom').html().split(" ");
+            startRetrieving(tmpList[0], tmpList[1]);
+            $('#refresh-submissions').hide();
+        }
+    });
+</script>
 {{if user == "Self":}}
     <h1>Your submissions</h1>
 {{else:}}
     <h1>Submissions of {{=user}}</h1>
 {{pass}}
+<button id="refresh-submissions" class="btn btn-info right" onclick="clearSession()">
+    Refresh
+    <i class="fa fa-refresh"></i>
+</button>
+<div id="id_custom" style="display: none;">{{=user_id}} {{=c}}</div>
+<br/><br/>
 {{=table}}
