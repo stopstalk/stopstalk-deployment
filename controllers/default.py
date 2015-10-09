@@ -39,6 +39,18 @@ def index():
         r = db(db.friends.user_id == reg_user).select()
         utilities.retrieve_submissions(int(reg_user))
 
+        row = db(db.auth_user.id == reg_user).select().first()
+        tup = get_max_streak(row.stopstalk_handle)
+        total_submissions = tup[1]
+        total_days = tup[3]
+
+        today = datetime.today().date()
+        start = datetime.strptime(current.INITIAL_DATE,
+                                  "%Y-%m-%d %H:%M:%S").date()
+
+        per_day = total_submissions * 1.0 / (today - start).days
+        db(db.auth_user.stopstalk_handle == row.stopstalk_handle).update(per_day=per_day)
+
         # User has a `set` of friends' ids
         # If user does not exists then initialize it with empty set
         if len(r) == 0:
@@ -52,8 +64,6 @@ def index():
 def get_max_streak(handle):
     """
         Get the maximum of all streaks
-
-        @Todo: There is some bug here
     """
 
     # Build the complex SQL query
@@ -69,7 +79,6 @@ def get_max_streak(handle):
                  """
 
     row = db.executesql(sql_query)
-
     streak = 0
     max_streak = 0
     prev = curr = start = None
@@ -101,13 +110,13 @@ def get_max_streak(handle):
 
     # There are no submissions in the database for this user
     if prev is None:
-        return (0, 0, 0)
+        return (0, 0, 0, 0)
 
     # Check if the last streak is continued till today
     if (today - prev).days > 1:
         streak = 0
 
-    return max_streak, total_submissions, streak
+    return max_streak, total_submissions, streak, len(row)
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
@@ -154,7 +163,7 @@ def notifications():
     users_on_streak = []
 
     for handle in handles:
-        max_streak, total_submissions, curr_streak = get_max_streak(handle[0])
+        max_streak, total_submissions, curr_streak, total_days = get_max_streak(handle[0])
 
         # If streak is non-zero append to users_on_streak list
         if curr_streak:
@@ -190,8 +199,7 @@ def compute_row(user, custom=False):
         Computes rating and retrieves other
         information of the specified user
     """
-
-    max_streak, total_submissions, curr_streak = get_max_streak(user.stopstalk_handle)
+    max_streak, total_submissions, curr_streak, total_days = get_max_streak(user.stopstalk_handle)
 
     if total_submissions == 0:
         return ()
@@ -203,6 +211,28 @@ def compute_row(user, custom=False):
     query &= (stable.status == "AC")
     accepted = db(query).select(stable.problem_name, distinct=True)
     accepted = len(accepted)
+    today = datetime.today().date()
+    start = datetime.strptime(current.INITIAL_DATE,
+                              "%Y-%m-%d %H:%M:%S").date()
+    if custom:
+        table = db.custom_friend
+    else:
+        table = db.auth_user
+
+    query = (table.stopstalk_handle == user.stopstalk_handle)
+    record = db(query).select().first()
+    if record.per_day is None or \
+       record.per_day == 0.0:
+        per_day = total_submissions * 1.0 / (today - start).days
+        db(query).update(per_day=per_day)
+
+    else:
+        row = db(query).select(table.per_day).first()
+        per_day = row["per_day"]
+
+    curr_per_day = total_submissions * 1.0 / (today - start).days
+    diff = "%0.5f" % (curr_per_day - per_day)
+    diff = float(diff)
 
     # Unique rating formula
     # @ToDo: Improvement is always better
@@ -222,7 +252,8 @@ def compute_row(user, custom=False):
     return (user.first_name + " " + user.last_name,
             user.stopstalk_handle,
             user.institute,
-            rating)
+            rating,
+            diff)
 
 # ----------------------------------------------------------------------------
 def leaderboard():
@@ -252,7 +283,8 @@ def leaderboard():
     table.append(TR(TH("Name"),
                     TH("StopStalk Handle"),
                     TH("Institute"),
-                    TH("StopStalk Rating")))
+                    TH("StopStalk Rating"),
+                    TH("Per Day Changes")))
 
     for i in users:
 
@@ -266,6 +298,15 @@ def leaderboard():
                      _href=URL("user", "profile", args=[i[1]]))))
         tr.append(TD(i[2]))
         tr.append(TD(i[3]))
+        diff = "{:1.5f}".format(i[4])
+        if diff == "0.00000":
+            tr.append(TD(diff))
+        if i[4] > 0:
+            tr.append(TD(diff, " ", I(_class="fa fa-caret-up fa-2x",
+                                      _style="color: #0f0;")))
+        elif i[4] < 0:
+            tr.append(TD(diff, " ", I(_class="fa fa-caret-down fa-2x",
+                                      _style="color: #f00;")))
         table.append(tr)
 
     return dict(table=table)
@@ -399,8 +440,12 @@ def submissions():
 
     query = (db.submission.user_id.belongs(friends))
     query |= (db.submission.custom_user_id.belongs(cusfriends))
-    count = db(query).count()
-    count = count / 100 + 1
+    total_count = db(query).count()
+
+    PER_PAGE = current.PER_PAGE
+    count = total_count / PER_PAGE
+    if total_count % PER_PAGE:
+        count += 1
 
     all_friends = []
     for friend_id in friends:
@@ -419,21 +464,10 @@ def submissions():
                     friends=all_friends,
                     cusfriends=all_custom_friends)
 
-    """
-    # Retrieve user submissions only on page 1
-    if active == "1":
-        for i in friends:
-            utilities.retrieve_submissions(i)
-
-        for i in cusfriends:
-            utilities.retrieve_submissions(i, custom=True)
-
-    """
-
-    offset = 100 * (int(active) - 1)
-    # Retrieve only 100 submissions from the offset
+    offset = PER_PAGE * (int(active) - 1)
+    # Retrieve only some number of submissions from the offset
     rows = db(query).select(orderby=~db.submission.time_stamp,
-                            limitby=(offset, offset + 100))
+                            limitby=(offset, offset + PER_PAGE))
 
     table = utilities.render_table(rows)
     return dict(table=table,

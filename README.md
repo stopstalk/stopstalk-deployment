@@ -48,7 +48,10 @@ Stop stalking and Start StopStalking :sunglasses:
    Example Commit message: `Solved Issue #5`
 5. I will review it as soon as possible.
 
-##Contact
+## Configuration
+    Configure the models/000_config.py file as per your requirement.
+
+## Contact
   > Email: raj454raj@gmail.com
 
   > Website: https://whoisraj454raj.com

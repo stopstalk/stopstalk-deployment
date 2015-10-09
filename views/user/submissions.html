@@ -1,10 +1,47 @@
 {{extend 'layout.html'}}
+<script src="{{=URL('static', 'js/jquery.bootpag.min.js')}}"></script>
 <script>
     var clearSession = function() {
         sessionStorage.clear();
         window.location.href = "";
     }
     $(function() {
+
+        var currentURL = window.location.href,
+            handle,
+            page,
+            index;
+
+        index = currentURL.indexOf("=");
+        if (index == -1) {
+            page = "1";
+        }
+        else {
+            page = currentURL.slice(index + 1);
+        }
+
+        handle = currentURL.split("/").splice(-1)[0];
+        handle = handle.split("?")[0];
+        if (handle == "submissions") {
+            handle = "";
+        }
+
+        $.ajax({
+            method: 'GET',
+            url: '/stopstalk/user/submissions.json/' + handle + "?page=" + page
+        }).done(function(response) {
+
+            var pageCount = response['page_count'];
+            $('#page-selection').bootpag({
+                total: pageCount,
+                page: parseInt(page),
+                maxVisible: 10
+            }).on("page", function(event, num) {
+                window.location.href = "http://localhost:8000/stopstalk/user/submissions/" + handle + "?page=" + num.toString();
+            });
+
+        });
+
         if (sessionStorage.getItem("has_updated") != null) {
             $('#refresh-submissions').show();
         }
@@ -36,6 +73,7 @@
 {{else:}}
     <h1>Submissions of {{=user}}</h1>
 {{pass}}
+<div id="page-selection" class="center"></div>
 <button id="refresh-submissions" class="btn btn-info right" onclick="clearSession()">
     Refresh
     <i class="fa fa-refresh"></i>

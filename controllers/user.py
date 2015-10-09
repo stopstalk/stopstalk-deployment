@@ -29,8 +29,11 @@ def edit_custom_friend_details():
     for row in rows:
         tr = TR()
         tr.append(TD(A(row.first_name + " " + row.last_name,
-                       _href=URL("user", "profile", args=[row.stopstalk_handle]))))
+                       _href=URL("user",
+                                 "profile",
+                                 args=[row.stopstalk_handle]))))
         tr.append(TD(row.stopstalk_handle))
+
         for site in current.SITES:
             tmp_handle = row[site.lower() + "_handle"]
             if tmp_handle:
@@ -239,13 +242,15 @@ def profile():
 def submissions():
     """
         Retrieve submissions of a specific user
-        @ToDo: Bootstrap Pagination
     """
 
     custom = False
 
     if len(request.args) < 1:
-        user_id = session.user_id
+        if session.user_id:
+            user_id = session.user_id
+        else:
+            redirect(URL("default", "index"))
     else:
         query = (db.auth_user.stopstalk_handle == request.args[0])
         row = db(query).select().first()
@@ -260,6 +265,11 @@ def submissions():
             else:
                 redirect(URL("default", "index"))
 
+    if request.vars["page"]:
+        page = request.vars["page"]
+    else:
+        page = "1"
+
     stable = db.submission
 
     if custom:
@@ -267,7 +277,17 @@ def submissions():
     else:
         query = (stable.user_id == user_id)
 
-    all_submissions = db(query).select(orderby=~stable.time_stamp)
+    PER_PAGE = current.PER_PAGE
+    if request.extension == "json":
+        total_submissions = db(query).count()
+        page_count = total_submissions / PER_PAGE
+        if total_submissions % PER_PAGE:
+            page_count += 1
+        return dict(page_count=page_count)
+
+    offset = PER_PAGE * (int(page) - 1)
+    all_submissions = db(query).select(orderby=~stable.time_stamp,
+                                       limitby=(offset, offset + PER_PAGE))
     table = utilities.render_table(all_submissions)
 
     if user_id == session.user_id:

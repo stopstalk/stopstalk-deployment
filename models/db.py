@@ -78,7 +78,10 @@ extra_fields = [Field('institute', requires=IS_NOT_EMPTY()),
                       writable=False),
                 Field('last_retrieved', 'datetime',
                       default=initial_date,
-                      writable=False)
+                      writable=False),
+                Field('per_day', 'double',
+                      default=0.0,
+                      writable=False),
                 ]
 
 site_handles = []
@@ -136,7 +139,11 @@ custom_friend_fields = [Field("user_id", "reference auth_user"),
                               writable=False),
                         Field("last_retrieved", "datetime",
                               default=initial_date,
-                              writable=False)]
+                              writable=False),
+                        Field('per_day', 'double',
+                              default=0.0,
+                              writable=False),
+                        ]
 
 custom_friend_fields += site_handles
 db.define_table("custom_friend",
