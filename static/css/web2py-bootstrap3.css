@@ -15,6 +15,9 @@ div.flash {
     margin: 0 0 20px;
     padding: 15px 35px 15px 15px;
 }
+a:active, a:focus {
+    outline: none;
+}
 div.flash.alert:hover {
     opacity: 1;
 }

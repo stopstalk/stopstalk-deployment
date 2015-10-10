@@ -298,15 +298,17 @@ def leaderboard():
                      _href=URL("user", "profile", args=[i[1]]))))
         tr.append(TD(i[2]))
         tr.append(TD(i[3]))
+
         diff = "{:1.5f}".format(i[4])
         if diff == "0.00000":
-            tr.append(TD(diff))
-        if i[4] > 0:
-            tr.append(TD(diff, " ", I(_class="fa fa-caret-up fa-2x",
+            tr.append(TD("+" + diff, " ", I(_class="fa fa-minus")))
+        elif i[4] > 0:
+            tr.append(TD("+" + str(diff), " ", I(_class="fa fa-chevron-circle-up",
                                       _style="color: #0f0;")))
         elif i[4] < 0:
-            tr.append(TD(diff, " ", I(_class="fa fa-caret-down fa-2x",
+            tr.append(TD(diff, " ", I(_class="fa fa-chevron-circle-down",
                                       _style="color: #f00;")))
+
         table.append(tr)
 
     return dict(table=table)

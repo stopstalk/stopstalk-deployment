@@ -420,6 +420,9 @@ def custom_friend():
     form.process()
 
     if form.accepted:
+        utilities.retrieve_submissions(form.vars.id,
+                                       custom=True)
         session.flash = "Submissions for custom user added"
         redirect(URL("default", "submissions", args=[1]))
+
     return dict(form=form)

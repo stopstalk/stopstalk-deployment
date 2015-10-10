@@ -8,8 +8,8 @@
 </script>
 <h1>Recent submissions</h1>
 <button id="refresh-submissions" class="btn btn-info right" onclick="clearSession()">
-    Refresh
-    <i class="fa fa-refresh"></i>
+    <span id="button-text">Refresh</span>
+    <i class="fa fa-refresh" id="refresh"></i>
 </button>
 <div id="content"></div>
 <div id="page-selection" class="center"></div>
@@ -17,6 +17,8 @@
         $(function() {
             if (sessionStorage.getItem("has_updated") != null) {
                 $('#refresh-submissions').show();
+                $('#button-text').html('Refresh');
+                $('#refresh').attr('class', 'fa fa-refresh');
             }
             var check = function(user_count, flen, clen) {
                 if (user_count == flen + clen) {
@@ -79,7 +81,9 @@
                 var cfriends = page['cusfriends'];
                 if (sessionStorage.getItem("has_updated") == null) {
                     startRetrieving(friends, cfriends);
-                    $('#refresh-submissions').hide();
+                    $('#refresh-submissions').prop('disabled', true);
+                    $('#button-text').html('Please wait ...');
+                    $('#refresh').attr('class', 'fa fa-refresh fa-spin');
                 }
 
                 var currentUrl = window.location.href;

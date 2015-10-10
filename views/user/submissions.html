@@ -7,6 +7,12 @@
     }
     $(function() {
 
+        if (sessionStorage.getItem("has_updated") != null) {
+            $('#refresh-submissions').show();
+            $('#button-text').html('Refresh');
+            $('#refresh').attr('class', 'fa fa-refresh');
+        }
+
         var currentURL = window.location.href,
             handle,
             page,
@@ -64,7 +70,9 @@
             $('.flash').html("Hang in Tight !!").slideDown();
             var tmpList = $('#id_custom').html().split(" ");
             startRetrieving(tmpList[0], tmpList[1]);
-            $('#refresh-submissions').hide();
+            $('#refresh-submissions').prop('disabled', true);
+            $('#button-text').html('Please wait ...');
+            $('#refresh').attr('class', 'fa fa-refresh fa-spin');
         }
     });
 </script>
@@ -73,11 +81,10 @@
 {{else:}}
     <h1>Submissions of {{=user}}</h1>
 {{pass}}
-<div id="page-selection" class="center"></div>
 <button id="refresh-submissions" class="btn btn-info right" onclick="clearSession()">
-    Refresh
-    <i class="fa fa-refresh"></i>
+    <span id="button-text">Refresh</span>
+    <i class="fa fa-refresh" id="refresh"></i>
 </button>
+<div id="page-selection" class="center"></div>
 <div id="id_custom" style="display: none;">{{=user_id}} {{=c}}</div>
-<br/><br/>
 {{=table}}
