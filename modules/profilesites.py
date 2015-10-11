@@ -9,6 +9,10 @@ from gluon import current
 gevent.monkey.patch_all(thread=False)
 user_agent = "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5"
 
+"""
+    @ToDo: Current framework is very bad
+"""
+
 class Profile(object):
     """
         Class containing methods for retrieving
@@ -21,13 +25,14 @@ class Profile(object):
         self.site = None
         self.handle = None
         self.submissions = {handle: {}}
+        self.retrieve_failed = False
 
         if site in current.SITES:
             self.handle = handle
             self.site = site
 
-    @staticmethod
     # -------------------------------------------------------------------------
+    @staticmethod
     def parsetime(time_str):
         try:
             dt = datetime.datetime.strptime(time_str, "%I:%M %p %d/%m/%y")
@@ -39,22 +44,45 @@ class Profile(object):
             return dt
 
     # -------------------------------------------------------------------------
+    @staticmethod
+    def get_request(url, headers={}):
+
+        MAX_TRIES_ALLOWED = current.MAX_TRIES_ALLOWED
+        i = 0
+
+        while i < MAX_TRIES_ALLOWED:
+            response = requests.get(url,
+                                    headers=headers,
+                                    proxies=current.PROXY)
+            if response.status_code == 200:
+                return response
+            i += 1
+
+        if response.status_code == 404:
+            return {}
+
+        return -1
+
+    # -------------------------------------------------------------------------
     def parallelize_codechef(self, handle, page):
         """
             Helper function for retrieving codechef submissions parallely
         """
+
+        if self.retrieve_failed:
+            return
 
         url = "https://www.codechef.com/recent/user?user_handle=" + \
                handle + \
                "&page=" + \
                str(page)
 
-        while True:
-            tmp = requests.get(url,
-                               headers={"User-Agent": user_agent},
-                               proxies=current.PROXY)
-            if tmp.status_code == 200:
-                break
+        tmp = Profile.get_request(url, headers={"User-Agent": user_agent})
+
+        # GET request failed
+        if tmp == -1:
+            self.retrieve_failed = True
+            return
 
         d = ast.literal_eval(tmp.text)["content"]
 
@@ -63,7 +91,7 @@ class Profile(object):
         x = bs4.BeautifulSoup(d)
         for i in x.find_all("tr"):
             try:
-                if i['class'][0] == "kol":
+                if i["class"][0] == "kol":
 
                     self.submissions[handle][page][it] = []
                     submission = self.submissions[handle][page][it]
@@ -127,19 +155,20 @@ class Profile(object):
     # -------------------------------------------------------------------------
     def codechef(self, last_retrieved):
 
+        if self.retrieve_failed:
+            return -1
+
         if self.handle:
             handle = self.handle
         else:
-            return {}
+            return -1
 
         user_url = "http://www.codechef.com/recent/user?user_handle=" + handle
 
-        while 1:
-            tmp = requests.get(user_url,
-                               headers={"User-Agent": user_agent},
-                               proxies=current.PROXY)
-            if tmp.status_code == 200:
-                break
+        tmp = Profile.get_request(user_url, headers={"User-Agent": user_agent})
+
+        if tmp == -1:
+            return -1
 
         d = ast.literal_eval(tmp.text)
         max_page = d["max_page"]
@@ -164,12 +193,10 @@ class Profile(object):
                            "&page=" + \
                            str(page)
 
-                while 1:
-                    tmp = requests.get(user_url,
-                                       headers={"User-Agent": user_agent},
-                                       proxies=current.PROXY)
-                    if tmp.status_code == 200:
-                        break
+                tmp = Profile.get_request(user_url, headers={"User-Agent": user_agent})
+
+                if tmp == -1:
+                    return -1
 
                 d = ast.literal_eval(tmp.text)["content"]
 
@@ -177,7 +204,7 @@ class Profile(object):
                 x = bs4.BeautifulSoup(d)
                 for i in x.find_all("tr"):
                     try:
-                        if i['class'][0] == "kol":
+                        if i["class"][0] == "kol":
 
                             submissions[handle][page][it] = []
                             submission = submissions[handle][page][it]
@@ -259,11 +286,16 @@ class Profile(object):
         if self.handle:
             handle = self.handle
         else:
-            return {}
+            return -1
 
-        tmp = requests.get("http://codeforces.com/api/user.status?handle=" + \
-                           handle + \
-                           "&from=1&count=5000", proxies=current.PROXY)
+        url = "http://codeforces.com/api/user.status?handle=" + \
+              handle + \
+              "&from=1&count=5000"
+
+        tmp = Profile.get_request(url, headers={"User-Agent": user_agent})
+
+        if tmp == -1:
+            return -1
 
         submissions = {handle: {1: {}}}
         all_submissions = tmp.json()
@@ -337,7 +369,7 @@ class Profile(object):
         if self.handle:
             handle = self.handle
         else:
-            return {}
+            return -1
 
         submissions = {handle: {}}
         start = 0
@@ -347,7 +379,10 @@ class Profile(object):
         currid = 0
         page = 0
         url = "https://www.spoj.com/users/" + handle
-        tmpreq = requests.get(url, proxies=current.PROXY)
+        tmpreq = Profile.get_request(url)
+
+        if tmpreq == -1:
+            return -1
 
         # Bad but correct way of checking if the handle exists
         if tmpreq.text.find("History of submissions") == -1:
@@ -361,7 +396,10 @@ class Profile(object):
                   str(start)
 
             start += 20
-            t = requests.get(url, proxies=current.PROXY)
+            t = Profile.get_request(url)
+            if t == -1:
+                return -1
+
             soup = bs4.BeautifulSoup(t.text)
             table_body = soup.find("tbody")
 
@@ -440,8 +478,11 @@ class Profile(object):
             return {}
 
         url = "https://www.hackerearth.com/submissions/" + handle
-        t = requests.get(url, proxies=current.PROXY)
-        tmp_string = t.headers['set-cookie']
+        t = Profile.get_request(url)
+        if t == -1 or t == {}:
+            return t
+
+        tmp_string = t.headers["set-cookie"]
         csrf_token = re.findall("csrftoken=\w*", tmp_string)[0][10:]
         url = "https://www.hackerearth.com/AJAX/feed/newsfeed/submission/user/" + handle + "/"
 
@@ -471,6 +512,8 @@ class Profile(object):
                                 proxies=current.PROXY,
                                 headers=response)
 
+            if tmp.status_code != 200:
+                return -1
             try:
                 final_json = tmp.json()
             except:
@@ -554,11 +597,15 @@ class Profile(object):
         if self.handle:
             handle = self.handle
         else:
-            return {}
+            return -1
 
-        tmp = requests.get("https://www.hackerrank.com/rest/hackers/" + \
-                           handle + \
-                           "/recent_challenges?offset=0&limit=50000")
+        url = "https://www.hackerrank.com/rest/hackers/" + \
+              handle + \
+              "/recent_challenges?offset=0&limit=50000"
+
+        tmp = Profile.get_request(url)
+        if tmp == -1:
+            return -1
 
         all_submissions = tmp.json()["models"]
 

@@ -45,7 +45,8 @@ def navbar(auth_navbar):
 
         li_custom = LI(A(I(_class="fa fa-list"), ' ',
                          current.T("My Submissions"),
-                         _href=URL("user", "submissions"), rel="nofollow"))
+                         _href=URL("user", "submissions", vars={'page': 1}),
+                         rel="nofollow"))
         dropdown.append(li_custom)
 
         li_profile = LI(A(I(_class="fa fa-pencil-square-o"), ' ',

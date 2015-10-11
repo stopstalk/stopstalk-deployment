@@ -26,3 +26,6 @@ current.INITIAL_DATE = "2013-01-01 00:00:00"
 
 # Number of submissions per page
 current.PER_PAGE = 100
+
+# Maximum number of requests to make if a website is not responding
+current.MAX_TRIES_ALLOWED = 5

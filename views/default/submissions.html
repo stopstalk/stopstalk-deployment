@@ -47,7 +47,10 @@
                         }
 
                         if (response != "Failure") {
-                            $('.flash').html("Database updated for " + val[1]).slideDown();
+                            $('.flash').html(val[1] + "<span style='color: red;'> <strong>[" + response.toString() + "]</strong> </span> added").slideDown();
+                        }
+                        else {
+                            $('.flash').html("Check your internet connection").slideDown();
                         }
 
                     });
@@ -66,7 +69,10 @@
                             window.location.href = "";
                         }
                         if (response != "Failure") {
-                            $('.flash').html("Database updated for " + val[1]).slideDown();
+                            $('.flash').html(val[1] + "<span style='color: red;'> <strong>[" + response.toString() + "]</strong></span> added").slideDown();
+                        }
+                        else {
+                            $('.flash').html("Check your internet connection").slideDown();
                         }
                     });
                 });

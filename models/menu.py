@@ -16,7 +16,7 @@ response.google_analytics_id = None
 if session.user_id:
     response.menu = [
         (I(_class="fa fa-inbox fa-2x"), False, URL('default', 'notifications'), []),
-        (I(_class="fa fa-users fa-2x"), False, URL('user', 'friend_requests', vars={"page": 1}), []),
+        (I(_class="fa fa-users fa-2x"), False, URL('user', 'friend_requests'), []),
         (I(_class="fa fa-search fa-2x"), False, URL('default', 'search'), []),
         (I(_class="fa fa-plus-circle fa-2x"), False, URL('user', 'custom_friend'), []),
         (I(_class="fa fa-edit fa-2x"), False, URL('user', 'edit_custom_friend_details'), []),

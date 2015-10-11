@@ -105,6 +105,10 @@ def get_submissions(user_id,
     db = current.db
     count = 0
 
+    if submissions == {}:
+        print "[0]"
+        return 0
+
     for i in sorted(submissions[handle].iterkeys()):
         for j in sorted(submissions[handle][i].iterkeys()):
             submission = submissions[handle][i][j]
@@ -131,6 +135,7 @@ def get_submissions(user_id,
         print RED + "[+%s] " % (count) + RESET_COLOR
     else:
         print "[0]"
+    return count
 
 # ----------------------------------------------------------------------------
 def retrieve_submissions(reg_user, custom=False):
@@ -161,22 +166,43 @@ def retrieve_submissions(reg_user, custom=False):
         last_retrieved = initial_date
 
     last_retrieved = time.strptime(str(last_retrieved), time_conversion)
+    list_of_submissions = []
+
+    for site in current.SITES:
+        site_handle = row[site.lower() + "_handle"]
+
+        if site_handle:
+            P = profile.Profile(site, site_handle)
+            site_method = getattr(P, site.lower())
+            submissions = site_method(last_retrieved)
+            list_of_submissions.append((site, submissions))
+            if submissions == -1:
+                break
+
+    total_retrieved = 0
+
+    for submissions in list_of_submissions:
+        if submissions[1] == -1:
+            print RED + \
+                  "PROBLEM CONNECTING TO " + site + \
+                  " FOR " + \
+                  row.stopstalk_handle + \
+                  RESET_COLOR
+
+            return "FAILURE"
 
     # Update the last retrieved of the user
     today = datetime.now()
     db(query).update(last_retrieved=today)
 
-    for site in current.SITES:
+    for submissions in list_of_submissions:
+        site = submissions[0]
         site_handle = row[site.lower() + "_handle"]
-        if site_handle:
-            _debug(row.first_name, row.last_name, site, custom)
-
-            P = profile.Profile(site, site_handle)
-            site_method = getattr(P, site.lower())
-            submissions = site_method(last_retrieved)
-            get_submissions(reg_user,
-                            site_handle,
-                            row.stopstalk_handle,
-                            submissions,
-                            site,
-                            custom)
+        _debug(row.first_name, row.last_name, site, custom)
+        total_retrieved += get_submissions(reg_user,
+                                           site_handle,
+                                           row.stopstalk_handle,
+                                           submissions[1],
+                                           site,
+                                           custom)
+    return total_retrieved

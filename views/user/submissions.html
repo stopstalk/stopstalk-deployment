@@ -61,7 +61,15 @@
                 sessionStorage.setItem("has_updated", 1);
                 window.location.href = "";
                 if (response != "Failure") {
-                    $('.flash').html("Database updated").slideDown();
+                    if (response == 0) {
+                        $('.flash').html("Database is already updated").slideDown();
+                    }
+                    else {
+                        $('.flash').html("Successfully added <span style='color: red;'>[" + response.toString() + "]</span> submissions").slideDown();
+                    }
+                }
+                else {
+                    $('.flash').html("Check your internet connection").slideDown();
                 }
 
             });

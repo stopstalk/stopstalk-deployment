@@ -37,7 +37,13 @@ def index():
        desc.__contains__("Verification"):
         reg_user = desc.split(" ")[1]
         r = db(db.friends.user_id == reg_user).select()
-        utilities.retrieve_submissions(int(reg_user))
+        result = utilities.retrieve_submissions(int(reg_user))
+        if result == "FAILURE":
+            response.flash = "Some error occured"
+        else:
+            response.flash = "Successfully added " + \
+                             str(result) + \
+                             " submissions"
 
         row = db(db.auth_user.id == reg_user).select().first()
         tup = get_max_streak(row.stopstalk_handle)
@@ -491,9 +497,12 @@ def start_retrieving():
             custom = True
         else:
             custom = False
-        utilities.retrieve_submissions(friend_id, custom)
-        session.has_updated = "Complete"
-        return friend_id
+
+        result = utilities.retrieve_submissions(friend_id, custom)
+        if result == "FAILURE":
+            return "Failure"
+        else:
+            return result
 
 # ----------------------------------------------------------------------------
 def call():
