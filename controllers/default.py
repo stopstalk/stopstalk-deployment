@@ -240,6 +240,11 @@ def compute_row(user, custom=False):
     diff = "%0.5f" % (curr_per_day - per_day)
     diff = float(diff)
 
+    # This is not crazy. This is to solve the problem
+    # if diff is -0.0
+    if diff == 0.0:
+        diff = 0.0
+
     # Unique rating formula
     # @ToDo: Improvement is always better
     rating = max_streak * 10 + \
@@ -306,7 +311,8 @@ def leaderboard():
         tr.append(TD(i[3]))
 
         diff = "{:1.5f}".format(i[4])
-        if diff == "0.00000":
+
+        if float(diff) == 0.0:
             tr.append(TD("+" + diff, " ", I(_class="fa fa-minus")))
         elif i[4] > 0:
             tr.append(TD("+" + str(diff), " ", I(_class="fa fa-chevron-circle-up",
