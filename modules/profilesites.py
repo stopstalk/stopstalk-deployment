@@ -316,12 +316,13 @@ class Profile(object):
             time_stamp = time.strftime("%Y-%m-%d %H:%M:%S", curr)
 
             arg = "problem/"
-            if len(str(row["contestId"])) != 3:
+            if len(str(row["contestId"])) > 3:
                 arg = "gymProblem/"
 
             problem_link = "http://codeforces.com/problemset/" + arg + \
                            str(row["contestId"]) + "/" + \
                            row["problem"]["index"]
+
             append(problem_link)
             problem_name = row["problem"]["name"]
             append(problem_name)
