@@ -215,8 +215,8 @@ def compute_row(user, custom=False):
     # Find the total solved problems(Lesser than total accepted)
     query = (stable.stopstalk_handle == user.stopstalk_handle)
     query &= (stable.status == "AC")
-    accepted = db(query).select(stable.problem_name, distinct=True)
-    accepted = len(accepted)
+    solved = db(query).select(stable.problem_name, distinct=True)
+    solved = len(solved)
     today = datetime.today().date()
     start = datetime.strptime(current.INITIAL_DATE,
                               "%Y-%m-%d %H:%M:%S").date()
@@ -240,17 +240,20 @@ def compute_row(user, custom=False):
     diff = "%0.5f" % (curr_per_day - per_day)
     diff = float(diff)
 
-    # This is not crazy. This is to solve the problem
+    # I am not crazy. This is to solve the problem
     # if diff is -0.0
     if diff == 0.0:
         diff = 0.0
 
     # Unique rating formula
     # @ToDo: Improvement is always better
-    rating = max_streak * 10 + \
-             accepted * 50 + \
-             (accepted * 100.0 / total_submissions) * 80 + \
-             (total_submissions - accepted) * 15
+    rating = (curr_per_day - per_day) * 100000 + \
+             max_streak * 50 + \
+             solved * 100 + \
+             (solved * 100.0 / total_submissions) * 40 + \
+             (total_submissions - solved) * 10 + \
+             per_day * 150
+
     rating = int(rating)
 
     table = db.auth_user
