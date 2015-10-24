@@ -57,7 +57,8 @@ def render_table(submissions):
                     TH("Problem"),
                     TH("Language"),
                     TH("Status"),
-                    TH("Points")))
+                    TH("Points"),
+                    TH("View Code")))
 
     for submission in submissions:
 
@@ -87,6 +88,15 @@ def render_table(submissions):
                       _title=status_dict[submission.status],
                       _style="height: 25px; width: 25px;")))
         append(TD(submission.points))
+
+        if submission.view_link:
+            append(TD(A("View",
+                        _href=submission.view_link,
+                        _class="btn btn-info",
+                        _target="_blank")))
+        else:
+            append(TD())
+
         table.append(tr)
 
     return table
@@ -112,7 +122,7 @@ def get_submissions(user_id,
     for i in sorted(submissions[handle].iterkeys()):
         for j in sorted(submissions[handle][i].iterkeys()):
             submission = submissions[handle][i][j]
-            if len(submission) == 6:
+            if len(submission) == 7:
                 count += 1
                 args = dict(stopstalk_handle=stopstalk_handle,
                             site_handle=handle,
@@ -122,7 +132,8 @@ def get_submissions(user_id,
                             problem_link=submission[1],
                             lang=submission[5],
                             status=submission[3],
-                            points=submission[4])
+                            points=submission[4],
+                            view_link=submission[6])
 
                 if custom is False:
                     args["user_id"] = user_id

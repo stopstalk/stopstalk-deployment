@@ -161,6 +161,9 @@ db.define_table("submission",
                 Field("lang"),
                 Field("status"),
                 Field("points"),
+                Field('view_link',
+                      default='',
+                      ),
                 )
 
 db.define_table("friend_requests",

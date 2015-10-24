@@ -34,6 +34,12 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def parsetime(time_str):
+        """
+            Try to parse any generalised time to
+            standard format.
+            For now used by Codechef
+        """
+
         try:
             dt = datetime.datetime.strptime(time_str, "%I:%M %p %d/%m/%y")
             return dt
@@ -46,14 +52,21 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def get_request(url, headers={}):
+        """
+            Make a HTTP GET request to a url
+        """
 
         MAX_TRIES_ALLOWED = current.MAX_TRIES_ALLOWED
         i = 0
 
         while i < MAX_TRIES_ALLOWED:
-            response = requests.get(url,
-                                    headers=headers,
-                                    proxies=current.PROXY)
+            try:
+                response = requests.get(url,
+                                        headers=headers,
+                                        proxies=current.PROXY)
+            except RuntimeError:
+                return -1
+
             if response.status_code == 200:
                 return response
             i += 1
@@ -89,6 +102,7 @@ class Profile(object):
         it = 1
         self.submissions[handle][page] = {}
         x = bs4.BeautifulSoup(d)
+
         for i in x.find_all("tr"):
             try:
                 if i["class"][0] == "kol":
@@ -148,6 +162,12 @@ class Profile(object):
 
                     # Language
                     append(i.contents[3].contents[0].strip())
+
+                    # View code link
+                    # @ToDo: Find a way to get the code link
+                    view_link = ""
+                    append(view_link)
+
                     it += 1
             except KeyError:
                 pass
@@ -275,6 +295,11 @@ class Profile(object):
 
                             # Language
                             append(i.contents[3].contents[0].strip())
+
+                            # View code link
+                            view_link = ""
+                            append(view_link)
+
                             it += 1
                     except KeyError:
                         pass
@@ -312,6 +337,7 @@ class Profile(object):
             curr = time.gmtime(row["creationTimeSeconds"] + 330 * 60)
             if curr <= last_retrieved:
                 return submissions
+            # Time of submission
             append(str(time.strftime("%Y-%m-%d %H:%M:%S", curr)))
             time_stamp = time.strftime("%Y-%m-%d %H:%M:%S", curr)
 
@@ -319,6 +345,7 @@ class Profile(object):
             if len(str(row["contestId"])) > 3:
                 arg = "gymProblem/"
 
+            # Problem Name/URL
             problem_link = "http://codeforces.com/problemset/" + arg + \
                            str(row["contestId"]) + "/" + \
                            row["problem"]["index"]
@@ -327,6 +354,7 @@ class Profile(object):
             problem_name = row["problem"]["name"]
             append(problem_name)
 
+            # Problem status
             status = row["verdict"]
             st = "AC"
             if status == "OK":
@@ -351,6 +379,7 @@ class Profile(object):
                 st = "OTH"
             append(st)
 
+            # Points
             if st == "AC":
                 points = "100"
             elif st == "HCK":
@@ -359,9 +388,18 @@ class Profile(object):
                 points = "0"
             append(points)
 
+            # Language
             append(row["programmingLanguage"])
 
+            # View code link
+            view_link = "http://codeforces.com/contest/" + \
+                        str(row["contestId"]) + \
+                        "/submission/" + \
+                        str(row["id"])
+            append(view_link)
+
             it += 1
+
         return submissions
 
     # -------------------------------------------------------------------------
@@ -431,7 +469,7 @@ class Profile(object):
                         return submissions
                     append(str(tos))
 
-                    # Problem URL
+                    # Problem Name/URL
                     uri = i.contents[5].contents[0]
                     uri["href"] = "http://www.spoj.com" + uri["href"]
                     append(eval(repr(uri["href"]).replace("\\", "")))
@@ -464,10 +502,17 @@ class Profile(object):
                     # Language
                     append(i.contents[12].contents[1].contents[0])
 
+                    # View code Link
+                    view_link = ""
+                    append(view_link)
+
                     it += 1
+
             page += 1
+
             if flag == 1:
                 break
+
         return submissions
 
     # -------------------------------------------------------------------------
@@ -540,6 +585,7 @@ class Profile(object):
                 tos = all_tds[-1].contents[1]["title"]
                 time_stamp = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
 
+                # Time of submission
                 time_stamp = datetime.datetime(time_stamp.tm_year,
                                                time_stamp.tm_mon,
                                                time_stamp.tm_mday,
@@ -555,11 +601,13 @@ class Profile(object):
 
                 append(str(time_stamp))
 
+                # Problem Name/URL
                 problem_link = "https://hackerearth.com" + all_as[1]["href"]
                 append(problem_link)
                 problem_name = all_as[1].contents[0]
                 append(problem_name)
 
+                # Status
                 try:
                     status = all_tds[2].contents[1]["title"]
                 except IndexError:
@@ -581,15 +629,24 @@ class Profile(object):
                     status = "OTH"
                 append(status)
 
+                # Points
                 if status == "AC":
                     points = "100"
                 else:
                     points = "0"
                 append(points)
 
+                # Language
                 language = all_tds[5].contents[0]
                 append(language)
+
+                # View code link
+                view_link = "https://hackerearth.com" + \
+                            all_as[-1]["href"]
+                append(view_link)
+
                 it += 1
+
         return submissions
 
     # -------------------------------------------------------------------------
@@ -619,19 +676,33 @@ class Profile(object):
             submission = submission[it]
             append = submission.append
 
+            # Time of submission
             time_stamp = row["created_at"][:-5].split("T")
             curr = time.strptime(time_stamp[0] + " " + time_stamp[1],
                                  "%Y-%m-%d %H:%M:%S")
-
             if curr <= last_retrieved:
                 return submissions
             append(" ".join(time_stamp))
 
+            # Problem link
             append("https://hackerrank.com/challenges/" + row["slug"])
+
+            # Problem name
             append(row["name"])
+
+            # Status
+            # HackerRank only gives the list of solved problems
             append("AC")
+
+            # Points
             append("100")
+
+            # Language
             append("-")
+
+            # View code link
+            append("")
+
             it += 1
 
         return submissions
