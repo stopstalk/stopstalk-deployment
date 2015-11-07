@@ -3,16 +3,19 @@
 """
 
 from gluon import *
+from collections import OrderedDict
 
 # List all the profile sites here
 # To disable any of the profile site
 #   - Just remove that site from the dictionary
 # Site Name => user profile url
-current.SITES = {"CodeChef": "http://www.codechef.com/users/",
-                 "CodeForces": "http://www.codeforces.com/profile/",
-                 "Spoj": "http://www.spoj.com/users/",
-                 "HackerEarth": "https://hackerearth.com/users/",
-                 "HackerRank": "https://hackerrank.com/"}
+# OrderedDict is used to maintain the order of insertion
+current.SITES = OrderedDict()
+current.SITES["CodeChef"] = "http://www.codechef.com/users/"
+current.SITES["CodeForces"] = "http://www.codeforces.com/profile/"
+current.SITES["Spoj"] = "http://www.spoj.com/users/"
+current.SITES["HackerEarth"] = "https://hackerearth.com/users/"
+current.SITES["HackerRank"] = "https://hackerrank.com/"
 
 # If you are under a PROXY uncomment this and comment the next line
 #current.PROXY = {"http": "http://proxy.iiit.ac.in:8080/",
@@ -28,4 +31,7 @@ current.INITIAL_DATE = "2013-01-01 00:00:00"
 current.PER_PAGE = 100
 
 # Maximum number of requests to make if a website is not responding
-current.MAX_TRIES_ALLOWED = 5
+current.MAX_TRIES_ALLOWED = 10
+
+# Maximum time that a request can take to return a response(in seconds)
+current.TIMEOUT = 15

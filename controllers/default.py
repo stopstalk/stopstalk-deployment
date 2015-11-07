@@ -17,7 +17,6 @@ def index():
     if session["auth"]:
         session["handle"] = session["auth"]["user"]["stopstalk_handle"]
         session["user_id"] = session["auth"]["user"]["id"]
-        session.flash = "Logged in successfully"
         session.url_count = 0
         session.has_updated = "Incomplete"
         redirect(URL("default", "submissions", args=[1]))
@@ -38,12 +37,6 @@ def index():
         reg_user = desc.split(" ")[1]
         r = db(db.friends.user_id == reg_user).select()
         result = utilities.retrieve_submissions(int(reg_user))
-        if result == "FAILURE":
-            response.flash = "Some error occured"
-        else:
-            response.flash = "Successfully added " + \
-                             str(result) + \
-                             " submissions"
 
         row = db(db.auth_user.id == reg_user).select().first()
         tup = get_max_streak(row.stopstalk_handle)
@@ -179,24 +172,26 @@ def notifications():
     users_on_streak.sort(key=lambda k: k[1], reverse=True)
 
     # The table containing users on streak
-    table = TABLE(TR(TH(H3(STRONG("User"))),
-                     TH(H3(STRONG("Streak"),
-                        _class="center"))),
-                  _class="table")
+    table = TABLE(THEAD(TR(TH(H5(STRONG("User"))),
+                           TH(H5(STRONG("Streak"))))),
+                  _class="striped centered")
+
+    tbody = TBODY()
 
     # Append all the users to the final table
     for users in users_on_streak:
         handle = users[0]
         curr_streak = users[1]
-        tr = TR(TD(H3(A(handle[1],
+        tr = TR(TD(H5(A(handle[1],
                         _href=URL("user", "profile", args=[handle[0]])))),
-                TD(H3(str(curr_streak) + " ",
+                TD(H5(str(curr_streak) + " ",
                       I(_class="fa fa-bolt",
                         _style="color:red"),
                       _class="center",
                       )))
-        table.append(tr)
+        tbody.append(tr)
 
+    table.append(tbody)
     return dict(table=table)
 
 # ----------------------------------------------------------------------------
@@ -293,13 +288,14 @@ def leaderboard():
     # Sort users according to the rating
     users = sorted(users, key=lambda x: x[3], reverse=True)
 
-    table = TABLE(_class="table")
-    table.append(TR(TH("Name"),
-                    TH("StopStalk Handle"),
-                    TH("Institute"),
-                    TH("StopStalk Rating"),
-                    TH("Per Day Changes")))
+    table = TABLE(_class="centered striped")
+    table.append(THEAD(TR(TH("Name"),
+                          TH("StopStalk Handle"),
+                          TH("Institute"),
+                          TH("StopStalk Rating"),
+                          TH("Per Day Changes"))))
 
+    tbody = TBODY()
     for i in users:
 
         # If there are no submissions of the user in the database
@@ -324,8 +320,9 @@ def leaderboard():
             tr.append(TD(diff, " ", I(_class="fa fa-chevron-circle-down",
                                       _style="color: #f00;")))
 
-        table.append(tr)
+        tbody.append(tr)
 
+    table.append(tbody)
     return dict(table=table)
 
 # ----------------------------------------------------------------------------
@@ -391,7 +388,7 @@ def retrieve_users():
 
     rows = db(query).select()
 
-    t = TABLE(_class="table")
+    t = TABLE(_class="striped centered")
     tr = TR(TH("Name"),
             TH("StopStalk Handle"))
 
@@ -399,14 +396,20 @@ def retrieve_users():
         tr.append(TH(site + " Handle"))
 
     tr.append(TH("Friendship Status"))
-    t.append(tr)
+    thead = THEAD()
+    thead.append(tr)
+    t.append(thead)
 
+    tbody = TBODY()
     for user in rows:
 
         friends = db(db.friends.user_id == user.id).select().first()
         friends = eval(friends.friends_list)
         tr = TR()
-        tr.append(TD(user.first_name + " " + user.last_name))
+        tr.append(TD(A(user.first_name + " " + user.last_name,
+                       _href=URL("user", "profile",
+                                 args=[user.stopstalk_handle],
+                                 extension=False))))
         tr.append(TD(user.stopstalk_handle))
 
         for site in current.SITES:
@@ -419,15 +422,17 @@ def retrieve_users():
             if len(r) == 0:
                 tr.append(TD(FORM(INPUT(_type="submit",
                                         _value="Add Friend",
-                                        _class="btn btn-warning"),
+                                        _class="btn waves-light waves-effect",
+                                        _style="background-color: #FF5722"),
                                   _action=URL("default", "mark_friend",
                                               args=[user.id]))))
             else:
                 tr.append(TD("Friend request sent"))
         else:
             tr.append(TD("Already friends"))
-        t.append(tr)
+        tbody.append(tr)
 
+    t.append(tbody)
     return dict(t=t)
 
 # ----------------------------------------------------------------------------

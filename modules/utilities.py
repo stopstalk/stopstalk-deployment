@@ -33,6 +33,29 @@ def get_link(site, handle):
     return current.SITES[site] + handle
 
 # -----------------------------------------------------------------------------
+def materialize_form(form, fields):
+    """
+        Change layout of SQLFORM forms
+    """
+
+    form.add_class("form-horizontal center")
+    main_div = DIV(_class="center")
+
+    for id, label, controls, help in fields:
+        curr_div = DIV(_class="row")
+        _controls = controls
+        if isinstance(controls, SPAN):
+            _controls = INPUT(_value=controls.components[0],
+                              _class="validate",
+                              _disabled="")
+        input_field = DIV(_controls, label,
+                          _class="input-field col offset-s4 s4")
+        curr_div.append(input_field)
+        main_div.append(curr_div)
+
+    return main_div
+
+# -----------------------------------------------------------------------------
 def render_table(submissions):
     """
         Create the HTML table from submissions
@@ -49,17 +72,18 @@ def render_table(submissions):
                    "OTH": "Others",
                    }
 
-    table = TABLE(_class="table")
-    table.append(TR(TH("User Name"),
-                    TH("Site"),
-                    TH("Site Handle"),
-                    TH("Time of submission"),
-                    TH("Problem"),
-                    TH("Language"),
-                    TH("Status"),
-                    TH("Points"),
-                    TH("View Code")))
+    table = TABLE(_class="striped centered")
+    table.append(THEAD(TR(TH("User Name"),
+                          TH("Site"),
+                          TH("Site Handle"),
+                          TH("Time of submission"),
+                          TH("Problem"),
+                          TH("Language"),
+                          TH("Status"),
+                          TH("Points"),
+                          TH("View Code"))))
 
+    tbody = TBODY()
     for submission in submissions:
 
         tr = TR()
@@ -92,13 +116,14 @@ def render_table(submissions):
         if submission.view_link:
             append(TD(A("View",
                         _href=submission.view_link,
-                        _class="btn btn-info",
+                        _class="btn waves-light waves-effect",
+                        _style="background-color: #FF5722",
                         _target="_blank")))
         else:
             append(TD())
 
-        table.append(tr)
-
+        tbody.append(tr)
+    table.append(tbody)
     return table
 
 # -----------------------------------------------------------------------------

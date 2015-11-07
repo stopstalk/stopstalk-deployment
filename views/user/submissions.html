@@ -1,5 +1,10 @@
 {{extend 'layout.html'}}
 <script src="{{=URL('static', 'js/jquery.bootpag.min.js')}}"></script>
+<style>
+    #refresh-submissions {
+        margin-right: 4%;
+    }
+</style>
 <script>
     var clearSession = function() {
         sessionStorage.clear();
@@ -62,20 +67,20 @@
                 window.location.href = "";
                 if (response != "Failure") {
                     if (response == 0) {
-                        $('.flash').html("Database is already updated").slideDown();
+                        Materialize.toast('Database is already up to date', 4000);
                     }
                     else {
-                        $('.flash').html("Successfully added <span style='color: red;'>[" + response.toString() + "]</span> submissions").slideDown();
+                        Materialize.toast("Successfully added <span style='color:red;'>[" + response.toString() + "]</span> submissions", 4000);
                     }
                 }
                 else {
-                    $('.flash').html("Check your internet connection").slideDown();
+                    Materialize.toast("Check your internet connection", 4000);
                 }
 
             });
         }
         if (sessionStorage.getItem("has_updated") == null) {
-            $('.flash').html("Hang in Tight !!").slideDown();
+            Materialize.toast("Hang in tight !!", 4000);
             var tmpList = $('#id_custom').html().split(" ");
             startRetrieving(tmpList[0], tmpList[1]);
             $('#refresh-submissions').prop('disabled', true);
@@ -89,10 +94,10 @@
 {{else:}}
     <h1>Submissions of {{=user}}</h1>
 {{pass}}
-<button id="refresh-submissions" class="btn btn-info right" onclick="clearSession()">
+<div id="page-selection" class="center"></div>
+<button id="refresh-submissions" class="btn btn-info right" style="background-color: #FFEB3B; color: black;" onclick="clearSession()">
     <span id="button-text">Refresh</span>
     <i class="fa fa-refresh" id="refresh"></i>
 </button>
-<div id="page-selection" class="center"></div>
 <div id="id_custom" style="display: none;">{{=user_id}} {{=c}}</div>
 {{=table}}

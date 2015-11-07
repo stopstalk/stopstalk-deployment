@@ -150,9 +150,8 @@
     <style>
         #user-details {
             float: left;
-            margin-top: 15%;
-            margin-left: 15%;
-            width: 20%;
+            margin-top: 10%;
+            margin-left: 10%;
         }
     </style>
   </head>
@@ -162,34 +161,40 @@
         <div class="row">
             <div class="left"><h2><strong><b>{{=name}}</b></strong></h2></div>
             <div class="right">
-                <h4>
                     <a href="{{=URL('user', 'submissions', args=[handle])}}" style="color: lightseagreen;" target="_blank">
-                        <i class="fa fa-chevron-circle-right fa-2x"></i>
+                        <i class="fa fa-chevron-circle-right fa-4x"></i>
                     </a>
-                </h4>
             </div>
         </div>
-        <table class="table">
-        <tr>
-            <td>
-            <h3><strong>Accuracy</strong></h3>
+        <div class="row center">
+            <h5><strong>Accuracy</strong></h5>
             {{for site in current.SITES:}}
-                <h5><b>{{=site}}</b> {{=efficiency[site]}}</h5>
+                <div class="chip">
+                    <img src="{{=URL('static', 'images/' + site.lower() + '_logo.png')}}" alt="{{=site}}" title="{{=site}}"/>
+                    {{=efficiency[site]}}
+                </div>
             {{pass}}
-            </td>
-            <td class="center">
-            <h3><strong>Maximum Streak</strong></h4>
-            <h2><p id="max-streak"></p></h2>
-            </td>
-            <td class="center">
-            <h3><strong>Current Streak</strong></h4>
-            <h2><p id="curr-streak"></p></h2>
-            </td>
-        </tr>
+        </div>
+        <br/>
+        <table class="striped centered">
+            <caption><h5><strong>Streak<strong></h5></caption>
+            <thead>
+                <tr>
+                    <th><h6>Maximum Streak</h6></th>
+                    <th><h6>Current Streak</h6></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="max-streak"></td>
+                    <td id="curr-streak"></td>
+                </tr>
+            </tbody>
         </table>
     </div>
-    <div id="chart_div" style="margin-left:48%;padding:2%;overflow-x:hidden;"></div>
-    <br/>
-    <div id="calendar_basic" style="padding-left:16%;"></div>
+    <div id="chart_div" style="margin-left: 45%; padding: 2%; overflow-x: hidden;"></div>
+    <br/><br/>
+    <div id="calendar_basic" class="center" style="margin-left: 20%; width: 70%;"></div>
+
   </body>
 </html>

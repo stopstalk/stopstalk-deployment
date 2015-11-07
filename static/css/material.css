@@ -1,0 +1,27 @@
+  /* label color */
+   label {
+     color: #aba;
+   }
+   /* label focus color */
+   input[type=text]:focus + label {
+     color: #aba;
+   }
+   /* label underline focus color */
+   input[type=text]:focus {
+     border-bottom: 1px solid #aba;
+     box-shadow: 0 1px 0 0 #aba;
+   }
+   /* valid color */
+   input[type=text].valid {
+     border-bottom: 1px solid #aba;
+     box-shadow: 0 1px 0 0 #aba;
+   }
+   /* invalid color */
+   input[type=text].invalid {
+     border-bottom: 1px solid #aba;
+     box-shadow: 0 1px 0 0 #aba;
+   }
+   /* icon prefix focus color */
+   .input-field .prefix.active {
+     color: #aba;
+   }

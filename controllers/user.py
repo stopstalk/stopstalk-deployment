@@ -41,7 +41,8 @@ def edit_custom_friend_details():
                                _href=current.SITES[site] + tmp_handle)))
             else:
                 tr.append(TD())
-        tr.append(TD(FORM(INPUT(_class="btn btn-warning",
+        tr.append(TD(FORM(INPUT(_class="btn yellow",
+                                _style="color: black;",
                                 _value="Update",
                                 _type="submit"),
                           _action=URL("user", "update_friend", args=[row.id]))))
@@ -78,14 +79,24 @@ def update_friend():
     form = SQLFORM(cftable,
                    record,
                    fields=form_fields,
-                   deletable=True)
+                   deletable=True,
+                   formstyle=utilities.materialize_form,
+                   )
 
     if form.process().accepted:
-        response.flash = "User details updated"
-        db(cftable.id == request.args[0]).update(last_retrieved=current.INITIAL_DATE)
-        db(db.submission.custom_user_id == request.args[0]).delete()
-        utilities.retrieve_submissions(form.vars.id, True)
-        redirect(URL("user", "edit_custom_friend_details"))
+        if form.vars.delete_this_record != "on":
+            ## UPDATE
+            # If delete checkbox is not checked
+            response.flash = "User details updated"
+            db(cftable.id == request.args[0]).update(last_retrieved=current.INITIAL_DATE)
+            db(db.submission.custom_user_id == request.args[0]).delete()
+            utilities.retrieve_submissions(form.vars.id, True)
+            redirect(URL("user", "edit_custom_friend_details"))
+        else:
+            ## DELETE
+            # If delete checkbox is checked => just process it redirect back
+            response.flash = "Custom User deleted"
+            redirect(URL("user", "edit_custom_friend_details"))
     elif form.errors:
         response.flash = "Form has errors"
 
@@ -313,28 +324,33 @@ def friend_requests():
     """
 
     rows = db(db.friend_requests.to_h == session.user_id).select()
-    table = TABLE(_class="table table-condensed")
-    table.append(TR(TH(T("Name")),
-                    TH(T("Institute")),
-                    TH(T("Action"))))
+    table = TABLE(_class="striped centered")
+    table.append(THEAD(TR(TH(T("Name")),
+                          TH(T("Institute")),
+                          TH(T("Action")))))
 
+    tbody = TBODY()
     for row in rows:
         tr = TR()
-        tr.append(TD(row.from_h.first_name + " " + row.from_h.last_name))
+        tr.append(TD(A(row.from_h.first_name + " " + row.from_h.last_name,
+                       _href=URL("user", "profile", args=[row.from_h.stopstalk_handle]))))
         tr.append(TD(row.from_h.institute))
         tr.append(TD(UL(LI(FORM(INPUT(_value="Accept",
                                       _type="submit",
-                                      _class="btn btn-success"),
+                                      _class="btn",
+                                      _style="background-color: green;"),
                                 _action=URL("user", "accept_fr",
                                             args=[row.from_h, row.id]))),
                         LI(FORM(INPUT(_value="Reject",
                                       _type="submit",
-                                      _class="btn btn-danger"),
+                                      _class="btn",
+                                      _style="background-color: red;"),
                                 _action=URL("user", "reject_fr",
                                             args=[row.id]))),
                         _style="display: inline-flex;list-style-type: none;")))
-        table.append(tr)
+        tbody.append(tr)
 
+    table.append(tbody)
     return dict(table=table)
 
 # -------------------------------------------------------------------------------
@@ -414,7 +430,8 @@ def custom_friend():
     form = SQLFORM(db.custom_friend,
                    fields=list_fields,
                    hidden=dict(user_id=session.user_id,
-                               last_retrieved=datetime.now()))
+                               last_retrieved=datetime.now()),
+                   formstyle=utilities.materialize_form)
 
     # Set the hidden field
     form.vars.user_id = session.user_id

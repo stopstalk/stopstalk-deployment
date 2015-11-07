@@ -20,9 +20,7 @@
          http://google.com/webmasters -->
     <meta name="google-site-verification" content="">
     <!-- include stylesheets -->
-    <link rel="stylesheet" href="{{=URL('static','css/bootstrap.min.css')}}"/>
-    <link rel="stylesheet" href="{{=URL('static','css/bootstrap-theme.min.css')}}"/>
-    <link rel="stylesheet" href="{{=URL('static','css/web2py-bootstrap3.css')}}"/>
+    <link rel="stylesheet" href="{{=URL('static','materialize/css/materialize.css')}}"/>
     <link rel="stylesheet" href="{{=URL('static','fa/css/font-awesome.min.css')}}"/>
     <link rel="shortcut icon" href="{{=URL('static','images/favicon.ico')}}" type="image/x-icon">
     <link rel="apple-touch-icon" href="{{=URL('static','images/favicon.png')}}">
@@ -45,40 +43,72 @@
     middle_column = {0: mc0, 1: mc1, 2: mc2}[
     (left_sidebar_enabled and 1 or 0)+(right_sidebar_enabled and 1 or 0)]
     }}
-
+    <style>
+        input.form-control {
+            width: 50%;
+            text-align:  center;
+        }
+        .pagination li.active{
+            background-color: #259b24;
+        }
+        #welcome {
+            min-width: 180px;
+        }
+        #welcome > li > a {
+            color: #536dfe;
+        }
+        body {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+    </style>
   </head>
-  <body>
+  <body class="center">
     <!--[if lt IE 8]><p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p><![endif]-->
     <div class="flash alert alert-dismissable">{{=response.flash or ''}}</div>
     <!-- Navbar ======================================= -->
-    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-      <div class="container-fluid">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a href="{{=URL('default', 'index')}}">
-            <img src="{{=URL('static', 'images/StopStalk.png')}}" style="height: 50px; width: 50px;"/>
-          </a>
+    <header>
+    <ul id="welcome" class="dropdown-content" style="min-width: 180px; color: #536dfe;">
+        {{if session["user_id"]:}}
+            <li><a href="{{=URL('user', 'profile')}}">Profile</a></li>
+            <li><a href="{{=URL('user', 'submissions')}}">My Submissions</a></li>
+            <li><a href="{{=URL('default', 'user', args=['profile'])}}">Update Details</a></li>
+            <li><a href="{{=URL('default', 'user', args=['change_password'])}}">Change Password</a></li>
+            <li><a href="{{=URL('default', 'user', args=['logout'])}}">Logout</a></li>
+        {{else:}}
+            <li><a href="{{=URL('default', 'user', args=['login'])}}">Login</a></li>
+            <li><a href="{{=URL('default', 'user', args=['register'])}}">Register</a></li>
+        {{pass}}
+    </ul>
+    <nav style="background-color: #536dfe">
+    <div class="nav-wrapper">
+        <a href="{{=URL('default', 'index')}}">
+            <img src="{{=URL('static', 'images/StopStalk.png')}}" style="position: absolute; left: 0px; height: 60px; width: 60px; padding: 5px;"/>
+        </a>
+        <div class="right">
+            <span class="left">
+                {{if response.menu:}}
+                    {{=MENU(response.menu, _class='nav navbar-nav',li_class='dropdown',ul_class='dropdown-menu')}}
+                {{pass}}
+            </span>
+            <ul class="right hide-on-med-and-down" style="float: left;">
+                <li><a class="dropdown-button left" href="" data-activates="welcome"><i class="fa fa-sort-down"></i></a></li>
+            <!-- Dropdown Trigger -->
+            </ul>
         </div>
-        <div class="collapse navbar-collapse navbar-ex1-collapse">
-          <ul class="nav navbar-nav navbar-right">
-            {{=custom.navbar(auth.navbar(mode='bare'))}}
-          </ul>
-          {{if response.menu:}}
-          {{=MENU(response.menu, _class='nav navbar-nav',li_class='dropdown',ul_class='dropdown-menu')}}
-          {{pass}}
-        </div>
-      </div>
+    </div>
     </nav>
+    </header>
     <!-- Masthead ===================================== -->
     {{block header}}
     {{end}}
     <!-- Main ========================================= -->
     <!-- Begin page content -->
+    <main>
     <div class="container-fluid">
       {{if left_sidebar_enabled:}}
         <div class="col-md-3 left-sidebar">
@@ -105,15 +135,9 @@
       {{pass}}
 
     </div>
-
-    {{block footer}} <!-- this is default footer -->
-    <footer class="footer">
-      <div class="container-fluid">
-      </div>
-    </footer>
-    {{end}}
+    </main>
     <!-- The javascript =============================== -->
-    <script src="{{=URL('static','js/bootstrap.min.js')}}"></script>
+    <script src="{{=URL('static','materialize/js/materialize.min.js')}}"></script>
     <script src="{{=URL('static','js/web2py-bootstrap3.js')}}"></script>
     {{block page_js}}{{end page_js}}
     {{if response.google_analytics_id:}}

@@ -63,15 +63,18 @@ class Profile(object):
             try:
                 response = requests.get(url,
                                         headers=headers,
-                                        proxies=current.PROXY)
+                                        proxies=current.PROXY,
+                                        timeout=current.TIMEOUT)
             except RuntimeError:
                 return -1
+            except:
+                return {}
 
             if response.status_code == 200:
                 return response
             i += 1
 
-        if response.status_code == 404:
+        if response.status_code == 404 or response.status_code == 400:
             return {}
 
         return -1
@@ -93,7 +96,7 @@ class Profile(object):
         tmp = Profile.get_request(url, headers={"User-Agent": user_agent})
 
         # GET request failed
-        if tmp == -1:
+        if tmp == -1 or tmp == {}:
             self.retrieve_failed = True
             return
 
@@ -187,8 +190,8 @@ class Profile(object):
 
         tmp = Profile.get_request(user_url, headers={"User-Agent": user_agent})
 
-        if tmp == -1:
-            return -1
+        if tmp == -1 or tmp == {}:
+            return tmp
 
         d = ast.literal_eval(tmp.text)
         max_page = d["max_page"]
@@ -315,12 +318,12 @@ class Profile(object):
 
         url = "http://codeforces.com/api/user.status?handle=" + \
               handle + \
-              "&from=1&count=5000"
+              "&from=1&count=50000"
 
         tmp = Profile.get_request(url, headers={"User-Agent": user_agent})
 
-        if tmp == -1:
-            return -1
+        if tmp == {} or tmp == -1:
+            return tmp
 
         submissions = {handle: {1: {}}}
         all_submissions = tmp.json()
@@ -337,6 +340,7 @@ class Profile(object):
             curr = time.gmtime(row["creationTimeSeconds"] + 330 * 60)
             if curr <= last_retrieved:
                 return submissions
+
             # Time of submission
             append(str(time.strftime("%Y-%m-%d %H:%M:%S", curr)))
             time_stamp = time.strftime("%Y-%m-%d %H:%M:%S", curr)
@@ -662,8 +666,8 @@ class Profile(object):
               "/recent_challenges?offset=0&limit=50000"
 
         tmp = Profile.get_request(url)
-        if tmp == -1:
-            return -1
+        if tmp == {} or tmp == -1:
+            return tmp
 
         all_submissions = tmp.json()["models"]
 

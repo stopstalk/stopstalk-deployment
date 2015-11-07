@@ -1,5 +1,10 @@
 {{extend 'layout.html'}}
 <script src="{{=URL('static', 'js/jquery.bootpag.min.js')}}"></script>
+<style>
+    #refresh-submissions {
+        margin-right: 4%;
+    }
+</style>
 <script>
     var clearSession = function() {
         sessionStorage.clear();
@@ -7,12 +12,12 @@
     }
 </script>
 <h1>Recent submissions</h1>
-<button id="refresh-submissions" class="btn btn-info right" onclick="clearSession()">
+<div id="page-selection" class="center"></div>
+<button id="refresh-submissions" class="btn waves-effect waves-light right" style="background-color: #FFEB3B; color: black;" onclick="clearSession()">
     <span id="button-text">Refresh</span>
     <i class="fa fa-refresh" id="refresh"></i>
 </button>
 <div id="content"></div>
-<div id="page-selection" class="center"></div>
     <script>
         $(function() {
             if (sessionStorage.getItem("has_updated") != null) {
@@ -29,7 +34,6 @@
             var startRetrieving = function (friends, cusfriends) {
                 var user_count = 0;
                 var updateStatus = $("#final_status").val();
-
                 if (updateStatus == "Completed")
                     return;
 
@@ -47,10 +51,10 @@
                         }
 
                         if (response != "Failure") {
-                            $('.flash').html(val[1] + "<span style='color: red;'> <strong>[" + response.toString() + "]</strong> </span> added").slideDown();
+                            Materialize.toast(val[1] + "<span style='color: red;'> <strong> [" + response.toString() + "] </strong> </span> added", 4000);
                         }
                         else {
-                            $('.flash').html("Check your internet connection").slideDown();
+                            Materialize.toast("Check your internet connection", 4000);
                         }
 
                     });
@@ -69,10 +73,10 @@
                             window.location.href = "";
                         }
                         if (response != "Failure") {
-                            $('.flash').html(val[1] + "<span style='color: red;'> <strong>[" + response.toString() + "]</strong></span> added").slideDown();
+                            Materialize.toast(val[1] + "<span style='color: red;'> <strong> [" + response.toString() + "] </strong></span> added", 4000);
                         }
                         else {
-                            $('.flash').html("Check your internet connection").slideDown();
+                            Materialize.toast("Check your internet connection", 4000);
                         }
                     });
                 });
@@ -86,10 +90,12 @@
                 var friends = page['friends'];
                 var cfriends = page['cusfriends'];
                 if (sessionStorage.getItem("has_updated") == null) {
-                    startRetrieving(friends, cfriends);
-                    $('#refresh-submissions').prop('disabled', true);
-                    $('#button-text').html('Please wait ...');
-                    $('#refresh').attr('class', 'fa fa-refresh fa-spin');
+                    if(friends.length > 0 && cfriends.length > 0) {
+                        startRetrieving(friends, cfriends);
+                        $('#refresh-submissions').prop('disabled', true);
+                        $('#button-text').html('Please wait ...');
+                        $('#refresh').attr('class', 'fa fa-refresh fa-spin');
+                    }
                 }
 
                 var currentUrl = window.location.href;

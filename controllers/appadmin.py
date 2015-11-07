@@ -10,6 +10,7 @@ import datetime
 import copy
 import gluon.contenttype
 import gluon.fileutils
+import utilities
 
 try:
     import pygraphviz as pgv
@@ -146,7 +147,8 @@ def index():
 
 def insert():
     (db, table) = get_table(request)
-    form = SQLFORM(db[table], ignore_rw=ignore_rw)
+    form = SQLFORM(db[table], ignore_rw=ignore_rw,
+                   formstyle=utilities.materialize_form)
     if form.accepts(request.vars, session):
         response.flash = T('new record inserted')
     return dict(form=form, table=db[table])
@@ -337,7 +339,8 @@ def update():
         ignore_rw=ignore_rw and not keyed,
         linkto=URL('select',
                    args=request.args[:1]), upload=URL(r=request,
-                                                      f='download', args=request.args[:1]))
+                                                      f='download', args=request.args[:1]),
+        formstyle=utilities.materialize_form)
 
     if form.accepts(request.vars, session):
         session.flash = T('done!')
@@ -652,7 +655,11 @@ def manage():
     smartgrid_args = manager_action.get('smartgrid_args', {})
     kwargs.update(**smartgrid_args.get('DEFAULT', {}))
     kwargs.update(**smartgrid_args.get(table._tablename, {}))
-    grid = SQLFORM.smartgrid(table, args=request.args[:2], formname=formname, **kwargs)
+    grid = SQLFORM.smartgrid(table,
+                             args=request.args[:2],
+                             formname=formname,
+                             formstyle=utilities.materialize_form,
+                             **kwargs)
     return grid
 
 def hooks():
