@@ -6781,9 +6781,6 @@ input[type=checkbox]:not(:disabled) ~ .lever:active:after {
     top: -14px;
     font-size: 0.8rem; }
 
-select {
-  display: none; }
-
 select.browser-default {
   display: block; }
 
@@ -7986,7 +7983,7 @@ select {
 
 .picker__date-display {
   text-align: center;
-  background-color: #26a69a;
+  background-color: #FFC107;
   color: #fff;
   padding-bottom: 15px;
   font-weight: 300; }
@@ -7997,7 +7994,7 @@ select {
   background: #a1ded8; }
 
 .picker__weekday-display {
-  background-color: #1f897f;
+  background-color: #FFA000;
   padding: 10px;
   font-weight: 200;
   letter-spacing: .5;
@@ -8029,14 +8026,15 @@ select {
   margin-bottom: .5em; }
 
 .picker__day--infocus {
-  color: #595959;
+  color: #999999;
   letter-spacing: -.3;
   padding: .75rem 0;
   font-weight: 400;
   border: 1px solid transparent; }
 
 .picker__day.picker__day--today {
-  color: #26a69a; }
+  color: #1a237e;
+}
 
 .picker__day.picker__day--today.picker__day--selected {
   color: #fff; }
@@ -8051,8 +8049,8 @@ select {
   -ms-transform: scale(.9);
   -o-transform: scale(.9);
   transform: scale(.9);
-  background-color: #26a69a;
-  color: #ffffff; }
+  background-color: #03A9F4;
+  color: #fff; }
   .picker__day--selected.picker__day--outfocus, .picker__day--selected:hover.picker__day--outfocus, .picker--focused .picker__day--selected.picker__day--outfocus {
     background-color: #a1ded8; }
 
@@ -8063,7 +8061,7 @@ select {
 .picker__close, .picker__today {
   font-size: 1.1rem;
   padding: 0 1rem;
-  color: #26a69a; }
+  color: #03A9F4; }
 
 .picker__nav--prev:before, .picker__nav--next:before {
   content: " ";

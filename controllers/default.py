@@ -35,7 +35,6 @@ def index():
     if desc.__contains__("Registered") or \
        desc.__contains__("Verification"):
         reg_user = desc.split(" ")[1]
-        r = db(db.friends.user_id == reg_user).select()
         result = utilities.retrieve_submissions(int(reg_user))
 
         row = db(db.auth_user.id == reg_user).select().first()
@@ -49,12 +48,6 @@ def index():
 
         per_day = total_submissions * 1.0 / (today - start).days
         db(db.auth_user.stopstalk_handle == row.stopstalk_handle).update(per_day=per_day)
-
-        # User has a `set` of friends' ids
-        # If user does not exists then initialize it with empty set
-        if len(r) == 0:
-            db.friends.insert(user_id=int(reg_user),
-                              friends_list=str(set([])))
 
     response.flash = T("Please Login")
     return dict()
@@ -134,13 +127,14 @@ def notifications():
 
     # Check for streak of friends on stopstalk
     query = (ftable.user_id == session["user_id"])
-    row = db(query).select(ftable.friends_list).first()
+    row = db(query).select(ftable.friend_id)
+    friends = map(lambda x: x["friend_id"], row)
 
     # Will contain list of handles of all the friends along
     # with the Custom Users added by the logged-in user
     handles = []
 
-    for user in eval(row.friends_list):
+    for user in friends:
         query = (atable.id == user)
         user_data = db(query).select(atable.first_name,
                                      atable.last_name,
@@ -339,6 +333,55 @@ def search():
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
+def filtered_submissions():
+    """
+        INCOMPLETE
+    """
+
+    stable = db.submission
+    cftable = db.custom_friend
+    atable = db.auth_user
+
+#    query = (stable.user_id.first_name.like("%" + request.vars["name"] + "%"))
+#    query &= (stable.user_id.last_name.like("%" + request.vars["name"] + "%"))
+    # Retrieve all the custom users created by the logged-in user
+    query = (cftable.user_id == session.user_id)
+    query &= (cftable.first_name.like("%" + request.vars["name"] + "%"))
+    query &= (cftable.last_name.like("%" + request.vars["name"] + "%"))
+    custom_friends = db(query).select(cftable.id)
+
+    cusfriends = []
+    for friend in custom_friends:
+        cusfriends.append(friend.id)
+
+    # Get the friends of logged in user
+    query = (db.friends.user_id == session.user_id)
+    query &= (atable.first_name.like("%" + request.vars["name"] + "%"))
+    query &= (atable.last_name.like("%" + request.vars["name"] + "%"))
+    friends = db(query).select(db.friends.friends_list).first()
+    friends = tuple(eval(friends.friends_list))
+
+    query = (stable.problem_name.like("%" + request.vars["pname"] + "%"))
+    if request.vars["language"] != "":
+        query &= (stable.language == request.vars["language"])
+    if request.vars["status"] != "":
+        query &= (stable.status == request.vars["status"])
+    print db(query).select()
+    print request.vars
+    print friends
+    print cusfriends
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
+def filters():
+    tmp = db(db.submission.id>0).select(db.submission.lang, distinct=True)
+    languages = []
+    for  i in tmp:
+        languages.append(i["lang"])
+    return dict(languages=languages)
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
 def mark_friend():
     """
         Send a friend request
@@ -403,8 +446,8 @@ def retrieve_users():
     tbody = TBODY()
     for user in rows:
 
-        friends = db(db.friends.user_id == user.id).select().first()
-        friends = eval(friends.friends_list)
+        friends = db(db.friends.user_id == user.id).select(db.friends.friend_id)
+        friends = map(lambda x: x["friend_id"], friends)
         tr = TR()
         tr.append(TD(A(user.first_name + " " + user.last_name,
                        _href=URL("user", "profile",
@@ -457,8 +500,12 @@ def submissions():
 
     # Get the friends of logged in user
     query = (db.friends.user_id == session.user_id)
-    friends = db(query).select(db.friends.friends_list).first()
-    friends = tuple(eval(friends.friends_list))
+    all_friends = db(query).select(db.friends.friend_id)
+    if all_friends is None:
+        all_friends = []
+    friends = []
+    for friend in all_friends:
+        friends.append(friend["friend_id"])
 
     query = (db.submission.user_id.belongs(friends))
     query |= (db.submission.custom_user_id.belongs(cusfriends))

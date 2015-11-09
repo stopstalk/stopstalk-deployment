@@ -44,10 +44,15 @@ def materialize_form(form, fields):
     for id, label, controls, help in fields:
         curr_div = DIV(_class="row")
         _controls = controls
+
         if isinstance(controls, SPAN):
             _controls = INPUT(_value=controls.components[0],
                               _class="validate",
                               _disabled="")
+        elif isinstance(controls, TEXTAREA):
+            _controls = TEXTAREA(controls.components[0],
+                                 _class="materialize-textarea")
+
         input_field = DIV(_controls, label,
                           _class="input-field col offset-s4 s4")
         curr_div.append(input_field)

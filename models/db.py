@@ -62,22 +62,22 @@ plugins = PluginManager()
 
 initial_date = datetime.strptime("2013-01-01 00:00:00", "%Y-%m-%d %H:%M:%S")
 
-extra_fields = [Field('institute', requires=IS_NOT_EMPTY()),
-                Field('stopstalk_handle',
+extra_fields = [Field("institute", requires=IS_NOT_EMPTY()),
+                Field("stopstalk_handle",
                       requires=[IS_NOT_IN_DB(db,
-                                             'auth_user.stopstalk_handle',
+                                             "auth_user.stopstalk_handle",
                                              error_message=T("Handle taken")),
                                              IS_NOT_IN_DB(db,
-                                                          'custom_friend.stopstalk_handle',
+                                                          "custom_friend.stopstalk_handle",
                                                           error_message=T("Handle taken"))]
                                              ),
-                Field('rating',
+                Field("rating",
                       default=0,
                       writable=False),
-                Field('last_retrieved', 'datetime',
+                Field("last_retrieved", "datetime",
                       default=initial_date,
                       writable=False),
-                Field('per_day', 'double',
+                Field("per_day", "double",
                       default=0.0,
                       writable=False),
                 ]
@@ -87,7 +87,7 @@ for site in current.SITES:
     site_handles += [Field(site.lower() + "_handle")]
 
 extra_fields += site_handles
-auth.settings.extra_fields['auth_user'] = extra_fields
+auth.settings.extra_fields["auth_user"] = extra_fields
 
 auth.define_tables(username=False, signature=False)
 
@@ -127,10 +127,10 @@ custom_friend_fields = [Field("user_id", "reference auth_user"),
                         Field("last_name", requires=IS_NOT_EMPTY()),
                         Field("institute", requires=IS_NOT_EMPTY()),
                         Field("stopstalk_handle", requires = [IS_NOT_IN_DB(db,
-                                                                           'auth_user.stopstalk_handle',
+                                                                           "auth_user.stopstalk_handle",
                                                                            error_message=T("Handle already exists")),
                                                               IS_NOT_IN_DB(db,
-                                                                           'custom_friend.stopstalk_handle',
+                                                                           "custom_friend.stopstalk_handle",
                                                                            error_message=T("Handle already exists"))]),
                         Field("rating",
                               default=0,
@@ -138,7 +138,7 @@ custom_friend_fields = [Field("user_id", "reference auth_user"),
                         Field("last_retrieved", "datetime",
                               default=initial_date,
                               writable=False),
-                        Field('per_day', 'double',
+                        Field("per_day", "double",
                               default=0.0,
                               writable=False),
                         ]
@@ -159,8 +159,8 @@ db.define_table("submission",
                 Field("lang"),
                 Field("status"),
                 Field("points"),
-                Field('view_link',
-                      default='',
+                Field("view_link",
+                      default="",
                       ),
                 )
 
@@ -171,6 +171,6 @@ db.define_table("friend_requests",
 
 db.define_table("friends",
                 Field("user_id", "reference auth_user"),
-                Field("friends_list", "text"))
+                Field("friend_id", "reference auth_user"))
 
 current.db = db

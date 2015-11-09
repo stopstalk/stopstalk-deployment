@@ -1,0 +1,73 @@
+{{extend 'layout.html'}}
+<script>
+    $(document).ready(function() {
+        $('.datepicker').pickadate({
+            selectMonths: true, // Creates a dropdown to control month
+            selectYears: 15, // Creates a dropdown of 15 years to control year
+            format: 'yyyy/mm/dd',
+            min: new Date(2013, 0, 1),
+            max: new Date()
+        });
+    });
+
+</script>
+<div class="row">
+    <form class="col s12" action="{{=URL('default', 'filtered_submissions')}}">
+      <div class="row">
+        <div class="input-field col offset-s3 s3">
+          <input id="name" name="name" type="text">
+          <label for="name">Name</label>
+        </div>
+        <div class="input-field col s3">
+          <input id="problem_name" name="pname" type="text" class="validate">
+          <label for="problem_name">Problem Name</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col offset-s3 s2">
+          <select name="site">
+              <option value="" selected>Site</option>
+              {{for site in current.SITES:}}
+                <option value="{{=site}}">{{=site}}</option>
+              {{pass}}
+          </select>
+        </div>
+        <div class="input-field col s2">
+          <select name="status">
+              <option value="" selected>Submission Status</option>
+              {{for status in (("AC", "Accepted"),
+                               ("WA", "Wrong Answer"),
+                               ("TLE", "Time Limit Exceeded"),
+                               ("MLE", "Memory Limit Exceeded"),
+                               ("RE", "Runtime Error"),
+                               ("CE", "Compile Error"),
+                               ("SK", "Skipped"),
+                               ("HCK", "Hacked"),
+                               ("OTH", "Others")):
+                }}
+                <option value="{{=status[0]}}">{{=status[1]}}</option>
+              {{pass}}
+          </select>
+        </div>
+        <div class="input-field col s2">
+            <select name="language">
+                <option value="" selected>Language</option>
+                {{for language in languages:}}
+                <option value="{{=language}}">{{=language}}</option>
+                {{pass}}
+            </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col offset-s3 s3">
+            <input id="start_date" name="start_date" data-value="" type="date" class="datepicker" />
+            <label for="start_date">Start Date</label>
+        </div>
+        <div class="input-field col s3">
+            <input id="end_date" name="end_date" data-value="" type="date" class="datepicker" />
+            <label for="end_date">End Date</label>
+        </div>
+      </div>
+      <input type="submit" value="Apply Filters" />
+    </form>
+  </div>

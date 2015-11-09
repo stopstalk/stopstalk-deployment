@@ -360,13 +360,8 @@ def add_friend(user_id, friend_id):
         Add a friend into friend-list
     """
 
-    query = (db.friends.user_id == user_id)
-    user_friends = db(query).select(db.friends.friends_list).first()
-
-    user_friends = eval(user_friends["friends_list"])
-    user_friends.add(friend_id)
-
-    db(query).update(friends_list=str(user_friends))
+    db.friends.insert(user_id=user_id,
+                      friend_id=friend_id)
 
 # -------------------------------------------------------------------------------
 @auth.requires_login()
@@ -410,7 +405,6 @@ def reject_fr():
     db(db.friend_requests.id == fr_id).delete()
 
     redirect(URL("user", "friend_requests"))
-    return dict()
 
 # -------------------------------------------------------------------------------
 @auth.requires_login()
