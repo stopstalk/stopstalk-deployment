@@ -110,6 +110,7 @@ def get_max_streak(handle):
 
     return max_streak, total_submissions, streak, len(row)
 
+
 # ----------------------------------------------------------------------------
 @auth.requires_login()
 def notifications():
@@ -333,52 +334,90 @@ def search():
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
-def filtered_submissions():
-    """
-        INCOMPLETE
-    """
+def filters():
 
+    all_languages = db(db.submission.id>0).select(db.submission.lang, distinct=True)
+    languages = []
+    for  i in all_languages:
+        languages.append(i["lang"])
+
+    table = None
+    # If form is not submitted
+    if request.vars == {}:
+        return dict(languages=languages,
+                    table=table)
+
+    # Form has been submitted
     stable = db.submission
     cftable = db.custom_friend
     atable = db.auth_user
+    ftable = db.friends
 
-#    query = (stable.user_id.first_name.like("%" + request.vars["name"] + "%"))
-#    query &= (stable.user_id.last_name.like("%" + request.vars["name"] + "%"))
     # Retrieve all the custom users created by the logged-in user
-    query = (cftable.user_id == session.user_id)
-    query &= (cftable.first_name.like("%" + request.vars["name"] + "%"))
-    query &= (cftable.last_name.like("%" + request.vars["name"] + "%"))
+    query = (cftable.first_name.like("%" + request.post_vars["name"] + "%"))
+    query |= (cftable.last_name.like("%" + request.post_vars["name"] + "%"))
+    query &= (cftable.user_id == session.user_id)
     custom_friends = db(query).select(cftable.id)
-
-    cusfriends = []
-    for friend in custom_friends:
-        cusfriends.append(friend.id)
+    cusfriends = map(lambda x: x["id"], custom_friends)
 
     # Get the friends of logged in user
-    query = (db.friends.user_id == session.user_id)
-    query &= (atable.first_name.like("%" + request.vars["name"] + "%"))
-    query &= (atable.last_name.like("%" + request.vars["name"] + "%"))
-    friends = db(query).select(db.friends.friends_list).first()
-    friends = tuple(eval(friends.friends_list))
+    query = (atable.first_name.like("%" + request.post_vars["name"] + "%"))
+    query |= (atable.last_name.like("%" + request.post_vars["name"] + "%"))
+    query &= (ftable.user_id == atable.id)
+    friend_ids = db(atable).select(atable.id, join=ftable.on(query))
+    friends = map(lambda x: x["id"], friend_ids)
 
-    query = (stable.problem_name.like("%" + request.vars["pname"] + "%"))
-    if request.vars["language"] != "":
-        query &= (stable.language == request.vars["language"])
-    if request.vars["status"] != "":
-        query &= (stable.status == request.vars["status"])
-    print db(query).select()
-    print request.vars
-    print friends
-    print cusfriends
+    # User in one of the friends
+    query = (stable.user_id.belongs(friends))
 
-# ----------------------------------------------------------------------------
-@auth.requires_login()
-def filters():
-    tmp = db(db.submission.id>0).select(db.submission.lang, distinct=True)
-    languages = []
-    for  i in tmp:
-        languages.append(i["lang"])
-    return dict(languages=languages)
+    # User in one of the custom friends
+    query |= (stable.custom_user_id.belongs(cusfriends))
+
+    start_date = request.post_vars["start_date"]
+    end_date = request.post_vars["end_date"]
+
+    if start_date == "":
+        start_date = current.INITIAL_DATE
+    else:
+        start_date += " 00:00:00"
+
+    if end_date == "":
+        end_date = datetime.today()
+    else:
+        end_date += " 23:59:59"
+
+    start_time = time.strptime(start_date, "%Y-%m-%d %H:%M:%S")
+    end_time = time.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+    if end_time > start_time:
+        # Submissions in the the range start_date to end_date
+        query &= (stable.time_stamp >= start_date)
+        query &= (stable.time_stamp <= end_date)
+    else:
+        response.flash = "Start Date greater than End Date"
+
+    # Submissions with problem name containing pname
+    if request.post_vars["pname"] != "":
+        query &= (stable.problem_name.like("%" + request.post_vars["pname"] + "%"))
+
+    # Submissions from this site
+    if request.post_vars["site"] != "":
+        query &= (stable.site == str(request.post_vars["site"]))
+
+    # Submissions with this language
+    if request.post_vars["language"] != "":
+        query &= (stable.lang == str(request.post_vars["language"]))
+
+    # Submissions with this submission status
+    if request.post_vars["status"] != "":
+        query &= (stable.status == str(request.post_vars["status"]))
+
+    # Apply the complex query and sort by time_stamp DESC
+    filtered = db(query).select(orderby=~stable.time_stamp)
+
+    table = utilities.render_table(filtered)
+
+    return dict(languages=languages,
+                table=table)
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()

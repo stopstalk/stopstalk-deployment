@@ -69,8 +69,8 @@
   </head>
   <body class="center">
     <!--[if lt IE 8]><p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p><![endif]-->
-    <div class="flash alert alert-dismissable">{{=response.flash or ''}}</div>
     <!-- Navbar ======================================= -->
+    <div class="flash alert alert-dismissable" style="display: none;">{{=response.flash or ''}}</div>
     <header>
     <ul id="welcome" class="dropdown-content" style="min-width: 180px; color: #536dfe;">
         {{if session["user_id"]:}}

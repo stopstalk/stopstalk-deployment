@@ -90,7 +90,6 @@ def render_table(submissions):
 
     tbody = TBODY()
     for submission in submissions:
-
         tr = TR()
         append = tr.append
 
@@ -109,7 +108,7 @@ def render_table(submissions):
                     _target="_blank")))
         append(TD(submission.time_stamp))
         append(TD(A(submission.problem_name,
-                    _href=submission.problem_link,
+                    _href=URL("problems", "index", args=submission.id),
                     _target="_blank")))
         append(TD(submission.lang))
         append(TD(IMG(_src=URL("static",

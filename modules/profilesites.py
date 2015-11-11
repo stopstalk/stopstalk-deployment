@@ -5,6 +5,7 @@ import bs4
 import gevent
 from gevent import monkey
 from gluon import current
+from bs4 import BeautifulSoup
 
 gevent.monkey.patch_all(thread=False)
 user_agent = "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5"
@@ -12,6 +13,48 @@ user_agent = "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) 
 """
     @ToDo: Current framework is very bad
 """
+
+# -------------------------------------------------------------------------
+def codechef_get_tags(problem_link):
+
+    url = problem_link.split("/")
+    url = url[2:]
+    url.insert(1, "api/contests")
+    if len(url) == 4:
+        url.insert(2, "PRACTICE")
+    url = "https://" + "/".join(url)
+    response = Profile.get_request(url)
+    t = response.json()
+    all_tags = []
+    try:
+        tags = t["tags"]
+        all_as = BeautifulSoup(str(tags)).find_all("a")
+        for i in all_as:
+            all_tags.append(i.contents[0].strip())
+        return all_tags
+    except KeyError:
+        return all_tags
+
+# -------------------------------------------------------------------------
+def spoj_get_tags(problem_link):
+    response = Profile.get_request(problem_link)
+    tags = BeautifulSoup(response.text).find_all("div", id="problem-tags")
+    tags = tags[0].findAll("span")
+    all_tags = []
+    for tag in tags:
+        tmp = tag.contents
+        if tmp != []:
+            all_tags.append(tmp[0][1:])
+    return all_tags
+
+# -------------------------------------------------------------------------
+def codeforces_get_tags(problem_link):
+    response = Profile.get_request(problem_link)
+    tags = BeautifulSoup(response.text).find_all("span", class_="tag-box")
+    all_tags = []
+    for tag in tags:
+        all_tags.append(tag.contents[0].strip())
+    return all_tags
 
 class Profile(object):
     """
@@ -710,3 +753,4 @@ class Profile(object):
             it += 1
 
         return submissions
+

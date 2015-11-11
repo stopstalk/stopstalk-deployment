@@ -1,0 +1,87 @@
+{{extend 'layout.html'}}
+<head>
+    <!--Load the AJAX API-->
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+
+      // Load the Visualization API and the piechart package.
+      google.load('visualization', '1.0', {'packages':['corechart']});
+
+      // Set a callback to run when the Google Visualization API is loaded.
+      google.setOnLoadCallback(drawChart);
+
+
+      // Callback that creates and populates a data table,
+      // instantiates the pie chart, passes in the data and
+      // draws it.
+      function drawChart() {
+
+          var numJSON = {'AC': 0,
+                         'WA': 0,
+                         'TLE': 0,
+                         'MLE': 0,
+                         'CE': 0,
+                         'RE': 0,
+                         'SK': 0,
+                         'OTH': 0,
+                         'HCK': 0
+                         };
+
+          var pname = $('#problem_name').html();
+          console.log(pname + "*");
+          $.ajax({
+              method: 'POST',
+              url: '/stopstalk/problems/pie_chart_helper.json/',
+              data: {'pname': pname}
+          }).done(function(data) {
+
+              var statuses = data['row'];
+              $.each(statuses, function(i) {
+                  numJSON[statuses[i]['submission']['status']] = statuses[i]['_extra']['COUNT(submission.id)'];
+              });
+              console.log(numJSON);
+              // Create the data table.
+              var data = new google.visualization.DataTable();
+              data.addColumn('string', 'resultType');
+              data.addColumn('number', 'numberOfSubmissions');
+              data.addRows([
+                  ['Accepted', numJSON['AC']],
+                  ['Compile Error', numJSON['CE']],
+                  ['Wrong Answer', numJSON['WA']],
+                  ['Time Limit Exceeded', numJSON['TLE']],
+                  ['Memory Limit Exceeded', numJSON['MLE']],
+                  ['Runtime Error', numJSON['RE']],
+                  ['Hacked', numJSON['HCK']],
+                  ['Skipped', numJSON['SK']],
+                  ['Others', numJSON['OTH']]
+              ]);
+
+              // Set chart options
+              var options = {'title':'Total Submissions',
+                             'width': 800,
+                             'height': 600,
+                             'pieHole': 0.5,
+                             'slices': {
+                                 0: {color: '#109618'},
+                                 1: {color: '#FF9900'},
+                                 2: {color: '#DC3912'},
+                                 3: {color: '#3366CC'},
+                                 4: {color: '#0099C6'},
+                                 5: {color: '#990099'}
+                             }
+                            };
+
+              // Instantiate and draw our chart, passing in some options.
+              var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+              chart.draw(data, options);
+          });
+        }
+    </script>
+</head>
+<div class="row">
+    <h3>{{=problem_name}}</h3>
+    {{=problem_details}}
+    <div id="chart_div" style="float: right;"></div>
+</div>
+<h4>Recent Submissions</h4>
+{{=table}}

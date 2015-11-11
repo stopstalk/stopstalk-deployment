@@ -3,8 +3,7 @@
     $(document).ready(function() {
         $('.datepicker').pickadate({
             selectMonths: true, // Creates a dropdown to control month
-            selectYears: 15, // Creates a dropdown of 15 years to control year
-            format: 'yyyy/mm/dd',
+            format: 'yyyy-mm-dd',
             min: new Date(2013, 0, 1),
             max: new Date()
         });
@@ -12,7 +11,10 @@
 
 </script>
 <div class="row">
-    <form class="col s12" action="{{=URL('default', 'filtered_submissions')}}">
+    <h3>Filters</h3>
+</div>
+<div class="row">
+    <form class="col s12" method="POST" action="">
       <div class="row">
         <div class="input-field col offset-s3 s3">
           <input id="name" name="name" type="text">
@@ -53,7 +55,7 @@
             <select name="language">
                 <option value="" selected>Language</option>
                 {{for language in languages:}}
-                <option value="{{=language}}">{{=language}}</option>
+                    <option value="{{=language}}">{{=language}}</option>
                 {{pass}}
             </select>
         </div>
@@ -71,3 +73,6 @@
       <input type="submit" value="Apply Filters" />
     </form>
   </div>
+{{if table:}}
+{{=table}}
+{{pass}}

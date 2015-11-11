@@ -176,8 +176,7 @@
         });
         var confirm_message = (typeof w2p_ajax_confirm_message != 'undefined') ? w2p_ajax_confirm_message : "Are you sure you want to delete this object?";
         doc.on('click', "input[type='checkbox'].delete", function() {
-          if(this.checked)
-            if(!web2py.confirm(confirm_message)) this.checked = false;
+            /* Confirm deletion alert removed */
         });
         var datetime_format = (typeof w2p_ajax_datetime_format != 'undefined') ? w2p_ajax_datetime_format : "%Y-%m-%d %H:%M:%S";
         doc.on('click', "input.datetime", function() {
@@ -530,12 +529,10 @@
       },
       /*helper for flash messages*/
       flash: function(message, status) {
-        var flash = $('.flash');
-        web2py.hide_flash();
-        flash.html(message).addClass(status);
-        if(flash.html()) flash.append('<span id="closeflash"> &times; </span>').slideDown();
+        Materialize.toast(message, 4000);
       },
       hide_flash: function() {
+
         $('.flash').fadeOut(0).html('');
       },
       show_if_handler: function(target) {
