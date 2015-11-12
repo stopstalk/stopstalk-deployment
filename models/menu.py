@@ -17,6 +17,7 @@ if session.user_id:
     response.menu = [
         (I(_class="fa fa-inbox fa-2x"), False, URL('default', 'notifications'), []),
         (I(_class="fa fa-users fa-2x"), False, URL('user', 'friend_requests'), []),
+        (I(_class="fa fa-tag fa-2x"), False, URL('problems', 'tag'), []),
         (I(_class="fa fa-search fa-2x"), False, URL('default', 'search'), []),
         (I(_class="fa fa-filter fa-2x"), False, URL('default', 'filters'), []),
         (I(_class="fa fa-plus-circle fa-2x"), False, URL('user', 'custom_friend'), []),

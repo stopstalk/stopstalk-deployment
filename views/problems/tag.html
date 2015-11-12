@@ -1,0 +1,38 @@
+{{extend 'layout.html'}}
+<script>
+    $(document).ready(function() {
+        $('#refresh').click(function() {
+            Materialize.toast("Refreshing Tags...", 4000);
+            $.ajax({
+                method: 'GET',
+                url: '/stopstalk/problems/refresh_tags'
+            }).done(function(response) {
+                if (response != "-1") {
+                    Materialize.toast("Tags updated", 4000);
+                }
+                else {
+                    Materialize.toast("Please check your internet connection", 4000);
+                }
+            });
+        });
+        $('#searchButton').click(function() {
+            window.location.href = "http://localhost:8000/stopstalk/problems/tag?q=" + $('#search').val();
+        });
+    });
+</script>
+<h3>Search problems by tags</h3>
+<div class="row center">
+    <div class="input-field col offset-s4 s4">
+        <input id="search" type="text"/>
+        <label for="search">Search Tags...</label>
+        <button id="refresh" class="green btn">
+            <i class="fa fa-refresh"></i>
+        </button>
+        <a id="searchButton" class="blue btn waves-effect waves-light">
+            <i class="fa fa-search"></i>
+        </a>
+    </div>
+</div>
+<div class="row" id="output">
+    {{=table}}
+</div>

@@ -130,7 +130,10 @@ def render_table(submissions):
                     _target="_blank")))
         append(TD(submission.time_stamp))
         append(TD(A(submission.problem_name,
-                    _href=URL("problems", "index", args=submission.id),
+                    _href=URL("problems",
+                              "index",
+                              vars={"pname": submission.problem_name,
+                                    "plink": submission.problem_link}),
                     _target="_blank")))
         append(TD(submission.lang))
         append(TD(IMG(_src=URL("static",
@@ -232,7 +235,6 @@ def retrieve_submissions(reg_user, custom=False):
 
     for site in current.SITES:
         site_handle = row[site.lower() + "_handle"]
-
         if site_handle:
             P = profile.Profile(site, site_handle)
             site_method = getattr(P, site.lower())

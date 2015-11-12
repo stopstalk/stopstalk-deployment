@@ -6175,11 +6175,11 @@ a.waves-effect .waves-ripple {
   height: 32px;
   font-size: 13px;
   font-weight: 500;
-  color: rgba(0, 0, 0, 0.6);
+  color: #fff;
   line-height: 32px;
   padding: 0 12px;
   border-radius: 16px;
-  background-color: #E4E4E4; }
+  background-color: #000; }
   .chip img {
     float: left;
     margin: 0 8px 0 -12px;

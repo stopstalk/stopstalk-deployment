@@ -173,4 +173,8 @@ db.define_table("friends",
                 Field("user_id", "reference auth_user"),
                 Field("friend_id", "reference auth_user"))
 
+db.define_table("problem_tags",
+                Field("problem_link"),
+                Field("tags",
+                      default="-"))
 current.db = db

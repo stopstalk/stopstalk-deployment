@@ -45,7 +45,11 @@ def codechef_get_tags(problem_link):
     if len(url) == 4:
         url.insert(2, "PRACTICE")
     url = "https://" + "/".join(url)
+
     response = Profile.get_request(url)
+    if response == -1:
+        return []
+
     t = response.json()
     all_tags = []
     try:
@@ -59,23 +63,35 @@ def codechef_get_tags(problem_link):
 
 # -------------------------------------------------------------------------
 def spoj_get_tags(problem_link):
+
     response = Profile.get_request(problem_link)
+    if response == -1:
+        return []
+
     tags = BeautifulSoup(response.text).find_all("div", id="problem-tags")
     tags = tags[0].findAll("span")
     all_tags = []
+
     for tag in tags:
         tmp = tag.contents
         if tmp != []:
             all_tags.append(tmp[0][1:])
+
     return all_tags
 
 # -------------------------------------------------------------------------
 def codeforces_get_tags(problem_link):
+
     response = Profile.get_request(problem_link)
+    if response == -1:
+        return []
+
     tags = BeautifulSoup(response.text).find_all("span", class_="tag-box")
     all_tags = []
+
     for tag in tags:
         all_tags.append(tag.contents[0].strip())
+
     return all_tags
 
 class Profile(object):
@@ -188,7 +204,8 @@ class Profile(object):
                     # Problem name/url
                     prob = i.contents[1].contents[0]
                     prob["href"] = "http://www.codechef.com" + prob["href"]
-                    append(eval(repr(prob["href"]).replace("\\", "")))
+                    problem_link = eval(repr(prob["href"]).replace("\\", ""))
+                    append(problem_link)
                     try:
                         append(prob.contents[0])
                     except IndexError:
@@ -321,7 +338,8 @@ class Profile(object):
                             # Problem name/url
                             prob = i.contents[1].contents[0]
                             prob["href"] = "http://www.codechef.com" + prob["href"]
-                            append(eval(repr(prob["href"]).replace("\\", "")))
+                            problem_link = eval(repr(prob["href"]).replace("\\", ""))
+                            append(problem_link)
                             try:
                                 append(prob.contents[0])
                             except IndexError:
@@ -381,7 +399,7 @@ class Profile(object):
         else:
             return -1
 
-        url = "http://codeforces.com/api/user.status?handle=" + \
+        url = "http://www.codeforces.com/api/user.status?handle=" + \
               handle + \
               "&from=1&count=50000"
 
@@ -415,7 +433,7 @@ class Profile(object):
                 arg = "gymProblem/"
 
             # Problem Name/URL
-            problem_link = "http://codeforces.com/problemset/" + arg + \
+            problem_link = "http://www.codeforces.com/problemset/" + arg + \
                            str(row["contestId"]) + "/" + \
                            row["problem"]["index"]
 
@@ -461,7 +479,7 @@ class Profile(object):
             append(row["programmingLanguage"])
 
             # View code link
-            view_link = "http://codeforces.com/contest/" + \
+            view_link = "http://www.codeforces.com/contest/" + \
                         str(row["contestId"]) + \
                         "/submission/" + \
                         str(row["id"])
@@ -540,8 +558,9 @@ class Profile(object):
 
                     # Problem Name/URL
                     uri = i.contents[5].contents[0]
-                    uri["href"] = "http://www.spoj.com" + uri["href"]
-                    append(eval(repr(uri["href"]).replace("\\", "")))
+                    uri["href"] = "https://www.spoj.com" + uri["href"]
+                    problem_link = eval(repr(uri["href"]).replace("\\", ""))
+                    append(problem_link)
                     append(uri.contents[0].strip())
 
                     # Problem Status
@@ -671,7 +690,7 @@ class Profile(object):
                 append(str(time_stamp))
 
                 # Problem Name/URL
-                problem_link = "https://hackerearth.com" + all_as[1]["href"]
+                problem_link = "https://www.hackerearth.com" + all_as[1]["href"]
                 append(problem_link)
                 problem_name = all_as[1].contents[0]
                 append(problem_name)
@@ -710,7 +729,7 @@ class Profile(object):
                 append(language)
 
                 # View code link
-                view_link = "https://hackerearth.com" + \
+                view_link = "https://www.hackerearth.com" + \
                             all_as[-1]["href"]
                 append(view_link)
 
@@ -754,7 +773,7 @@ class Profile(object):
             append(" ".join(time_stamp))
 
             # Problem link
-            append("https://hackerrank.com/challenges/" + row["slug"])
+            append("https://www.hackerrank.com/challenges/" + row["slug"])
 
             # Problem name
             append(row["name"])
@@ -775,4 +794,3 @@ class Profile(object):
             it += 1
 
         return submissions
-

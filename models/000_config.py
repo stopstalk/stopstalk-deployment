@@ -14,8 +14,8 @@ current.SITES = OrderedDict()
 current.SITES["CodeChef"] = "http://www.codechef.com/users/"
 current.SITES["CodeForces"] = "http://www.codeforces.com/profile/"
 current.SITES["Spoj"] = "http://www.spoj.com/users/"
-current.SITES["HackerEarth"] = "https://hackerearth.com/users/"
-current.SITES["HackerRank"] = "https://hackerrank.com/"
+current.SITES["HackerEarth"] = "https://www.hackerearth.com/users/"
+current.SITES["HackerRank"] = "https://www.hackerrank.com/"
 
 # If you are under a PROXY uncomment this and comment the next line
 #current.PROXY = {"http": "http://proxy.iiit.ac.in:8080/",
