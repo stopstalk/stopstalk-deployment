@@ -102,7 +102,6 @@ def update_friend():
                    record,
                    fields=form_fields,
                    deletable=True,
-                   formstyle=utilities.materialize_form,
                    )
 
     if form.process().accepted:
@@ -446,8 +445,7 @@ def custom_friend():
     form = SQLFORM(db.custom_friend,
                    fields=list_fields,
                    hidden=dict(user_id=session.user_id,
-                               last_retrieved=datetime.now()),
-                   formstyle=utilities.materialize_form)
+                               last_retrieved=datetime.now()))
 
     # Set the hidden field
     form.vars.user_id = session.user_id

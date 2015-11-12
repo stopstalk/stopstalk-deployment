@@ -32,7 +32,6 @@ import datetime
 import copy
 import gluon.contenttype
 import gluon.fileutils
-import utilities
 
 try:
     import pygraphviz as pgv
@@ -169,8 +168,7 @@ def index():
 
 def insert():
     (db, table) = get_table(request)
-    form = SQLFORM(db[table], ignore_rw=ignore_rw,
-                   formstyle=utilities.materialize_form)
+    form = SQLFORM(db[table], ignore_rw=ignore_rw)
     if form.accepts(request.vars, session):
         response.flash = T('new record inserted')
     return dict(form=form, table=db[table])
@@ -250,17 +248,43 @@ def select():
                 orderby = '~' + orderby
     session.last_orderby = orderby
     session.last_query = request.vars.query
-    form = FORM(TABLE(TR(T('Query:'), '', INPUT(_style='width:400px',
-                _name='query', _value=request.vars.query or '',
-                requires=IS_NOT_EMPTY(
-                    error_message=T("Cannot be empty")))), TR(T('Update:'),
-                INPUT(_name='update_check', _type='checkbox',
-                value=False), INPUT(_style='width:400px',
-                _name='update_fields', _value=request.vars.update_fields
-                                    or '')), TR(T('Delete:'), INPUT(_name='delete_check',
-                _class='delete', _type='checkbox', value=False), ''),
-                TR('', '', INPUT(_type='submit', _value=T('submit')))),
-                _action=URL(r=request, args=request.args))
+    form = FORM(DIV(DIV(INPUT(_style='width:400px',
+                              _name='query',
+                              _id='query_inp',
+                              _value=request.vars.query or '',
+                              requires=IS_NOT_EMPTY(
+                                    error_message=T("Cannot be empty"))),
+                        LABEL("Query:", _for='query_inp'),
+                        _class="input-field col offset-s3 s6"),
+                    _class="row"),
+                DIV(DIV(INPUT(_name='update_check',
+                              _id='update_inp',
+                              _type='checkbox',
+                              value=False),
+                        LABEL("Update", _for='update_inp'),
+                        _class="input-field col offset-s3 s6"),
+                    _class="row"),
+                DIV(DIV(INPUT(_style='width:400px',
+                              _name='update_fields',
+                              _id='update_field_inp',
+                              _value=request.vars.update_fields or ''),
+                        LABEL("Update Fields:", _for='update_fields_inp'),
+                        _class="input-field col offset-s3 s6"),
+                    _class="row"),
+                DIV(DIV(INPUT(_name='delete_check',
+                              _class='delete',
+                              _id='delete_inp',
+                              _type='checkbox',
+                              value=False),
+                        LABEL("Delete:", _for='delete_inp'),
+                        _class="input-field col offset-s3 s6"),
+                    _class="row"),
+                DIV(DIV(INPUT(_type='submit',
+                              _value=T('submit')),
+                        _class="input-field col offset-s3 s6"),
+                    _class="row"),
+                _action=URL(r=request, args=request.args),
+                _class="row col s12")
 
     tb = None
     if form.accepts(request.vars, formname=None):
@@ -361,8 +385,7 @@ def update():
         ignore_rw=ignore_rw and not keyed,
         linkto=URL('select',
                    args=request.args[:1]), upload=URL(r=request,
-                                                      f='download', args=request.args[:1]),
-        formstyle=utilities.materialize_form)
+                                                      f='download', args=request.args[:1]))
 
     if form.accepts(request.vars, session):
         session.flash = T('done!')
@@ -680,7 +703,6 @@ def manage():
     grid = SQLFORM.smartgrid(table,
                              args=request.args[:2],
                              formname=formname,
-                             formstyle=utilities.materialize_form,
                              **kwargs)
     return grid
 

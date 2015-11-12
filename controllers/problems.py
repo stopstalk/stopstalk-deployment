@@ -77,7 +77,7 @@ def index():
         tags_func = getattr(profile, site + "_get_tags")
         all_tags = tags_func(problem_link)
         if all_tags != []:
-            tags = DIV()
+            tags = DIV(_class="center")
             for tag in all_tags:
                 tags.append(DIV(A(tag,
                                   _href=URL("problems",

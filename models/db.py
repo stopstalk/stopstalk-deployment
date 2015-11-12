@@ -55,6 +55,7 @@ response.form_label_separator = myconf.take('forms.separator')
 
 from gluon.tools import Auth, Service, PluginManager
 from datetime import datetime
+from utilities import materialize_form
 
 auth = Auth(db)
 service = Service()
@@ -101,6 +102,8 @@ mail.settings.login = current.sender_mail + ":" + current.sender_password
 auth.settings.registration_requires_verification = True
 auth.settings.registration_requires_approval = False
 auth.settings.reset_password_requires_verification = True
+auth.settings.formstyle = materialize_form
+current.response.formstyle = materialize_form
 
 #########################################################################
 ## Define your tables below (or better in another model file) for example

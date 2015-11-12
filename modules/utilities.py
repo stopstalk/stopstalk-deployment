@@ -74,6 +74,10 @@ def materialize_form(form, fields):
         elif isinstance(controls, TEXTAREA):
             _controls = TEXTAREA(controls.components[0],
                                  _class="materialize-textarea")
+        elif isinstance(controls, SELECT):
+            _controls = SELECT(OPTION(label, _value=""),
+                               *controls.components[1:])
+            label = ""
 
         input_field = DIV(_controls, label,
                           _class="input-field col offset-s4 s4")
