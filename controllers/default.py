@@ -398,18 +398,28 @@ def filters():
     start_date = request.post_vars["start_date"]
     end_date = request.post_vars["end_date"]
 
+    # Else part ensures that both the dates passed
+    # are included in the range
     if start_date == "":
+        # If start date is empty start from the INITIAL_DATE
         start_date = current.INITIAL_DATE
     else:
+        # Else append starting time for that day
         start_date += " 00:00:00"
 
     if end_date == "":
-        end_date = datetime.today()
+        # If end date is empty retrieve all submissions till now(current timestamp)
+        # Current date/time
+        end_date = str(datetime.today())
+        # Remove the last milliseconds from the timestamp
+        end_date = end_date[:-7]
     else:
+        # Else append the ending time for that day
         end_date += " 23:59:59"
 
     start_time = time.strptime(start_date, "%Y-%m-%d %H:%M:%S")
     end_time = time.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+
     if end_time > start_time:
         # Submissions in the the range start_date to end_date
         query &= (stable.time_stamp >= start_date)

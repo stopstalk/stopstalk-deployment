@@ -24,7 +24,12 @@ import re
 import utilities
 import profilesites as profile
 
+# ----------------------------------------------------------------------------
 def pie_chart_helper():
+    """
+        Helper function for populating pie chart with different
+        submission status of a problem
+    """
 
     problem_name = request.post_vars["pname"]
     stable = db.submission
@@ -34,16 +39,31 @@ def pie_chart_helper():
                                                          groupby=stable.status)
     return dict(row=row)
 
+# ----------------------------------------------------------------------------
 def urltosite(url):
+    """
+        Helper function to extract site from url
+    """
+
+    # Note: try/except is not added because this function is not to
+    #       be called for invalid problem urls
     site = re.search("www.*com", url).group()
+
+    # Remove www. and .com from the url to get the site
     site = site[4:-4]
+
     return site
 
+# ----------------------------------------------------------------------------
 def index():
+    """
+        The main problem page
+    """
 
     if request.vars.has_key("pname") == False or \
         request.vars.has_key("plink") == False:
 
+        # Disables direct entering of a URL
         session.flash = "Please click on a Problem Link"
         redirect(URL("default", "index"))
 
@@ -89,7 +109,11 @@ def index():
                 problem_link=problem_link,
                 table=table)
 
+# ----------------------------------------------------------------------------
 def tag():
+    """
+        Tag search page
+    """
 
     table = TABLE(_class="striped centered")
     thead = THEAD(TR(TH("Problem Name"),
@@ -97,19 +121,25 @@ def tag():
                      TH("Problem Page"),
                      TH("Tags")))
     table.append(thead)
+
+    # If URL does not have vars containing q
+    # then remain at the search page and return
+    # an empty table
     if request.vars.has_key("q") is False:
         return dict(table=table)
 
     q = request.vars["q"]
     stable = db.submission
     ptable = db.problem_tags
+
     query = ptable.tags.like("%" + q + "%")
+    join_query = (stable.problem_link == ptable.problem_link)
 
     all_problems = db(query).select(stable.problem_name,
                                     stable.problem_link,
                                     stable.site,
                                     ptable.tags,
-                                    left=ptable.on(stable.problem_link==ptable.problem_link),
+                                    left=ptable.on(join_query),
                                     distinct=True)
     tbody = TBODY()
     for problem in all_problems:
@@ -136,16 +166,31 @@ def tag():
         table.append(tr)
     return dict(table=table)
 
+# ----------------------------------------------------------------------------
 def refresh_tags():
+    """
+        Refresh tags in the database
+    """
 
-    current_problem_list = db(db.problem_tags.id > 0).select(db.problem_tags.problem_link)
-    updated_problem_list = db(db.submission.id > 0).select(db.submission.problem_link,
-                                                           distinct=True)
-    current_problem_list = map(lambda x: x["problem_link"], current_problem_list)
-    updated_problem_list = map(lambda x: x["problem_link"], updated_problem_list)
+    ptable = db.problem_tags
+    stable = db.submission
 
+    # Problems that are in problem_tags table
+    current_problem_list = db(ptable.id > 0).select(ptable.problem_link)
+    # Problems that are in submission table
+    updated_problem_list = db(stable.id > 0).select(stable.problem_link,
+                                                    distinct=True)
+    current_problem_list = map(lambda x: x["problem_link"],
+                               current_problem_list)
+    updated_problem_list = map(lambda x: x["problem_link"],
+                               updated_problem_list)
+
+    # Compute difference between the lists
     difference_list = list(set(updated_problem_list) - set(current_problem_list))
     print "Refreshing "
+
+    # Start retrieving tags for the problems
+    # that are not in problem_tags table
     for link in difference_list:
         site = urltosite(link)
         try:
@@ -156,8 +201,12 @@ def refresh_tags():
         except:
             all_tags = ["-"]
         print "."
-        db.problem_tags.insert(problem_link=link,
-                               tags=str(all_tags))
+
+        # Insert tags in problem_tags table
+        # Note: Tags are stored in a stringified list
+        #       so that they can be used directly by eval
+        ptable.insert(problem_link=link,
+                      tags=str(all_tags))
 
     print "\nNew problems added: " + \
           utilities.RED + \

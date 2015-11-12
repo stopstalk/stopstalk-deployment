@@ -1,6 +1,18 @@
 {{extend 'layout.html'}}
 <html>
   <head>
+    <style>
+        .chip {
+            color: black;
+            background-color: #e4e4e4;
+        }
+        #user-details {
+            float: left;
+            margin-top: 10%;
+            margin-left: 7%;
+        }
+    </style>
+
     <!--Load the AJAX API-->
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
@@ -147,13 +159,6 @@
             });
         }
     </script>
-    <style>
-        #user-details {
-            float: left;
-            margin-top: 10%;
-            margin-left: 10%;
-        }
-    </style>
   </head>
 
   <body>
