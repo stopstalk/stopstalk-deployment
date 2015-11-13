@@ -129,10 +129,21 @@ def tag():
         return dict(table=table)
 
     q = request.vars["q"]
+    # Enables multiple space seperated tag search
+    q = q.split(" ")
     stable = db.submission
     ptable = db.problem_tags
 
-    query = ptable.tags.like("%" + q + "%")
+    query = None
+    for tag in q:
+        if query is not None:
+            # Decision to make & or |
+            # & => Search for problem containing all these tags
+            # | => Search for problem containing one of the tags
+            query &= ptable.tags.like("%" + tag + "%")
+        else:
+            query = ptable.tags.like("%" + tag + "%")
+
     join_query = (stable.problem_link == ptable.problem_link)
 
     all_problems = db(query).select(stable.problem_name,
