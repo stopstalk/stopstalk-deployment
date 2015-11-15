@@ -24,12 +24,12 @@ import utilities
 import time
 from datetime import datetime, date
 
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 @auth.requires_login()
 def index():
     return dict()
 
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 @auth.requires_login()
 def edit_custom_friend_details():
     """
@@ -67,12 +67,14 @@ def edit_custom_friend_details():
                                 _style="color: black;",
                                 _value="Update",
                                 _type="submit"),
-                          _action=URL("user", "update_friend", args=[row.id]))))
+                          _action=URL("user",
+                                      "update_friend",
+                                      args=[row.id]))))
         table.append(tr)
 
     return dict(table=table)
 
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 @auth.requires_login()
 def update_friend():
 
@@ -109,9 +111,15 @@ def update_friend():
             ## UPDATE
             # If delete checkbox is not checked
             response.flash = "User details updated"
-            db(cftable.id == request.args[0]).update(last_retrieved=current.INITIAL_DATE)
+
+            # Since there may be some updates in the handle
+            # for correctness we need to remove all the submissions
+            # and retrieve all the submissions again
+            query = (cftable.id == request.args[0])
+            db(query).update(last_retrieved=current.INITIAL_DATE)
             db(db.submission.custom_user_id == request.args[0]).delete()
             utilities.retrieve_submissions(form.vars.id, True)
+
             redirect(URL("user", "edit_custom_friend_details"))
         else:
             ## DELETE
@@ -123,7 +131,7 @@ def update_friend():
 
     return dict(form=form)
 
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def get_dates():
     """
         Return a dictionary containing count of submissions
@@ -192,7 +200,7 @@ def get_dates():
                 max_streak=max_streak,
                 curr_streak=streak)
 
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def get_stats():
     """
         Get statistics of the user
@@ -211,11 +219,13 @@ def get_stats():
 
     stable = db.submission
     count = stable.id.count()
-    row = db(stable.stopstalk_handle == handle).select(stable.status, count,
-                                                       groupby=stable.status)
+    query = (stable.stopstalk_handle == handle)
+    row = db(query).select(stable.status,
+                           count,
+                           groupby=stable.status)
     return dict(row=row)
 
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def profile():
     """
         Controller to show user profile
@@ -271,7 +281,7 @@ def profile():
                 efficiency=efficiency,
                 handle=handle)
 
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def submissions():
     """
         Retrieve submissions of a specific user
@@ -337,7 +347,7 @@ def submissions():
                 user_id=user_id,
                 table=table)
 
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 @auth.requires_login()
 def friend_requests():
     """
@@ -354,7 +364,9 @@ def friend_requests():
     for row in rows:
         tr = TR()
         tr.append(TD(A(row.from_h.first_name + " " + row.from_h.last_name,
-                       _href=URL("user", "profile", args=[row.from_h.stopstalk_handle]))))
+                       _href=URL("user",
+                                 "profile",
+                                 args=[row.from_h.stopstalk_handle]))))
         tr.append(TD(row.from_h.institute))
         tr.append(TD(UL(LI(FORM(INPUT(_value="Accept",
                                       _type="submit",
@@ -368,23 +380,25 @@ def friend_requests():
                                       _style="background-color: red;"),
                                 _action=URL("user", "reject_fr",
                                             args=[row.id]))),
-                        _style="display: inline-flex;list-style-type: none;")))
+                        _style="display: inline-flex; list-style-type: none;")))
         tbody.append(tr)
 
     table.append(tbody)
     return dict(table=table)
 
-# -------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 @auth.requires_login()
 def add_friend(user_id, friend_id):
     """
         Add a friend into friend-list
+
+        @ToDo: Maybe Unnecessary wrapper
     """
 
     db.friends.insert(user_id=user_id,
                       friend_id=friend_id)
 
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 @auth.requires_login()
 def accept_fr():
     """
@@ -410,7 +424,7 @@ def accept_fr():
     redirect(URL("user", "friend_requests"))
     return dict()
 
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 @auth.requires_login()
 def reject_fr():
     """
@@ -427,7 +441,7 @@ def reject_fr():
 
     redirect(URL("user", "friend_requests"))
 
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 @auth.requires_login()
 def custom_friend():
     """

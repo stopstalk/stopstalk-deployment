@@ -69,7 +69,8 @@ def index():
                                   "%Y-%m-%d %H:%M:%S").date()
 
         per_day = total_submissions * 1.0 / (today - start).days
-        db(db.auth_user.stopstalk_handle == row.stopstalk_handle).update(per_day=per_day)
+        query = (db.auth_user.stopstalk_handle == row.stopstalk_handle)
+        db(query).update(per_day=per_day)
 
     response.flash = T("Please Login")
     return dict()
@@ -329,13 +330,16 @@ def leaderboard():
         diff = "{:1.5f}".format(i[4])
 
         if float(diff) == 0.0:
-            tr.append(TD("+" + diff, " ", I(_class="fa fa-minus")))
+            tr.append(TD("+" + diff, " ",
+                         I(_class="fa fa-minus")))
         elif i[4] > 0:
-            tr.append(TD("+" + str(diff), " ", I(_class="fa fa-chevron-circle-up",
-                                      _style="color: #0f0;")))
+            tr.append(TD("+" + str(diff), " ",
+                         I(_class="fa fa-chevron-circle-up",
+                           _style="color: #0f0;")))
         elif i[4] < 0:
-            tr.append(TD(diff, " ", I(_class="fa fa-chevron-circle-down",
-                                      _style="color: #f00;")))
+            tr.append(TD(diff, " ",
+                         I(_class="fa fa-chevron-circle-down",
+                           _style="color: #f00;")))
 
         tbody.append(tr)
 
@@ -358,33 +362,36 @@ def search():
 @auth.requires_login()
 def filters():
 
-    all_languages = db(db.submission.id>0).select(db.submission.lang, distinct=True)
+    stable = db.submission
+    post_vars = request.post_vars
+
+    all_languages = db(stable.id>0).select(stable.lang,
+                                           distinct=True)
     languages = []
     for  i in all_languages:
         languages.append(i["lang"])
 
     table = None
     # If form is not submitted
-    if request.vars == {}:
+    if post_vars == {}:
         return dict(languages=languages,
                     table=table)
 
     # Form has been submitted
-    stable = db.submission
     cftable = db.custom_friend
     atable = db.auth_user
     ftable = db.friends
 
     # Retrieve all the custom users created by the logged-in user
-    query = (cftable.first_name.like("%" + request.post_vars["name"] + "%"))
-    query |= (cftable.last_name.like("%" + request.post_vars["name"] + "%"))
+    query = (cftable.first_name.like("%" + post_vars["name"] + "%"))
+    query |= (cftable.last_name.like("%" + post_vars["name"] + "%"))
     query &= (cftable.user_id == session.user_id)
     custom_friends = db(query).select(cftable.id)
     cusfriends = map(lambda x: x["id"], custom_friends)
 
     # Get the friends of logged in user
-    query = (atable.first_name.like("%" + request.post_vars["name"] + "%"))
-    query |= (atable.last_name.like("%" + request.post_vars["name"] + "%"))
+    query = (atable.first_name.like("%" + post_vars["name"] + "%"))
+    query |= (atable.last_name.like("%" + post_vars["name"] + "%"))
     query &= (ftable.user_id == atable.id)
     friend_ids = db(atable).select(atable.id, join=ftable.on(query))
     friends = map(lambda x: x["id"], friend_ids)
@@ -395,8 +402,8 @@ def filters():
     # User in one of the custom friends
     query |= (stable.custom_user_id.belongs(cusfriends))
 
-    start_date = request.post_vars["start_date"]
-    end_date = request.post_vars["end_date"]
+    start_date = post_vars["start_date"]
+    end_date = post_vars["end_date"]
 
     # Else part ensures that both the dates passed
     # are included in the range
@@ -425,23 +432,24 @@ def filters():
         query &= (stable.time_stamp >= start_date)
         query &= (stable.time_stamp <= end_date)
     else:
-        response.flash = "Start Date greater than End Date"
+        session.flash = "Start Date greater than End Date"
+        redirect(URL("default", "filters"))
 
     # Submissions with problem name containing pname
-    if request.post_vars["pname"] != "":
-        query &= (stable.problem_name.like("%" + request.post_vars["pname"] + "%"))
+    if post_vars["pname"] != "":
+        query &= (stable.problem_name.like("%" + post_vars["pname"] + "%"))
 
     # Submissions from this site
-    if request.post_vars["site"] != "":
-        query &= (stable.site == str(request.post_vars["site"]))
+    if post_vars["site"] != "":
+        query &= (stable.site == str(post_vars["site"]))
 
     # Submissions with this language
-    if request.post_vars["language"] != "":
-        query &= (stable.lang == str(request.post_vars["language"]))
+    if post_vars["language"] != "":
+        query &= (stable.lang == str(post_vars["language"]))
 
     # Submissions with this submission status
-    if request.post_vars["status"] != "":
-        query &= (stable.status == str(request.post_vars["status"]))
+    if post_vars["status"] != "":
+        query &= (stable.status == str(post_vars["status"]))
 
     # Apply the complex query and sort by time_stamp DESC
     filtered = db(query).select(orderby=~stable.time_stamp)

@@ -388,7 +388,7 @@ def update():
                                                       f='download', args=request.args[:1]))
 
     if form.accepts(request.vars, session):
-        session.flash = T('done!')
+        session.flash = T('Done !!')
         qry = query_by_table_type(table, db)
         redirect(URL('select', args=request.args[:1],
                  vars=dict(query=qry)))

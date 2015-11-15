@@ -40,11 +40,13 @@ def _debug(first_name, last_name, site, custom=False):
     """
 
     name = first_name + " " + last_name
-    s = "Retrieving " + CYAN + site + RESET_COLOR + " submissions for "
+    debug_string = "Retrieving " + \
+                   CYAN + site + RESET_COLOR + \
+                   " submissions for "
     if custom:
-        s += "CUSTOM USER "
-    s += BLUE + name + RESET_COLOR
-    print s,
+        debug_string += "CUSTOM USER "
+    debug_string += BLUE + name + RESET_COLOR
+    print debug_string,
 
 # -----------------------------------------------------------------------------
 def get_link(site, handle):
@@ -53,6 +55,26 @@ def get_link(site, handle):
     """
 
     return current.SITES[site] + handle
+
+# -----------------------------------------------------------------------------
+def get_friends(user_id):
+
+    db = current.db
+    cftable = db.custom_friend
+    atable = db.auth_user
+    ftable = db.friends
+
+    # Retrieve custom friends
+    query = (cftable.user_id == user_id)
+    custom_friends = db(query).select(cftable.id)
+    custom_friends = map(lambda x: x["id"], custom_friends)
+
+    # Retrieve friends
+    query = (ftable.user_id == atable.id)
+    friend_ids = db(atable.id != user_id).select(atable.id, join=ftable.on(query))
+    friends = map(lambda x: x["id"], friend_ids)
+
+    return friends, custom_friends
 
 # -----------------------------------------------------------------------------
 def materialize_form(form, fields):
@@ -68,16 +90,27 @@ def materialize_form(form, fields):
         _controls = controls
 
         if isinstance(controls, SPAN):
+            # Mostly for ids which cannot be edited by user
             _controls = INPUT(_value=controls.components[0],
-                              _class="validate",
                               _disabled="")
         elif isinstance(controls, TEXTAREA):
+            # Textarea inputs
             _controls = TEXTAREA(controls.components[0],
                                  _class="materialize-textarea")
         elif isinstance(controls, SELECT):
+            # Select inputs
             _controls = SELECT(OPTION(label, _value=""),
                                *controls.components[1:])
+            # Note now label will be the first element
+            # of Select input whose value would be ""
             label = ""
+        elif isinstance(controls, A):
+            # For the links in the bottom while updating tables like auth_user
+            label = ""
+        elif isinstance(controls, INPUT) is False:
+            # If the values are readonly
+            _controls = INPUT(_value=controls,
+                              _disabled="")
 
         input_field = DIV(_controls, label,
                           _class="input-field col offset-s4 s4")

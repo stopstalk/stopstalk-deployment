@@ -21,6 +21,7 @@
 """
 
 import re
+import time, datetime
 import utilities
 import profilesites as profile
 
@@ -34,9 +35,10 @@ def pie_chart_helper():
     problem_name = request.post_vars["pname"]
     stable = db.submission
     count = stable.id.count()
-    row = db(stable.problem_name == problem_name).select(stable.status,
-                                                         count,
-                                                         groupby=stable.status)
+    query = (stable.problem_name == problem_name)
+    row = db(query).select(stable.status,
+                           count,
+                           groupby=stable.status)
     return dict(row=row)
 
 # ----------------------------------------------------------------------------
@@ -61,7 +63,7 @@ def index():
     """
 
     if request.vars.has_key("pname") == False or \
-        request.vars.has_key("plink") == False:
+       request.vars.has_key("plink") == False:
 
         # Disables direct entering of a URL
         session.flash = "Please click on a Problem Link"
@@ -154,16 +156,20 @@ def tag():
                                     distinct=True)
     tbody = TBODY()
     for problem in all_problems:
+
+        submission = problem["submission"]
+        problem_tag = problem["problem_tags"]
         tr = TR()
-        tr.append(TD(A(problem["submission"]["problem_name"],
+
+        tr.append(TD(A(submission["problem_name"],
                        _href=URL("problems",
                                  "index",
-                                 vars={"pname": problem["submission"]["problem_name"],
-                                       "plink": problem["submission"]["problem_link"]}))))
+                                 vars={"pname": submission["problem_name"],
+                                       "plink": submission["problem_link"]}))))
         tr.append(TD(A(I(_class="fa fa-link"),
-                         _href=problem["submission"]["problem_link"])))
-        tr.append(TD(problem["submission"]["site"]))
-        all_tags = eval(problem["problem_tags"]["tags"])
+                         _href=submission["problem_link"])))
+        tr.append(TD(submission["site"]))
+        all_tags = eval(problem_tag["tags"])
         td = TD()
         for tag in all_tags:
             td.append(DIV(A(tag,
@@ -175,6 +181,7 @@ def tag():
             td.append(" ")
         tr.append(td)
         table.append(tr)
+
     return dict(table=table)
 
 # ----------------------------------------------------------------------------
@@ -197,7 +204,8 @@ def refresh_tags():
                                updated_problem_list)
 
     # Compute difference between the lists
-    difference_list = list(set(updated_problem_list) - set(current_problem_list))
+    difference_list = list(set(updated_problem_list) - \
+                           set(current_problem_list))
     print "Refreshing "
 
     # Start retrieving tags for the problems
@@ -223,3 +231,71 @@ def refresh_tags():
           utilities.RED + \
           " [%d]" % (len(difference_list)) + \
           utilities.RESET_COLOR
+
+def _render_trending(caption, rows):
+
+    table = TABLE(_class="striped centered")
+    thead = THEAD(TR(TH("Problem"), TH("Submissions")))
+    table.append(thead)
+    tbody = TBODY()
+    for problem in rows:
+        tr = TR()
+        tr.append(TD(A(problem["submission"]["problem_name"],
+                       _href=URL("problems", "index",
+                                 vars={"pname": problem["submission"]["problem_name"],
+                                       "plink": problem["submission"]["problem_link"]}))))
+        tr.append(TD(problem["_extra"]["COUNT(submission.id)"]))
+        tbody.append(tr)
+
+    table.append(tbody)
+    table = DIV(H4(caption, _class="center"), table)
+
+    return table
+
+# ----------------------------------------------------------------------------
+def trending():
+    """
+        Show trending problems globally and among friends
+    """
+
+    stable = db.submission
+    today = datetime.datetime.today()
+    start_date = str(today - datetime.timedelta(days=10))
+    end_date = str(today)
+    start_time = time.strptime(start_date[:-7], "%Y-%m-%d %H:%M:%S")
+    end_time = time.strptime(end_date[:-7], "%Y-%m-%d %H:%M:%S")
+    count = stable.id.count()
+
+    if session.user_id:
+        friends, custom_friends = utilities.get_friends(session.user_id)
+
+        query = (stable.user_id.belongs(friends))
+        query |= (stable.custom_user_id.belongs(custom_friends))
+        query &= (stable.time_stamp >= start_date)
+        query &= (stable.time_stamp <= end_date)
+
+        friend_trending = db(query).select(stable.problem_name,
+                                           stable.problem_link,
+                                           count,
+                                           orderby=~count,
+                                           groupby=stable.problem_link,
+                                           limitby=(0, 10))
+        friend_table = _render_trending("Trending among friends", friend_trending)
+
+    query = (stable.time_stamp >= start_date)
+    query &= (stable.time_stamp <= end_date)
+    global_trending = db(query).select(stable.problem_name,
+                                       stable.problem_link,
+                                       count,
+                                       orderby=~count,
+                                       groupby=stable.problem_link,
+                                       limitby=(0, 10))
+    global_table = _render_trending("Trending Globally", global_trending)
+
+    if session.user_id:
+        div = DIV(_class="row col s12")
+        div.append(DIV(friend_table, _class="col s6"))
+        div.append(DIV(global_table, _class="col s6"))
+    else:
+        div = DIV(global_table, _class="center")
+    return dict(div=div)
