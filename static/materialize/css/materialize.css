@@ -1837,6 +1837,9 @@ button, input, optgroup, select, textarea {
 button {
   overflow: visible; }
 
+select {
+    display: none;
+}
 /**
  * Address inconsistent `text-transform` inheritance for `button` and `select`.
  * All other form control elements do not inherit `text-transform` values.
@@ -5928,7 +5931,7 @@ button.btn-floating {
       background-color: #eee; }
     .dropdown-content li > a, .dropdown-content li > span {
       font-size: 1.2rem;
-      color: #26a69a;
+      color: #536dfe;
       display: block;
       padding: 1rem 1rem; }
     .dropdown-content li > a > i {
@@ -6541,7 +6544,7 @@ form p:last-child {
   /* checkbox aspect */ }
   [type="checkbox"] + label {
     position: relative;
-    padding-left: 35px;
+    padding-left: 40px;
     cursor: pointer;
     display: inline-block;
     height: 25px;
@@ -6559,13 +6562,13 @@ form p:last-child {
     content: '';
     position: absolute;
     top: 0;
-    left: 0;
+    left: 0px;
     width: 18px;
     height: 18px;
     z-index: 0;
     border: 2px solid #5a5a5a;
     border-radius: 1px;
-    margin-top: 2px;
+    margin-top: -2px;
     -webkit-transition: 0.2s;
     -moz-transition: 0.2s;
     -o-transition: 0.2s;

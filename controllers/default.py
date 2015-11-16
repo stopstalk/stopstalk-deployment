@@ -440,16 +440,25 @@ def filters():
         query &= (stable.problem_name.like("%" + post_vars["pname"] + "%"))
 
     # Submissions from this site
-    if post_vars["site"] != "":
-        query &= (stable.site == str(post_vars["site"]))
+    if post_vars.has_key("site"):
+        sites = post_vars["site"]
+        if isinstance(sites, str):
+            sites = [sites]
+        query &= (stable.site.belongs(sites))
 
     # Submissions with this language
-    if post_vars["language"] != "":
-        query &= (stable.lang == str(post_vars["language"]))
+    if post_vars.has_key("language"):
+        langs = post_vars["language"]
+        if isinstance(langs, str):
+            langs = [langs]
+        query &= (stable.lang.belongs(langs))
 
     # Submissions with this submission status
-    if post_vars["status"] != "":
-        query &= (stable.status == str(post_vars["status"]))
+    if post_vars.has_key("status"):
+        statuses = post_vars["status"]
+        if isinstance(statuses, str):
+            statuses = [statuses]
+        query &= (stable.status.belongs(statuses))
 
     # Apply the complex query and sort by time_stamp DESC
     filtered = db(query).select(orderby=~stable.time_stamp)

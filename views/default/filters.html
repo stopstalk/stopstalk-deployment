@@ -7,6 +7,7 @@
             min: new Date(2013, 0, 1),
             max: new Date()
         });
+        $('select').material_select();
     });
 
 </script>
@@ -16,27 +17,19 @@
 <div class="row">
     <form class="col s12" method="POST" action="">
       <div class="row">
-        <div class="input-field col offset-s3 s3">
+        <div class="input-field col offset-s1 s5">
           <input id="name" name="name" type="text">
           <label for="name">Name</label>
         </div>
-        <div class="input-field col s3">
+        <div class="input-field col s5">
           <input id="problem_name" name="pname" type="text" class="validate">
           <label for="problem_name">Problem Name</label>
         </div>
       </div>
       <div class="row">
-        <div class="input-field col offset-s3 s2">
-          <select name="site">
-              <option value="" selected>Site</option>
-              {{for site in current.SITES:}}
-                <option value="{{=site}}">{{=site}}</option>
-              {{pass}}
-          </select>
-        </div>
-        <div class="input-field col s2">
-          <select name="status">
-              <option value="" selected>Submission Status</option>
+        <div class="input-field col offset-s1 s4">
+          <select name="status" multiple>
+              <option value="" selected disabled>Submission Status</option>
               {{for status in (("AC", "Accepted"),
                                ("WA", "Wrong Answer"),
                                ("TLE", "Time Limit Exceeded"),
@@ -52,8 +45,16 @@
           </select>
         </div>
         <div class="input-field col s2">
-            <select name="language">
-                <option value="" selected>Language</option>
+          <select name="site" multiple>
+              <option value="" selected disabled>Site</option>
+              {{for site in current.SITES:}}
+                <option value="{{=site}}">{{=site}}</option>
+              {{pass}}
+          </select>
+        </div>
+        <div class="input-field col s4">
+            <select name="language" multiple>
+                <option value="" selected disabled>Language</option>
                 {{for language in languages:}}
                     <option value="{{=language}}">{{=language}}</option>
                 {{pass}}
