@@ -93,11 +93,13 @@ def index():
     except AttributeError:
         tags = DIV("No tags available")
 
-    problem_details = TABLE(_style="float: left; width: 30%; margin-top: 12%; margin-left: 8%; font-size: 150%;")
+    problem_details = TABLE(_style="float: left; width: 30%; margin-top: 8%; margin-left: 8%; font-size: 150%;")
     tbody = TBODY()
     tbody.append(TR(TD(STRONG("Problem Name:"),
                     TD(problem_name,
                        _id="problem_name"))))
+    tbody.append(TR(TD(STRONG("Site:"),
+                    TD(urltosite(problem_link).capitalize()))))
     tbody.append(TR(TD(STRONG("Problem Link:"),
                     TD(A(I(_class="fa fa-link"), " Link",
                        _href=problem_link)))))

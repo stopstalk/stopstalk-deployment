@@ -322,10 +322,19 @@ def select():
     # begin handle upload csv
     csv_table = table or request.vars.table
     if csv_table:
-        formcsv = FORM(str(T('or import from csv file')) + " ",
-                       INPUT(_type='file', _name='csvfile'),
-                       INPUT(_type='hidden', _value=csv_table, _name='table'),
-                       INPUT(_type='submit', _value=T('import')))
+        formcsv = FORM(DIV(str(T('or import from csv file')) + " ", _class="row"),
+                       DIV(DIV(DIV(SPAN("File"),
+                                   INPUT(_type='file', _name='csvfile'),
+                                         _class="btn"),
+                               DIV(INPUT(_class="file-path", _type="text"),
+                                   _class="file-path-wrapper"),
+                               _class="col offset-s4 s4 file-field input-field"),
+                           _class="row"),
+                       DIV(DIV(INPUT(_type='hidden', _value=csv_table, _name='table'),
+                               INPUT(_type='submit', _value=T('import')),
+                               _class="col offset-s4 s4"),
+                           _class="row"),
+                       _class="row center")
     else:
         formcsv = None
     if formcsv and formcsv.process().accepted:

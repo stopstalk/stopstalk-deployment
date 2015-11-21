@@ -87,9 +87,21 @@ def materialize_form(form, fields):
 
     for id, label, controls, help in fields:
         curr_div = DIV(_class="row")
+        input_field = None
         _controls = controls
-
-        if isinstance(controls, SPAN):
+        if isinstance(controls, INPUT):
+            input_type = controls.attributes["_type"]
+            if input_type == "file":
+                # Layout for file type inputs
+                input_field = DIV(DIV(SPAN("Upload"),
+                                      INPUT(_type="file"),
+                                      _class="btn"),
+                                  DIV(INPUT(_type="text",
+                                            _class="file-path",
+                                            _placeholder=label.components[0]),
+                                      _class="file-path-wrapper"),
+                                  _class="col input-field file-field offset-s3 s6")
+        elif isinstance(controls, SPAN):
             # Mostly for ids which cannot be edited by user
             _controls = INPUT(_value=controls.components[0],
                               _disabled="")
@@ -112,8 +124,9 @@ def materialize_form(form, fields):
             _controls = INPUT(_value=controls,
                               _disabled="")
 
-        input_field = DIV(_controls, label,
-                          _class="input-field col offset-s4 s4")
+        if input_field is None:
+            input_field = DIV(_controls, label,
+                              _class="input-field col offset-s3 s6")
         curr_div.append(input_field)
         main_div.append(curr_div)
 
