@@ -133,7 +133,6 @@ def get_max_streak(handle):
 
     return max_streak, total_submissions, streak, len(row)
 
-
 # ----------------------------------------------------------------------------
 @auth.requires_login()
 def notifications():
@@ -553,18 +552,41 @@ def retrieve_users():
             if len(r) == 0:
                 tr.append(TD(FORM(INPUT(_type="submit",
                                         _value="Add Friend",
-                                        _class="btn waves-light waves-effect",
-                                        _style="background-color: #FF5722"),
+                                        _class="btn waves-light waves-effect green"),
                                   _action=URL("default", "mark_friend",
                                               args=[user.id]))))
             else:
                 tr.append(TD("Friend request sent"))
         else:
-            tr.append(TD("Already friends"))
+            tr.append(TD(FORM(INPUT(_type="submit",
+                                    _value="Unfriend",
+                                    _class="btn waves-light waves-effect red",
+                                    ),
+                              _action=URL("default", "unfriend", args=[user.id]))))
         tbody.append(tr)
 
     t.append(tbody)
     return dict(t=t)
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
+def unfriend():
+    """
+        Unfriend the user
+    """
+
+    if len(request.args) == 0:
+        session.flash = "Please click on a button!"
+        redirect(URL("default", "search"))
+    else:
+        friend_id = request.args[0]
+        user_id = session["user_id"]
+        ftable = db.friends
+        db((ftable.user_id == user_id) & (ftable.friend_id == friend_id)).delete()
+        db((ftable.user_id == friend_id) & (ftable.user_id == friend_id)).delete()
+
+        session.flash = "Successfully unfriended"
+        redirect(URL("default", "search.html"))
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
@@ -631,6 +653,7 @@ def submissions():
                 friends=friends,
                 cusfriends=cusfriends)
 
+# ----------------------------------------------------------------------------
 def start_retrieving():
     """
         AJAX helper function for starting retrieval
@@ -655,6 +678,9 @@ def start_retrieving():
 
 # ----------------------------------------------------------------------------
 def faq():
+    """
+        FAQ page
+    """
 
     div = DIV(_class="row")
     ul = UL(_class="collapsible col offset-s3 s6", data={"collapsible": "expandable"})
@@ -689,7 +715,9 @@ def faq():
                     _class="collapsible-body"),
                 )
         ul.append(li)
+
     div.append(ul)
+
     return dict(div=div)
 
 # ----------------------------------------------------------------------------

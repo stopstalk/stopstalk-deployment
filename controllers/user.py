@@ -77,6 +77,9 @@ def edit_custom_friend_details():
 # ------------------------------------------------------------------------------
 @auth.requires_login()
 def update_friend():
+    """
+        Update custom friend details
+    """
 
     if len(request.args) < 1:
         session.flash = "Please click one of the buttons"
@@ -421,6 +424,7 @@ def accept_fr():
     # Delete the friend request row
     db(db.friend_requests.id == row_id).delete()
 
+    session.flash = "Friend added!"
     redirect(URL("user", "friend_requests"))
     return dict()
 
@@ -439,6 +443,7 @@ def reject_fr():
     # Simply delete the friend request
     db(db.friend_requests.id == fr_id).delete()
 
+    session.flash = "Friend request rejected!"
     redirect(URL("user", "friend_requests"))
 
 # ------------------------------------------------------------------------------
