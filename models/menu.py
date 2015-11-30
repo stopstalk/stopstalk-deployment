@@ -53,6 +53,10 @@ response.menu += [(I(_class="fa fa-bar-chart fa-2x",
                      _title="Search by tags"),
                    False,
                    URL('problems', 'tag'), []),
+                  (I(_class="fa fa-question fa-2x",
+                     _title="FAQs"),
+                   False,
+                   URL('default', 'faq'), []),
                   ]
 
 if "auth" in locals(): auth.wikimenu()
