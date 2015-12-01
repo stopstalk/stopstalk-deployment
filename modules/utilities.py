@@ -89,30 +89,57 @@ def materialize_form(form, fields):
         curr_div = DIV(_class="row")
         input_field = None
         _controls = controls
+
+        try:
+            _name = controls.attributes["_name"]
+        except KeyError:
+            _name = ""
+        try:
+            _type = controls.attributes["_type"]
+        except KeyError:
+            _type = "string"
+
+        try:
+            _id = controls.attributes["_id"]
+        except KeyError:
+            _id = ""
+
         if isinstance(controls, INPUT):
-            input_type = controls.attributes["_type"]
-            if input_type == "file":
+            if _type == "file":
                 # Layout for file type inputs
                 input_field = DIV(DIV(SPAN("Upload"),
-                                      INPUT(_type="file"),
+                                      INPUT(_type=_type,
+                                            _id=_id),
                                       _class="btn"),
                                   DIV(INPUT(_type="text",
                                             _class="file-path",
                                             _placeholder=label.components[0]),
                                       _class="file-path-wrapper"),
                                   _class="col input-field file-field offset-s3 s6")
-        elif isinstance(controls, SPAN):
+        if isinstance(controls, SPAN):
             # Mostly for ids which cannot be edited by user
             _controls = INPUT(_value=controls.components[0],
+                              _type=_type,
+                              _name=_name,
+                              _id=_id,
                               _disabled="")
         elif isinstance(controls, TEXTAREA):
             # Textarea inputs
-            _controls = TEXTAREA(controls.components[0],
-                                 _class="materialize-textarea")
+            try:
+                _controls = TEXTAREA(controls.components[0],
+                                     _name=_name,
+                                     _id=_id,
+                                     _class="materialize-textarea text")
+            except IndexError:
+                _controls = TEXTAREA(_name=_name,
+                                     _id=_id,
+                                     _class="materialize-textarea text")
         elif isinstance(controls, SELECT):
             # Select inputs
             _controls = SELECT(OPTION(label, _value=""),
-                               *controls.components[1:])
+                               _name=_name,
+                               *controls.components[1:]
+                               )
             # Note now label will be the first element
             # of Select input whose value would be ""
             label = ""
@@ -122,6 +149,8 @@ def materialize_form(form, fields):
         elif isinstance(controls, INPUT) is False:
             # If the values are readonly
             _controls = INPUT(_value=controls,
+                              _name=_name,
+                              _type=_type,
                               _disabled="")
 
         if input_field is None:

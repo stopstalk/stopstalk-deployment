@@ -721,6 +721,22 @@ def faq():
     return dict(div=div)
 
 # ----------------------------------------------------------------------------
+def contact_us():
+    """
+        Contact Us page
+    """
+
+    form = SQLFORM(db.contact_us)
+
+    if form.process(keepvalues=True).accepted:
+        session.flash = "We will get back to you!"
+        redirect(URL("default", "contact_us"))
+    elif form.errors:
+        response.flash = "Form has errors!"
+
+    return dict(form=form)
+
+# ----------------------------------------------------------------------------
 def call():
     """
     exposes services. for example:

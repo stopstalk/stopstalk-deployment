@@ -57,6 +57,10 @@ response.menu += [(I(_class="fa fa-bar-chart fa-2x",
                      _title="FAQs"),
                    False,
                    URL('default', 'faq'), []),
+                  (I(_class="fa fa-phone fa-2x",
+                     _title="Contact Us"),
+                   False,
+                   URL('default', 'contact_us'), []),
                   ]
 
 if "auth" in locals(): auth.wikimenu()

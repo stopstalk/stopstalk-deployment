@@ -180,4 +180,13 @@ db.define_table("problem_tags",
                 Field("problem_link"),
                 Field("tags",
                       default="-"))
+
+db.define_table("contact_us",
+                Field("name", requires=IS_NOT_EMPTY()),
+                Field("phone_number", requires=IS_NOT_EMPTY()),
+                Field("email", requires=[IS_NOT_EMPTY(), IS_EMAIL()]),
+                Field("subject", requires=IS_NOT_EMPTY()),
+                # @ToDo: Not working for some reason
+                Field("text_message", "text", requires=IS_NOT_EMPTY()))
+
 current.db = db
