@@ -58,6 +58,11 @@ def get_link(site, handle):
 
 # -----------------------------------------------------------------------------
 def get_friends(user_id):
+    """
+        Friends of user_id (including custom friens)
+
+        @Return: (list of friend_ids, list of custom_friend_ids)
+    """
 
     db = current.db
     cftable = db.custom_friend

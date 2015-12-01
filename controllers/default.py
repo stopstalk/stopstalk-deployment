@@ -355,14 +355,26 @@ def user():
 # ----------------------------------------------------------------------------
 @auth.requires_login()
 def search():
+    """
+        Search for a user
+    """
+
     return dict()
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
 def filters():
+    """
+        Apply multiple kind of filters on submissions
+    """
 
     stable = db.submission
-    post_vars = request.post_vars
+    get_vars = request.get_vars
+    if len(request.args) == 0:
+        page = 1
+    else:
+        page = int(request.args[0])
+        page -= 1
 
     all_languages = db(stable.id>0).select(stable.lang,
                                            distinct=True)
@@ -372,7 +384,7 @@ def filters():
 
     table = None
     # If form is not submitted
-    if post_vars == {}:
+    if get_vars == {}:
         return dict(languages=languages,
                     table=table)
 
@@ -382,15 +394,15 @@ def filters():
     ftable = db.friends
 
     # Retrieve all the custom users created by the logged-in user
-    query = (cftable.first_name.like("%" + post_vars["name"] + "%"))
-    query |= (cftable.last_name.like("%" + post_vars["name"] + "%"))
+    query = (cftable.first_name.like("%" + get_vars["name"] + "%"))
+    query |= (cftable.last_name.like("%" + get_vars["name"] + "%"))
     query &= (cftable.user_id == session.user_id)
     custom_friends = db(query).select(cftable.id)
     cusfriends = map(lambda x: x["id"], custom_friends)
 
     # Get the friends of logged in user
-    query = (atable.first_name.like("%" + post_vars["name"] + "%"))
-    query |= (atable.last_name.like("%" + post_vars["name"] + "%"))
+    query = (atable.first_name.like("%" + get_vars["name"] + "%"))
+    query |= (atable.last_name.like("%" + get_vars["name"] + "%"))
     query &= (ftable.user_id == atable.id)
     friend_ids = db(atable).select(atable.id, join=ftable.on(query))
     friends = map(lambda x: x["id"], friend_ids)
@@ -401,8 +413,8 @@ def filters():
     # User in one of the custom friends
     query |= (stable.custom_user_id.belongs(cusfriends))
 
-    start_date = post_vars["start_date"]
-    end_date = post_vars["end_date"]
+    start_date = get_vars["start_date"]
+    end_date = get_vars["end_date"]
 
     # Else part ensures that both the dates passed
     # are included in the range
@@ -435,37 +447,42 @@ def filters():
         redirect(URL("default", "filters"))
 
     # Submissions with problem name containing pname
-    if post_vars["pname"] != "":
-        query &= (stable.problem_name.like("%" + post_vars["pname"] + "%"))
+    if get_vars["pname"] != "":
+        query &= (stable.problem_name.like("%" + get_vars["pname"] + "%"))
 
     # Submissions from this site
-    if post_vars.has_key("site"):
-        sites = post_vars["site"]
+    if get_vars.has_key("site"):
+        sites = get_vars["site"]
         if isinstance(sites, str):
             sites = [sites]
         query &= (stable.site.belongs(sites))
 
     # Submissions with this language
-    if post_vars.has_key("language"):
-        langs = post_vars["language"]
+    if get_vars.has_key("language"):
+        langs = get_vars["language"]
         if isinstance(langs, str):
             langs = [langs]
         query &= (stable.lang.belongs(langs))
 
     # Submissions with this submission status
-    if post_vars.has_key("status"):
-        statuses = post_vars["status"]
+    if get_vars.has_key("status"):
+        statuses = get_vars["status"]
         if isinstance(statuses, str):
             statuses = [statuses]
         query &= (stable.status.belongs(statuses))
 
+    PER_PAGE = current.PER_PAGE
     # Apply the complex query and sort by time_stamp DESC
-    filtered = db(query).select(orderby=~stable.time_stamp)
-
+    filtered = db(query).select(limitby=(page * PER_PAGE,
+                                         (page + 1) * PER_PAGE),
+                                         orderby=~stable.time_stamp)
+    total_pages = db(query).count()
+    total_pages = total_pages / 100
     table = utilities.render_table(filtered)
 
     return dict(languages=languages,
-                table=table)
+                table=table,
+                total_pages=total_pages)
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()

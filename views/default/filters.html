@@ -1,5 +1,20 @@
 {{extend 'layout.html'}}
+<script src="{{=URL('static', 'js/jquery.bootpag.min.js')}}"></script>
 <script>
+
+    $(function() {
+    var get_argument = function() {
+        var url = window.location.href;
+        var tempElement = document.createElement("a");
+        tempElement.href = url;
+        var path = tempElement.pathname;
+        var argument = path.split("/").splice(-1);
+        if (argument[0] == "filters" || argument[0] == "") {
+            return "1";
+        }
+        return argument[0];
+    }
+
     $(document).ready(function() {
         $('.datepicker').pickadate({
             selectMonths: true, // Creates a dropdown to control month
@@ -8,14 +23,27 @@
             max: new Date()
         });
         $('select').material_select();
+        var currPage = get_argument();
+        var totalPages = $('#total-pages').html();
+        if (totalPages == "0") {
+            totalPages = "1";
+        }
+        $('#page-selection').bootpag({
+            total: parseInt(totalPages),
+            page: parseInt(currPage),
+            maxVisible: 10
+        }).on("page", function(event, num) {
+            window.location.href = "http://localhost:8000/stopstalk/default/filters/" + num.toString() + "?" + window.location.href.split("?").splice(-1);
+        });
     });
+            });
 
 </script>
 <div class="row">
     <h3>Filters</h3>
 </div>
 <div class="row">
-    <form class="col s12" method="POST" action="">
+    <form class="col s12" method="GET" action="{{=URL('default', 'filters', args=[1])}}">
       <div class="row">
         <div class="input-field col offset-s1 s5">
           <input id="name" name="name" type="text">
@@ -62,18 +90,22 @@
         </div>
       </div>
       <div class="row">
-        <div class="input-field col offset-s3 s3">
+        <div class="col offset-s3 s3">
+            <label for="start_date" class="left">Start Date</label>
             <input id="start_date" name="start_date" data-value="" type="date" class="datepicker" />
-            <label for="start_date">Start Date</label>
         </div>
-        <div class="input-field col s3">
+        <div class="col s3">
+            <label for="end_date" class="left">End Date</label>
             <input id="end_date" name="end_date" data-value="" type="date" class="datepicker" />
-            <label for="end_date">End Date</label>
         </div>
       </div>
       <input type="submit" value="Apply Filters" />
     </form>
   </div>
+{{if request.args != []:}}
+    <div id="total-pages" style="display: none;">{{=total_pages}}</div>
+    <div id="page-selection" class="center"></div>
+{{pass}}
 {{if table:}}
     {{=table}}
 {{pass}}
