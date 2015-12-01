@@ -5,7 +5,7 @@
             Materialize.toast("Refreshing Tags...", 4000);
             $.ajax({
                 method: 'GET',
-                url: '/stopstalk/problems/refresh_tags'
+                url: '{{=URL("problems", "refresh_tags")}}'
             }).done(function(response) {
                 if (response != "-1") {
                     Materialize.toast("Tags updated", 4000);
@@ -16,7 +16,7 @@
             });
         });
         $('#searchButton').click(function() {
-            window.location.href = "http://localhost:8000/stopstalk/problems/tag?q=" + $('#search').val();
+            window.location.href = "{{=URL('problems', 'tag')}}" + "/?q=" + $('#search').val();
         });
     });
 </script>

@@ -33,7 +33,7 @@
             page: parseInt(currPage),
             maxVisible: 10
         }).on("page", function(event, num) {
-            window.location.href = "http://localhost:8000/stopstalk/default/filters/" + num.toString() + "?" + window.location.href.split("?").splice(-1);
+            window.location.href = "{{=URL('default', 'filters')}}" + "/" + num.toString() + "?" + window.location.href.split("?").splice(-1);
         });
     });
             });

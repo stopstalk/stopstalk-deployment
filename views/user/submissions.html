@@ -39,7 +39,7 @@
 
         $.ajax({
             method: 'GET',
-            url: '/stopstalk/user/submissions.json/' + handle + "?page=" + page
+            url: '{{=URL("user", "submissions", extension="json")}}' + "/" + handle + "?page=" + page
         }).done(function(response) {
 
             var pageCount = response['page_count'];
@@ -48,7 +48,7 @@
                 page: parseInt(page),
                 maxVisible: 10
             }).on("page", function(event, num) {
-                window.location.href = "http://localhost:8000/stopstalk/user/submissions/" + handle + "?page=" + num.toString();
+                window.location.href = "{{=URL('user', 'submissions')}}" + "/" + handle + "?page=" + num.toString();
             });
 
         });
@@ -60,7 +60,7 @@
         var startRetrieving = function (user_id, custom) {
             $.ajax({
                 method: 'GET',
-                url: '/stopstalk/default/start_retrieving/' + user_id + "/" + custom
+                url: '{{=URL("default", "start_retrieving")}}' + "/" + user_id + "/" + custom
             }).done(function(response) {
 
                 sessionStorage.setItem("has_updated", 1);

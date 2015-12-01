@@ -41,7 +41,7 @@
 
                     $.ajax({
                         method: 'GET',
-                        url: '/stopstalk/default/start_retrieving/' + val[0].toString() + "/0"
+                        url: '{{=URL("default", "start_retrieving")}}' + "/" + val[0].toString() + "/0"
                     }).done(function(response) {
 
                         user_count++;
@@ -64,7 +64,7 @@
 
                     $.ajax({
                         method: 'GET',
-                        url: '/stopstalk/default/start_retrieving/' + val[0].toString() + "/1"
+                        url: '{{=URL("default", "start_retrieving")}}' + "/" + val[0].toString() + "/1"
                     }).done(function(response) {
 
                         user_count++;
@@ -84,7 +84,7 @@
 
             $.ajax({
                 method: 'GET',
-                url: '/stopstalk/default/submissions.json'
+                url: '{{=URL("default", "submissions", extension="json")}}'
             }).done(function(page) {
                 var pageCount = page['count'];
                 var friends = page['friends'];
@@ -111,7 +111,7 @@
                     page: parseInt(currPage),
                     maxVisible: 10
                 }).on("page", function(event, num) {
-                    window.location.href = "http://localhost:8000/stopstalk/default/submissions/" + num.toString();
+                    window.location.href = '{{=URL("default", "submissions")}}' + "/" + num.toString();
                 });
             });
         });

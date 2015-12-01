@@ -242,6 +242,9 @@ def profile():
     else:
         handle = str(request.args[0])
 
+    total_submissions = db(db.submission.stopstalk_handle == handle).count()
+    if total_submissions == 0:
+        return dict(total_submissions=total_submissions)
     query = (db.auth_user.stopstalk_handle == handle)
     row = db(query).select().first()
     if row is None:
@@ -282,7 +285,8 @@ def profile():
 
     return dict(name=name,
                 efficiency=efficiency,
-                handle=handle)
+                handle=handle,
+                total_submissions=total_submissions)
 
 # ------------------------------------------------------------------------------
 def submissions():
