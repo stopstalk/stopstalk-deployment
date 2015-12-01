@@ -1,85 +1,15 @@
 {{extend 'layout.html'}}
 <script src="{{=URL('static', 'js/jquery.bootpag.min.js')}}"></script>
-<style>
-    #refresh-submissions {
-        margin-right: 4%;
-    }
-</style>
-<script>
-    var clearSession = function() {
-        sessionStorage.clear();
-        window.location.href = "";
-    }
-</script>
 <h1>Recent submissions</h1>
 <div id="page-selection" class="center"></div>
-<button id="refresh-submissions" class="btn waves-effect waves-light right" style="background-color: #FFEB3B; color: black;" onclick="clearSession()">
-    <span id="button-text">Refresh</span>
-    <i class="fa fa-refresh" id="refresh"></i>
-</button>
 <div id="content"></div>
     <script>
         $(function() {
-            if (sessionStorage.getItem("has_updated") != null) {
-                $('#refresh-submissions').show();
-                $('#button-text').html('Refresh');
-                $('#refresh').attr('class', 'fa fa-refresh');
-            }
             var check = function(user_count, flen, clen) {
                 if (user_count == flen + clen) {
                     return true;
                 }
                 return false;
-            }
-            var startRetrieving = function (friends, cusfriends) {
-                var user_count = 0;
-                var updateStatus = $("#final_status").val();
-                if (updateStatus == "Completed")
-                    return;
-
-                $.each(friends, function(index, val) {
-
-                    $.ajax({
-                        method: 'GET',
-                        url: '{{=URL("default", "start_retrieving")}}' + "/" + val[0].toString() + "/0"
-                    }).done(function(response) {
-
-                        user_count++;
-                        if (check(user_count, friends.length, cusfriends.length)) {
-                            sessionStorage.setItem("has_updated", 1);
-                            window.location.href = "";
-                        }
-
-                        if (response != "Failure") {
-                            Materialize.toast(val[1] + "<span style='color: red;'> <strong> [" + response.toString() + "] </strong> </span> added", 4000);
-                        }
-                        else {
-                            Materialize.toast("Check your internet connection", 4000);
-                        }
-
-                    });
-                });
-
-                $.each(cusfriends, function(index, val) {
-
-                    $.ajax({
-                        method: 'GET',
-                        url: '{{=URL("default", "start_retrieving")}}' + "/" + val[0].toString() + "/1"
-                    }).done(function(response) {
-
-                        user_count++;
-                        if (check(user_count, friends.length, cusfriends.length)) {
-                            sessionStorage.setItem("has_updated", 1);
-                            window.location.href = "";
-                        }
-                        if (response != "Failure") {
-                            Materialize.toast(val[1] + "<span style='color: red;'> <strong> [" + response.toString() + "] </strong></span> added", 4000);
-                        }
-                        else {
-                            Materialize.toast("Check your internet connection", 4000);
-                        }
-                    });
-                });
             }
 
             $.ajax({
@@ -89,14 +19,6 @@
                 var pageCount = page['count'];
                 var friends = page['friends'];
                 var cfriends = page['cusfriends'];
-                if (sessionStorage.getItem("has_updated") == null) {
-                    if(friends.length > 0 && cfriends.length > 0) {
-                        startRetrieving(friends, cfriends);
-                        $('#refresh-submissions').prop('disabled', true);
-                        $('#button-text').html('Please wait ...');
-                        $('#refresh').attr('class', 'fa fa-refresh fa-spin');
-                    }
-                }
 
                 var currentUrl = window.location.href;
                 currentUrl = currentUrl.split("/").slice(-1);

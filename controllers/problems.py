@@ -70,14 +70,18 @@ def index():
         redirect(URL("default", "index"))
 
     stable = db.submission
+    ptable = db.problem_tags
     problem_name = request.vars["pname"]
     problem_link = request.vars["plink"]
 
     submissions = db(stable.problem_link == problem_link).select(orderby=~stable.time_stamp)
     site = urltosite(problem_link)
     try:
-        tags_func = getattr(profile, site + "_get_tags")
-        all_tags = tags_func(problem_link)
+        all_tags = db(ptable.problem_link == problem_link).select(ptable.tags).first()
+        if all_tags:
+            all_tags = eval(all_tags["tags"])
+        else:
+            all_tags = []
         if all_tags != []:
             tags = DIV(_class="center")
             for tag in all_tags:
@@ -187,54 +191,10 @@ def tag():
     return dict(table=table)
 
 # ----------------------------------------------------------------------------
-def refresh_tags():
-    """
-        Refresh tags in the database
-    """
-
-    ptable = db.problem_tags
-    stable = db.submission
-
-    # Problems that are in problem_tags table
-    current_problem_list = db(ptable.id > 0).select(ptable.problem_link)
-    # Problems that are in submission table
-    updated_problem_list = db(stable.id > 0).select(stable.problem_link,
-                                                    distinct=True)
-    current_problem_list = map(lambda x: x["problem_link"],
-                               current_problem_list)
-    updated_problem_list = map(lambda x: x["problem_link"],
-                               updated_problem_list)
-
-    # Compute difference between the lists
-    difference_list = list(set(updated_problem_list) - \
-                           set(current_problem_list))
-    print "Refreshing "
-
-    # Start retrieving tags for the problems
-    # that are not in problem_tags table
-    for link in difference_list:
-        site = urltosite(link)
-        try:
-            tags_func = getattr(profile, site + "_get_tags")
-            all_tags = tags_func(link)
-            if all_tags == []:
-                all_tags = ["-"]
-        except:
-            all_tags = ["-"]
-        print "."
-
-        # Insert tags in problem_tags table
-        # Note: Tags are stored in a stringified list
-        #       so that they can be used directly by eval
-        ptable.insert(problem_link=link,
-                      tags=str(all_tags))
-
-    print "\nNew problems added: " + \
-          utilities.RED + \
-          " [%d]" % (len(difference_list)) + \
-          utilities.RESET_COLOR
-
 def _render_trending(caption, rows):
+    """
+        Create trending table from the rows
+    """
 
     table = TABLE(_class="striped centered")
     thead = THEAD(TR(TH("Problem"), TH("Submissions")))

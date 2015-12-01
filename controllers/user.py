@@ -113,7 +113,7 @@ def update_friend():
         if form.vars.delete_this_record != "on":
             ## UPDATE
             # If delete checkbox is not checked
-            response.flash = "User details updated"
+            session.flash = "User details updated"
 
             # Since there may be some updates in the handle
             # for correctness we need to remove all the submissions
@@ -121,13 +121,11 @@ def update_friend():
             query = (cftable.id == request.args[0])
             db(query).update(last_retrieved=current.INITIAL_DATE)
             db(db.submission.custom_user_id == request.args[0]).delete()
-            utilities.retrieve_submissions(form.vars.id, True)
-
             redirect(URL("user", "edit_custom_friend_details"))
         else:
             ## DELETE
             # If delete checkbox is checked => just process it redirect back
-            response.flash = "Custom User deleted"
+            session.flash = "Custom User deleted"
             redirect(URL("user", "edit_custom_friend_details"))
     elif form.errors:
         response.flash = "Form has errors"
@@ -475,9 +473,7 @@ def custom_friend():
     form.process()
 
     if form.accepted:
-        utilities.retrieve_submissions(form.vars.id,
-                                       custom=True)
-        session.flash = "Submissions for custom user added"
+        session.flash = "Submissions will be added shortly"
         redirect(URL("default", "submissions", args=[1]))
 
     return dict(form=form)

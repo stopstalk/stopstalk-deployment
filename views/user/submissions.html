@@ -12,12 +12,6 @@
     }
     $(function() {
 
-        if (sessionStorage.getItem("has_updated") != null) {
-            $('#refresh-submissions').show();
-            $('#button-text').html('Refresh');
-            $('#refresh').attr('class', 'fa fa-refresh');
-        }
-
         var currentURL = window.location.href,
             handle,
             page,
@@ -53,40 +47,6 @@
 
         });
 
-        if (sessionStorage.getItem("has_updated") != null) {
-            $('#refresh-submissions').show();
-        }
-
-        var startRetrieving = function (user_id, custom) {
-            $.ajax({
-                method: 'GET',
-                url: '{{=URL("default", "start_retrieving")}}' + "/" + user_id + "/" + custom
-            }).done(function(response) {
-
-                sessionStorage.setItem("has_updated", 1);
-                window.location.href = "";
-                if (response != "Failure") {
-                    if (response == 0) {
-                        Materialize.toast('Database is already up to date', 4000);
-                    }
-                    else {
-                        Materialize.toast("Successfully added <span style='color:red;'>[" + response.toString() + "]</span> submissions", 4000);
-                    }
-                }
-                else {
-                    Materialize.toast("Check your internet connection", 4000);
-                }
-
-            });
-        }
-        if (sessionStorage.getItem("has_updated") == null) {
-            Materialize.toast("Hang in tight !!", 4000);
-            var tmpList = $('#id_custom').html().split(" ");
-            startRetrieving(tmpList[0], tmpList[1]);
-            $('#refresh-submissions').prop('disabled', true);
-            $('#button-text').html('Please wait ...');
-            $('#refresh').attr('class', 'fa fa-refresh fa-spin');
-        }
     });
 </script>
 {{if user == "Self":}}
@@ -95,9 +55,5 @@
     <h1>Submissions of {{=user}}</h1>
 {{pass}}
 <div id="page-selection" class="center"></div>
-<button id="refresh-submissions" class="btn btn-info right" style="background-color: #FFEB3B; color: black;" onclick="clearSession()">
-    <span id="button-text">Refresh</span>
-    <i class="fa fa-refresh" id="refresh"></i>
-</button>
 <div id="id_custom" style="display: none;">{{=user_id}} {{=c}}</div>
 {{=table}}

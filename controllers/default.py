@@ -41,36 +41,8 @@ def index():
         session["user_id"] = session["auth"]["user"]["id"]
         session.url_count = 0
         session.has_updated = "Incomplete"
+        session.flash = "Successfully logged in"
         redirect(URL("default", "submissions", args=[1]))
-
-    # Detect a registration has taken place
-    # This will be the case when submission on
-    # a register user form is done.
-    row = db(db.auth_event.id > 0).select().last()
-    if row:
-        desc = row.description
-    else:
-        desc = ""
-
-    # If the last auth_event record contains registered
-    # or verification then retrieve submissions
-    if desc.__contains__("Registered") or \
-       desc.__contains__("Verification"):
-        reg_user = desc.split(" ")[1]
-        result = utilities.retrieve_submissions(int(reg_user))
-
-        row = db(db.auth_user.id == reg_user).select().first()
-        tup = get_max_streak(row.stopstalk_handle)
-        total_submissions = tup[1]
-        total_days = tup[3]
-
-        today = datetime.today().date()
-        start = datetime.strptime(current.INITIAL_DATE,
-                                  "%Y-%m-%d %H:%M:%S").date()
-
-        per_day = total_submissions * 1.0 / (today - start).days
-        query = (db.auth_user.stopstalk_handle == row.stopstalk_handle)
-        db(query).update(per_day=per_day)
 
     response.flash = T("Please Login")
     return dict()
@@ -669,29 +641,6 @@ def submissions():
     return dict(table=table,
                 friends=friends,
                 cusfriends=cusfriends)
-
-# ----------------------------------------------------------------------------
-def start_retrieving():
-    """
-        AJAX helper function for starting retrieval
-        of a particular user
-    """
-
-    if len(request.args) < 2:
-        return "Failure"
-    else:
-        friend_id = int(request.args[0])
-        custom = int(request.args[1])
-        if custom == 1:
-            custom = True
-        else:
-            custom = False
-
-        result = utilities.retrieve_submissions(friend_id, custom)
-        if result == "FAILURE":
-            return "Failure"
-        else:
-            return result
 
 # ----------------------------------------------------------------------------
 def faq():
