@@ -251,7 +251,8 @@ def compute_row(user, custom=False):
             user.stopstalk_handle,
             user.institute,
             rating,
-            diff)
+            diff,
+            custom)
 
 # ----------------------------------------------------------------------------
 def leaderboard():
@@ -291,8 +292,21 @@ def leaderboard():
         if i is ():
             continue
 
+        if i[5]:
+            span = SPAN(_class="orange tooltipped",
+                        data={"position": "right",
+                              "delay": "50",
+                              "tooltip": "Custom User"},
+                        _style="cursor: pointer; " + \
+                                "float:right; " + \
+                                "height:10px; " + \
+                                "width:10px; " + \
+                                "border-radius: 50%;")
+        else:
+            span = SPAN()
+
         tr = TR()
-        tr.append(TD(i[0]))
+        tr.append(TD(DIV(span, DIV(i[0]))))
         tr.append(TD(A(i[1],
                      _href=URL("user", "profile", args=[i[1]]))))
         tr.append(TD(i[2]))
@@ -661,6 +675,8 @@ def faq():
                  "Why can I see only some View buttons in the submissions table?",
                  "Can I view the StopStalk code?",
                  "Is there any tool which has extra features than the deployed version?",
+                 "How should I refer to a friend?",
+                 "Are there any benefits StopStalk provides for referring to a friend?",
                  )
     answers = ("Custom User is a way to view submissions of a friend. Note: Only you can see his/her submissions",
                "At present you can not explicitly update the submissions in the database. The submissions are automatically updated at 03:00 IST",
@@ -672,6 +688,8 @@ def faq():
                "The sites that which allow to view anybody's submissions publicly have a View button. At present Codeforces and HackerEarth submissions can be viewed publicly",
                MARKMIN("Yes, the code is completely open-sourced and it is on [[Github https://github.com/stopstalk/]]"),
                MARKMIN("Yes, there is the original version of the code with complete features [[here https://github.com/stopstalk/stopstalk/]] . You can set it up locally!"),
+               "All you have to do is ask your friend to enter your StopStalk handle when asked for Referrer's StopStalk handle.",
+               "Yes. You can increase the limit of number of custom users per user. At present 3 custom users are allowed on successful registration. On referring of 5 friends with your StopStalk handle you get 1 extra custom user."
                )
 
     for i in xrange(len(questions)):
