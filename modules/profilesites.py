@@ -26,11 +26,20 @@ import datetime
 import bs4
 import gevent
 from gevent import monkey
-from gluon import current
 from bs4 import BeautifulSoup
 
 gevent.monkey.patch_all(thread=False)
 user_agent = "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5"
+
+SITES = {"CodeChef": "http://www.codechef.com/users/",
+         "CodeForces": "http://www.codeforces.com/profile/",
+         "Spoj": "http://www.spoj.com/users/",
+         "HackerEarth": "https://hackerearth.com/users/",
+         "HackerRank": "https://hackerrank.com/"}
+MAX_TRIES_ALLOWED = 5
+PROXY = {}
+TIMEOUT = 10
+INITIAL_DATE = "2013-01-01 00:00:00"
 
 """
     @ToDo: Current framework is very bad
@@ -108,7 +117,7 @@ class Profile(object):
         self.submissions = {handle: {}}
         self.retrieve_failed = False
 
-        if site in current.SITES:
+        if site in SITES:
             self.handle = handle
             self.site = site
 
@@ -137,15 +146,14 @@ class Profile(object):
             Make a HTTP GET request to a url
         """
 
-        MAX_TRIES_ALLOWED = current.MAX_TRIES_ALLOWED
         i = 0
 
         while i < MAX_TRIES_ALLOWED:
             try:
                 response = requests.get(url,
                                         headers=headers,
-                                        proxies=current.PROXY,
-                                        timeout=current.TIMEOUT)
+                                        proxies=PROXY,
+                                        timeout=TIMEOUT)
             except RuntimeError:
                 return -1
             except:
@@ -281,7 +289,7 @@ class Profile(object):
         it = 1
 
         # Apply parallel processing only if retrieving from the INITIAL_DATE
-        tmp_const = time.strptime(current.INITIAL_DATE, "%Y-%m-%d %H:%M:%S")
+        tmp_const = time.strptime(INITIAL_DATE, "%Y-%m-%d %H:%M:%S")
         if tmp_const == last_retrieved:
             threads = []
             for i in xrange(max_page):
@@ -510,8 +518,11 @@ class Profile(object):
         if tmpreq == -1:
             return -1
 
-        # Bad but correct way of checking if the handle exists
-        if tmpreq.text.find("History of submissions") == -1:
+        try:
+            # Bad but correct way of checking if the handle exists
+            if tmpreq.text.find("History of submissions") == -1:
+                return submissions
+        except AttributeError:
             return submissions
 
         while 1:
@@ -643,7 +654,7 @@ class Profile(object):
 
             tmp = requests.post(url,
                                 data=data,
-                                proxies=current.PROXY,
+                                proxies=PROXY,
                                 headers=response)
 
             if tmp.status_code != 200:
