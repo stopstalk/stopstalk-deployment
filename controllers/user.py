@@ -455,6 +455,18 @@ def custom_friend():
         Controller to add a Custom Friend
     """
 
+    # The total referrals by the logged-in user
+    total_referrals = db(db.auth_user.referrer == session["handle"]).count()
+
+    # 3 custom friends allowed plus one for each 5 invites
+    allowed_custom_friends = total_referrals / 5 + 3
+
+    # Custom users already created
+    current_count = db(db.custom_friend.user_id == session["user_id"]).count()
+
+    if current_count >= allowed_custom_friends:
+        return dict(form=None)
+
     list_fields = ["first_name",
                    "last_name",
                    "institute",

@@ -135,6 +135,7 @@ def materialize_form(form, fields):
         if input_field is None:
             input_field = DIV(_controls, label,
                               _class="input-field col offset-s3 s6")
+
         curr_div.append(input_field)
         main_div.append(curr_div)
 

@@ -1,3 +1,8 @@
 {{extend 'layout.html'}}
 <h1>Make a custom friend</h1>
-{{=form}}
+{{if form:}}
+    {{=form}}
+{{else:}}
+    <h5>You have reached the limit for creating custom friends</h5>
+    <h5>Refer more to increase the limit</h5>
+{{pass}}

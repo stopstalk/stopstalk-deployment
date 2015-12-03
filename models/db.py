@@ -81,6 +81,9 @@ extra_fields = [Field("institute", requires=IS_NOT_EMPTY()),
                 Field("per_day", "double",
                       default=0.0,
                       writable=False),
+                Field("referrer",
+                      label="Referrer's StopStalk Handle",
+                      default=""),
                 ]
 
 site_handles = []
