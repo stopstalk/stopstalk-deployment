@@ -56,8 +56,8 @@ def codechef_get_tags(problem_link):
     url = "https://" + "/".join(url)
 
     response = Profile.get_request(url)
-    if response == -1:
-        return []
+    if response == -1 or response == {}:
+        return ["-"]
 
     t = response.json()
     all_tags = []
@@ -74,8 +74,8 @@ def codechef_get_tags(problem_link):
 def spoj_get_tags(problem_link):
 
     response = Profile.get_request(problem_link)
-    if response == -1:
-        return []
+    if response == -1 or response == {}:
+        return ["-"]
 
     tags = BeautifulSoup(response.text).find_all("div", id="problem-tags")
     tags = tags[0].findAll("span")
@@ -92,8 +92,8 @@ def spoj_get_tags(problem_link):
 def codeforces_get_tags(problem_link):
 
     response = Profile.get_request(problem_link)
-    if response == -1:
-        return []
+    if response == -1 or response == {}:
+        return ["-"]
 
     tags = BeautifulSoup(response.text).find_all("span", class_="tag-box")
     all_tags = []
@@ -101,6 +101,45 @@ def codeforces_get_tags(problem_link):
     for tag in tags:
         all_tags.append(tag.contents[0].strip())
 
+    return all_tags
+
+# -------------------------------------------------------------------------
+def hackerearth_get_tags(problem_link):
+
+    response = Profile.get_request(problem_link)
+    if response == -1 or response == {}:
+        return ["-"]
+
+    b = BeautifulSoup(response.text)
+    try:
+        tags = b.find_all("div", class_="problem-tags")[0]
+    except IndexError:
+        return ["-"]
+    lis = tags.find_all("li")
+    all_tags = []
+    for li in lis:
+        if li.contents[0] != "No tags":
+            all_tags.append(li.contents[0])
+
+    if all_tags == []:
+        all_tags = ["-"]
+    return all_tags
+
+# -------------------------------------------------------------------------
+def hackerrank_get_tags(problem_link):
+
+    slug = problem_link.split("/")[-1]
+    url = "https://www.hackerrank.com/rest/contests/master/challenges/" + slug
+    response = Profile.get_request(url)
+    if response == {} or response == -1:
+        return ["-"]
+
+    track = response.json()["model"]["track"]
+    all_tags = []
+    if track:
+        all_tags = [track["name"]]
+    if all_tags == []:
+        all_tags = ["-"]
     return all_tags
 
 class Profile(object):
