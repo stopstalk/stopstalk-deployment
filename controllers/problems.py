@@ -23,7 +23,6 @@
 import re
 import time, datetime
 import utilities
-import profilesites as profile
 
 # ----------------------------------------------------------------------------
 def pie_chart_helper():

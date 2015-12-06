@@ -118,8 +118,6 @@ def update_friend():
             # Since there may be some updates in the handle
             # for correctness we need to remove all the submissions
             # and retrieve all the submissions again
-            query = (cftable.id == request.args[0])
-            db(query).update(last_retrieved=current.INITIAL_DATE)
             db(db.submission.custom_user_id == request.args[0]).delete()
             redirect(URL("user", "edit_custom_friend_details"))
         else:
@@ -456,7 +454,12 @@ def custom_friend():
     """
 
     # The total referrals by the logged-in user
-    total_referrals = db(db.auth_user.referrer == session["handle"]).count()
+    query = (db.auth_user.referrer == session["handle"])
+
+    # User should not enter his/her own
+    # stopstalk handle as referrer handle
+    query &= (db.auth_user.stopstalk_handle != session["handle"])
+    total_referrals = db(query).count()
 
     # 3 custom friends allowed plus one for each 5 invites
     allowed_custom_friends = total_referrals / 5 + 3
@@ -477,8 +480,7 @@ def custom_friend():
 
     form = SQLFORM(db.custom_friend,
                    fields=list_fields,
-                   hidden=dict(user_id=session.user_id,
-                               last_retrieved=datetime.now()))
+                   hidden=dict(user_id=session.user_id))
 
     # Set the hidden field
     form.vars.user_id = session.user_id

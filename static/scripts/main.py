@@ -98,7 +98,7 @@ def get_submissions(user_id,
     return count
 
 # ----------------------------------------------------------------------------
-def retrieve_submissions(reg_user, last_retrieved, custom=False):
+def retrieve_submissions(reg_user, custom=False):
     """
         Retrieve submissions that are not already in the database
     """
@@ -106,10 +106,23 @@ def retrieve_submissions(reg_user, last_retrieved, custom=False):
     if custom:
         query = (db.custom_friend.id == reg_user)
         row = db(query).select().first()
+        table = db.custom_friend
     else:
         query = (db.auth_user.id == reg_user)
         row = db(query).select().first()
+        table = db.auth_user
 
+    # Start retrieving from this date if user registered the first time
+    initial_date = current.INITIAL_DATE
+    time_conversion = "%Y-%m-%d %H:%M:%S"
+
+    last_retrieved = db(query).select(table.last_retrieved).first()
+    if last_retrieved:
+        last_retrieved = str(last_retrieved.last_retrieved)
+    else:
+        last_retrieved = initial_date
+
+    last_retrieved = time.strptime(str(last_retrieved), time_conversion)
     list_of_submissions = []
 
     for site in current.SITES:
@@ -134,6 +147,10 @@ def retrieve_submissions(reg_user, last_retrieved, custom=False):
 
             return "FAILURE"
 
+    # Update the last retrieved of the user
+    today = datetime.now()
+    db(query).update(last_retrieved=today)
+
     for submissions in list_of_submissions:
         site = submissions[0]
         site_handle = row[site.lower() + "_handle"]
@@ -147,20 +164,11 @@ def retrieve_submissions(reg_user, last_retrieved, custom=False):
     return total_retrieved
 
 if __name__ == "__main__":
-    time_conversion = "%Y-%m-%d %H:%M:%S"
-    lr = open("applications/stopstalk/static/scripts/last_retrieved")
-    last_retrieved = lr.read().strip()
-    last_retrieved = time.strptime(last_retrieved, time_conversion)
-    list_of_submissions = []
 
     registered_users = db(db.auth_user.id > 0).select(db.auth_user.id)
     for user in registered_users:
-        retrieve_submissions(user["id"], last_retrieved)
+        retrieve_submissions(user["id"])
 
     custom_users = db(db.custom_friend.id > 0).select(db.custom_friend.id)
     for custom_user in custom_users:
-        retrieve_submissions(custom_user["id"], last_retrieved, True)
-    lr.close()
-    lr = open("applications/stopstalk/static/scripts/last_retrieved", "w")
-    today = datetime.now()
-    lr.write(str(today)[:-7])
+        retrieve_submissions(custom_user["id"], True)
