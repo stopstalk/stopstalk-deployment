@@ -1,7 +1,7 @@
 from gluon import *
 # Configure mysql server
 current.mysql_user = "root"
-current.mysql_password = "################"
+current.mysql_password = ""
 current.mysql_server = "localhost"
 current.mysql_dbname = "migration"
 

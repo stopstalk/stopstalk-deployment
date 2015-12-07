@@ -12,7 +12,7 @@ response.meta.keywords = 'stopstalk, raj454raj'
 response.meta.generator = ''
 
 response.google_analytics_id = None
-
+"""
 if session.user_id:
     response.menu = [
         (I(_class="fa fa-inbox fa-2x",
@@ -62,5 +62,5 @@ response.menu += [(I(_class="fa fa-bar-chart fa-2x",
                    False,
                    URL('default', 'contact_us'), []),
                   ]
-
+"""
 if "auth" in locals(): auth.wikimenu()

@@ -103,7 +103,7 @@ mail.settings.login = current.sender_mail + ":" + current.sender_password
 
 ## configure auth policy
 auth.settings.registration_requires_verification = False
-auth.settings.registration_requires_approval = False
+auth.settings.registration_requires_approval = True
 auth.settings.reset_password_requires_verification = True
 auth.settings.formstyle = materialize_form
 current.response.formstyle = materialize_form

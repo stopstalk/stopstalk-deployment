@@ -44,7 +44,6 @@ def index():
         session.flash = "Successfully logged in"
         redirect(URL("default", "submissions", args=[1]))
 
-    response.flash = T("Please Login")
     return dict()
 
 # ----------------------------------------------------------------------------
