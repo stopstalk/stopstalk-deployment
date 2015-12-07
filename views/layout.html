@@ -78,7 +78,7 @@
         {{if session["user_id"]:}}
             <li><a href="{{=URL('user', 'profile')}}">Profile</a></li>
             <li><a href="{{=URL('user', 'submissions')}}">My Submissions</a></li>
-            <li><a href="{{=URL('default', 'user', args=['profile'])}}">Update Details</a></li>
+            <li><a href="{{=URL('user', 'update_details')}}">Update Details</a></li>
             <li><a href="{{=URL('default', 'user', args=['change_password'])}}">Change Password</a></li>
             <li class="divider"></li>
             <li><a href="{{=URL('default', 'user', args=['logout'])}}">Logout</a></li>

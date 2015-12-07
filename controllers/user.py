@@ -76,6 +76,33 @@ def edit_custom_friend_details():
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()
+def update_details():
+
+    form_fields = ["first_name",
+                   "last_name",
+                   "email",
+                   "institute",
+                   "stopstalk_handle",
+                   ]
+
+    for site in current.SITES:
+        form_fields.append(site.lower() + "_handle")
+
+    record = db.auth_user(session.user_id)
+    form = SQLFORM(db.auth_user,
+                   record,
+                   fields=form_fields)
+
+    if form.process().accepted:
+        session.flash = "User details updated"
+        redirect(URL("default", "submissions", args=[1]))
+    elif form.errors:
+        response.flash = "Form has errors"
+
+    return dict(form=form)
+
+# ------------------------------------------------------------------------------
+@auth.requires_login()
 def update_friend():
     """
         Update custom friend details
