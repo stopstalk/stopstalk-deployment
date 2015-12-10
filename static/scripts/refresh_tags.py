@@ -61,9 +61,18 @@ def refresh_tags():
     updated_problem_list = map(lambda x: x["problem_link"],
                                updated_problem_list)
 
+    # Problems having tags = ["-"]
+    # Possibilities of such case -
+    #   => There are actually no tags for the problem
+    #   => The problem is from a contest and they'll be updating tags shortly
+    #   => Page was not reachable due to some reason
+    no_tags = db(ptable.tags == "['-']").select(ptable.problem_link)
+    no_tags = map(lambda x: x["problem_link"],
+                  no_tags)
+
     # Compute difference between the lists
-    difference_list = list(set(updated_problem_list) - \
-                           set(current_problem_list))
+    difference_list = list((set(updated_problem_list) - \
+                            set(current_problem_list)).union(no_tags))
     print "Refreshing "
 
     threads = []

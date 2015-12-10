@@ -81,7 +81,7 @@ def index():
             all_tags = eval(all_tags["tags"])
         else:
             all_tags = []
-        if all_tags != []:
+        if all_tags != [] and all_tags != ['-']:
             tags = DIV(_class="center")
             for tag in all_tags:
                 tags.append(DIV(A(tag,
