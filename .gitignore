@@ -1,5 +1,6 @@
 /cache/*
 /errors/*
+/models/1strun.py
 /sessions/*
 /uploads/*
 /databases/*
