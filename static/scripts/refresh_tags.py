@@ -61,6 +61,9 @@ def refresh_tags():
     updated_problem_list = map(lambda x: x["problem_link"],
                                updated_problem_list)
 
+    # Sites which add tags at a later stage
+    probable_sites = ["codechef", "codeforces", "hackerearth"]
+
     # Problems having tags = ["-"]
     # Possibilities of such case -
     #   => There are actually no tags for the problem
@@ -70,9 +73,13 @@ def refresh_tags():
     no_tags = map(lambda x: x["problem_link"],
                   no_tags)
 
+    no_tags = filter(lambda link: urltosite(link) in probable_sites,
+                     no_tags)
+
     # Compute difference between the lists
     difference_list = list((set(updated_problem_list) - \
                             set(current_problem_list)).union(no_tags))
+
     print "Refreshing "
 
     threads = []
@@ -95,6 +102,7 @@ def get_tag(link):
 
     ptable = db.problem_tags
     site = urltosite(link)
+
     try:
         tags_func = getattr(profile, site + "_get_tags")
         all_tags = tags_func(link)
@@ -107,8 +115,9 @@ def get_tag(link):
     # Insert tags in problem_tags table
     # Note: Tags are stored in a stringified list
     #       so that they can be used directly by eval
-    ptable.insert(problem_link=link,
-                  tags=str(all_tags))
+    ptable.update_or_insert(ptable.problem_link == link,
+                            problem_link=link,
+                            tags=str(all_tags))
 
 if __name__ == "__main__":
     refresh_tags()

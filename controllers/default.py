@@ -47,6 +47,7 @@ def index():
     return dict()
 
 # ----------------------------------------------------------------------------
+@auth.requires_login()
 def get_max_streak(handle):
     """
         Get the maximum of all streaks
@@ -183,6 +184,7 @@ def notifications():
     return dict(table=table)
 
 # ----------------------------------------------------------------------------
+@auth.requires_login()
 def compute_row(user, custom=False):
     """
         Computes rating and retrieves other
@@ -254,6 +256,7 @@ def compute_row(user, custom=False):
             custom)
 
 # ----------------------------------------------------------------------------
+@auth.requires_login()
 def leaderboard():
     """
         Get a table with users sorted by rating
@@ -656,6 +659,7 @@ def submissions():
                 cusfriends=cusfriends)
 
 # ----------------------------------------------------------------------------
+@auth.requires_login()
 def faq():
     """
         FAQ page

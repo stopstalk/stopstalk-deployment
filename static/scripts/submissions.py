@@ -27,14 +27,6 @@ import gevent
 from gevent import monkey
 gevent.monkey.patch_all(thread=False)
 
-RED = "\x1b[1;31m"
-GREEN = "\x1b[1;32m"
-YELLOW = "\x1b[1;33m"
-BLUE = "\x1b[1;34m"
-MAGENTA = "\x1b[1;35m"
-CYAN = "\x1b[1;36m"
-RESET_COLOR = "\x1b[0m"
-
 # -----------------------------------------------------------------------------
 def _debug(first_name, last_name, site, custom=False):
     """
@@ -43,11 +35,11 @@ def _debug(first_name, last_name, site, custom=False):
 
     name = first_name + " " + last_name
     debug_string = "Retrieving " + \
-                   CYAN + site + RESET_COLOR + \
+                   site + \
                    " submissions for "
     if custom:
         debug_string += "CUSTOM USER "
-    debug_string += BLUE + name + RESET_COLOR
+    debug_string += name
     print debug_string,
 
 # -----------------------------------------------------------------------------

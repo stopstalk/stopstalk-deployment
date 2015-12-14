@@ -158,6 +158,7 @@ def update_friend():
     return dict(form=form)
 
 # ------------------------------------------------------------------------------
+@auth.requires_login()
 def get_dates():
     """
         Return a dictionary containing count of submissions
@@ -227,6 +228,7 @@ def get_dates():
                 curr_streak=streak)
 
 # ------------------------------------------------------------------------------
+@auth.requires_login()
 def get_stats():
     """
         Get statistics of the user
@@ -252,6 +254,7 @@ def get_stats():
     return dict(row=row)
 
 # ------------------------------------------------------------------------------
+@auth.requires_login()
 def profile():
     """
         Controller to show user profile
@@ -312,6 +315,7 @@ def profile():
                 total_submissions=total_submissions)
 
 # ------------------------------------------------------------------------------
+@auth.requires_login()
 def submissions():
     """
         Retrieve submissions of a specific user
@@ -514,7 +518,7 @@ def custom_friend():
     form.process()
 
     if form.accepted:
-        session.flash = "Submissions will be added shortly"
+        session.flash = "Submissions will be added by tomorrow"
         redirect(URL("default", "submissions", args=[1]))
 
     return dict(form=form)

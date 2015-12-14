@@ -25,6 +25,7 @@ import time, datetime
 import utilities
 
 # ----------------------------------------------------------------------------
+@auth.requires_login()
 def pie_chart_helper():
     """
         Helper function for populating pie chart with different
@@ -41,6 +42,7 @@ def pie_chart_helper():
     return dict(row=row)
 
 # ----------------------------------------------------------------------------
+@auth.requires_login()
 def urltosite(url):
     """
         Helper function to extract site from url
@@ -56,6 +58,7 @@ def urltosite(url):
     return site
 
 # ----------------------------------------------------------------------------
+@auth.requires_login()
 def index():
     """
         The main problem page
@@ -117,6 +120,7 @@ def index():
                 table=table)
 
 # ----------------------------------------------------------------------------
+@auth.requires_login()
 def tag():
     """
         Tag search page
@@ -190,6 +194,7 @@ def tag():
     return dict(table=table)
 
 # ----------------------------------------------------------------------------
+@auth.requires_login()
 def _render_trending(caption, rows):
     """
         Create trending table from the rows
@@ -214,6 +219,7 @@ def _render_trending(caption, rows):
     return table
 
 # ----------------------------------------------------------------------------
+@auth.requires_login()
 def trending():
     """
         Show trending problems globally and among friends
