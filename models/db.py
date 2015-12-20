@@ -128,9 +128,12 @@ auth.settings.registration_requires_approval = True
 auth.settings.reset_password_requires_verification = True
 auth.settings.formstyle = materialize_form
 
-auth.messages.email_sent = 'Verification Email sent'
-auth.messages.logged_out = 'Successfully logged out'
-auth.messages.invalid_login = 'Invalid login credentials'
+auth.messages.email_sent = "Verification Email sent"
+auth.messages.logged_out = "Successfully logged out"
+auth.messages.invalid_login = "Invalid login credentials"
+auth.messages.label_remember_me = "Remember credentials"
+auth.settings.long_expiration = 3600 * 24 * 366 # Remember me for a year
+
 current.response.formstyle = materialize_form
 
 #########################################################################
