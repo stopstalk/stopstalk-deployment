@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-="""
+"""
     Copyright (c) 2015 Raj Patel(raj454raj@gmail.com), StopStalk
 
     Permission is hereby granted, free of charge, to any person obtaining a copy

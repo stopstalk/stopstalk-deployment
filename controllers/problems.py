@@ -226,12 +226,15 @@ def trending():
     """
 
     stable = db.submission
+
     today = datetime.datetime.today()
-    start_date = str(today - datetime.timedelta(days=10))
-    end_date = str(today)
+    start_date = str(today - datetime.timedelta(days=current.PAST_DAYS))
     start_time = time.strptime(start_date[:-7], "%Y-%m-%d %H:%M:%S")
+    end_date = str(today)
     end_time = time.strptime(end_date[:-7], "%Y-%m-%d %H:%M:%S")
+
     count = stable.id.count()
+    PROBLEMS_PER_PAGE = current.PROBLEMS_PER_PAGE
 
     if session.user_id:
         friends, custom_friends = utilities.get_friends(session.user_id)
@@ -246,8 +249,9 @@ def trending():
                                            count,
                                            orderby=~count,
                                            groupby=stable.problem_link,
-                                           limitby=(0, 10))
-        friend_table = _render_trending("Trending among friends", friend_trending)
+                                           limitby=(0, PROBLEMS_PER_PAGE))
+        friend_table = _render_trending("Trending among friends",
+                                        friend_trending)
 
     query = (stable.time_stamp >= start_date)
     query &= (stable.time_stamp <= end_date)
@@ -256,7 +260,7 @@ def trending():
                                        count,
                                        orderby=~count,
                                        groupby=stable.problem_link,
-                                       limitby=(0, 10))
+                                       limitby=(0, PROBLEMS_PER_PAGE))
     global_table = _render_trending("Trending Globally", global_trending)
 
     if session.user_id:
