@@ -84,7 +84,7 @@ def get_submissions(user_id,
                 db.submission.insert(**args)
 
     if count != 0:
-        print RED + "[+%s] " % (count) + RESET_COLOR
+        print "[+%s] " % (count)
     else:
         print "[0]"
     return count
@@ -131,11 +131,9 @@ def retrieve_submissions(reg_user, custom=False):
 
     for submissions in list_of_submissions:
         if submissions[1] == -1:
-            print RED + \
-                  "PROBLEM CONNECTING TO " + site + \
+            print "PROBLEM CONNECTING TO " + site + \
                   " FOR " + \
-                  row.stopstalk_handle + \
-                  RESET_COLOR
+                  row.stopstalk_handle
 
             return "FAILURE"
 
