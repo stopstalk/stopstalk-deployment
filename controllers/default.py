@@ -23,9 +23,6 @@
 import utilities
 import time
 from datetime import date
-"""
-    @ToDo: Loads of cleanup :D
-"""
 
 # ----------------------------------------------------------------------------
 def index():
@@ -39,8 +36,6 @@ def index():
     if session["auth"]:
         session["handle"] = session["auth"]["user"]["stopstalk_handle"]
         session["user_id"] = session["auth"]["user"]["id"]
-        session.url_count = 0
-        session.has_updated = "Incomplete"
         session.flash = "Successfully logged in"
         redirect(URL("default", "submissions", args=[1]))
 
@@ -68,7 +63,7 @@ def get_max_streak(handle):
     row = db.executesql(sql_query)
     streak = 0
     max_streak = 0
-    prev = curr = start = None
+    prev = curr = None
     total_submissions = 0
 
     for i in row:
@@ -78,7 +73,6 @@ def get_max_streak(handle):
             prev = time.strptime(str(i[0]), "%Y-%m-%d %H:%M:%S")
             prev = date(prev.tm_year, prev.tm_mon, prev.tm_mday)
             streak = 1
-            start = prev
         else:
             curr = time.strptime(str(i[0]), "%Y-%m-%d %H:%M:%S")
             curr = date(curr.tm_year, curr.tm_mon, curr.tm_mday)
@@ -97,7 +91,7 @@ def get_max_streak(handle):
 
     # There are no submissions in the database for this user
     if prev is None:
-        return (0, 0, 0, 0)
+        return (0,) * 4
 
     # Check if the last streak is continued till today
     if (today - prev).days > 1:
@@ -122,21 +116,18 @@ def notifications():
 
     # Check for streak of friends on stopstalk
     query = (ftable.user_id == session["user_id"])
-    row = db(query).select(ftable.friend_id)
-    friends = map(lambda x: x["friend_id"], row)
+    rows = db(query).select(atable.first_name,
+                            atable.last_name,
+                            atable.stopstalk_handle,
+                            join=ftable.on(ftable.friend_id == atable.id))
 
     # Will contain list of handles of all the friends along
     # with the Custom Users added by the logged-in user
     handles = []
 
-    for user in friends:
-        query = (atable.id == user)
-        user_data = db(query).select(atable.first_name,
-                                     atable.last_name,
-                                     atable.stopstalk_handle).first()
-
-        handles.append((user_data.stopstalk_handle,
-                        user_data.first_name + " " + user_data.last_name))
+    for user in rows:
+        handles.append((user.stopstalk_handle,
+                        user.first_name + " " + user.last_name))
 
     # Check for streak of custom friends
     query = (ctable.user_id == session["user_id"])
@@ -151,7 +142,7 @@ def notifications():
     users_on_streak = []
 
     for handle in handles:
-        max_streak, total_submissions, curr_streak, total_days = get_max_streak(handle[0])
+        curr_streak = get_max_streak(handle[0])[2]
 
         # If streak is non-zero append to users_on_streak list
         if curr_streak:
@@ -190,7 +181,10 @@ def compute_row(user, custom=False):
         Computes rating and retrieves other
         information of the specified user
     """
-    max_streak, total_submissions, curr_streak, total_days = get_max_streak(user.stopstalk_handle)
+
+    tup = get_max_streak(user.stopstalk_handle)
+    max_streak = tup[0]
+    total_submissions = tup[1]
 
     if total_submissions == 0:
         return ()
@@ -364,8 +358,8 @@ def filters():
         page = int(request.args[0])
         page -= 1
 
-    all_languages = db(stable.id>0).select(stable.lang,
-                                           distinct=True)
+    all_languages = db(stable.id > 0).select(stable.lang,
+                                             distinct=True)
     languages = []
     for  i in all_languages:
         languages.append(i["lang"])
@@ -382,18 +376,18 @@ def filters():
     ftable = db.friends
 
     # Retrieve all the custom users created by the logged-in user
-    query = (cftable.first_name.like("%" + get_vars["name"] + "%"))
-    query |= (cftable.last_name.like("%" + get_vars["name"] + "%"))
+    query = (cftable.first_name.contains(get_vars["name"]))
+    query |= (cftable.last_name.contains(get_vars["name"]))
     query &= (cftable.user_id == session.user_id)
     custom_friends = db(query).select(cftable.id)
-    cusfriends = map(lambda x: x["id"], custom_friends)
+    cusfriends = [x["id"] for x in custom_friends]
 
     # Get the friends of logged in user
-    query = (atable.first_name.like("%" + get_vars["name"] + "%"))
-    query |= (atable.last_name.like("%" + get_vars["name"] + "%"))
+    query = (atable.first_name.contains(get_vars["name"]))
+    query |= (atable.last_name.contains(get_vars["name"]))
     query &= (ftable.user_id == atable.id)
     friend_ids = db(atable).select(atable.id, join=ftable.on(query))
-    friends = map(lambda x: x["id"], friend_ids)
+    friends = [x["id"] for x in friend_ids]
 
     # User in one of the friends
     query = (stable.user_id.belongs(friends))
@@ -436,7 +430,7 @@ def filters():
 
     # Submissions with problem name containing pname
     if get_vars["pname"] != "":
-        query &= (stable.problem_name.like("%" + get_vars["pname"] + "%"))
+        query &= (stable.problem_name.contains(get_vars["pname"]))
 
     # Submissions from this site
     if get_vars.has_key("site"):
@@ -498,30 +492,36 @@ def retrieve_users():
 
     atable = db.auth_user
     frtable = db.friend_requests
+    ftable = db.friends
     q = request.get_vars.get("q", None)
 
-    query = (atable.first_name.like("%" + q + "%",
-                                    case_sensitive=False))
-    query |= (atable.last_name.like("%" + q + "%",
-                                    case_sensitive=False))
-    query |= (atable.stopstalk_handle.like("%" + q + "%",
-                                           case_sensitive=False))
+    query = (atable.first_name.contains(q))
+    query |= (atable.last_name.contains(q))
+    query |= (atable.stopstalk_handle.contains(q))
 
     for site in current.SITES:
         field_name = site.lower() + "_handle"
-        query |= (atable[field_name].like("%" + q + "%",
-                                          case_sensitive=False))
+        query |= (atable[field_name].contains(q))
 
     # Don't show the logged in user in the search
     query &= (atable.id != session.user_id)
 
     # Don't show users who have sent friend requests
     # to the logged in user
-    tmprows = db(frtable.from_h != session.user_id).select(frtable.from_h)
+    tmprows = db(frtable.to_h == session.user_id).select(frtable.from_h)
     for row in tmprows:
         query &= (atable.id != row.from_h)
 
-    rows = db(query).select()
+    # Columns of auth_user to be retrieved
+    columns = [atable.id,
+               atable.first_name,
+               atable.last_name,
+               atable.stopstalk_handle]
+
+    for site in current.SITES:
+        columns.append(atable[site.lower() + "_handle"])
+
+    rows = db(query).select(*columns)
 
     t = TABLE(_class="striped centered")
     tr = TR(TH("Name"),
@@ -536,6 +536,12 @@ def retrieve_users():
     t.append(thead)
 
     tbody = TBODY()
+
+    query = (ftable.user_id == session["user_id"])
+    friends = db(query).select(atable.id,
+                               join=ftable.on(ftable.friend_id == atable.id))
+    friends = [x["id"] for x in friends]
+
     for user in rows:
 
         friends = db(db.friends.user_id == user.id).select(db.friends.friend_id)
@@ -551,7 +557,7 @@ def retrieve_users():
             tr.append(TD(user[site.lower() + "_handle"]))
 
         # Check if the current user is already a friend or not
-        if session.user_id not in friends:
+        if user.id not in friends:
             r = db((frtable.from_h == session.user_id) &
                    (frtable.to_h == user.id)).select()
             if len(r) == 0:
@@ -580,15 +586,19 @@ def unfriend():
         Unfriend the user
     """
 
-    if len(request.args) == 0:
+    if len(request.args) != 1:
         session.flash = "Please click on a button!"
         redirect(URL("default", "search"))
     else:
         friend_id = request.args[0]
         user_id = session["user_id"]
         ftable = db.friends
-        db((ftable.user_id == user_id) & (ftable.friend_id == friend_id)).delete()
-        db((ftable.user_id == friend_id) & (ftable.user_id == friend_id)).delete()
+
+        # Delete records in the friends table
+        query = (ftable.user_id == user_id) & (ftable.friend_id == friend_id)
+        db(query).delete()
+        query = (ftable.user_id == friend_id) & (ftable.user_id == friend_id)
+        db(query).delete()
 
         session.flash = "Successfully unfriended"
         redirect(URL("default", "search.html"))
@@ -605,22 +615,21 @@ def submissions():
     else:
         active = request.args[0]
 
+    cftable = db.custom_friend
+    ftable = db.friends
+
     # Retrieve all the custom users created by the logged-in user
-    query = (db.custom_friend.user_id == session.user_id)
-    custom_friends = db(query).select(db.custom_friend.id)
+    query = (cftable.user_id == session.user_id)
+    custom_friends = db(query).select(cftable.id)
 
     cusfriends = []
     for friend in custom_friends:
         cusfriends.append(friend.id)
 
     # Get the friends of logged in user
-    query = (db.friends.user_id == session.user_id)
-    all_friends = db(query).select(db.friends.friend_id)
-    if all_friends is None:
-        all_friends = []
-    friends = []
-    for friend in all_friends:
-        friends.append(friend["friend_id"])
+    query = (ftable.user_id == session.user_id)
+    friends = db(query).select(ftable.friend_id)
+    friends = [x["friend_id"] for x in friends]
 
     query = (db.submission.user_id.belongs(friends))
     query |= (db.submission.custom_user_id.belongs(cusfriends))
