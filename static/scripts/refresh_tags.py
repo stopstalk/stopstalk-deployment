@@ -35,7 +35,7 @@ def urltosite(url):
 
     # Note: try/except is not added because this function is not to
     #       be called for invalid problem urls
-    site = re.search("www.*com", url).group()
+    site = re.search("www\..*\.com", url).group()
 
     # Remove www. and .com from the url to get the site
     site = site[4:-4]

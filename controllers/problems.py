@@ -21,7 +21,7 @@
 """
 
 import re
-import time, datetime
+import datetime
 import utilities
 
 # ----------------------------------------------------------------------------
@@ -76,10 +76,12 @@ def index():
     problem_name = request.vars["pname"]
     problem_link = request.vars["plink"]
 
-    submissions = db(stable.problem_link == problem_link).select(orderby=~stable.time_stamp)
-    site = urltosite(problem_link)
+    query = (stable.problem_link == problem_link)
+    submissions = db(query).select(orderby=~stable.time_stamp)
+
     try:
-        all_tags = db(ptable.problem_link == problem_link).select(ptable.tags).first()
+        query = (ptable.problem_link == problem_link)
+        all_tags = db(query).select(ptable.tags).first()
         if all_tags:
             all_tags = eval(all_tags["tags"])
         else:
@@ -151,9 +153,9 @@ def tag():
             # Decision to make & or |
             # & => Search for problem containing all these tags
             # | => Search for problem containing one of the tags
-            query &= ptable.tags.like("%" + tag + "%")
+            query &= ptable.tags.contains(tag)
         else:
-            query = ptable.tags.like("%" + tag + "%")
+            query = ptable.tags.contains(tag)
 
     join_query = (stable.problem_link == ptable.problem_link)
 
@@ -189,7 +191,9 @@ def tag():
                           _class="chip"))
             td.append(" ")
         tr.append(td)
-        table.append(tr)
+        tbody.append(tr)
+
+    table.append(tr)
 
     return dict(table=table)
 
@@ -206,10 +210,11 @@ def _render_trending(caption, rows):
     tbody = TBODY()
     for problem in rows:
         tr = TR()
+        submission = problem["submission"]
         tr.append(TD(A(problem["submission"]["problem_name"],
                        _href=URL("problems", "index",
-                                 vars={"pname": problem["submission"]["problem_name"],
-                                       "plink": problem["submission"]["problem_link"]}))))
+                                 vars={"pname": submission["problem_name"],
+                                       "plink": submission["problem_link"]}))))
         tr.append(TD(problem["_extra"]["COUNT(submission.id)"]))
         tbody.append(tr)
 
@@ -229,9 +234,7 @@ def trending():
 
     today = datetime.datetime.today()
     start_date = str(today - datetime.timedelta(days=current.PAST_DAYS))
-    start_time = time.strptime(start_date[:-7], "%Y-%m-%d %H:%M:%S")
     end_date = str(today)
-    end_time = time.strptime(end_date[:-7], "%Y-%m-%d %H:%M:%S")
 
     count = stable.id.count()
     PROBLEMS_PER_PAGE = current.PROBLEMS_PER_PAGE
@@ -269,4 +272,7 @@ def trending():
         div.append(DIV(global_table, _class="col s6"))
     else:
         div = DIV(global_table, _class="center")
+
     return dict(div=div)
+
+# END =========================================================================

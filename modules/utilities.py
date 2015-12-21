@@ -20,9 +20,11 @@
     THE SOFTWARE.
 """
 
-from gluon import *
 import time
-from datetime import datetime, date
+from datetime import datetime
+from gluon import current, IMG, DIV, TABLE, THEAD, \
+                  TBODY, TR, TH, TD, A, SPAN, INPUT, \
+                  TEXTAREA, SELECT, OPTION, URL
 
 # -----------------------------------------------------------------------------
 def get_link(site, handle):
@@ -48,12 +50,12 @@ def get_friends(user_id):
     # Retrieve custom friends
     query = (cftable.user_id == user_id)
     custom_friends = db(query).select(cftable.id)
-    custom_friends = map(lambda x: x["id"], custom_friends)
+    custom_friends = [x["id"] for x in custom_friends]
 
     # Retrieve friends
     query = (ftable.user_id == atable.id)
-    friend_ids = db(atable.id != user_id).select(atable.id, join=ftable.on(query))
-    friends = map(lambda x: x["id"], friend_ids)
+    friends = db(atable.id != user_id).select(atable.id, join=ftable.on(query))
+    friends = [x["id"] for x in friends]
 
     return friends, custom_friends
 
@@ -66,7 +68,7 @@ def materialize_form(form, fields):
     form.add_class("form-horizontal center")
     main_div = DIV(_class="center")
 
-    for id, label, controls, help in fields:
+    for field_id, label, controls, field_help in fields:
         curr_div = DIV(_class="row")
         input_field = None
         _controls = controls
@@ -118,8 +120,7 @@ def materialize_form(form, fields):
             # Select inputs
             _controls = SELECT(OPTION(label, _value=""),
                                _name=_name,
-                               *controls.components[1:]
-                               )
+                               *controls.components[1:])
             # Note now label will be the first element
             # of Select input whose value would be ""
             label = ""
@@ -155,8 +156,7 @@ def render_table(submissions):
                    "CE": "Compile Error",
                    "SK": "Skipped",
                    "HCK": "Hacked",
-                   "OTH": "Others",
-                   }
+                   "OTH": "Others"}
 
     table = TABLE(_class="striped centered")
     table.append(THEAD(TR(TH("User Name"),
@@ -213,3 +213,5 @@ def render_table(submissions):
         tbody.append(tr)
     table.append(tbody)
     return table
+
+# END =========================================================================
