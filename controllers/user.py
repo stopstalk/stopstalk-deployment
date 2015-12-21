@@ -268,23 +268,32 @@ def profile():
     else:
         handle = str(request.args[0])
 
-    total_submissions = db(db.submission.stopstalk_handle == handle).count()
+    stable = db.submission
+    # @Todo: Improve this!
+    total_submissions = db(stable.stopstalk_handle == handle).count()
     if total_submissions == 0:
         return dict(total_submissions=total_submissions)
+
+    output = {}
+    output["handle"] = handle
+    output["total_submissions"] = total_submissions
+
     query = (db.auth_user.stopstalk_handle == handle)
     row = db(query).select().first()
     if row is None:
         query = (db.custom_friend.stopstalk_handle == handle)
         row = db(query).select().first()
 
-    stable = db.submission
+    output["row"] = row
+
     name = row.first_name + " " + row.last_name
-    group_by = []
+    output["name"] = name
+    group_by = [stable.site, stable.status]
     query = (stable.stopstalk_handle == handle)
     rows = db(query).select(stable.site,
                             stable.status,
                             stable.id.count(),
-                            groupby=[stable.site, stable.status])
+                            groupby=group_by)
 
 
     data = {}
@@ -309,10 +318,9 @@ def profile():
         else:
             efficiency[i] = "%.3f" % (data[i][0] * 100.0 / data[i][1])
 
-    return dict(name=name,
-                efficiency=efficiency,
-                handle=handle,
-                total_submissions=total_submissions)
+    output["efficiency"] = efficiency
+
+    return output
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()

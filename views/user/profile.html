@@ -201,10 +201,12 @@
         <div class="row center">
             <h5><strong>Accuracy</strong></h5>
             {{for site in current.SITES:}}
-                <div class="chip">
-                    <img src="{{=URL('static', 'images/' + site.lower() + '_logo.png')}}" alt="{{=site}}" title="{{=site}}"/>
-                    {{=efficiency[site]}}
-                </div>
+                <a href="{{=(current.SITES[site] + row[site.lower() + '_handle'])}}" target="_blank">
+                    <div class="chip">
+                        <img src="{{=URL('static', 'images/' + site.lower() + '_logo.png')}}" alt="{{=site}}" title="{{=site}}"/>
+                        {{=efficiency[site]}}
+                    </div>
+                </a>
             {{pass}}
         </div>
         <br/>
