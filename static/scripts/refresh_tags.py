@@ -21,10 +21,11 @@
 """
 
 import re
-import profilesites as profile
 import gevent
 from gevent import monkey
 
+# @ToDo: Make this generalised
+from sites import codechef, codeforces, spoj, hackerearth, hackerrank
 gevent.monkey.patch_all(thread=False)
 
 # ----------------------------------------------------------------------------
@@ -104,7 +105,8 @@ def get_tag(link):
     site = urltosite(link)
 
     try:
-        tags_func = getattr(profile, site + "_get_tags")
+        Site = globals()[site]
+        tags_func = Site.Profile().get_tags
         all_tags = tags_func(link)
         if all_tags == []:
             all_tags = ["-"]

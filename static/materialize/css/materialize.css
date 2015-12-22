@@ -1980,7 +1980,9 @@ ul {
 a {
   color: #039be5;
   text-decoration: none;
-  -webkit-tap-highlight-color: transparent; }
+  -webkit-tap-highlight-color: transparent;
+  outline: 0;
+}
 
 .valign-wrapper {
   display: -webkit-box;

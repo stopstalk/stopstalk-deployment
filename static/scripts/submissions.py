@@ -20,12 +20,14 @@
     THE SOFTWARE.
 """
 
-import profilesites as p
 import time
 from datetime import datetime
 import gevent
 from gevent import monkey
 gevent.monkey.patch_all(thread=False)
+
+# @ToDo: Make this generalised
+from sites import codechef, codeforces, spoj, hackerearth, hackerrank
 
 # -----------------------------------------------------------------------------
 def _debug(first_name, last_name, site, custom=False):
@@ -120,8 +122,9 @@ def retrieve_submissions(reg_user, custom=False):
     for site in current.SITES:
         site_handle = row[site.lower() + "_handle"]
         if site_handle:
-            P = p.Profile(site, site_handle)
-            site_method = getattr(P, site.lower())
+            Site = globals()[site.lower()]
+            P = Site.Profile(site_handle)
+            site_method = P.get_submissions
             submissions = site_method(last_retrieved)
             list_of_submissions.append((site, submissions))
             if submissions == -1:
