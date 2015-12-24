@@ -39,7 +39,6 @@
               $.each(statuses, function(i) {
                   numJSON[statuses[i]['submission']['status']] = statuses[i]['_extra']['COUNT(submission.id)'];
               });
-              console.log(numJSON);
               // Create the data table.
               var data = new google.visualization.DataTable();
               data.addColumn('string', 'resultType');
@@ -58,8 +57,7 @@
 
               // Set chart options
               var options = {'title':'Total Submissions',
-                             'width': 800,
-                             'height': 600,
+                             'chartArea': {width:'90%',height:'80%'},
                              'pieHole': 0.5,
                              'slices': {
                                  0: {color: '#109618'},
@@ -81,7 +79,6 @@
 <div class="row">
     <h3>{{=problem_name}}</h3>
     {{=problem_details}}
-    <div id="chart_div" style="float: right;"></div>
 </div>
 <h4>Recent Submissions</h4>
 {{=table}}

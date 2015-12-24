@@ -93,26 +93,35 @@ def index():
                                   _href=URL("problems",
                                             "tag",
                                             vars={"q": tag}),
-                                  _style="color: white;"),
-                            _class="chip"))
+                                  _style="color: white;",
+                                  _target="_blank"),
+                                _class="chip"))
                 tags.append(" ")
         else:
             tags = DIV("No tags available")
     except AttributeError:
         tags = DIV("No tags available")
 
-    problem_details = TABLE(_style="float: left; width: 30%; margin-top: 8%; margin-left: 8%; font-size: 150%;")
+    problem_details = TABLE(_style="font-size: 140%;")
     tbody = TBODY()
-    tbody.append(TR(TD(STRONG("Problem Name:"),
+    tbody.append(TR(TD(),
+                    TD(STRONG("Problem Name:")),
                     TD(problem_name,
-                       _id="problem_name"))))
-    tbody.append(TR(TD(STRONG("Site:"),
-                    TD(urltosite(problem_link).capitalize()))))
-    tbody.append(TR(TD(STRONG("Problem Link:"),
+                       _id="problem_name"),
+                    TD(_id="chart_div",
+                       _style="width: 50%; height: 30%;",
+                       _rowspan="4")))
+    tbody.append(TR(TD(),
+                    TD(STRONG("Site:")),
+                    TD(urltosite(problem_link).capitalize())))
+    tbody.append(TR(TD(),
+                    TD(STRONG("Problem Link:")),
                     TD(A(I(_class="fa fa-link"), " Link",
-                       _href=problem_link)))))
-    tbody.append(TR(TD(STRONG("Tags:")),
-                   (TD(tags))))
+                         _href=problem_link,
+                         _target="_blank"))))
+    tbody.append(TR(TD(),
+                    TD(STRONG("Tags:")),
+                    TD(tags)))
     problem_details.append(tbody)
     table = utilities.render_table(submissions)
 
@@ -176,9 +185,11 @@ def tag():
                        _href=URL("problems",
                                  "index",
                                  vars={"pname": submission["problem_name"],
-                                       "plink": submission["problem_link"]}))))
+                                       "plink": submission["problem_link"]}),
+                       _target="_blank")))
         tr.append(TD(A(I(_class="fa fa-link"),
-                         _href=submission["problem_link"])))
+                       _href=submission["problem_link"],
+                       _target="_blank")))
         tr.append(TD(submission["site"]))
         all_tags = eval(problem_tag["tags"])
         td = TD()
@@ -187,7 +198,8 @@ def tag():
                             _href=URL("problems",
                                       "tag",
                                       vars={"q": tag}),
-                            _style="color: white;"),
+                            _style="color: white;",
+                            _target="_blank"),
                           _class="chip"))
             td.append(" ")
         tr.append(td)
@@ -214,7 +226,8 @@ def _render_trending(caption, rows):
         tr.append(TD(A(problem["submission"]["problem_name"],
                        _href=URL("problems", "index",
                                  vars={"pname": submission["problem_name"],
-                                       "plink": submission["problem_link"]}))))
+                                       "plink": submission["problem_link"]}),
+                       _target="_blank")))
         tr.append(TD(problem["_extra"]["COUNT(submission.id)"]))
         tbody.append(tr)
 

@@ -163,7 +163,8 @@ def notifications():
         handle = users[0]
         curr_streak = users[1]
         tr = TR(TD(H5(A(handle[1],
-                        _href=URL("user", "profile", args=[handle[0]])))),
+                        _href=URL("user", "profile", args=[handle[0]]),
+                        _target="_blank"))),
                 TD(H5(str(curr_streak) + " ",
                       I(_class="fa fa-bolt",
                         _style="color:red"),
@@ -304,7 +305,8 @@ def leaderboard():
         tr = TR()
         tr.append(TD(DIV(span, DIV(i[0]))))
         tr.append(TD(A(i[1],
-                     _href=URL("user", "profile", args=[i[1]]))))
+                       _href=URL("user", "profile", args=[i[1]]),
+                       _target="_blank")))
         tr.append(TD(i[2]))
         tr.append(TD(i[3]))
 
@@ -550,7 +552,8 @@ def retrieve_users():
         tr.append(TD(A(user.first_name + " " + user.last_name,
                        _href=URL("user", "profile",
                                  args=[user.stopstalk_handle],
-                                 extension=False))))
+                                 extension=False),
+                       _target="_blank")))
         tr.append(TD(user.stopstalk_handle))
 
         for site in current.SITES:

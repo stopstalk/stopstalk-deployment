@@ -57,14 +57,16 @@ def edit_custom_friend_details():
         tr.append(TD(A(row.first_name + " " + row.last_name,
                        _href=URL("user",
                                  "profile",
-                                 args=[row.stopstalk_handle]))))
+                                 args=[row.stopstalk_handle]),
+                       _target="_blank")))
         tr.append(TD(row.stopstalk_handle))
 
         for site in current.SITES:
             tmp_handle = row[site.lower() + "_handle"]
             if tmp_handle:
                 tr.append(TD(A(tmp_handle,
-                               _href=current.SITES[site] + tmp_handle)))
+                               _href=current.SITES[site] + tmp_handle,
+                               _target="_blank")))
             else:
                 tr.append(TD())
         tr.append(TD(FORM(INPUT(_class="btn yellow",
@@ -97,7 +99,8 @@ def update_details():
     record = db.auth_user(session.user_id)
     form = SQLFORM(db.auth_user,
                    record,
-                   fields=form_fields)
+                   fields=form_fields,
+                   showid=False)
 
     if form.process().accepted:
         session.flash = "User details updated"
@@ -412,7 +415,8 @@ def friend_requests():
         tr.append(TD(A(row.from_h.first_name + " " + row.from_h.last_name,
                        _href=URL("user",
                                  "profile",
-                                 args=[row.from_h.stopstalk_handle]))))
+                                 args=[row.from_h.stopstalk_handle]),
+                       _target="_blank")))
         tr.append(TD(row.from_h.institute))
         tr.append(TD(UL(LI(FORM(INPUT(_value="Accept",
                                       _type="submit",
