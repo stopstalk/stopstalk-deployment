@@ -23,6 +23,7 @@
 import re
 import gevent
 from gevent import monkey
+import datetime
 
 # @ToDo: Make this generalised
 from sites import codechef, codeforces, spoj, hackerearth, hackerrank
@@ -62,20 +63,23 @@ def refresh_tags():
     updated_problem_list = map(lambda x: x["problem_link"],
                                updated_problem_list)
 
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
+    before_10 = (datetime.datetime.now() - datetime.timedelta(10)).strftime("%Y-%m-%d")
+
     # Sites which add tags at a later stage
     probable_sites = ["codechef", "codeforces", "hackerearth"]
 
     # Problems having tags = ["-"]
     # Possibilities of such case -
     #   => There are actually no tags for the problem
-    #   => The problem is from a contest and they'll be updating tags shortly
+    #   => The problem is from a contest and they'll be
+    #      updating tags shortly(assuming 10 days)
     #   => Page was not reachable due to some reason
-    no_tags = db(ptable.tags == "['-']").select(ptable.problem_link)
+    query = (ptable.problem_added_on >= before_10)
+    query &= (ptable.tags == "['-']")
+    no_tags = db(query).select(ptable.problem_link)
     no_tags = map(lambda x: x["problem_link"],
                   no_tags)
-
-    no_tags = filter(lambda link: urltosite(link) in probable_sites,
-                     no_tags)
 
     # Compute difference between the lists
     difference_list = list((set(updated_problem_list) - \
@@ -114,12 +118,14 @@ def get_tag(link):
         all_tags = ["-"]
     print link, all_tags
 
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
     # Insert tags in problem_tags table
     # Note: Tags are stored in a stringified list
     #       so that they can be used directly by eval
     ptable.update_or_insert(ptable.problem_link == link,
                             problem_link=link,
-                            tags=str(all_tags))
+                            tags=str(all_tags),
+                            problem_added_on=today)
 
 if __name__ == "__main__":
     refresh_tags()

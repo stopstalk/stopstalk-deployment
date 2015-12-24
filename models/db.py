@@ -210,7 +210,8 @@ db.define_table("friends",
 db.define_table("problem_tags",
                 Field("problem_link"),
                 Field("tags",
-                      default="-"))
+                      default="['-']"),
+                Field("problem_added_on", "date"))
 
 db.define_table("contact_us",
                 Field("name", requires=IS_NOT_EMPTY()),
