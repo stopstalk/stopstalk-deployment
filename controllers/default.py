@@ -729,7 +729,7 @@ def contact_us():
 
     if form.process(keepvalues=True).accepted:
         session.flash = "We will get back to you!"
-        redirect(URL("default", "contact_us"))
+        redirect(URL("default", "index"))
     elif form.errors:
         response.flash = "Form has errors!"
 

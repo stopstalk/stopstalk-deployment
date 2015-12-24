@@ -122,6 +122,13 @@ mail.settings.server = current.smtp_server
 mail.settings.sender = current.sender_mail
 mail.settings.login = current.sender_mail + ":" + current.sender_password
 
+# -----------------------------------------------------------------------------
+def send_mail(to, subject, message):
+    mail.send(to=to,
+              subject=subject,
+              message=message)
+
+current.send_mail = send_mail
 ## configure auth policy
 auth.settings.registration_requires_verification = True
 auth.settings.registration_requires_approval = True
