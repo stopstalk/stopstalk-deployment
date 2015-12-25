@@ -134,6 +134,7 @@ auth.settings.registration_requires_verification = True
 auth.settings.registration_requires_approval = True
 auth.settings.reset_password_requires_verification = True
 auth.settings.formstyle = materialize_form
+auth.settings.login_next = URL("default", "index")
 
 auth.messages.email_sent = "Verification Email sent"
 auth.messages.logged_out = "Successfully logged out"

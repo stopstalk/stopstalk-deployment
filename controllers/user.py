@@ -469,6 +469,13 @@ def accept_fr():
     # Delete the friend request row
     db(db.friend_requests.id == row_id).delete()
 
+    # Send acceptance email to the friend
+    atable = db.auth_user
+    row = db(atable.id == friend_id).select(atable.email).first()
+    current.send_mail(row.email,
+                      "Friend on StopStalk accepted your friend request!",
+                      session.handle + " accepted your friend request")
+
     session.flash = "Friend added!"
     redirect(URL("user", "friend_requests"))
 
@@ -486,8 +493,18 @@ def reject_fr():
 
     fr_id = request.args[0]
 
+    frtable = db.friend_requests
+    atable = db.auth_user
+    join_query = (frtable.from_h == atable.id)
+    row = db(frtable.id == fr_id).select(atable.email,
+                                         join=frtable.on(join_query)).first()
     # Simply delete the friend request
     db(db.friend_requests.id == fr_id).delete()
+
+    # Send rejection email to the friend
+    current.send_mail(row.email,
+                      "Friend on StopStalk rejected your friend request!",
+                      session.handle + " rejected your friend request")
 
     session.flash = "Friend request rejected!"
     redirect(URL("user", "friend_requests"))

@@ -481,6 +481,15 @@ def mark_friend():
 
     # Insert a tuple of users' id into the friend_requests table
     db.friend_requests.insert(from_h=session.user_id, to_h=request.args[0])
+
+    # Send the user an email notifying about the request
+    atable = db.auth_user
+    row = db(atable.id == request.args[0]).select(atable.email).first()
+    current.send_mail(to=row.email,
+                      subject="You have a new Friend Request",
+                      message=session.handle + \
+                      " wants to connect on StopStalk")
+
     session.flash = "Friend Request sent"
     redirect(URL("default", "search.html"))
     return dict()
@@ -546,8 +555,6 @@ def retrieve_users():
 
     for user in rows:
 
-        friends = db(db.friends.user_id == user.id).select(db.friends.friend_id)
-        friends = map(lambda x: x["friend_id"], friends)
         tr = TR()
         tr.append(TD(A(user.first_name + " " + user.last_name,
                        _href=URL("user", "profile",
@@ -602,6 +609,14 @@ def unfriend():
         db(query).delete()
         query = (ftable.user_id == friend_id) & (ftable.user_id == friend_id)
         db(query).delete()
+
+        # Send email to the friend notifying about the tragedy ;)
+        atable = db.auth_user
+        row = db(atable.id == friend_id).select(atable.email).first()
+        current.send_mail(to=row.email,
+                          subject="A friend Unfriended you on StopStalk",
+                          message=session.handle + \
+                          " unfriended you on StopStalk")
 
         session.flash = "Successfully unfriended"
         redirect(URL("default", "search.html"))
