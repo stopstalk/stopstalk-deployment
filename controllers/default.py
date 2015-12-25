@@ -34,8 +34,6 @@ def index():
 
     # If the user is logged in
     if session["auth"]:
-        session["handle"] = session["auth"]["user"]["stopstalk_handle"]
-        session["user_id"] = session["auth"]["user"]["id"]
         session.flash = "Successfully logged in"
         redirect(URL("default", "submissions", args=[1]))
 
@@ -740,7 +738,13 @@ def contact_us():
         Contact Us page
     """
 
-    form = SQLFORM(db.contact_us)
+    ctable = db.contact_us
+    if session["auth"]:
+        user = session["auth"]["user"]
+        ctable.email.default = user["email"]
+        ctable.name.default = user["first_name"] + " " + user["last_name"]
+
+    form = SQLFORM(ctable)
 
     if form.process(keepvalues=True).accepted:
         session.flash = "We will get back to you!"
