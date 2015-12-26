@@ -77,6 +77,14 @@ def index():
     problem_link = request.vars["plink"]
 
     query = (stable.problem_link == problem_link)
+
+    # If a user is logged-in then show his/her friends' submissions
+    if session.auth:
+        friends, cusfriends = utilities.get_friends(session.user_id)
+        query &= (stable.user_id.belongs(friends)) | \
+                 (stable.custom_user_id.belongs(cusfriends)) | \
+                 (stable.user_id == session.user_id)
+
     submissions = db(query).select(orderby=~stable.time_stamp)
 
     try:
@@ -174,6 +182,7 @@ def tag():
                                     ptable.tags,
                                     left=ptable.on(join_query),
                                     distinct=True)
+
     tbody = TBODY()
     for problem in all_problems:
 
@@ -205,8 +214,7 @@ def tag():
         tr.append(td)
         tbody.append(tr)
 
-    table.append(tr)
-
+    table.append(tbody)
     return dict(table=table)
 
 # ----------------------------------------------------------------------------
