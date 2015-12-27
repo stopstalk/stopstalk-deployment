@@ -518,16 +518,23 @@ def custom_friend():
         Controller to add a Custom Friend
     """
 
+    atable = db.auth_user
+
     # The total referrals by the logged-in user
-    query = (db.auth_user.referrer == session["handle"])
+    query = (atable.referrer == session["handle"])
 
     # User should not enter his/her own
     # stopstalk handle as referrer handle
-    query &= (db.auth_user.stopstalk_handle != session["handle"])
+    query &= (atable.stopstalk_handle != session["handle"])
     total_referrals = db(query).count()
 
+    # Retrieve the total allowed custom users from auth_user table
+    query = (atable.id == session["user_id"])
+    default_allowed = db(query).select(atable.allowed_cu).first()
+    default_allowed = default_allowed["allowed_cu"]
+
     # 3 custom friends allowed plus one for each 5 invites
-    allowed_custom_friends = total_referrals / 5 + 3
+    allowed_custom_friends = total_referrals / 5 + default_allowed
 
     # Custom users already created
     current_count = db(db.custom_friend.user_id == session["user_id"]).count()

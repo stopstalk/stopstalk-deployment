@@ -105,6 +105,11 @@ extra_fields = [Field("institute", requires=IS_NOT_EMPTY()),
                 Field("referrer",
                       label="Referrer's StopStalk Handle",
                       default=""),
+                Field("allowed_cu", "integer",
+                      # Make this 3 after complete website is up
+                      default=4,
+                      readable=False,
+                      writable=False)
                 ]
 
 site_handles = []
