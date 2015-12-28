@@ -103,7 +103,7 @@ def index():
                 tags.append(DIV(A(tag,
                                   _href=URL("problems",
                                             "tag",
-                                            vars={"q": tag}),
+                                            vars={"q": tag, "page": 1}),
                                   _style="color: white;",
                                   _target="_blank"),
                                 _class="chip"))
@@ -163,6 +163,12 @@ def tag():
         return dict(table=table)
 
     q = request.vars["q"]
+    try:
+        curr_page = int(request.vars["page"])
+    except:
+        curr_page = 1
+    PER_PAGE = current.PER_PAGE
+
     # Enables multiple space seperated tag search
     q = q.split(" ")
     stable = db.submission
@@ -198,12 +204,25 @@ def tag():
 
     join_query = (stable.problem_link == ptable.problem_link)
 
+    # @Todo: Need a cleanup here
+    total_problems = db(query).select(stable.problem_link,
+                                      ptable.tags,
+                                      left=ptable.on(join_query),
+                                      distinct=True)
+
+    total_problems = len(total_problems)
+    total_pages = total_problems / PER_PAGE + 1
+    if request.extension == "json":
+        return dict(total_pages=total_pages)
+
     all_problems = db(query).select(stable.problem_name,
                                     stable.problem_link,
                                     stable.site,
                                     ptable.tags,
                                     left=ptable.on(join_query),
-                                    distinct=True)
+                                    distinct=True,
+                                    limitby=((curr_page - 1) * PER_PAGE,
+                                             curr_page * PER_PAGE))
 
     tbody = TBODY()
     for problem in all_problems:
@@ -228,7 +247,7 @@ def tag():
             td.append(DIV(A(tag,
                             _href=URL("problems",
                                       "tag",
-                                      vars={"q": tag}),
+                                      vars={"q": tag, "page": 1}),
                             _style="color: white;",
                             _target="_blank"),
                           _class="chip"))

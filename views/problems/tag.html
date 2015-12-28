@@ -1,10 +1,35 @@
 {{extend 'layout.html'}}
+<script src="{{=URL('static', 'js/jquery.bootpag.min.js')}}"></script>
 <script>
-$(function() {
-    $('#searchButton').click(function() {
-        window.location.href = "{{=URL('problems', 'tag')}}" + "/?q=" + $('#search').val();
+    $(function() {
+        var curr_url = window.location.href;
+        var vars = curr_url.split("?")[1];
+        var params = {'q': '', 'page': ''};
+        var allVars = vars.split("&");
+        var firstParam = allVars[0].split("=");
+        params[firstParam[0]] = firstParam[1];
+        var secondParam = allVars[1].split("=");
+        params[secondParam[0]] = secondParam[1];
+
+        $.ajax({
+            url: '{{=URL("problems", "tag", extension="json")}}' + '/?q=' + params['q'] + '&page=1',
+            method: 'GET'
+        }).done(function(response) {
+            console.log(response);
+            console.log(params);
+            $('#page-selection').bootpag({
+                total: response['total_pages'],
+                page: parseInt(params['page']),
+                maxVisible: 10
+            }).on("page", function(event, num) {
+                window.location.href = "{{=URL('problems', 'tag')}}" + "/?q=" + params['q'] + "&page=" + num.toString();
+            });
+
+        });
+        $('#searchButton').click(function() {
+            window.location.href = "{{=URL('problems', 'tag')}}" + "/?q=" + $('#search').val() + "&page=1";
+        });
     });
-});
 </script>
 <h3>Search problems by tags</h3>
 <div class="row center">
@@ -16,6 +41,7 @@ $(function() {
         </a>
     </div>
 </div>
+<div id="page-selection" class="center"></div>
 <div class="row" id="output">
     {{=table}}
 </div>
