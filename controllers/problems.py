@@ -25,6 +25,7 @@ import datetime
 import utilities
 
 # ----------------------------------------------------------------------------
+# Remove this
 @auth.requires_login()
 def pie_chart_helper():
     """
@@ -42,6 +43,7 @@ def pie_chart_helper():
     return dict(row=row)
 
 # ----------------------------------------------------------------------------
+# Remove this
 @auth.requires_login()
 def urltosite(url):
     """
@@ -58,6 +60,7 @@ def urltosite(url):
     return site
 
 # ----------------------------------------------------------------------------
+# Remove this
 @auth.requires_login()
 def index():
     """
@@ -139,6 +142,7 @@ def index():
                 table=table)
 
 # ----------------------------------------------------------------------------
+# Remove this
 @auth.requires_login()
 def tag():
     """
@@ -163,6 +167,21 @@ def tag():
     q = q.split(" ")
     stable = db.submission
     ptable = db.problem_tags
+    atable = db.auth_user
+    cftable = db.custom_friend
+    ftable = db.friends
+
+    # If a user is logged in then only show problems that are solved by
+    # his/her friends, custom friends and also himself/herself.
+    if session.auth:
+        friends, cusfriends = utilities.get_friends(session.user_id)
+        query = (stable.user_id.belongs(friends))
+        query |= (stable.user_id == session.user_id)
+        query |= (stable.custom_user_id.belongs(cusfriends))
+
+        # All the URLs of problems
+        problem_links = db(query).select(stable.problem_link, distinct=True)
+        problem_links = [x["problem_link"] for x in problem_links]
 
     query = None
     for tag in q:
@@ -173,6 +192,9 @@ def tag():
             query &= ptable.tags.contains(tag)
         else:
             query = ptable.tags.contains(tag)
+
+    if session.auth:
+        query &= ptable.problem_link.belongs(problem_links)
 
     join_query = (stable.problem_link == ptable.problem_link)
 
@@ -218,6 +240,7 @@ def tag():
     return dict(table=table)
 
 # ----------------------------------------------------------------------------
+# Remove this
 @auth.requires_login()
 def _render_trending(caption, rows):
     """
@@ -246,6 +269,7 @@ def _render_trending(caption, rows):
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
+# Remove this
 def trending():
     """
         Show trending problems globally and among friends

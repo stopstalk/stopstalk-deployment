@@ -174,6 +174,7 @@ def notifications():
     return dict(table=table)
 
 # ----------------------------------------------------------------------------
+# Remove this
 @auth.requires_login()
 def compute_row(user, custom=False):
     """
@@ -249,6 +250,7 @@ def compute_row(user, custom=False):
             custom)
 
 # ----------------------------------------------------------------------------
+# Remove this
 @auth.requires_login()
 def leaderboard():
     """
@@ -344,6 +346,7 @@ def search():
     return dict()
 
 # ----------------------------------------------------------------------------
+# Remove this
 @auth.requires_login()
 def filters():
     """
@@ -686,6 +689,7 @@ def submissions():
                 cusfriends=cusfriends)
 
 # ----------------------------------------------------------------------------
+# Remove this
 @auth.requires_login()
 def faq():
     """

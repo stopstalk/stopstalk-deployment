@@ -166,6 +166,7 @@ def update_friend():
     return dict(form=form)
 
 # ------------------------------------------------------------------------------
+# Remove this
 @auth.requires_login()
 def get_dates():
     """
@@ -235,6 +236,7 @@ def get_dates():
                 curr_streak=streak)
 
 # ------------------------------------------------------------------------------
+# Remove this
 @auth.requires_login()
 def get_stats():
     """
@@ -261,6 +263,7 @@ def get_stats():
     return dict(row=row)
 
 # ------------------------------------------------------------------------------
+# Remove this
 @auth.requires_login()
 def profile():
     """
@@ -330,6 +333,7 @@ def profile():
     return output
 
 # ------------------------------------------------------------------------------
+# Remove this
 @auth.requires_login()
 def submissions():
     """
