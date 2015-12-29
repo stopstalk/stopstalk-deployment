@@ -34,7 +34,7 @@ def index():
 
     # If the user is logged in
     if session["auth"]:
-        session.flash = "Successfully logged in"
+        session.flash = "Welcome StopStalker!!"
         redirect(URL("default", "submissions", args=[1]))
 
     return dict()
@@ -676,7 +676,8 @@ def submissions():
     if request.extension == "json":
         return dict(count=count,
                     friends=all_friends,
-                    cusfriends=all_custom_friends)
+                    cusfriends=all_custom_friends,
+                    total_rows=1)
 
     offset = PER_PAGE * (int(active) - 1)
     # Retrieve only some number of submissions from the offset
@@ -686,7 +687,8 @@ def submissions():
     table = utilities.render_table(rows)
     return dict(table=table,
                 friends=friends,
-                cusfriends=cusfriends)
+                cusfriends=cusfriends,
+                total_rows=len(rows))
 
 # ----------------------------------------------------------------------------
 # Remove this

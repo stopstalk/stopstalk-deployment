@@ -401,7 +401,8 @@ def submissions():
     return dict(c=c,
                 user=user,
                 user_id=user_id,
-                table=table)
+                table=table,
+                total_rows=len(all_submissions))
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()

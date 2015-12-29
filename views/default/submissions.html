@@ -1,4 +1,5 @@
 {{extend 'layout.html'}}
+{{if total_rows:}}
 <script src="{{=URL('static', 'js/jquery.bootpag.min.js')}}"></script>
 <h1>Recent submissions</h1>
 <div id="page-selection" class="center"></div>
@@ -39,3 +40,20 @@
         });
     </script>
 {{=table}}
+{{else:}}
+    <br /><br />
+    <h4>Welcome to StopStalk!</h4><br />
+    <h5>You do not have any friends yet!</h5>
+    <h5>
+        Try adding friends on StopStalk &nbsp;
+        <a href="{{=URL('default', 'search')}}" target="_blank">
+            <i class="fa fa-long-arrow-right"></i>
+        </a>
+    </h5>
+    <h5>
+        You can also add Custom Users if your friend is not on StopStalk &nbsp;
+        <a href="{{=URL('user', 'custom_friend')}}" target="_blank">
+            <i class="fa fa-long-arrow-right"></i>
+        </a>
+    </h5>
+{{pass}}

@@ -49,11 +49,20 @@
 
     });
 </script>
-{{if user == "Self":}}
-    <h1>Your submissions</h1>
+{{if total_rows:}}
+    {{if user == "Self":}}
+        <h1>Your submissions</h1>
+    {{else:}}
+        <h1>Submissions of {{=user}}</h1>
+    {{pass}}
+    <div id="page-selection" class="center"></div>
+    <div id="id_custom" style="display: none;">{{=user_id}} {{=c}}</div>
+    {{=table}}
 {{else:}}
-    <h1>Submissions of {{=user}}</h1>
+    <br /><br />
+    <h5>No submissions in the database yet!</h5>
+    <h5>If you have registered today then your submissions will be up by tomorrow morning!</h5>
+    <h5>Make sure you entered the correct site handles.</h5>
+    <h5>Till then you can add your friends who are already on StopStalk!</h5>
 {{pass}}
-<div id="page-selection" class="center"></div>
-<div id="id_custom" style="display: none;">{{=user_id}} {{=c}}</div>
-{{=table}}
+
