@@ -102,8 +102,14 @@ def retrieve_submissions(reg_user, custom=False):
         row = db(query).select().first()
         table = db.custom_friend
     else:
-        query = (db.auth_user.id == reg_user)
+        query = ((db.auth_user.id == reg_user) & \
+                 (db.auth_user.blacklisted == False))
         row = db(query).select().first()
+
+        if row is None:
+            print "Auth user " + str(reg_user) + " skipped"
+            return
+
         table = db.auth_user
 
     # Start retrieving from this date if user registered the first time

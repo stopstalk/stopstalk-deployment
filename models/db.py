@@ -104,8 +104,11 @@ extra_fields = [Field("institute", requires=IS_NOT_EMPTY()),
                       # Make this 3 after complete website is up
                       default=4,
                       readable=False,
-                      writable=False)
-                ]
+                      writable=False),
+                Field("blacklisted",
+                      default=False,
+                      readable=False,
+                      writable=False)]
 
 site_handles = []
 for site in current.SITES:
