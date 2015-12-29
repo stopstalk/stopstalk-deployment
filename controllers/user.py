@@ -142,7 +142,8 @@ def update_friend():
     form = SQLFORM(cftable,
                    record,
                    fields=form_fields,
-                   deletable=True)
+                   deletable=True,
+                   showid=False)
 
     if form.process().accepted:
         if form.vars.delete_this_record != "on":
@@ -152,7 +153,9 @@ def update_friend():
 
             # Since there may be some updates in the handle
             # for correctness we need to remove all the submissions
-            # and retrieve all the submissions again
+            # and retrieve all the submissions again(Will be updated next day)
+            query = (cftable.id == request.args[0])
+            db(query).update(last_retrieved=current.INITIAL_DATE)
             db(db.submission.custom_user_id == request.args[0]).delete()
             redirect(URL("user", "edit_custom_friend_details"))
         else:
