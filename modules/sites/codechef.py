@@ -81,7 +81,7 @@ class Profile(object):
             return all_tags
 
     # -------------------------------------------------------------------------
-    def parallelize_codechef(self, handle, page):
+    def parallelize_codechef(self, handle, page, last_retrieved):
         """
             Helper function for retrieving codechef submissions parallely
         """
@@ -119,6 +119,12 @@ class Profile(object):
                     tos = i.contents[0].contents[0]
                     tos = str(ast.literal_eval(repr(tos).replace("\\", "")))
                     tos = self.parsetime(tos)
+                    curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
+
+                    # So cool optimization!
+                    if curr <= last_retrieved:
+                        return
+
                     append(str(tos))
 
                     # Problem name/url
@@ -207,7 +213,8 @@ class Profile(object):
             for i in xrange(max_page):
                 threads.append(gevent.spawn(self.parallelize_codechef,
                                             handle,
-                                            i))
+                                            i,
+                                            last_retrieved))
             gevent.joinall(threads)
             return self.submissions
 
