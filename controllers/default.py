@@ -276,13 +276,15 @@ def leaderboard():
     users = sorted(users, key=lambda x: x[3], reverse=True)
 
     table = TABLE(_class="centered striped")
-    table.append(THEAD(TR(TH("Name"),
+    table.append(THEAD(TR(TH("Rank"),
+                          TH("Name"),
                           TH("StopStalk Handle"),
                           TH("Institute"),
                           TH("StopStalk Rating"),
                           TH("Per Day Changes"))))
 
     tbody = TBODY()
+    rank = 1
     for i in users:
 
         # If there are no submissions of the user in the database
@@ -303,6 +305,7 @@ def leaderboard():
             span = SPAN()
 
         tr = TR()
+        tr.append(TD(str(rank) + "."))
         tr.append(TD(DIV(span, DIV(i[0]))))
         tr.append(TD(A(i[1],
                        _href=URL("user", "profile", args=[i[1]]),
@@ -325,6 +328,7 @@ def leaderboard():
                            _style="color: #f00;")))
 
         tbody.append(tr)
+        rank += 1
 
     table.append(tbody)
     return dict(table=table)
@@ -491,7 +495,13 @@ def mark_friend():
     current.send_mail(to=row.email,
                       subject="You have a new Friend Request",
                       message=session.handle + \
-                      " wants to connect on StopStalk")
+                              "(" + (URL("user",
+                                         "profile",
+                                         args=[session.handle],
+                                         scheme=True,
+                                         host=True,
+                                         extension=False)) + \
+                      ") wants to connect on StopStalk")
 
     session.flash = "Friend Request sent"
     redirect(URL("default", "search.html"))
@@ -617,9 +627,15 @@ def unfriend():
         atable = db.auth_user
         row = db(atable.id == friend_id).select(atable.email).first()
         current.send_mail(to=row.email,
-                          subject="A friend Unfriended you on StopStalk",
+                          subject="A friend unfriended you on StopStalk",
                           message=session.handle + \
-                          " unfriended you on StopStalk")
+                                  "(" + (URL("user",
+                                             "profile",
+                                             args=[session.handle],
+                                             scheme=True,
+                                             host=True,
+                                             extension=False)) + \
+                          ") unfriended you on StopStalk")
 
         session.flash = "Successfully unfriended"
         redirect(URL("default", "search.html"))
@@ -715,8 +731,8 @@ def faq():
                  "Are there any benefits StopStalk provides for referring to a friend?",
                  )
     answers = ("Custom User is a way to view submissions of a friend. Note: Only you can see his/her submissions",
-               "At present you can not explicitly update the submissions in the database. The submissions are automatically updated at 03:00 IST",
-               "Best option is to ask him/her register on option. If not, then you can add a Custom User if you already know all the handles",
+               "At present you can not explicitly update the submissions in the database. The submissions are automatically updated every morning.",
+               "Best option is to ask him/her register on StopStalk and then send a friend request. If not, then you can add a Custom User if you already know all the handles.",
                "At present, the limit is set to 3 per user. We are working on it so that this limit is increased",
                "StopStalk rating is determined by a very unique formula which takes care of number of solved problems, maximum streak, accuracy, per day changes and effort",
                "Whenever user joins StopStalk, per day change is 0.0 and number of problems solved per day are computed. After every day this get modified depending on number of solutions submitted. Positive value says that you have benefitted after joining StopStalk",

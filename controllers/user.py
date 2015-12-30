@@ -481,8 +481,15 @@ def accept_fr():
     atable = db.auth_user
     row = db(atable.id == friend_id).select(atable.email).first()
     current.send_mail(row.email,
-                      "Friend on StopStalk accepted your friend request!",
-                      session.handle + " accepted your friend request")
+                      session.handle + \
+                      " from StopStalk accepted your friend request!",
+                      session.handle + \
+                      "(" + (URL("user",
+                                 "profile",
+                                 args=[session.handle],
+                                 scheme=True,
+                                 host=True)) + \
+                      ") accepted your friend request")
 
     session.flash = "Friend added!"
     redirect(URL("user", "friend_requests"))
@@ -511,8 +518,15 @@ def reject_fr():
 
     # Send rejection email to the friend
     current.send_mail(row.email,
-                      "Friend on StopStalk rejected your friend request!",
-                      session.handle + " rejected your friend request")
+                      session.handle + \
+                      " from StopStalk rejected your friend request!",
+                      session.handle + \
+                      "(" + (URL("user",
+                                 "profile",
+                                 args=[session.handle],
+                                 scheme=True,
+                                 host=True)) + \
+                      ") rejected your friend request")
 
     session.flash = "Friend request rejected!"
     redirect(URL("user", "friend_requests"))
@@ -538,11 +552,16 @@ def custom_friend():
 
     # Retrieve the total allowed custom users from auth_user table
     query = (atable.id == session["user_id"])
-    default_allowed = db(query).select(atable.allowed_cu).first()
-    default_allowed = default_allowed["allowed_cu"]
+    row = db(query).select(atable.referrer,
+                           atable.allowed_cu).first()
+    default_allowed = row.allowed_cu
+    referrer = 0
+    # If a valid referral is applied then award 1 extra CU
+    if row.referrer and row.referrer != session["handle"]:
+        referrer = db(atable.stopstalk_handle == row.referrer).count()
 
     # 3 custom friends allowed plus one for each 5 invites
-    allowed_custom_friends = total_referrals / 5 + default_allowed
+    allowed_custom_friends = total_referrals / 5 + default_allowed + referrer
 
     # Custom users already created
     current_count = db(db.custom_friend.user_id == session["user_id"]).count()
