@@ -502,9 +502,12 @@ def mark_friend():
 
     # Send the user an email notifying about the request
     atable = db.auth_user
-    row = db(atable.id == request.args[0]).select(atable.email).first()
+    query = (atable.id == request.args[0])
+    row = db(query).select(atable.email,
+                           atable.stopstalk_handle).first()
     current.send_mail(to=row.email,
-                      subject="You have a new Friend Request",
+                      subject=row.stopstalk_handle + \
+                              " wants to be a friend on StopStalk",
                       message=session.handle + \
                               "(" + (URL("user",
                                          "profile",
