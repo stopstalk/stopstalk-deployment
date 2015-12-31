@@ -501,7 +501,13 @@ def mark_friend():
                                          scheme=True,
                                          host=True,
                                          extension=False)) + \
-                      ") wants to connect on StopStalk")
+                      ") wants to connect on StopStalk\n\n" + \
+                      "To view all friend requests go here - " + \
+                      URL("user",
+                          "friend_requests",
+                          scheme=True,
+                          host=True,
+                          extension=False))
 
     session.flash = "Friend Request sent"
     redirect(URL("default", "search.html"))

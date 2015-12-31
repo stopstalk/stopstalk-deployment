@@ -21,13 +21,50 @@
 """
 
 db = current.db
-email_ids = db(db.auth_user.id > 0).select(db.auth_user.email)
-email_ids = [x["email"] for x in email_ids]
+atable = db.auth_user
+rows = db(atable.id > 0).select(atable.stopstalk_handle,
+                                atable.email)
 
-message = "Hello there and welcome! We are all set for your welcome."
-subject = "Welcome to StopStalk!"
+def get_message(stopstalk_handle):
 
-for email_id in email_ids:
-    current.send_mail(to=email_id,
+    message = """
+
+Hello there and Welcome to StopStalk!
+We're all set for the release.
+
+Lets get going - """ + URL("default", "user", args=["login"], scheme=True, host=True) + \
+"""\n\n Checkout your StopStalk profile page here - """ + URL("user",
+                                                              "profile",
+                                                              args=[stopstalk_handle],
+                                                              scheme=True,
+                                                              host=True) + \
+"""
+
+If your friends are not on StopStalk - send them your
+StopStalk handle and ask them to enter it in
+Referrer's StopStalk handle field to get more Custom Users.
+
+You can also add Custom Users if you know their handles
+on the Competitive programming sites.
+
+Checkout the Global Leaderboard - """ + URL("default", "leaderboard", scheme=True, host=True) + \
+"""
+
+Show your love -
+Like us on Facebook - https://www.facebook.com/stopstalkcommunity/
+Follow us on Twitter - https://twitter.com/stop_stalk/
+Star the Repo on Github - https://github.com/stopstalk/stopstalk/
+
+Lets go StopStalking !!
+
+Cheers,
+StopStalk
+"""
+
+    return message
+
+for row in rows:
+    subject = "Welcome to StopStalk " + row.stopstalk_handle
+    current.send_mail(to=row.email,
                       subject=subject,
-                      message=message)
+                      message=get_message(row.stopstalk_handle))
