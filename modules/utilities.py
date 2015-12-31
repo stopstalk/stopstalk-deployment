@@ -53,9 +53,9 @@ def get_friends(user_id):
     custom_friends = [x["id"] for x in custom_friends]
 
     # Retrieve friends
-    query = (ftable.user_id == atable.id)
-    friends = db(atable.id != user_id).select(atable.id, join=ftable.on(query))
-    friends = [x["id"] for x in friends]
+    query = (ftable.user_id == user_id)
+    friends = db(query).select(ftable.friend_id)
+    friends = [x["friend_id"] for x in friends]
 
     return friends, custom_friends
 
