@@ -33,8 +33,11 @@ response.meta.keywords = 'stopstalk, raj454raj, IIIT, competitive programming, p
 response.meta.generator = ''
 
 response.google_analytics_id = None
+
+response.menu = []
+
 if session.user_id:
-    response.menu = [
+    response.menu += [
         (I(_class="fa fa-inbox fa-2x",
            _title="Notifications"),
          False,
@@ -51,17 +54,13 @@ if session.user_id:
            _title="Add Custom Friend"),
          False,
          URL('user', 'custom_friend'), []),
-        (I(_class="fa fa-filter fa-2x",
-           _title="Filters"),
-         False,
-         URL('default', 'filters'), []),
         (I(_class="fa fa-pencil fa-2x",
            _title="Edit Custom Friend Details"),
          False,
          URL('user', 'edit_custom_friend_details'), []),
     ]
 
-    response.menu += [(I(_class="fa fa-bar-chart fa-2x",
+response.menu += [(I(_class="fa fa-bar-chart fa-2x",
                      _title="Leaderboard"),
                    False,
                    URL('default', 'leaderboard'), []),
@@ -69,6 +68,10 @@ if session.user_id:
                      _title="Trending problems"),
                    False,
                    URL('problems', 'trending'), []),
+                  (I(_class="fa fa-filter fa-2x",
+                     _title="Filters"),
+                   False,
+                   URL('default', 'filters'), []),
                   (I(_class="fa fa-tag fa-2x",
                      _title="Search by tags"),
                    False,
@@ -78,12 +81,6 @@ if session.user_id:
                    False,
                    URL('default', 'faq'), []),
                   (I(_class="fa fa-phone fa-2x",
-                     _title="Contact Us"),
-                   False,
-                   URL('default', 'contact_us'), []),
-                  ]
-else:
-    response.menu = [(I(_class="fa fa-phone fa-2x",
                     _title="Contact Us"),
                   False,
                   URL('default', 'contact_us'), [])]

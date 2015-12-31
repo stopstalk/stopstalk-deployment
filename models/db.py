@@ -101,8 +101,7 @@ extra_fields = [Field("institute", requires=IS_NOT_EMPTY()),
                       label="Referrer's StopStalk Handle",
                       default=""),
                 Field("allowed_cu", "integer",
-                      # Make this 3 after complete website is up
-                      default=4,
+                      default=3,
                       readable=False,
                       writable=False),
                 Field("blacklisted",
@@ -134,7 +133,6 @@ def send_mail(to, subject, message):
 current.send_mail = send_mail
 ## configure auth policy
 auth.settings.registration_requires_verification = True
-auth.settings.registration_requires_approval = True
 auth.settings.reset_password_requires_verification = True
 auth.settings.formstyle = materialize_form
 auth.settings.login_next = URL("default", "index")

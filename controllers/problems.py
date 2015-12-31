@@ -25,8 +25,6 @@ import datetime
 import utilities
 
 # ----------------------------------------------------------------------------
-# Remove this
-@auth.requires_login()
 def pie_chart_helper():
     """
         Helper function for populating pie chart with different
@@ -43,8 +41,6 @@ def pie_chart_helper():
     return dict(row=row)
 
 # ----------------------------------------------------------------------------
-# Remove this
-@auth.requires_login()
 def urltosite(url):
     """
         Helper function to extract site from url
@@ -60,8 +56,6 @@ def urltosite(url):
     return site
 
 # ----------------------------------------------------------------------------
-# Remove this
-@auth.requires_login()
 def index():
     """
         The main problem page
@@ -142,8 +136,6 @@ def index():
                 table=table)
 
 # ----------------------------------------------------------------------------
-# Remove this
-@auth.requires_login()
 def tag():
     """
         Tag search page
@@ -211,7 +203,10 @@ def tag():
                                       distinct=True)
 
     total_problems = len(total_problems)
-    total_pages = total_problems / PER_PAGE + 1
+    total_pages = total_problems / PER_PAGE
+    if total_problems % PER_PAGE != 0:
+        total_pages = total_problems / PER_PAGE + 1
+
     if request.extension == "json":
         return dict(total_pages=total_pages)
 
@@ -259,8 +254,6 @@ def tag():
     return dict(table=table)
 
 # ----------------------------------------------------------------------------
-# Remove this
-@auth.requires_login()
 def _render_trending(caption, rows):
     """
         Create trending table from the rows
@@ -287,8 +280,6 @@ def _render_trending(caption, rows):
     return table
 
 # ----------------------------------------------------------------------------
-@auth.requires_login()
-# Remove this
 def trending():
     """
         Show trending problems globally and among friends

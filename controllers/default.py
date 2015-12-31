@@ -40,7 +40,6 @@ def index():
     return dict()
 
 # ----------------------------------------------------------------------------
-@auth.requires_login()
 def get_max_streak(handle):
     """
         Get the maximum of all streaks
@@ -174,8 +173,6 @@ def notifications():
     return dict(table=table)
 
 # ----------------------------------------------------------------------------
-# Remove this
-@auth.requires_login()
 def compute_row(user, custom=False):
     """
         Computes rating and retrieves other
@@ -250,8 +247,6 @@ def compute_row(user, custom=False):
             custom)
 
 # ----------------------------------------------------------------------------
-# Remove this
-@auth.requires_login()
 def leaderboard():
     """
         Get a table with users sorted by rating
@@ -350,8 +345,6 @@ def search():
     return dict()
 
 # ----------------------------------------------------------------------------
-# Remove this
-@auth.requires_login()
 def filters():
     """
         Apply multiple kind of filters on submissions
@@ -390,17 +383,35 @@ def filters():
         custom_friends = db(query).select(cftable.id)
         cusfriends = [x["id"] for x in custom_friends]
 
-    # Get the friends of logged in user
-    query = (atable.first_name.contains(get_vars["name"]))
-    query |= (atable.last_name.contains(get_vars["name"]))
-    query &= (ftable.user_id == atable.id)
-    friend_ids = db(atable).select(atable.id, join=ftable.on(query))
-    friends = [x["id"] for x in friend_ids]
+        # Get the friends of logged in user
+        query = (atable.first_name.contains(get_vars["name"]))
+        query |= (atable.last_name.contains(get_vars["name"]))
+        query &= (ftable.user_id == atable.id)
+        friend_ids = db(atable.id > 0).select(atable.id, join=ftable.on(query))
+        friends = [x["id"] for x in friend_ids]
 
-    # User in one of the friends
-    query = (stable.user_id.belongs(friends))
+        # User in one of the friends
+        query = (stable.user_id.belongs(friends))
 
-    if session.auth:
+        # User in one of the custom friends
+        query |= (stable.custom_user_id.belongs(cusfriends))
+
+    else:
+        # Retrieve all the custom users
+        query = (cftable.first_name.contains(get_vars["name"]))
+        query |= (cftable.last_name.contains(get_vars["name"]))
+        custom_friends = db(query).select(cftable.id)
+        cusfriends = [x["id"] for x in custom_friends]
+
+        # Get the users registered
+        query = (atable.first_name.contains(get_vars["name"]))
+        query |= (atable.last_name.contains(get_vars["name"]))
+        user_ids = db(query).select(atable.id)
+        registered_users = [x["id"] for x in user_ids]
+
+        # User in one of the friends
+        query = (stable.user_id.belongs(registered_users))
+
         # User in one of the custom friends
         query |= (stable.custom_user_id.belongs(cusfriends))
 
@@ -713,8 +724,6 @@ def submissions():
                 total_rows=len(rows))
 
 # ----------------------------------------------------------------------------
-# Remove this
-@auth.requires_login()
 def faq():
     """
         FAQ page

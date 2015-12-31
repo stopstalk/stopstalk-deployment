@@ -104,6 +104,11 @@ def update_details():
 
     if form.process().accepted:
         session.flash = "User details updated"
+        atable = db.auth_user
+
+        db(atable.id == session.user_id).update(last_retrieved=current.INITIAL_DATE)
+        db(db.submission.user_id == session.user_id).delete()
+
         redirect(URL("default", "submissions", args=[1]))
     elif form.errors:
         response.flash = "Form has errors"
@@ -169,8 +174,6 @@ def update_friend():
     return dict(form=form)
 
 # ------------------------------------------------------------------------------
-# Remove this
-@auth.requires_login()
 def get_dates():
     """
         Return a dictionary containing count of submissions
@@ -239,8 +242,6 @@ def get_dates():
                 curr_streak=streak)
 
 # ------------------------------------------------------------------------------
-# Remove this
-@auth.requires_login()
 def get_stats():
     """
         Get statistics of the user
@@ -266,8 +267,6 @@ def get_stats():
     return dict(row=row)
 
 # ------------------------------------------------------------------------------
-# Remove this
-@auth.requires_login()
 def profile():
     """
         Controller to show user profile
@@ -336,8 +335,6 @@ def profile():
     return output
 
 # ------------------------------------------------------------------------------
-# Remove this
-@auth.requires_login()
 def submissions():
     """
         Retrieve submissions of a specific user
