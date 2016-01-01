@@ -195,14 +195,20 @@
                 <tr>
                     <th><h3><strong><b>{{=name}}</b></strong></h3></th>
                     <th>
-                        <a href="{{=URL('user', 'submissions', args=[handle])}}" class="btn-floating btn-large waves-effect waves-light red" target="_blank">
+                        <a href="{{=URL('user', 'submissions', args=[handle])}}" class="tooltipped btn-floating btn-large waves-effect waves-light red" data-position="bottom" data-delay="50" data-tooltip="View user submissions" target="_blank">
                             <i class="fa fa-long-arrow-right fa-3x"></i>
                         </a>
                     </th>
-                    {{if flag == "not-friends":}}
+                    {{if flag == "not-friends" and custom == False:}}
                         <th>
-                            <a href="{{=URL('default', 'mark_friend', args=[row.id])}}" class="btn-floating btn-large waves-effect waves-light green">
+                            <a href="{{=URL('default', 'mark_friend', args=[row.id])}}" class="tooltipped btn-floating btn-large waves-effect waves-light green" data-position="bottom" data-delay="50" data-tooltip="Send Friend Request">
                                 <i class="fa fa-user-plus fa-3x"></i>
+                            </a>
+                        </th>
+                    {{elif flag == "already-friends":}}
+                        <th>
+                            <a href="{{=URL('default', 'unfriend', args=[row.id])}}" class="tooltipped btn-floating btn-large waves-effect waves-light black" data-position="bottom" data-delay="50" data-tooltip="Unfriend">
+                                <i class="fa fa-user-times fa-3x"></i>
                             </a>
                         </th>
                     {{pass}}

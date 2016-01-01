@@ -664,6 +664,10 @@ def unfriend():
 
         # Delete records in the friends table
         query = (ftable.user_id == user_id) & (ftable.friend_id == friend_id)
+        value = db(query).count()
+        if value == 0:
+            session.flash = "Invalid URL"
+            redirect(URL("default", "search"))
         db(query).delete()
         query = (ftable.user_id == friend_id) & (ftable.user_id == friend_id)
         db(query).delete()
