@@ -669,7 +669,7 @@ def unfriend():
             session.flash = "Invalid URL"
             redirect(URL("default", "search"))
         db(query).delete()
-        query = (ftable.user_id == friend_id) & (ftable.user_id == friend_id)
+        query = (ftable.user_id == friend_id) & (ftable.friend_id == user_id)
         db(query).delete()
 
         # Send email to the friend notifying about the tragedy ;)
