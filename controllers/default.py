@@ -506,7 +506,7 @@ def mark_friend():
     row = db(query).select(atable.email,
                            atable.stopstalk_handle).first()
     current.send_mail(to=row.email,
-                      subject=row.stopstalk_handle + \
+                      subject=session.handle + \
                               " wants to be a friend on StopStalk",
                       message=session.handle + \
                               "(" + (URL("user",
