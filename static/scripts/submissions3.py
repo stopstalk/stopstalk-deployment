@@ -164,10 +164,19 @@ def retrieve_submissions(reg_user, custom=False):
 
 if __name__ == "__main__":
 
-    registered_users = db(db.auth_user.id > 0).select(db.auth_user.id)
-    for user in registered_users:
-        retrieve_submissions(user["id"])
+    atable = db.auth_user
+    cftable = db.custom_friend
 
-    custom_users = db(db.custom_friend.id > 0).select(db.custom_friend.id)
+    registered_users = db(atable.id > 0).select(atable.id)
+    registered_users = [x["id"] for x in registered_users]
+    for user in registered_users:
+        if user % 3 == 0:
+            retrieve_submissions(user)
+
+    custom_users = db(cftable.id > 0).select(cftable.id)
+    custom_users = [x["id"] for x in custom_users]
     for custom_user in custom_users:
-        retrieve_submissions(custom_user["id"], True)
+        if custom_user % 3 == 0:
+            retrieve_submissions(custom_user, True)
+
+# END =========================================================================

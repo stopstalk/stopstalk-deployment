@@ -20,13 +20,13 @@ directory = "/home/www-data/web2py/"
 print "Retrieving submissions ..."
 os.system("python " + directory + \
           "web2py.py -S stopstalk -M -R " + directory + \
-          "applications/stopstalk/static/scripts/submissions.py > " + \
-          today_dir + "submissions.log")
-os.system("cat " + today_dir + "/submissions.log")
+          "applications/stopstalk/static/scripts/submissions3.py > " + \
+          today_dir + "submissions3.log")
+os.system("cat " + today_dir + "/submissions3.log")
 
 print "Refreshing tags ..."
 os.system("python " + directory + \
           "web2py.py -S stopstalk -M -R " + directory + \
           "applications/stopstalk/static/scripts/refresh_tags.py > " + \
-          today_dir + "tags.log")
-os.system("cat " + today_dir + "/tags.log")
+          today_dir + "tags3.log")
+os.system("cat " + today_dir + "/tags3.log")
