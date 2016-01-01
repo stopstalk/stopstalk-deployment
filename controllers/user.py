@@ -292,11 +292,38 @@ def profile():
 
     query = (db.auth_user.stopstalk_handle == handle)
     row = db(query).select().first()
+
+    flag = "not-friends"
+    custom = False
+
     if row is None:
         query = (db.custom_friend.stopstalk_handle == handle)
         row = db(query).select().first()
+        custom = True
+    else:
+        if row.id != session.user_id:
+            ftable = db.friends
+            frtable = db.friend_requests
+            query = (ftable.user_id == session.user_id)
+            query &= (ftable.friend_id == row.id)
+            value = db(query).count()
+            if value == 0:
+                query = (frtable.from_h == session.user_id)
+                query &= (frtable.to_h == row.id)
+                query |= (frtable.from_h == row.id) & \
+                         (frtable.to_h == session.user_id)
+
+                value = db(query).count()
+                if value != 0:
+                    flag = "pending"
+            else:
+                flag = "already-friends"
+        else:
+            flag = "same-user"
 
     output["row"] = row
+    output["custom"] = custom
+    output["flag"] = flag
 
     name = row.first_name + " " + row.last_name
     output["name"] = name

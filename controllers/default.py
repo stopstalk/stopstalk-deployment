@@ -494,7 +494,32 @@ def mark_friend():
     """
 
     if len(request.args) < 1:
-        session.flash = "Friend Request sent"
+        session.flash = "Invalid URL"
+        redirect(URL("default", "search"))
+
+    frtable = db.friend_requests
+    ftable = db.friends
+    friend_id = request.args[0]
+
+    if friend_id != session.user_id:
+        query = (ftable.user_id == session.user_id)
+        query &= (ftable.friend_id == friend_id)
+        value = db(query).count()
+        if value == 0:
+            query = (frtable.from_h == session.user_id)
+            query &= (frtable.to_h == friend_id)
+            query |= (frtable.from_h == friend_id) & \
+                     (frtable.to_h == session.user_id)
+
+            value = db(query).count()
+            if value != 0:
+                session.flash = "Friend request pending..."
+                redirect(URL("default", "search"))
+        else:
+            session.flash = "Already friends !!"
+            redirect(URL("default", "search"))
+    else:
+        session.flash = "Invalid user argument!"
         redirect(URL("default", "search"))
 
     # Insert a tuple of users' id into the friend_requests table
