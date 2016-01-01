@@ -386,9 +386,15 @@ def filters():
         # Get the friends of logged in user
         query = (atable.first_name.contains(get_vars["name"]))
         query |= (atable.last_name.contains(get_vars["name"]))
-        query &= (ftable.user_id == atable.id)
-        friend_ids = db(atable.id > 0).select(atable.id, join=ftable.on(query))
-        friends = [x["id"] for x in friend_ids]
+
+        # @ToDo: Anyway to use join instead of two such db calls
+        possible_users = db(query).select(atable.id)
+        possible_users = [x["id"] for x in possible_users]
+
+        query = (ftable.user_id == session.user_id)
+        query &= (ftable.friend_id.belongs(possible_users))
+        friend_ids = db(query).select(ftable.friend_id)
+        friends = [x["friend_id"] for x in friend_ids]
 
         # User in one of the friends
         query = (stable.user_id.belongs(friends))
