@@ -1,2 +1,7 @@
-Write something about this app.
-Developed with web2py.
+STOPSTALK
+=========
+
+Retrieves your friends' submissions from various Competitive programming websites(CodeChef, CodeForces, Spoj, HackerEarth, HackerRank)
+No more remembering your friends handles and googling their profile pages!!
+
+Add custom users if your friend is not on StopStalk. It has other features like streak notification, filter submissions(name, problem name, status of submission, language, date range), search problems by tags, leaderboard, etc.
