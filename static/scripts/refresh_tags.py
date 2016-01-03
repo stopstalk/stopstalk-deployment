@@ -66,9 +66,6 @@ def refresh_tags():
     today = datetime.datetime.now().strftime("%Y-%m-%d")
     before_10 = (datetime.datetime.now() - datetime.timedelta(10)).strftime("%Y-%m-%d")
 
-    # Sites which add tags at a later stage
-    probable_sites = ["codechef", "codeforces", "hackerearth"]
-
     # Problems having tags = ["-"]
     # Possibilities of such case -
     #   => There are actually no tags for the problem

@@ -39,9 +39,9 @@ os.chdir(today_dir)
 
 directory = "/home/www-data/web2py/"
 
-print "Retrieving submissions ..."
+print "Refreshing tags ..."
 os.system("python " + directory + \
           "web2py.py -S stopstalk -M -R " + directory + \
-          "applications/stopstalk/static/scripts/submissions3.py > " + \
-          today_dir + "submissions3.log")
-os.system("cat " + today_dir + "/submissions3.log")
+          "applications/stopstalk/static/scripts/refresh_tags.py > " + \
+          today_dir + "tags.log")
+os.system("cat " + today_dir + "/tags.log")

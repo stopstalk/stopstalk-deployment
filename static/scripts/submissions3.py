@@ -21,8 +21,9 @@
 """
 
 import time
-from datetime import datetime
+import traceback
 import gevent
+from datetime import datetime
 from gevent import monkey
 gevent.monkey.patch_all(thread=False)
 
@@ -62,28 +63,60 @@ def get_submissions(user_id,
         print "[0]"
         return 0
 
+    columns = "(`user_id`, `custom_user_id`, `stopstalk_handle`, " + \
+              "`site_handle`, `site`, `time_stamp`, `problem_name`," + \
+              "`problem_link`, `lang`, `status`, `points`, `view_link`)"
+
+    rows = []
     for i in sorted(submissions[handle].iterkeys()):
         for j in sorted(submissions[handle][i].iterkeys()):
             submission = submissions[handle][i][j]
             if len(submission) == 7:
                 count += 1
-                args = dict(stopstalk_handle=stopstalk_handle,
-                            site_handle=handle,
-                            site=site,
-                            time_stamp=submission[0],
-                            problem_name=submission[2],
-                            problem_link=submission[1],
-                            lang=submission[5],
-                            status=submission[3],
-                            points=submission[4],
-                            view_link=submission[6])
-
-                if custom is False:
-                    args["user_id"] = user_id
+                row = []
+                if custom:
+                    row.extend(["--", user_id])
                 else:
-                    args["custom_user_id"] = user_id
+                    row.extend([user_id, "--"])
 
-                db.submission.insert(**args)
+                row.extend([stopstalk_handle,
+                            handle,
+                            site,
+                            submission[0],
+                            submission[2],
+                            submission[1],
+                            submission[5],
+                            submission[3],
+                            submission[4],
+                            submission[6]])
+
+                encoded_row = []
+                for x in row:
+                    if isinstance(x, basestring):
+                        tmp = x.encode("ascii", "ignore")
+
+                        # @ToDo: Dirty hack! Do something with
+                        #        replace and escaping quotes
+                        tmp = tmp.replace("\"", "").replace("'", "")
+                        if tmp == "--":
+                            tmp = "NULL"
+                        else:
+                            tmp = u"\"" + tmp + u"\""
+                        encoded_row.append(tmp)
+                    else:
+                        encoded_row.append(str(x))
+
+                rows.append(u"(" + u", ".join(encoded_row) + u")")
+
+    if len(rows) != 0:
+        sql_query = """INSERT INTO `submission` """ + \
+                    columns + """ VALUES """ + \
+                    ",".join(rows) + """;"""
+        try:
+            db.executesql(sql_query)
+        except:
+            traceback.print_exc()
+            print "Error in " + site + " BULK INSERT for " + handle
 
     if count != 0:
         print "[+%s] " % (count)
