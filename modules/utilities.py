@@ -120,6 +120,7 @@ def materialize_form(form, fields):
             # Select inputs
             _controls = SELECT(OPTION(label, _value=""),
                                _name=_name,
+                               _class="browser-default",
                                *controls.components[1:])
             # Note now label will be the first element
             # of Select input whose value would be ""

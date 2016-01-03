@@ -28,7 +28,7 @@
                          };
 
           var pname = $('#problem_name').html();
-          console.log(pname + "*");
+
           $.ajax({
               method: 'POST',
               url: '{{=URL("problems", "pie_chart_helper", extension="json")}}',

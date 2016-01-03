@@ -17,8 +17,7 @@
             url: '{{=URL("problems", "tag", extension="json")}}' + '/?q=' + params['q'] + '&page=1',
             method: 'GET'
         }).done(function(response) {
-            console.log(response);
-            console.log(params);
+
             $('#page-selection').bootpag({
                 total: response['total_pages'],
                 page: parseInt(params['page']),
