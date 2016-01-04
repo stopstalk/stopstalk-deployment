@@ -252,8 +252,22 @@ def leaderboard():
         Get a table with users sorted by rating
     """
 
-    reg_users = db(db.auth_user.id > 0).select()
-    custom_users = db(db.custom_friend.id > 0).select()
+    specific_institute = False
+    atable = db.auth_user
+    cftable = db.custom_friend
+
+    if request.vars.has_key("q"):
+        institute = request.vars["q"]
+        if institute != "":
+            specific_institute = True
+            reg_users = db(atable.institute == institute).select()
+            custom_users = db(cftable.institute == institute).select()
+
+
+
+    if specific_institute is False:
+        reg_users = db(db.auth_user.id > 0).select()
+        custom_users = db(db.custom_friend.id > 0).select()
 
     users = []
 
@@ -305,7 +319,8 @@ def leaderboard():
         tr.append(TD(A(i[1],
                        _href=URL("user", "profile", args=[i[1]]),
                        _target="_blank")))
-        tr.append(TD(i[2]))
+        tr.append(TD(A(i[2],
+                       _href=URL("default", "leaderboard", vars={"q": i[2]}))))
         tr.append(TD(i[3]))
 
         diff = "{:1.5f}".format(i[4])

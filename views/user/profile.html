@@ -1,6 +1,7 @@
 {{extend 'layout.html'}}
 <html>
   <head>
+    <title>User profile</title>
     <style>
 
         .chip {
@@ -65,6 +66,7 @@
               $.each(statuses, function(i) {
                   numJSON[statuses[i]['submission']['status']] = statuses[i]['_extra']['COUNT(submission.id)'];
               });
+
               // Create the data table.
               var data = new google.visualization.DataTable();
               data.addColumn('string', 'resultType');
@@ -138,6 +140,7 @@
 
                 var dateList = [],
                     dt;
+
                 $.each(total['total'], function(key, val) {
                     dt = key.split('-');
                     dateList.push([new Date(dt[0], --dt[1], dt[2]), val['count']]);
@@ -193,7 +196,12 @@
         <div class="row">
             <table class="centered">
                 <tr>
-                    <th><h3><strong><b>{{=name}}</b></strong></h3></th>
+                    <th><h4><strong><b>{{=name}}</b></strong></h4></th>
+                    <th>
+                        <a href="{{=URL('default', 'leaderboard', vars={'q': row.institute})}}" class="tooltipped btn-floating btn-large waves-effect waves-light yellow" data-position="bottom" data-delay="50" data-tooltip="{{=row.institute}}">
+                            <i class="fa fa-institution fa-3x"></i>
+                        </a>
+                    </th>
                     <th>
                         <a href="{{=URL('user', 'submissions', args=[handle])}}" class="tooltipped btn-floating btn-large waves-effect waves-light red" data-position="bottom" data-delay="50" data-tooltip="View user submissions" target="_blank">
                             <i class="fa fa-long-arrow-right fa-3x"></i>
@@ -218,9 +226,9 @@
         <div class="row center">
             <h5><strong>Accuracy</strong></h5>
             {{for site in current.SITES:}}
-                <a href="{{=(current.SITES[site] + row[site.lower() + '_handle'])}}" target="_blank">
+                <a href="{{=(current.SITES[site] + row[site.lower() + '_handle'])}}" class="tooltipped" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank">
                     <div class="chip">
-                        <img src="{{=URL('static', 'images/' + site.lower() + '_logo.png')}}" alt="{{=site}}" title="{{=site}}"/>
+                        <img src="{{=URL('static', 'images/' + site.lower() + '_logo.png')}}" alt="{{=site}}"/>
                         {{=efficiency[site]}}
                     </div>
                 </a>
