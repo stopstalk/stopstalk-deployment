@@ -840,6 +840,15 @@ def contact_us():
 
     if form.process(keepvalues=True).accepted:
         session.flash = "We will get back to you!"
+        current.send_mail(to="contactstopstalk@gmail.com",
+                          subject="We got feedback!",
+                          message="From: %s (%s - %s)\n" % \
+                                    (form.vars.name,
+                                     form.vars.email,
+                                     form.vars.phone_number) + \
+                                  "Subject: %s\n" % form.vars.subject + \
+                                  "Message: %s\n" % form.vars.text_message
+                          )
         redirect(URL("default", "index"))
     elif form.errors:
         response.flash = "Form has errors!"
