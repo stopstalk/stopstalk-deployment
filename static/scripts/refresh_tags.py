@@ -54,17 +54,22 @@ def refresh_tags():
     stable = db.submission
 
     # Problems that are in problem_tags table
-    current_problem_list = db(ptable.id > 0).select(ptable.problem_link)
+    current_problem_list = db(ptable).select(ptable.problem_link,
+                                             ptable.problem_name)
     # Problems that are in submission table
-    updated_problem_list = db(stable.id > 0).select(stable.problem_link,
-                                                    distinct=True)
-    current_problem_list = map(lambda x: x["problem_link"],
+    updated_problem_list = db(stable).select(stable.problem_link,
+                                             stable.problem_name,
+                                             distinct=True)
+    current_problem_list = map(lambda x: (x["problem_link"],
+                                          x["problem_name"]),
                                current_problem_list)
-    updated_problem_list = map(lambda x: x["problem_link"],
+    updated_problem_list = map(lambda x: (x["problem_link"],
+                                          x["problem_name"]),
                                updated_problem_list)
 
     today = datetime.datetime.now().strftime("%Y-%m-%d")
-    before_10 = (datetime.datetime.now() - datetime.timedelta(10)).strftime("%Y-%m-%d")
+    before_10 = (datetime.datetime.now() - \
+                 datetime.timedelta(10)).strftime("%Y-%m-%d")
 
     # Problems having tags = ["-"]
     # Possibilities of such case -
@@ -74,8 +79,9 @@ def refresh_tags():
     #   => Page was not reachable due to some reason
     query = (ptable.problem_added_on >= before_10)
     query &= (ptable.tags == "['-']")
-    no_tags = db(query).select(ptable.problem_link)
-    no_tags = map(lambda x: x["problem_link"],
+    no_tags = db(query).select(ptable.problem_link,
+                               ptable.problem_name)
+    no_tags = map(lambda x: (x["problem_link"], x["problem_name"]),
                   no_tags)
 
     # Compute difference between the lists
@@ -92,15 +98,15 @@ def refresh_tags():
     for i in xrange(0, len(difference_list), workers):
         threads = []
         # O God I am so smart !!
-        for link in difference_list[i : i + workers]:
-            threads.append(gevent.spawn(get_tag, link))
+        for problem in difference_list[i : i + workers]:
+            threads.append(gevent.spawn(get_tag, problem[0], problem[1]))
 
         gevent.joinall(threads)
 
     print "\nNew problems added: " + \
           " [%d]" % (len(difference_list))
 
-def get_tag(link):
+def get_tag(link, name):
 
     ptable = db.problem_tags
     site = urltosite(link)
@@ -121,6 +127,7 @@ def get_tag(link):
     #       so that they can be used directly by eval
     ptable.update_or_insert(ptable.problem_link == link,
                             problem_link=link,
+                            problem_name=name,
                             tags=str(all_tags),
                             problem_added_on=today)
 

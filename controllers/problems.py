@@ -159,7 +159,7 @@ def tag():
     table = TABLE(_class="striped centered")
     thead = THEAD(TR(TH("Problem Name"),
                      TH("Problem URL"),
-                     TH("Problem Page"),
+                     TH("Site"),
                      TH("Tags")))
     table.append(thead)
 
@@ -184,18 +184,6 @@ def tag():
     cftable = db.custom_friend
     ftable = db.friends
 
-    # If a user is logged in then only show problems that are solved by
-    # his/her friends, custom friends and also himself/herself.
-    if session.auth:
-        friends, cusfriends = utilities.get_friends(session.user_id)
-        query = (stable.user_id.belongs(friends))
-        query |= (stable.user_id == session.user_id)
-        query |= (stable.custom_user_id.belongs(cusfriends))
-
-        # All the URLs of problems
-        problem_links = db(query).select(stable.problem_link, distinct=True)
-        problem_links = [x["problem_link"] for x in problem_links]
-
     query = None
     for tag in q:
         if query is not None:
@@ -206,18 +194,7 @@ def tag():
         else:
             query = ptable.tags.contains(tag)
 
-    if session.auth:
-        query &= ptable.problem_link.belongs(problem_links)
-
-    join_query = (stable.problem_link == ptable.problem_link)
-
-    # @Todo: Need a cleanup here
-    total_problems = db(query).select(stable.problem_link,
-                                      ptable.tags,
-                                      left=ptable.on(join_query),
-                                      distinct=True)
-
-    total_problems = len(total_problems)
+    total_problems = db(query).count()
     total_pages = total_problems / PER_PAGE
     if total_problems % PER_PAGE != 0:
         total_pages = total_problems / PER_PAGE + 1
@@ -225,11 +202,9 @@ def tag():
     if request.extension == "json":
         return dict(total_pages=total_pages)
 
-    all_problems = db(query).select(stable.problem_name,
-                                    stable.problem_link,
-                                    stable.site,
+    all_problems = db(query).select(ptable.problem_name,
+                                    ptable.problem_link,
                                     ptable.tags,
-                                    left=ptable.on(join_query),
                                     distinct=True,
                                     limitby=((curr_page - 1) * PER_PAGE,
                                              curr_page * PER_PAGE))
@@ -237,21 +212,19 @@ def tag():
     tbody = TBODY()
     for problem in all_problems:
 
-        submission = problem["submission"]
-        problem_tag = problem["problem_tags"]
         tr = TR()
 
-        tr.append(TD(A(submission["problem_name"],
+        tr.append(TD(A(problem["problem_name"],
                        _href=URL("problems",
                                  "index",
-                                 vars={"pname": submission["problem_name"],
-                                       "plink": submission["problem_link"]}),
+                                 vars={"pname": problem["problem_name"],
+                                       "plink": problem["problem_link"]}),
                        _target="_blank")))
         tr.append(TD(A(I(_class="fa fa-link"),
-                       _href=submission["problem_link"],
+                       _href=problem["problem_link"],
                        _target="_blank")))
-        tr.append(TD(submission["site"]))
-        all_tags = eval(problem_tag["tags"])
+        tr.append(TD(urltosite(problem["problem_link"])))
+        all_tags = eval(problem["tags"])
         td = TD()
         for tag in all_tags:
             td.append(DIV(A(tag,
