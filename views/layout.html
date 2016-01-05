@@ -65,10 +65,20 @@
             user-select: none;
             cursor: default;
         }
-
+        .Site {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+        .Site-content {
+            flex: 1;
+        }
+        iframe {
+            visibility: block;
+        }
     </style>
   </head>
-  <body class="center">
+  <body class="center Site">
     <!--[if lt IE 8]><p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p><![endif]-->
     <!-- Navbar ======================================= -->
     <div class="flash alert alert-dismissable" style="display: none;">{{=response.flash or ''}}</div>
@@ -110,7 +120,7 @@
     {{end}}
     <!-- Main ========================================= -->
     <!-- Begin page content -->
-    <main>
+    <main class="Site-content">
     <div class="container-fluid">
       {{if left_sidebar_enabled:}}
         <div class="col-md-3 left-sidebar">
@@ -138,7 +148,35 @@
 
     </div>
     </main>
-
+    <footer class="page-footer" style="background-color: #536dfe;">
+          <div class="footer-copyright">
+            <div class="container">
+            <div class="left"> © 2015-2016 StopStalk </div>
+            <div class="right">
+               <span>Created by: <a href="https://whoisraj454raj.com" style="color: white;" target="_blank">Raj Patel</a></span>
+            </div>
+            </div>
+          </div>
+    </footer>
+    <div class="fixed-action-btn horizontal click-to-toggle" style="bottom: 45px; right: 24px;">
+        <a class="btn-floating btn-large pink accent-3">
+            <i class="fa fa-heart"></i>
+        </a>
+        <ul>
+            <li>
+                <a class="btn-floating indigo darken-4" target="_blank" href="https://www.facebook.com/stopstalkcommunity/"><i class="fa fa-facebook"></i></a>
+            </li>
+            <li>
+                <a class="btn-floating blue lighten-1" target="_blank" href="https://twitter.com/stop_stalk"><i class="fa fa-twitter"></i></a>
+            </li>
+            <li>
+                <a class="btn-floating red darken-4" target="_blank" href="https://plus.google.com/110575194069678651985"><i class="fa fa-google-plus"></i></a>
+            </li>
+            <li>
+                <a class="btn-floating black" target="_blank" href="https://github.com/stopstalk/stopstalk-deployment"><i class="fa fa-github"></i></a>
+            </li>
+            </ul>
+    </div>
     <!-- The javascript =============================== -->
     <script src="{{=URL('static','materialize/js/materialize.js')}}"></script>
     <script src="{{=URL('static','js/web2py-bootstrap3.js')}}"></script>

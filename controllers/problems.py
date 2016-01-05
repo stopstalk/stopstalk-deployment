@@ -223,7 +223,7 @@ def tag():
         tr.append(TD(A(I(_class="fa fa-link"),
                        _href=problem["problem_link"],
                        _target="_blank")))
-        tr.append(TD(urltosite(problem["problem_link"])))
+        tr.append(TD(urltosite(problem["problem_link"]).capitalize()))
         all_tags = eval(problem["tags"])
         td = TD()
         for tag in all_tags:
