@@ -31,10 +31,18 @@ def pie_chart_helper():
         submission status of a problem
     """
 
-    problem_name = request.post_vars["pname"]
+    problem_link = request.post_vars["plink"]
     stable = db.submission
     count = stable.id.count()
-    query = (stable.problem_name == problem_name)
+    query = (stable.problem_link == problem_link)
+
+    # Show stats only for friends and logged-in user
+    if session.auth:
+        friends, cusfriends = utilities.get_friends(session.user_id)
+        query &= (stable.user_id.belongs(friends)) | \
+                 (stable.custom_user_id.belongs(cusfriends)) | \
+                 (stable.user_id == session.user_id)
+
     row = db(query).select(stable.status,
                            count,
                            groupby=stable.status)
@@ -128,7 +136,14 @@ def index():
                     TD(STRONG("Tags:")),
                     TD(tags)))
     problem_details.append(tbody)
-    table = utilities.render_table(submissions)
+
+    if len(submissions) == 0:
+        table = DIV(H5("No submissions from your friends for this problem"),
+                    _class="center")
+    else:
+        table = utilities.render_table(submissions)
+        table = TAG[""](H4("Recent Submissions"),
+                        table)
 
     return dict(problem_details=problem_details,
                 problem_name=problem_name,

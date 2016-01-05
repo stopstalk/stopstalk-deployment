@@ -33,46 +33,50 @@
           $.ajax({
               method: 'POST',
               url: '{{=URL("problems", "pie_chart_helper", extension="json")}}',
-              data: {'pname': pname}
+              data: {'plink': '{{=problem_link}}'}
           }).done(function(data) {
 
-              var statuses = data['row'];
+              var statuses = data['row'],
+                  totalSubmissions = 0;
               $.each(statuses, function(i) {
-                  numJSON[statuses[i]['submission']['status']] = statuses[i]['_extra']['COUNT(submission.id)'];
+                  statusCount = statuses[i]['_extra']['COUNT(submission.id)'];
+                  numJSON[statuses[i]['submission']['status']] = statusCount;
+                  totalSubmissions += statusCount;
               });
-              // Create the data table.
-              var data = new google.visualization.DataTable();
-              data.addColumn('string', 'resultType');
-              data.addColumn('number', 'numberOfSubmissions');
-              data.addRows([
-                  ['Accepted', numJSON['AC']],
-                  ['Compile Error', numJSON['CE']],
-                  ['Wrong Answer', numJSON['WA']],
-                  ['Time Limit Exceeded', numJSON['TLE']],
-                  ['Memory Limit Exceeded', numJSON['MLE']],
-                  ['Runtime Error', numJSON['RE']],
-                  ['Hacked', numJSON['HCK']],
-                  ['Skipped', numJSON['SK']],
-                  ['Others', numJSON['OTH']]
-              ]);
 
-              // Set chart options
-              var options = {'title':'Total Submissions',
-                             'chartArea': {width:'90%',height:'80%'},
-                             'pieHole': 0.5,
-                             'slices': {
-                                 0: {color: '#109618'},
-                                 1: {color: '#FF9900'},
-                                 2: {color: '#DC3912'},
-                                 3: {color: '#3366CC'},
-                                 4: {color: '#0099C6'},
-                                 5: {color: '#990099'}
-                             }
-                            };
+              if (totalSubmissions) {
+                  // Create the data table.
+                  var data = new google.visualization.DataTable();
+                  data.addColumn('string', 'resultType');
+                  data.addColumn('number', 'numberOfSubmissions');
+                  data.addRows([
+                      ['Accepted', numJSON['AC']],
+                      ['Compile Error', numJSON['CE']],
+                      ['Wrong Answer', numJSON['WA']],
+                      ['Time Limit Exceeded', numJSON['TLE']],
+                      ['Memory Limit Exceeded', numJSON['MLE']],
+                      ['Runtime Error', numJSON['RE']],
+                      ['Hacked', numJSON['HCK']],
+                      ['Skipped', numJSON['SK']],
+                      ['Others', numJSON['OTH']]
+                  ]);
 
-              // Instantiate and draw our chart, passing in some options.
-              var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
-              chart.draw(data, options);
+                  // Set chart options
+                  var options = {'title':'Total Submissions',
+                                 'chartArea': {width:'90%',height:'80%'},
+                                 'pieHole': 0.5,
+                                 'slices': {0: {color: '#109618'},
+                                            1: {color: '#FF9900'},
+                                            2: {color: '#DC3912'},
+                                            3: {color: '#3366CC'},
+                                            4: {color: '#0099C6'},
+                                            5: {color: '#990099'}}
+                                 };
+
+                  // Instantiate and draw our chart, passing in some options.
+                  var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+                  chart.draw(data, options);
+              }
           });
         }
     </script>
@@ -81,5 +85,4 @@
     <h3>{{=problem_name}}</h3>
     {{=problem_details}}
 </div>
-<h4>Recent Submissions</h4>
 {{=table}}
