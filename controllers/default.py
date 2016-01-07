@@ -815,7 +815,7 @@ def faq():
     for i in xrange(len(questions)):
         li = LI(DIV(B(str(i + 1) + ". " + questions[i]),
                     _class="collapsible-header"),
-                DIV(P(answers[i]),
+                DIV(answers[i],
                     _class="collapsible-body"),
                 )
         ul.append(li)

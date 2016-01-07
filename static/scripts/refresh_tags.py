@@ -29,6 +29,9 @@ import datetime
 from sites import codechef, codeforces, spoj, hackerearth, hackerrank
 gevent.monkey.patch_all(thread=False)
 
+total_inserted = 0
+total_updated = 0
+
 # ----------------------------------------------------------------------------
 def urltosite(url):
     """
@@ -103,10 +106,16 @@ def refresh_tags():
 
         gevent.joinall(threads)
 
-    print "\nNew problems added: " + \
-          " [%d]" % (len(difference_list))
+    print "Total Inserted: [%d]" % (total_inserted)
+    print "Total Updated: [%d]" % (total_updated)
+    print "Not Updated: [%d]" % (len(difference_list) - \
+                                   total_inserted - \
+                                   total_updated)
 
 def get_tag(link, name):
+
+    global total_inserted
+    global total_updated
 
     ptable = db.problem_tags
     site = urltosite(link)
@@ -119,17 +128,32 @@ def get_tag(link, name):
             all_tags = ["-"]
     except AttributeError:
         all_tags = ["-"]
-    print link, all_tags
 
-    today = datetime.datetime.now().strftime("%Y-%m-%d")
-    # Insert tags in problem_tags table
-    # Note: Tags are stored in a stringified list
-    #       so that they can be used directly by eval
-    ptable.update_or_insert(ptable.problem_link == link,
-                            problem_link=link,
-                            problem_name=name,
-                            tags=str(all_tags),
-                            problem_added_on=today)
+    if all_tags != ["-"]:
+        today = datetime.datetime.now().strftime("%Y-%m-%d")
+        # If record already exists only update
+        # name and tags not problem_added_on
+        flag = db(ptable.problem_link == link).update(problem_name=name,
+                                                      tags=str(all_tags))
+        if flag:
+            total_updated += 1
+            print "Updated", link, all_tags
+        else:
+            total_inserted += 1
+            print "Inserted ", link, all_tags
+            # Insert tags in problem_tags table
+            # Note: Tags are stored in a stringified list
+            #       so that they can be used directly by eval
+            row = [link, name, str(all_tags), today]
+            ptable.insert(problem_link=link,
+                          problem_name=name,
+                          tags=str(all_tags),
+                          problem_added_on=today)
+    else:
+        print "Not-updated", link, all_tags
 
 if __name__ == "__main__":
+
+    total_inserted = 0
+    total_updated = 0
     refresh_tags()
