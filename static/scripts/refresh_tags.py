@@ -31,6 +31,7 @@ gevent.monkey.patch_all(thread=False)
 
 total_inserted = 0
 total_updated = 0
+not_updated = 0
 
 # ----------------------------------------------------------------------------
 def urltosite(url):
@@ -92,7 +93,6 @@ def refresh_tags():
                             set(current_problem_list)).union(no_tags))
 
     print "Refreshing "
-
     threads = []
     workers = 49
 
@@ -108,14 +108,13 @@ def refresh_tags():
 
     print "Total Inserted: [%d]" % (total_inserted)
     print "Total Updated: [%d]" % (total_updated)
-    print "Not Updated: [%d]" % (len(difference_list) - \
-                                   total_inserted - \
-                                   total_updated)
+    print "Not Updated: [%d]" % (not_updated)
 
 def get_tag(link, name):
 
     global total_inserted
     global total_updated
+    global not_updated
 
     ptable = db.problem_tags
     site = urltosite(link)
@@ -129,31 +128,37 @@ def get_tag(link, name):
     except AttributeError:
         all_tags = ["-"]
 
-    if all_tags != ["-"]:
-        today = datetime.datetime.now().strftime("%Y-%m-%d")
-        # If record already exists only update
-        # name and tags not problem_added_on
-        flag = db(ptable.problem_link == link).update(problem_name=name,
-                                                      tags=str(all_tags))
-        if flag:
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
+    # If record already exists only update
+    # name and tags not problem_added_on
+    row = db(ptable.problem_link == link).select().first()
+
+    if row:
+        prev_tags = row.tags
+        prev_name = row.problem_name
+        if prev_tags != str(all_tags) or prev_name != name:
+            row.update_record(problem_name=name,
+                              tags=str(all_tags))
             total_updated += 1
             print "Updated", link, all_tags
         else:
-            total_inserted += 1
-            print "Inserted ", link, all_tags
-            # Insert tags in problem_tags table
-            # Note: Tags are stored in a stringified list
-            #       so that they can be used directly by eval
-            row = [link, name, str(all_tags), today]
-            ptable.insert(problem_link=link,
-                          problem_name=name,
-                          tags=str(all_tags),
-                          problem_added_on=today)
+            not_updated += 1
+            print "Not-Updated", link, all_tags
     else:
-        print "Not-updated", link, all_tags
+        total_inserted += 1
+        print "Inserted ", link, all_tags
+        # Insert tags in problem_tags table
+        # Note: Tags are stored in a stringified list
+        #       so that they can be used directly by eval
+        row = [link, name, str(all_tags), today]
+        ptable.insert(problem_link=link,
+                      problem_name=name,
+                      tags=str(all_tags),
+                      problem_added_on=today)
 
 if __name__ == "__main__":
 
     total_inserted = 0
     total_updated = 0
+    not_updated = 0
     refresh_tags()
