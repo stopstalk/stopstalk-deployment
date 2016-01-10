@@ -40,6 +40,27 @@ def index():
     return dict()
 
 # ----------------------------------------------------------------------------
+def get_accepted_streak(handle):
+    """
+        Function that returns current streak of accepted solutions
+    """
+    sql_query = """
+                SELECT COUNT( * )
+                FROM  `submission`
+                WHERE stopstalk_handle='%s'
+                  AND time_stamp > (SELECT time_stamp
+                                    FROM  `submission`
+                                    WHERE stopstalk_handle='%s'
+                                      AND STATUS <>  'AC'
+                                    ORDER BY time_stamp DESC
+                                    LIMIT 1)
+                """ % (handle, handle)
+
+    streak = db.executesql(sql_query)
+    return streak[0][0]
+
+
+# ----------------------------------------------------------------------------
 def get_max_streak(handle):
     """
         Get the maximum of all streaks
@@ -140,17 +161,22 @@ def notifications():
 
     for handle in handles:
         curr_streak = get_max_streak(handle[0])[2]
+        curr_accepted_streak = get_accepted_streak(handle[0])
 
         # If streak is non-zero append to users_on_streak list
         if curr_streak:
-            users_on_streak.append((handle, curr_streak))
+            users_on_streak.append((handle, curr_streak, curr_accepted_streak))
+        elif curr_accepted_streak:
+            users_on_streak.append((handle, curr_streak, curr_accepted_streak))
+
 
     # Sort the users on streak by their streak
-    users_on_streak.sort(key=lambda k: k[1], reverse=True)
+    users_on_streak.sort(key=lambda k: (k[1], k[2]), reverse=True)
 
     # The table containing users on streak
-    table = TABLE(THEAD(TR(TH(H5(STRONG("User"))),
-                           TH(H5(STRONG("Streak"))))),
+    table = TABLE(THEAD(TR(TH(STRONG("User")),
+                           TH(STRONG("Days")),
+                           TH(STRONG("Submissions")))),
                   _class="striped centered")
 
     tbody = TBODY()
@@ -159,14 +185,19 @@ def notifications():
     for users in users_on_streak:
         handle = users[0]
         curr_streak = users[1]
-        tr = TR(TD(H5(A(handle[1],
-                        _href=URL("user", "profile", args=[handle[0]]),
-                        _target="_blank"))),
-                TD(H5(str(curr_streak) + " ",
-                      I(_class="fa fa-bolt",
-                        _style="color:red"),
-                      _class="center",
-                      )))
+        curr_accepted_streak = users[2]
+        tr = TR(TD((A(handle[1],
+                      _href=URL("user", "profile", args=[handle[0]]),
+                      _target="_blank"))),
+                TD(str(curr_streak) + " ",
+                   I(_class="fa fa-bolt",
+                     _style="color:red"),
+                   _class="center",
+                   ),
+                TD(str(curr_accepted_streak) + " ",
+                   I(_class="fa fa-bolt",
+                     _style="color:red"),
+                   _class="center"))
         tbody.append(tr)
 
     table.append(tbody)
