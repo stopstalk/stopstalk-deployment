@@ -530,8 +530,12 @@ def filters():
     filtered = db(query).select(limitby=(page * PER_PAGE,
                                          (page + 1) * PER_PAGE),
                                          orderby=~stable.time_stamp)
-    total_pages = db(query).count()
-    total_pages = total_pages / 100
+
+    total_problems = db(query).count()
+    total_pages = total_problems / 100
+    if total_problems % 100 == 0:
+        total_pages += 1
+
     table = utilities.render_table(filtered)
 
     return dict(languages=languages,
