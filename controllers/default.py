@@ -832,20 +832,23 @@ def faq():
                  "Is there any tool which has extra features than the deployed version?",
                  "How should I refer to a friend?",
                  "Are there any benefits StopStalk provides for referring to a friend?",
-                 )
-    answers = ("Custom User is a way to view submissions of a friend. Note: Only you can see his/her submissions",
-               "At present you can not explicitly update the submissions in the database. The submissions are automatically updated every morning.",
-               "Best option is to ask him/her register on StopStalk and then send a friend request. If not, then you can add a Custom User if you already know all the handles.",
-               "At present, the limit is set to 3 per user. We are working on it so that this limit is increased",
-               "StopStalk rating is determined by a very unique formula which takes care of number of solved problems, maximum streak, accuracy, per day changes and effort",
-               "Whenever user joins StopStalk, per day change is 0.0 and number of problems solved per day are computed. After every day this get modified depending on number of solutions submitted. Positive value says that you have benefitted after joining StopStalk",
-               "On accepting friend request both the user can see each others submissions",
-               "The sites that which allow to view anybody's submissions publicly have a View button. At present Codeforces and HackerEarth submissions can be viewed publicly",
+                 "In what timezone are the submission times shown?",
+                 "Why is my Institute listed in the dropdown?")
+
+    answers = (MARKMIN("Custom User is a way to view submissions of a friend. Note: Only you can see his/her submissions"),
+               MARKMIN("At present you can not explicitly update the submissions in the database. The submissions are automatically updated every morning."),
+               MARKMIN("Best option is to ask him/her register on StopStalk and then send a friend request. If not, then you can add a Custom User if you already know all the handles."),
+               MARKMIN("At present, the limit is set to 3 per user. We are working on it so that this limit is increased"),
+               MARKMIN("StopStalk rating is determined by a very unique formula which takes care of number of solved problems, maximum streak, accuracy, per day changes and effort"),
+               MARKMIN("Whenever user joins StopStalk, per day change is 0.0 and number of problems solved per day are computed. After every day this get modified depending on number of solutions submitted. Positive value says that you have benefitted after joining StopStalk"),
+               MARKMIN("On accepting friend request both the user can see each others submissions"),
+               MARKMIN("The sites that which allow to view anybody's submissions publicly have a View button. At present Codeforces and HackerEarth submissions can be viewed publicly"),
                MARKMIN("Yes, the code is completely open-sourced and it is on [[Github https://github.com/stopstalk/]]"),
                MARKMIN("Yes, there is the original version of the code with complete features [[here https://github.com/stopstalk/stopstalk/]] . You can set it up locally!"),
-               "All you have to do is ask your friend to enter your StopStalk handle when asked for Referrer's StopStalk handle.",
-               "Yes. You can increase the limit of number of custom users per user. At present 3 custom users are allowed on successful registration. On referring of 5 friends with your StopStalk handle you get 1 extra custom user."
-               )
+               MARKMIN("All you have to do is ask your friend to enter your StopStalk handle when asked for Referrer's StopStalk handle."),
+               MARKMIN("Yes. You can increase the limit of number of custom users per user. At present 3 custom users are allowed on successful registration. On referring of 5 friends with your StopStalk handle you get 1 extra custom user."),
+               MARKMIN("At present we are showing time stamps in IST(UTC +05:30), we are working on showing time stamps in the local timezone."),
+               MARKMIN("We have limited number of Institutes at the present. Just fill \"Other\" in the Institute field and we will get back to you soon to confirm your Institute."))
 
     for i in xrange(len(questions)):
         li = LI(DIV(B(str(i + 1) + ". " + questions[i]),
