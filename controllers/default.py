@@ -157,7 +157,8 @@ def notifications():
                         user.first_name + " " + user.last_name))
 
     # List of users with non-zero streak
-    users_on_streak = []
+    users_on_day_streak = []
+    users_on_submission_streak = []
 
     for handle in handles:
         curr_streak = get_max_streak(handle[0])[2]
@@ -165,27 +166,31 @@ def notifications():
 
         # If streak is non-zero append to users_on_streak list
         if curr_streak:
-            users_on_streak.append((handle, curr_streak, curr_accepted_streak))
-        elif curr_accepted_streak:
-            users_on_streak.append((handle, curr_streak, curr_accepted_streak))
-
+            users_on_day_streak.append((handle, curr_streak))
+        if curr_accepted_streak:
+            users_on_submission_streak.append((handle, curr_accepted_streak))
 
     # Sort the users on streak by their streak
-    users_on_streak.sort(key=lambda k: (k[1], k[2]), reverse=True)
+    users_on_day_streak.sort(key=lambda k: k[1], reverse=True)
+    users_on_submission_streak.sort(key=lambda k: k[1], reverse=True)
 
-    # The table containing users on streak
-    table = TABLE(THEAD(TR(TH(STRONG("User")),
-                           TH(STRONG("Days")),
-                           TH(STRONG("Submissions")))),
-                  _class="striped centered")
+    # The table containing users on streak(days)
+    table1 = TABLE(THEAD(TR(TH(STRONG("User")),
+                            TH(STRONG("Days")))),
+                   _class="striped centered")
 
-    tbody = TBODY()
+    # The table containing users on streak(submissions)
+    table2 = TABLE(THEAD(TR(TH(STRONG("User")),
+                            TH(STRONG("Submissions")))),
+                   _class="striped centered")
+
+    tbody1 = TBODY()
+    tbody2 = TBODY()
 
     # Append all the users to the final table
-    for users in users_on_streak:
+    for users in users_on_day_streak:
         handle = users[0]
         curr_streak = users[1]
-        curr_accepted_streak = users[2]
         tr = TR(TD((A(handle[1],
                       _href=URL("user", "profile", args=[handle[0]]),
                       _target="_blank"))),
@@ -193,15 +198,32 @@ def notifications():
                    I(_class="fa fa-bolt",
                      _style="color:red"),
                    _class="center",
-                   ),
+                   ))
+        tbody1.append(tr)
+
+    table1.append(tbody1)
+    if len(users_on_day_streak) == 0:
+        table1 = H6("No friends on day streak", _class="center")
+
+    # Append all the users to the final table
+    for users in users_on_submission_streak:
+        handle = users[0]
+        curr_accepted_streak = users[1]
+        tr = TR(TD((A(handle[1],
+                      _href=URL("user", "profile", args=[handle[0]]),
+                      _target="_blank"))),
                 TD(str(curr_accepted_streak) + " ",
                    I(_class="fa fa-bolt",
                      _style="color:red"),
                    _class="center"))
-        tbody.append(tr)
+        tbody2.append(tr)
 
-    table.append(tbody)
-    return dict(table=table)
+    table2.append(tbody2)
+    if len(users_on_submission_streak) == 0:
+        table2 = H6("No friends on submission streak", _class="center")
+
+    return dict(table1=table1,
+                table2=table2)
 
 # ----------------------------------------------------------------------------
 def compute_row(user, custom=False):
