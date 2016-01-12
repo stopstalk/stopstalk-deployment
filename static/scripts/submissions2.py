@@ -30,6 +30,8 @@ gevent.monkey.patch_all(thread=False)
 # @ToDo: Make this generalised
 from sites import codechef, codeforces, spoj, hackerearth, hackerrank
 
+rows = []
+
 # -----------------------------------------------------------------------------
 def _debug(first_name, last_name, site, custom=False):
     """
@@ -63,11 +65,8 @@ def get_submissions(user_id,
         print "[0]"
         return 0
 
-    columns = "(`user_id`, `custom_user_id`, `stopstalk_handle`, " + \
-              "`site_handle`, `site`, `time_stamp`, `problem_name`," + \
-              "`problem_link`, `lang`, `status`, `points`, `view_link`)"
+    global rows
 
-    rows = []
     for i in sorted(submissions[handle].iterkeys()):
         for j in sorted(submissions[handle][i].iterkeys()):
             submission = submissions[handle][i][j]
@@ -108,15 +107,6 @@ def get_submissions(user_id,
 
                 rows.append(u"(" + u", ".join(encoded_row) + u")")
 
-    if len(rows) != 0:
-        sql_query = """INSERT INTO `submission` """ + \
-                    columns + """ VALUES """ + \
-                    ",".join(rows) + """;"""
-        try:
-            db.executesql(sql_query)
-        except:
-            traceback.print_exc()
-            print "Error in " + site + " BULK INSERT for " + handle
 
     if count != 0:
         print "[+%s] " % (count)
@@ -200,6 +190,10 @@ if __name__ == "__main__":
     atable = db.auth_user
     cftable = db.custom_friend
 
+    columns = "(`user_id`, `custom_user_id`, `stopstalk_handle`, " + \
+              "`site_handle`, `site`, `time_stamp`, `problem_name`," + \
+              "`problem_link`, `lang`, `status`, `points`, `view_link`)"
+
     registered_users = db(atable.id > 0).select(atable.id)
     registered_users = [x["id"] for x in registered_users]
     for user in registered_users:
@@ -211,5 +205,15 @@ if __name__ == "__main__":
     for custom_user in custom_users:
         if custom_user % 3 == 2:
             retrieve_submissions(custom_user, True)
+
+    if len(rows) != 0:
+        sql_query = """INSERT INTO `submission` """ + \
+                    columns + """ VALUES """ + \
+                    ",".join(rows) + """;"""
+        try:
+            db.executesql(sql_query)
+        except:
+            traceback.print_exc()
+            print "Error in " + site + " BULK INSERT for " + handle
 
 # END =========================================================================
