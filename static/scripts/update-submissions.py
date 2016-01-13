@@ -30,6 +30,8 @@ gevent.monkey.patch_all(thread=False)
 # @ToDo: Make this generalised
 from sites import codechef, codeforces, spoj, hackerearth, hackerrank
 
+rows = []
+
 # -----------------------------------------------------------------------------
 def _debug(first_name, last_name, site, custom=False):
     """
@@ -63,11 +65,8 @@ def get_submissions(user_id,
         print "[0]"
         return 0
 
-    columns = "(`user_id`, `custom_user_id`, `stopstalk_handle`, " + \
-              "`site_handle`, `site`, `time_stamp`, `problem_name`," + \
-              "`problem_link`, `lang`, `status`, `points`, `view_link`)"
+    global rows
 
-    rows = []
     for i in sorted(submissions[handle].iterkeys()):
         for j in sorted(submissions[handle][i].iterkeys()):
             submission = submissions[handle][i][j]
@@ -107,16 +106,6 @@ def get_submissions(user_id,
                         encoded_row.append(str(x))
 
                 rows.append(u"(" + u", ".join(encoded_row) + u")")
-
-    if len(rows) != 0:
-        sql_query = """INSERT INTO `submission` """ + \
-                    columns + """ VALUES """ + \
-                    ",".join(rows) + """;"""
-        try:
-            db.executesql(sql_query)
-        except:
-            traceback.print_exc()
-            print "Error in " + site + " BULK INSERT for " + handle
 
     if count != 0:
         print "[+%s] " % (count)
@@ -200,18 +189,49 @@ if __name__ == "__main__":
     atable = db.auth_user
     cftable = db.custom_friend
 
-    query = (atable.last_retrieved == current.INITIAL_DATE)
-    query &= (atable.id > 79)
-    new_users = db(query).select(atable.id)
-    new_users = [x["id"] for x in new_users]
+    sql_query = """
+                    SELECT auth_user.id
+                    FROM auth_user
+                    WHERE auth_user.id > (SELECT auth_user.id
+                                          FROM auth_user
+                                          WHERE last_retrieved <> '%s'
+                                          ORDER BY auth_user.id DESC
+                                          LIMIT 1)
+                """ % (current.INITIAL_DATE)
+
+    user_ids = db.executesql(sql_query)
+    new_users = [x[0] for x in user_ids]
+
     for user in new_users:
         retrieve_submissions(user)
 
-    query = (cftable.last_retrieved == current.INITIAL_DATE)
-    query &= (cftable.id > 4)
-    custom_users = db(query).select(cftable.id)
-    custom_users = [x["id"] for x in custom_users]
+    sql_query = """
+                    SELECT custom_friend.id
+                    FROM custom_friend
+                    WHERE custom_friend.id > (SELECT custom_friend.id
+                                              FROM custom_friend
+                                              WHERE last_retrieved <> '%s'
+                                              ORDER BY custom_friend.id DESC
+                                              LIMIT 1)
+                """ % (current.INITIAL_DATE)
+
+    custom_user_ids = db.executesql(sql_query)
+    custom_users = [x[0] for x in custom_user_ids]
     for custom_user in custom_users:
         retrieve_submissions(custom_user, custom=True)
+
+    columns = "(`user_id`, `custom_user_id`, `stopstalk_handle`, " + \
+              "`site_handle`, `site`, `time_stamp`, `problem_name`," + \
+              "`problem_link`, `lang`, `status`, `points`, `view_link`)"
+
+    if len(rows) != 0:
+        sql_query = """INSERT INTO `submission` """ + \
+                    columns + """ VALUES """ + \
+                    ",".join(rows) + """;"""
+        try:
+            db.executesql(sql_query)
+        except:
+            traceback.print_exc()
+            print "Error in " + site + " BULK INSERT for " + handle
 
 # END =========================================================================
