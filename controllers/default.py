@@ -464,6 +464,9 @@ def filters():
         friend_ids = db(query).select(ftable.friend_id)
         friends = [x["friend_id"] for x in friend_ids]
 
+        # Show submissions of user also
+        friends.append(session.user_id)
+
         # User in one of the friends
         query = (stable.user_id.belongs(friends))
 
