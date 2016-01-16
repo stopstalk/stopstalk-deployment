@@ -106,7 +106,9 @@ def update_details():
         session.flash = "User details updated"
         atable = db.auth_user
 
-        db(atable.id == session.user_id).update(last_retrieved=current.INITIAL_DATE)
+        query = (atable.id == session.user_id)
+        db(query).update(rating=0,
+                         last_retrieved=current.INITIAL_DATE)
         db(db.submission.user_id == session.user_id).delete()
 
         redirect(URL("default", "submissions", args=[1]))
@@ -368,6 +370,8 @@ def submissions():
     """
 
     custom = False
+    atable = db.auth_user
+    cftable = db.custom_friend
 
     if len(request.args) < 1:
         if session.user_id:
@@ -375,13 +379,13 @@ def submissions():
         else:
             redirect(URL("default", "index"))
     else:
-        query = (db.auth_user.stopstalk_handle == request.args[0])
-        row = db(query).select().first()
+        query = (atable.stopstalk_handle == request.args[0])
+        row = db(query).select(atable.id, atable.first_name).first()
         if row:
             user_id = row.id
         else:
-            query = (db.custom_friend.stopstalk_handle == request.args[0])
-            row = db(query).select().first()
+            query = (cftable.stopstalk_handle == request.args[0])
+            row = db(query).select(cftable.id, cftable.first_name).first()
             if row:
                 user_id = row.id
                 custom = True
@@ -401,11 +405,14 @@ def submissions():
         query = (stable.user_id == user_id)
 
     PER_PAGE = current.PER_PAGE
+
     if request.extension == "json":
         total_submissions = db(query).count()
         page_count = total_submissions / PER_PAGE
+
         if total_submissions % PER_PAGE:
             page_count += 1
+
         return dict(page_count=page_count)
 
     offset = PER_PAGE * (int(page) - 1)
