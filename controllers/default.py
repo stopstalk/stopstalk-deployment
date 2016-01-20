@@ -449,7 +449,7 @@ def mark_friend():
 
     frtable = db.friend_requests
     ftable = db.friends
-    friend_id = request.args[0]
+    friend_id = long(request.args[0])
 
     if friend_id != session.user_id:
         query = (ftable.user_id == session.user_id)
@@ -473,11 +473,11 @@ def mark_friend():
         redirect(URL("default", "search"))
 
     # Insert a tuple of users' id into the friend_requests table
-    db.friend_requests.insert(from_h=session.user_id, to_h=request.args[0])
+    db.friend_requests.insert(from_h=session.user_id, to_h=friend_id)
 
     # Send the user an email notifying about the request
     atable = db.auth_user
-    query = (atable.id == request.args[0])
+    query = (atable.id == friend_id)
     row = db(query).select(atable.email,
                            atable.stopstalk_handle).first()
     current.send_mail(to=row.email,
@@ -608,7 +608,7 @@ def unfriend():
         session.flash = "Please click on a button!"
         redirect(URL("default", "search"))
     else:
-        friend_id = request.args[0]
+        friend_id = long(request.args[0])
         user_id = session["user_id"]
         ftable = db.friends
 
