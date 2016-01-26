@@ -72,16 +72,16 @@ def refresh_tags():
                                updated_problem_list)
 
     today = datetime.datetime.now().strftime("%Y-%m-%d")
-    before_10 = (datetime.datetime.now() - \
-                 datetime.timedelta(10)).strftime("%Y-%m-%d")
+    before_15 = (datetime.datetime.now() - \
+                 datetime.timedelta(15)).strftime("%Y-%m-%d")
 
     # Problems having tags = ["-"]
     # Possibilities of such case -
     #   => There are actually no tags for the problem
     #   => The problem is from a contest and they'll be
-    #      updating tags shortly(assuming 10 days)
+    #      updating tags shortly(assuming 15 days)
     #   => Page was not reachable due to some reason
-    query = (ptable.problem_added_on >= before_10)
+    query = (ptable.problem_added_on >= before_15)
     query &= (ptable.tags == "['-']")
     no_tags = db(query).select(ptable.problem_link,
                                ptable.problem_name)
@@ -106,9 +106,9 @@ def refresh_tags():
 
         gevent.joinall(threads)
 
-    print "Total Inserted: [%d]" % (total_inserted)
-    print "Total Updated: [%d]" % (total_updated)
-    print "Not Updated: [%d]" % (not_updated)
+    print "Total inserted: [%d]" % (total_inserted)
+    print "Total updated: [%d]" % (total_updated)
+    print "Total Not-Updated: [%d]" % (not_updated)
 
 def get_tag(link, name):
 
