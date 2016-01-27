@@ -106,9 +106,9 @@ def refresh_tags():
 
         gevent.joinall(threads)
 
-    print "Total inserted: [%d]" % (total_inserted)
-    print "Total updated: [%d]" % (total_updated)
-    print "Total Not-Updated: [%d]" % (not_updated)
+    print "Total Inserted: [%d]" % (total_inserted)
+    print "Total Updated: [%d]" % (total_updated)
+    print "Total Not-changed: [%d]" % (not_updated)
 
 def get_tag(link, name):
 
@@ -143,7 +143,7 @@ def get_tag(link, name):
             print "Updated", link, all_tags
         else:
             not_updated += 1
-            print "Not-Updated", link, all_tags
+            print "No-change", link, all_tags
     else:
         total_inserted += 1
         print "Inserted ", link, all_tags
