@@ -47,7 +47,7 @@ class Profile(object):
             tags = b.find_all("div", class_="problem-tags")[0]
         except IndexError:
             return ["-"]
-        lis = tags.find_all("li")
+        lis = tags.find_all("span")[1:]
         all_tags = []
         for li in lis:
             if li.contents[0] != "No tags":
