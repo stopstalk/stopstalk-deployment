@@ -60,6 +60,61 @@ def get_friends(user_id):
     return friends, custom_friends
 
 # ----------------------------------------------------------------------------
+def get_accepted_streak(handle):
+    """
+        Function that returns current streak of accepted solutions
+    """
+
+    db = current.db
+    sql_query = """
+                    SELECT COUNT( * )
+                    FROM  `submission`
+                    WHERE stopstalk_handle='%s'
+                    AND time_stamp > (SELECT time_stamp
+                                        FROM  `submission`
+                                        WHERE stopstalk_handle='%s'
+                                          AND STATUS <>  'AC'
+                                        ORDER BY time_stamp DESC
+                                        LIMIT 1);
+                """ % (handle, handle)
+
+    streak = db.executesql(sql_query)
+    return streak[0][0]
+
+# ----------------------------------------------------------------------------
+def get_max_accepted_streak(handle):
+    """
+        Return the max accepted solution streak
+    """
+    db = current.db
+    sql_query = """
+                    SELECT status
+                    FROM `submission`
+                    WHERE stopstalk_handle='%s'
+                    ORDER BY time_stamp;
+                """ % (handle)
+    rows = db.executesql(sql_query)
+
+    prev = None
+    streak = max_streak = 0
+
+    for status in rows:
+        if prev is None:
+            if status[0] == "AC":
+                streak = 1
+        elif prev == "AC" and status[0] == "AC":
+            streak += 1
+        elif prev != "AC" and status[0] == "AC":
+            streak = 1
+        elif prev == "AC" and status[0] != "AC":
+            max_streak = max(max_streak, streak)
+            streak = 0
+        prev = status[0]
+
+    max_streak = max(max_streak, streak)
+    return max_streak
+
+# ----------------------------------------------------------------------------
 def get_max_streak(handle):
     """
         Get the maximum of all streaks

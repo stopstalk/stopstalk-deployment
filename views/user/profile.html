@@ -145,8 +145,12 @@
                     dt = key.split('-');
                     dateList.push([new Date(dt[0], --dt[1], dt[2]), val['count']]);
                 });
+
+                // Update html for the streaks
                 $('#max-streak').html(total['max_streak']);
                 $('#curr-streak').html(total['curr_streak']);
+                $('#max-accepted-streak').html(total['max_accepted_streak']);
+                $('#curr-accepted-streak').html(total['curr_accepted_streak']);
                 dataTable.addRows(dateList);
 
                 var chart = new google.visualization.Calendar(document.getElementById('calendar_basic'));
@@ -239,14 +243,22 @@
             <caption><h5><strong>Streak<strong></h5></caption>
             <thead>
                 <tr>
-                    <th><h6>Maximum Streak</h6></th>
-                    <th><h6>Current Streak</h6></th>
+                    <th colspan="2"><h6>Day Streak</h6></th>
+                    <th colspan="2"><h6>Accepted Solution Streak</h6></th>
+                </tr>
+                <tr>
+                    <th><h6>Current</h6></th>
+                    <th><h6>Maximum</h6></th>
+                    <th><h6>Current</h6></th>
+                    <th><h6>Maximum</h6></th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td id="max-streak"></td>
                     <td id="curr-streak"></td>
+                    <td id="max-streak"></td>
+                    <td id="curr-accepted-streak"></td>
+                    <td id="max-accepted-streak"></td>
                 </tr>
             </tbody>
         </table>

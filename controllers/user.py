@@ -193,16 +193,19 @@ def get_dates():
     sql_query = """
                     SELECT status, time_stamp, COUNT(*)
                     FROM submission
-                    WHERE submission.stopstalk_handle=
-                """
-
-    sql_query += "'" + handle + "' "
-    sql_query += "GROUP BY DATE(submission.time_stamp), submission.status;"
+                    WHERE submission.stopstalk_handle='%s'
+                    GROUP BY DATE(submission.time_stamp), submission.status;
+                """ % (handle)
     row = db.executesql(sql_query)
-
     total_submissions = {}
+
+    # For day streak
     streak = max_streak = 0
     prev = curr = None
+
+    # For accepted solutions streak
+    curr_accepted_streak = utilities.get_accepted_streak(handle)
+    max_accepted_streak = utilities.get_max_accepted_streak(handle)
 
     for i in row:
 
@@ -241,7 +244,9 @@ def get_dates():
 
     return dict(total=total_submissions,
                 max_streak=max_streak,
-                curr_streak=streak)
+                curr_streak=streak,
+                curr_accepted_streak=curr_accepted_streak,
+                max_accepted_streak=max_accepted_streak)
 
 # ------------------------------------------------------------------------------
 def get_stats():

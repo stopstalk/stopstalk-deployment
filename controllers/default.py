@@ -39,26 +39,6 @@ def index():
     return dict()
 
 # ----------------------------------------------------------------------------
-def get_accepted_streak(handle):
-    """
-        Function that returns current streak of accepted solutions
-    """
-    sql_query = """
-                SELECT COUNT( * )
-                FROM  `submission`
-                WHERE stopstalk_handle='%s'
-                  AND time_stamp > (SELECT time_stamp
-                                    FROM  `submission`
-                                    WHERE stopstalk_handle='%s'
-                                      AND STATUS <>  'AC'
-                                    ORDER BY time_stamp DESC
-                                    LIMIT 1)
-                """ % (handle, handle)
-
-    streak = db.executesql(sql_query)
-    return streak[0][0]
-
-# ----------------------------------------------------------------------------
 @auth.requires_login()
 def notifications():
     """
@@ -103,7 +83,7 @@ def notifications():
 
     for handle in handles:
         curr_streak = utilities.get_max_streak(handle[0])[2]
-        curr_accepted_streak = get_accepted_streak(handle[0])
+        curr_accepted_streak = utilities.get_accepted_streak(handle[0])
 
         # If streak is non-zero append to users_on_streak list
         if curr_streak:
