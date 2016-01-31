@@ -367,7 +367,8 @@ def render_table(submissions):
 
         append(TD(A(person_id.first_name + " " + person_id.last_name,
                     _href=URL("user", "profile",
-                              args=[submission.stopstalk_handle]),
+                              args=[submission.stopstalk_handle],
+                              extension=False),
                     _target="_blank")))
         append(TD(submission.site))
         append(TD(A(submission.site_handle,
@@ -379,11 +380,13 @@ def render_table(submissions):
                     _href=URL("problems",
                               "index",
                               vars={"pname": submission.problem_name,
-                                    "plink": submission.problem_link}),
+                                    "plink": submission.problem_link},
+                              extension=False),
                     _target="_blank")))
         append(TD(submission.lang))
         append(TD(IMG(_src=URL("static",
-                               "images/" + submission.status + ".jpg"),
+                               "images/" + submission.status + ".jpg",
+                               extension=False),
                       _title=status_dict[submission.status],
                       _style="height: 25px; width: 25px;")))
         append(TD(submission.points))
