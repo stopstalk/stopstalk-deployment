@@ -284,6 +284,11 @@ def _render_trending(caption, rows, flag):
 # ----------------------------------------------------------------------------
 def _get_total_users(trending_problems, friends, cusfriends):
 
+    if friends == ():
+        friends = ("-1", "-1")
+    if cusfriends == ():
+        cusfriends = ("-1", "-1")
+
     for problem in trending_problems:
         sql = """
                  SELECT *
@@ -295,6 +300,7 @@ def _get_total_users(trending_problems, friends, cusfriends):
               """ % (problem["submission"]["problem_link"],
                      friends,
                      cusfriends)
+
         problem["count"] = len(db.executesql(sql))
 
     return trending_problems
