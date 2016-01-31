@@ -317,7 +317,8 @@ def profile():
     # @Todo: Improve this!
     total_submissions = db(stable.stopstalk_handle == handle).count()
     if total_submissions == 0:
-        return dict(total_submissions=total_submissions)
+        return dict(total_submissions=total_submissions,
+                    handle=handle)
 
     output = {}
     output["handle"] = handle
