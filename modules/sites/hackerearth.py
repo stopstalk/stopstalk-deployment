@@ -51,7 +51,7 @@ class Profile(object):
         all_tags = []
         for li in lis:
             if li.contents[0] != "No tags":
-                all_tags.append(li.contents[0])
+                all_tags.append(li.contents[0].strip(", "))
 
         if all_tags == []:
             all_tags = ["-"]
