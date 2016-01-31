@@ -117,6 +117,10 @@
             return "<p>YO</p>";
         }
 
+        function goToByScroll(id){
+            $('html, body').animate({scrollTop: $("#" + id).offset().top}, 'slow');
+        }
+
         function drawCalendar() {
 
             var totalSubmissions = $('#total-submissions').html();
@@ -154,6 +158,28 @@
                 dataTable.addRows(dateList);
 
                 var chart = new google.visualization.Calendar(document.getElementById('calendar_basic'));
+                google.visualization.events.addListener(chart, 'select', selectHandler);
+
+                function selectHandler(e) {
+                    var selection = chart.getSelection();
+                    var milliseconds = selection[0]["date"];
+
+                    if (milliseconds) {
+                        var dateObj = new Date(milliseconds);
+                        var yyyy = dateObj.getFullYear().toString();
+                        var mm = (dateObj.getMonth()+1).toString(); // getMonth() is zero-based
+                        var dd  = dateObj.getDate().toString();
+                        var finalDate = yyyy + '-' + (mm[1]?mm:'0'+mm[0]) + '-' + (dd[1]?dd:'0'+dd[0]);
+                        $.ajax({
+                            url: '{{=URL("user", "get_activity", extension="json")}}',
+                            data: {'date': finalDate, 'handle': '{{=handle}}'},
+                            method: 'POST',
+                        }).done(function(response) {
+                            $("#activity").html(response["table"]);
+                            goToByScroll("activity");
+                        });
+                    }
+                }
 
                 var options = {
                     legend: 'none',
@@ -266,6 +292,8 @@
     <div id="chart_div" style="margin-left: 45%; padding: 2%; overflow-x: hidden;"></div>
     <br/><br/>
     <div id="calendar_basic" class="center" style="margin-left: 20%; width: 70%;"></div>
+    <div id="activity"></div>
     {{pass}}
+
   </body>
 </html>

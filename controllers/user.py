@@ -196,6 +196,7 @@ def get_dates():
                     WHERE submission.stopstalk_handle='%s'
                     GROUP BY DATE(submission.time_stamp), submission.status;
                 """ % (handle)
+
     row = db.executesql(sql_query)
     total_submissions = {}
 
@@ -272,6 +273,31 @@ def get_stats():
                            count,
                            groupby=stable.status)
     return dict(row=row)
+
+# ------------------------------------------------------------------------------
+def get_activity():
+
+    if request.extension != "json":
+        return dict(table="")
+    stable = db.submission
+    post_vars = request.post_vars
+    date = post_vars["date"]
+    handle = post_vars["handle"]
+    start_time = date + " 00:00:00"
+    end_time = date + " 23:59:59"
+
+    query = (stable.time_stamp >= start_time)
+    query &= (stable.time_stamp <= end_time)
+    query &= (stable.stopstalk_handle == handle)
+    submissions = db(query).select()
+
+    if len(submissions) > 0:
+        table = utilities.render_table(submissions)
+        table = DIV(H3("Activity on " + date), table)
+    else:
+        table = H5("No activity on " + date)
+
+    return dict(table=table)
 
 # ------------------------------------------------------------------------------
 def profile():
