@@ -388,6 +388,7 @@ def render_table(submissions):
                                "images/" + submission.status + ".jpg",
                                extension=False),
                       _title=status_dict[submission.status],
+                      _alt=status_dict[submission.status],
                       _style="height: 25px; width: 25px;")))
         append(TD(submission.points))
 
