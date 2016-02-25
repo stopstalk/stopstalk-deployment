@@ -43,7 +43,10 @@ class Profile(object):
             return ["-"]
 
         tags = BeautifulSoup(response.text).find_all("div", id="problem-tags")
-        tags = tags[0].findAll("span")
+        try:
+            tags = tags[0].findAll("span")
+        except IndexError:
+            return ["-"]
         all_tags = []
 
         for tag in tags:
