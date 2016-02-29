@@ -427,7 +427,7 @@ def profile():
             row = rows.first()
             if row.duplicate_cu:
                 flag = "duplicate-custom"
-                original_row = row.duplicate_cu
+                original_row = db.custom_friend(row.duplicate_cu)
                 actual_handle = row.stopstalk_handle
                 handle = original_row.stopstalk_handle
                 original_row["first_name"] = row.first_name
