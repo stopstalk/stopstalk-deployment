@@ -311,25 +311,26 @@ def _get_total_users(trending_problems,
                      end_date):
 
     if friends == ():
-        friends = (-1,)
+        friends = ["-1"]
     if cusfriends == ():
-        cusfriends = (-1,)
+        cusfriends = ["-1"]
 
     for problem in trending_problems:
         sql = """
                  SELECT COUNT(id)
                  FROM `submission`
                  WHERE ((problem_link = '%s')
-                   AND ((user_id IN %s)
-                     OR (custom_user_id IN %s))
+                   AND ((user_id IN (%s))
+                     OR (custom_user_id IN (%s)))
                    AND  ((time_stamp >= '%s')
                      AND (time_stamp <= '%s')))
                  GROUP BY user_id, custom_user_id
               """ % (problem["submission"]["problem_link"],
-                     str(friends),
-                     str(cusfriends),
+                     ", ".join(friends),
+                     ", ".join(cusfriends),
                      start_date,
                      end_date)
+
         res = db.executesql(sql)
         problem["unique"] = len(res)
 
@@ -377,11 +378,11 @@ def trending():
                                            orderby=~count,
                                            groupby=stable.problem_link)
 
-        friends = [int(x) for x in friends]
-        custom_friends = [int(x) for x in custom_friends]
+        friends = [str(x) for x in friends]
+        custom_friends = [str(x) for x in custom_friends]
         friend_trending = _get_total_users(friend_trending.as_list(),
-                                           tuple(friends),
-                                           tuple(custom_friends),
+                                           friends,
+                                           custom_friends,
                                            start_date,
                                            end_date)
         friend_table = _render_trending("Trending among friends",
@@ -389,9 +390,9 @@ def trending():
                                         "Friends")
 
     friends = db(atable).select(atable.id)
-    friends = [int(x["id"]) for x in friends.as_list()]
+    friends = [str(x["id"]) for x in friends.as_list()]
     cusfriends = db(cftable).select(cftable.id)
-    cusfriends = [int(x["id"]) for x in cusfriends.as_list()]
+    cusfriends = [str(x["id"]) for x in cusfriends.as_list()]
 
     query = (stable.time_stamp >= start_date)
     query &= (stable.time_stamp <= end_date)
@@ -401,8 +402,8 @@ def trending():
                                        orderby=~count,
                                        groupby=stable.problem_link)
     global_trending = _get_total_users(global_trending.as_list(),
-                                       tuple(friends),
-                                       tuple(cusfriends),
+                                       friends,
+                                       cusfriends,
                                        start_date,
                                        end_date)
     global_table = _render_trending("Trending Globally",
