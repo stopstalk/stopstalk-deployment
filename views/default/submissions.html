@@ -19,8 +19,6 @@
                 url: '{{=URL("default", "submissions", extension="json")}}'
             }).done(function(page) {
                 var pageCount = page['count'];
-                var friends = page['friends'];
-                var cfriends = page['cusfriends'];
 
                 var currentUrl = window.location.href;
                 currentUrl = currentUrl.split("/").slice(-1);

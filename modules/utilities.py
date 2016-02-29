@@ -47,17 +47,19 @@ def get_friends(user_id):
     atable = db.auth_user
     ftable = db.friends
 
+    cf_to_duplicate = []
     # Retrieve custom friends
     query = (cftable.user_id == user_id)
-    custom_friends = db(query).select(cftable.id)
-    custom_friends = [x["id"] for x in custom_friends]
+    custom_friends = db(query).select(cftable.id, cftable.duplicate_cu)
+    for i in custom_friends:
+        cf_to_duplicate.append((i["id"], i["duplicate_cu"]))
 
     # Retrieve friends
     query = (ftable.user_id == user_id)
     friends = db(query).select(ftable.friend_id)
     friends = [x["friend_id"] for x in friends]
 
-    return friends, custom_friends
+    return friends, cf_to_duplicate
 
 # ----------------------------------------------------------------------------
 def get_accepted_streak(handle):
@@ -176,15 +178,21 @@ def compute_row(user, custom=False, update_flag=False):
         information of the specified user
     """
 
-    tup = get_max_streak(user.stopstalk_handle)
+    db = current.db
+    stable = db.submission
+    cftable = db.custom_friend
+
+    stopstalk_handle = user.stopstalk_handle
+    if custom:
+        if user.duplicate_cu:
+            stopstalk_handle = cftable(user.duplicate_cu).stopstalk_handle
+
+    tup = get_max_streak(stopstalk_handle)
     max_streak = tup[0]
     total_submissions = tup[1]
 
-    db = current.db
-    stable = db.submission
-
     # Find the total solved problems(Lesser than total accepted)
-    query = (stable.stopstalk_handle == user.stopstalk_handle)
+    query = (stable.stopstalk_handle == stopstalk_handle)
     query &= (stable.status == "AC")
     solved = db(query).select(stable.problem_name, distinct=True)
     solved = len(solved)
@@ -197,7 +205,7 @@ def compute_row(user, custom=False, update_flag=False):
     else:
         table = db.auth_user
 
-    query = (table.stopstalk_handle == user.stopstalk_handle)
+    query = (table.stopstalk_handle == stopstalk_handle)
     record = db(query).select(table.per_day, table.rating).first()
     if record.per_day is None or \
        record.per_day == 0.0:
@@ -231,7 +239,7 @@ def compute_row(user, custom=False, update_flag=False):
         rating_diff = rating - int(record.rating)
         if update_flag:
             # Update the rating ONLY when the function is called by run-it5.py
-            query = (table.stopstalk_handle == user.stopstalk_handle)
+            query = (table.stopstalk_handle == stopstalk_handle)
             db(query).update(per_day=per_day,
                              rating=rating)
     else:
@@ -330,7 +338,7 @@ def materialize_form(form, fields):
     return main_div
 
 # -----------------------------------------------------------------------------
-def render_table(submissions):
+def render_table(submissions, duplicates=[]):
     """
         Create the HTML table from submissions
     """
@@ -361,13 +369,23 @@ def render_table(submissions):
         tr = TR()
         append = tr.append
 
-        person_id = submission.custom_user_id
         if submission.user_id:
             person_id = submission.user_id
+        else:
+            person_id = submission.custom_user_id
+
+            # Check if the given custom_user is a duplicate
+            # We need to do this because there might be a case
+            # when a duplicate custom_user is created and then
+            # his name or institute is changed
+            for f in duplicates:
+                if f[1] == person_id and f[0] != None:
+                    person_id = current.db.custom_friend(f[0])
+                    break
 
         append(TD(A(person_id.first_name + " " + person_id.last_name,
                     _href=URL("user", "profile",
-                              args=[submission.stopstalk_handle],
+                              args=[person_id.stopstalk_handle],
                               extension=False),
                     _target="_blank")))
         append(TD(submission.site))

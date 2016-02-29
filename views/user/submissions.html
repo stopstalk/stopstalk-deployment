@@ -26,15 +26,9 @@
             page = currentURL.slice(index + 1);
         }
 
-        handle = currentURL.split("/").splice(-1)[0];
-        handle = handle.split("?")[0];
-        if (handle == "submissions") {
-            handle = "";
-        }
-
         $.ajax({
             method: 'GET',
-            url: '{{=URL("user", "submissions", extension="json")}}' + "/" + handle + "?page=" + page
+            url: '{{=URL("user", "submissions", args=handle, extension="json")}}' + "?page=" + page
         }).done(function(response) {
 
             var pageCount = response['page_count'];
@@ -43,7 +37,7 @@
                 page: parseInt(page),
                 maxVisible: 10
             }).on("page", function(event, num) {
-                window.location.href = "{{=URL('user', 'submissions')}}" + "/" + handle + "?page=" + num.toString();
+                window.location.href = "{{=URL('user', 'submissions', args=handle)}}" + "?page=" + num.toString();
             });
 
         });
@@ -57,7 +51,6 @@
         <h1>Submissions of {{=user}}</h1>
     {{pass}}
     <div id="page-selection" class="center"></div>
-    <div id="id_custom" style="display: none;">{{=user_id}} {{=c}}</div>
     {{=table}}
 {{else:}}
     <br /><br />

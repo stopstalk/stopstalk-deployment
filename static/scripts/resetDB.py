@@ -35,13 +35,13 @@
 db.submission.truncate()
 print "Successfully deleted all submissions"
 
-auth_user_update = db(db.auth_user.id > 0).update(last_retrieved="2013-01-01 00:00:00")
+auth_user_update = db(db.auth_user).update(last_retrieved="2013-01-01 00:00:00")
 if auth_user_update:
     print "Update on auth_user completed"
 else:
     print "auth_user was not updated"
 
-custom_friend_update = db(db.custom_friend.id > 0).update(last_retrieved="2013-01-01 00:00:00")
+custom_friend_update = db(db.custom_friend).update(last_retrieved="2013-01-01 00:00:00")
 if custom_friend_update:
     print "Update on custom_friend completed"
 else:

@@ -40,8 +40,16 @@ def pie_chart_helper():
     # Show stats only for friends and logged-in user
     if session.auth:
         friends, cusfriends = utilities.get_friends(session.user_id)
+        # The Original IDs of duplicate custom_friends
+        custom_friends = []
+        for cus_id in cusfriends:
+            if cus_id[1] == None:
+                custom_friends.append(cus_id[0])
+            else:
+                custom_friends.append(cus_id[1])
+
         query &= (stable.user_id.belongs(friends)) | \
-                 (stable.custom_user_id.belongs(cusfriends)) | \
+                 (stable.custom_user_id.belongs(custom_friends)) | \
                  (stable.user_id == session.user_id)
 
     row = db(query).select(stable.status,
@@ -84,11 +92,20 @@ def index():
 
     query = (stable.problem_link == problem_link)
 
+    cusfriends = []
     # If a user is logged-in then show his/her friends' submissions
     if session.auth:
         friends, cusfriends = utilities.get_friends(session.user_id)
+        # The Original IDs of duplicate custom_friends
+        custom_friends = []
+        for cus_id in cusfriends:
+            if cus_id[1] == None:
+                custom_friends.append(cus_id[0])
+            else:
+                custom_friends.append(cus_id[1])
+
         query &= (stable.user_id.belongs(friends)) | \
-                 (stable.custom_user_id.belongs(cusfriends)) | \
+                 (stable.custom_user_id.belongs(custom_friends)) | \
                  (stable.user_id == session.user_id)
 
     submissions = db(query).select(orderby=~stable.time_stamp)
@@ -142,7 +159,7 @@ def index():
         table = DIV(H5("No submissions from your friends for this problem"),
                     _class="center")
     else:
-        table = utilities.render_table(submissions)
+        table = utilities.render_table(submissions, cusfriends)
         table = TAG[""](H4("Recent Submissions"),
                         table)
 
@@ -248,19 +265,24 @@ def _render_trending(caption, rows, flag):
         Create trending table from the rows
     """
 
+    # Sort the rows according to the
+    # number of users who solved the
+    # problem in last PAST_DAYS
+    rows = sorted(rows, key=lambda k: k["unique"], reverse=True)
+    rows = rows[:current.PROBLEMS_PER_PAGE]
     problems = []
     for problem in rows:
         submission = problem["submission"]
         problems.append([submission["problem_name"],
                          submission["problem_link"],
-                         int(problem["_extra"]["COUNT(submission.id)"]),
-                         problem["count"]])
+                         problem["_extra"]["COUNT(submission.id)"],
+                         problem["unique"]])
 
     problems = sorted(problems, key=itemgetter(3), reverse=True)
 
     table = TABLE(_class="striped centered")
     thead = THEAD(TR(TH("Problem"),
-                     TH("Total Submissions"),
+                     TH("Recent Submissions"),
                      TH(flag)))
     table.append(thead)
     tbody = TBODY()
@@ -282,26 +304,34 @@ def _render_trending(caption, rows, flag):
     return table
 
 # ----------------------------------------------------------------------------
-def _get_total_users(trending_problems, friends, cusfriends):
+def _get_total_users(trending_problems,
+                     friends,
+                     cusfriends,
+                     start_date,
+                     end_date):
 
     if friends == ():
-        friends = ("-1", "-1")
+        friends = (-1,)
     if cusfriends == ():
-        cusfriends = ("-1", "-1")
+        cusfriends = (-1,)
 
     for problem in trending_problems:
         sql = """
-                 SELECT *
+                 SELECT COUNT(id)
                  FROM `submission`
-                 WHERE ((submission.problem_link = '%s')
-                   AND ((submission.user_id IN %s)
-                     OR (submission.custom_user_id IN %s)))
+                 WHERE ((problem_link = '%s')
+                   AND ((user_id IN %s)
+                     OR (custom_user_id IN %s))
+                   AND  ((time_stamp >= '%s')
+                     AND (time_stamp <= '%s')))
                  GROUP BY user_id, custom_user_id
               """ % (problem["submission"]["problem_link"],
-                     friends,
-                     cusfriends)
-
-        problem["count"] = len(db.executesql(sql))
+                     str(friends),
+                     str(cusfriends),
+                     start_date,
+                     end_date)
+        res = db.executesql(sql)
+        problem["unique"] = len(res)
 
     return trending_problems
 
@@ -309,6 +339,7 @@ def _get_total_users(trending_problems, friends, cusfriends):
 def trending():
     """
         Show trending problems globally and among friends
+        @ToDo: Needs lot of comments explaining the code
     """
 
     stable = db.submission
@@ -316,39 +347,51 @@ def trending():
     cftable = db.custom_friend
 
     today = datetime.datetime.today()
+    # Consider submissions only after PAST_DAYS(customisable)
+    # for trending problems
     start_date = str(today - datetime.timedelta(days=current.PAST_DAYS))
     end_date = str(today)
 
     count = stable.id.count()
-    PROBLEMS_PER_PAGE = current.PROBLEMS_PER_PAGE
 
     if session.user_id:
-        friends, custom_friends = utilities.get_friends(session.user_id)
+        friends, cusfriends = utilities.get_friends(session.user_id)
 
-        query = (stable.user_id.belongs(friends))
-        query |= (stable.custom_user_id.belongs(custom_friends))
-        query &= (stable.time_stamp >= start_date)
+        # The Original IDs of duplicate custom_friends
+        custom_friends = []
+        for cus_id in cusfriends:
+            if cus_id[1] == None:
+                custom_friends.append(cus_id[0])
+            else:
+                custom_friends.append(cus_id[1])
+
+        first_query = (stable.user_id.belongs(friends))
+        first_query |= (stable.custom_user_id.belongs(custom_friends))
+        query = (stable.time_stamp >= start_date)
         query &= (stable.time_stamp <= end_date)
+        query = first_query & query
 
-        friends = [str(x) for x in friends]
-        custom_friends = [str(x) for x in custom_friends]
         friend_trending = db(query).select(stable.problem_name,
                                            stable.problem_link,
                                            count,
                                            orderby=~count,
-                                           groupby=stable.problem_link,
-                                           limitby=(0, PROBLEMS_PER_PAGE))
+                                           groupby=stable.problem_link)
+
+        friends = [int(x) for x in friends]
+        custom_friends = [int(x) for x in custom_friends]
         friend_trending = _get_total_users(friend_trending.as_list(),
                                            tuple(friends),
-                                           tuple(custom_friends))
+                                           tuple(custom_friends),
+                                           start_date,
+                                           end_date)
         friend_table = _render_trending("Trending among friends",
                                         friend_trending,
                                         "Friends")
 
     friends = db(atable).select(atable.id)
-    friends = [str(x["id"]) for x in friends.as_list()]
+    friends = [int(x["id"]) for x in friends.as_list()]
     cusfriends = db(cftable).select(cftable.id)
-    cusfriends = [str(x["id"]) for x in cusfriends.as_list()]
+    cusfriends = [int(x["id"]) for x in cusfriends.as_list()]
 
     query = (stable.time_stamp >= start_date)
     query &= (stable.time_stamp <= end_date)
@@ -356,11 +399,12 @@ def trending():
                                        stable.problem_link,
                                        count,
                                        orderby=~count,
-                                       groupby=stable.problem_link,
-                                       limitby=(0, PROBLEMS_PER_PAGE))
+                                       groupby=stable.problem_link)
     global_trending = _get_total_users(global_trending.as_list(),
                                        tuple(friends),
-                                       tuple(cusfriends))
+                                       tuple(cusfriends),
+                                       start_date,
+                                       end_date)
     global_table = _render_trending("Trending Globally",
                                     global_trending,
                                     "Users")

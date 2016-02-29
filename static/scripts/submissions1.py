@@ -194,13 +194,13 @@ if __name__ == "__main__":
               "`site_handle`, `site`, `time_stamp`, `problem_name`," + \
               "`problem_link`, `lang`, `status`, `points`, `view_link`)"
 
-    registered_users = db(atable.id > 0).select(atable.id)
+    registered_users = db(atable).select(atable.id)
     registered_users = [x["id"] for x in registered_users]
     for user in registered_users:
         if user % 3 == 1:
             retrieve_submissions(user)
 
-    custom_users = db(cftable.id > 0).select(cftable.id)
+    custom_users = db(cftable.duplicate_cu == None).select(cftable.id)
     custom_users = [x["id"] for x in custom_users]
     for custom_user in custom_users:
         if custom_user % 3 == 1:

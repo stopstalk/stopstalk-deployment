@@ -22,7 +22,7 @@
 
 import utilities
 import time
-from datetime import datetime, date
+import datetime
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()
@@ -32,6 +32,83 @@ def index():
     """
 
     return dict()
+
+# ------------------------------------------------------------------------------
+@auth.requires_login()
+def add_custom_friend():
+    """
+        Add an already existing custom user to some other user
+    """
+
+    post_vars = request.post_vars
+    atable = db.auth_user
+    cftable = db.custom_friend
+    stopstalk_handle = post_vars["stopstalk_handle"]
+    # Modify(Prepare) this dictionary for inserting it again
+    # @ToDo: Need a better method. Major security flaw
+    current_row = eval(post_vars["row"])
+    original_handle = current_row["stopstalk_handle"]
+
+    stopstalk_handles = []
+    rows = db(atable).select(atable.stopstalk_handle)
+    rows = [x["stopstalk_handle"] for x in rows]
+    stopstalk_handles.extend(rows)
+
+    rows = db(cftable).select(cftable.stopstalk_handle)
+    rows = [x["stopstalk_handle"] for x in rows]
+    stopstalk_handles.extend(rows)
+
+    if stopstalk_handle in stopstalk_handles:
+        session.flash = "Handle already taken"
+        redirect(URL("user", "profile", args=original_handle))
+
+    # The total referrals by the logged-in user
+    query = (atable.referrer == session["handle"])
+
+    # User should not enter his/her own
+    # stopstalk handle as referrer handle
+    query &= (atable.stopstalk_handle != session["handle"])
+    total_referrals = db(query).count()
+
+    # Retrieve the total allowed custom users from auth_user table
+    query = (atable.id == session["user_id"])
+    row = db(query).select(atable.referrer,
+                           atable.allowed_cu).first()
+    default_allowed = row.allowed_cu
+    referrer = 0
+    # If a valid referral is applied then award 1 extra CU
+    if row.referrer and row.referrer != session["handle"]:
+        referrer = db(atable.stopstalk_handle == row.referrer).count()
+
+    # 3 custom friends allowed plus one for each 5 invites
+    allowed_custom_friends = total_referrals / 5 + default_allowed + referrer
+
+    # Custom users already created
+    current_count = db(db.custom_friend.user_id == session["user_id"]).count()
+
+    if current_count >= allowed_custom_friends:
+        session.flash = "Sorry!! All custom users used up!"
+        redirect(URL("user", "profile", args=original_handle))
+
+    # ID of the custom user
+    original_id = long(current_row["id"])
+
+    # Delete this id as this will be incremented
+    # automatically on insert
+    del current_row["id"]
+
+    # Set duplicate_cu for this new user
+    current_row["duplicate_cu"] = original_id
+    # Set the user_id as current logged in user
+    current_row["user_id"] = session.user_id
+    # Update the stopstalk handle
+    current_row["stopstalk_handle"] = stopstalk_handle
+
+    # Insert a new Custom friend for the logged-in user
+    cftable.insert(**current_row)
+
+    session.flash = "Custom user added!!"
+    redirect(URL("user", "profile", args=original_handle))
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()
@@ -152,24 +229,40 @@ def update_friend():
                    deletable=True,
                    showid=False)
 
-    if form.process().accepted:
-        if form.vars.delete_this_record != "on":
-            ## UPDATE
-            # If delete checkbox is not checked
-            session.flash = "User details updated"
-
-            # Since there may be some updates in the handle
-            # for correctness we need to remove all the submissions
-            # and retrieve all the submissions again(Will be updated next day)
-            query = (cftable.id == request.args[0])
-            db(query).update(last_retrieved=current.INITIAL_DATE)
-            db(db.submission.custom_user_id == request.args[0]).delete()
-            redirect(URL("user", "edit_custom_friend_details"))
-        else:
+    if form.validate():
+        if form.deleted:
             ## DELETE
             # If delete checkbox is checked => just process it redirect back
             session.flash = "Custom User deleted"
+            db(cftable.id == record.id).delete()
             redirect(URL("user", "edit_custom_friend_details"))
+        else:
+            ## UPDATE
+            # If delete checkbox is not checked
+            updated_handles = False
+
+            # Check if any of the site handle is updated
+            for site in current.SITES:
+                site_handle = site.lower() + "_handle"
+                if record[site_handle] != form.vars[site_handle]:
+                    updated_handles = True
+                    break
+
+            if updated_handles:
+                form.vars["duplicate_cu"] = None
+                # Since there may be some updates in the handle
+                # for correctness we need to remove all the submissions
+                # and retrieve all the submissions again(Will be updated next day)
+                form.vars["last_retrieved"] = current.INITIAL_DATE
+                form.vars["rating"]= 0
+                form.vars["per_day"] = 0.0
+                db(db.submission.custom_user_id == request.args[0]).delete()
+
+            record.update_record(**dict(form.vars))
+
+            session.flash = "User details updated"
+            redirect(URL("user", "edit_custom_friend_details"))
+
     elif form.errors:
         response.flash = "Form has errors"
 
@@ -212,11 +305,11 @@ def get_dates():
 
         if prev is None and streak == 0:
             prev = time.strptime(str(i[1]), "%Y-%m-%d %H:%M:%S")
-            prev = date(prev.tm_year, prev.tm_mon, prev.tm_mday)
+            prev = datetime.date(prev.tm_year, prev.tm_mon, prev.tm_mday)
             streak = 1
         else:
             curr = time.strptime(str(i[1]), "%Y-%m-%d %H:%M:%S")
-            curr = date(curr.tm_year, curr.tm_mon, curr.tm_mday)
+            curr = datetime.date(curr.tm_year, curr.tm_mon, curr.tm_mday)
 
             if (curr - prev).days == 1:
                 streak += 1
@@ -237,7 +330,7 @@ def get_dates():
             total_submissions[sub_date][i[0]] = i[2]
             total_submissions[sub_date]["count"] = i[2]
 
-    today = datetime.today().date()
+    today = datetime.datetime.today().date()
 
     # Check if the last streak is continued till today
     if (today - prev).days > 1:
@@ -303,6 +396,7 @@ def get_activity():
 def profile():
     """
         Controller to show user profile
+        @ToDo: Lots of cleanup! Atleast run a lint
     """
 
     if len(request.args) < 1:
@@ -313,8 +407,38 @@ def profile():
     else:
         handle = str(request.args[0])
 
+    query = (db.auth_user.stopstalk_handle == handle)
+    rows = db(query).select()
+    row = None
+    flag = "not-friends"
+    custom = False
+    actual_handle = handle
+
+    if len(rows) == 0:
+        query = (db.custom_friend.stopstalk_handle == handle)
+        rows = db(query).select()
+        if len(rows) == 0:
+            # No such user exists
+            return dict(total_submissions=0,
+                        handle=handle)
+        else:
+            flag = "custom"
+            custom = True
+            row = rows.first()
+            if row.duplicate_cu:
+                flag = "duplicate-custom"
+                original_row = row.duplicate_cu
+                actual_handle = row.stopstalk_handle
+                handle = original_row.stopstalk_handle
+                original_row["first_name"] = row.first_name
+                original_row["last_name"] = row.last_name
+                original_row["institute"] = row.institute
+                original_row["user_id"] = row.user_id
+                row = original_row
+    else:
+        row = rows.first()
+
     stable = db.submission
-    # @Todo: Improve this!
     total_submissions = db(stable.stopstalk_handle == handle).count()
     if total_submissions == 0:
         return dict(total_submissions=total_submissions,
@@ -322,18 +446,12 @@ def profile():
 
     output = {}
     output["handle"] = handle
+    output["actual_handle"] = actual_handle
     output["total_submissions"] = total_submissions
 
-    query = (db.auth_user.stopstalk_handle == handle)
-    row = db(query).select().first()
-
-    flag = "not-friends"
-    custom = False
-
-    if row is None:
-        query = (db.custom_friend.stopstalk_handle == handle)
-        row = db(query).select().first()
-        custom = True
+    if custom:
+        if row.user_id == session.user_id:
+            flag = "my-custom-user"
     else:
         if row.id != session.user_id:
             ftable = db.friends
@@ -404,23 +522,27 @@ def submissions():
     custom = False
     atable = db.auth_user
     cftable = db.custom_friend
+    handle = None
+    duplicates = []
 
     if len(request.args) < 1:
         if session.user_id:
             user_id = session.user_id
+            handle = session.handle
         else:
             redirect(URL("default", "index"))
     else:
-        query = (atable.stopstalk_handle == request.args[0])
+        handle = request.args[0]
+        query = (atable.stopstalk_handle == handle)
         row = db(query).select(atable.id, atable.first_name).first()
-        if row:
-            user_id = row.id
-        else:
-            query = (cftable.stopstalk_handle == request.args[0])
-            row = db(query).select(cftable.id, cftable.first_name).first()
+        if row is None:
+            query = (cftable.stopstalk_handle == handle)
+            row = db(query).select().first()
             if row:
-                user_id = row.id
                 custom = True
+                if row.duplicate_cu:
+                    duplicates = [(row.id, row.duplicate_cu)]
+                    handle = row.duplicate_cu.stopstalk_handle
             else:
                 redirect(URL("default", "index"))
 
@@ -430,11 +552,7 @@ def submissions():
         page = "1"
 
     stable = db.submission
-
-    if custom:
-        query = (stable.custom_user_id == user_id)
-    else:
-        query = (stable.user_id == user_id)
+    query = (stable.stopstalk_handle == handle)
 
     PER_PAGE = current.PER_PAGE
 
@@ -450,20 +568,15 @@ def submissions():
     offset = PER_PAGE * (int(page) - 1)
     all_submissions = db(query).select(orderby=~stable.time_stamp,
                                        limitby=(offset, offset + PER_PAGE))
-    table = utilities.render_table(all_submissions)
+    table = utilities.render_table(all_submissions, duplicates)
 
-    if user_id == session.user_id:
+    if handle == session.handle:
         user = "Self"
     else:
         user = row["first_name"]
 
-    c = "0"
-    if custom:
-        c = "1"
-
-    return dict(c=c,
+    return dict(handle=handle,
                 user=user,
-                user_id=user_id,
                 table=table,
                 total_rows=len(all_submissions))
 

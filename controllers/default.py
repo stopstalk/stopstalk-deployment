@@ -51,7 +51,7 @@ def notifications():
 
     ftable = db.friends
     atable = db.auth_user
-    ctable = db.custom_friend
+    cftable = db.custom_friend
 
     # Check for streak of friends on stopstalk
     query = (ftable.user_id == session["user_id"])
@@ -66,16 +66,25 @@ def notifications():
 
     for user in rows:
         handles.append((user.stopstalk_handle,
-                        user.first_name + " " + user.last_name))
+                        user.first_name + " " + user.last_name,
+                        user.stopstalk_handle))
 
     # Check for streak of custom friends
-    query = (ctable.user_id == session["user_id"])
-    rows = db(query).select(ctable.first_name,
-                            ctable.last_name,
-                            ctable.stopstalk_handle)
+    query = (cftable.user_id == session["user_id"])
+    rows = db(query).select(cftable.first_name,
+                            cftable.last_name,
+                            cftable.duplicate_cu,
+                            cftable.stopstalk_handle)
     for user in rows:
-        handles.append((user.stopstalk_handle,
-                        user.first_name + " " + user.last_name))
+        name = user.first_name + " " + user.last_name
+        actual_handle = user.stopstalk_handle
+
+        if user.duplicate_cu:
+            stopstalk_handle = user.duplicate_cu.stopstalk_handle
+        else:
+            stopstalk_handle = user.stopstalk_handle
+
+        handles.append((stopstalk_handle, name, actual_handle))
 
     # List of users with non-zero streak
     users_on_day_streak = []
@@ -113,7 +122,7 @@ def notifications():
         handle = users[0]
         curr_streak = users[1]
         tr = TR(TD((A(handle[1],
-                      _href=URL("user", "profile", args=[handle[0]]),
+                      _href=URL("user", "profile", args=[handle[2]]),
                       _target="_blank"))),
                 TD(str(curr_streak) + " ",
                    I(_class="fa fa-bolt",
@@ -131,7 +140,7 @@ def notifications():
         handle = users[0]
         curr_accepted_streak = users[1]
         tr = TR(TD((A(handle[1],
-                      _href=URL("user", "profile", args=[handle[0]]),
+                      _href=URL("user", "profile", args=[handle[2]]),
                       _target="_blank"))),
                 TD(str(curr_accepted_streak) + " ",
                    I(_class="fa fa-bolt",
@@ -156,17 +165,18 @@ def leaderboard():
     atable = db.auth_user
     cftable = db.custom_friend
 
-    fields = ["first_name", "last_name", "stopstalk_handle", "institute"]
+    afields = ["first_name", "last_name", "stopstalk_handle", "institute"]
+    cfields = afields + ["duplicate_cu"]
     if request.vars.has_key("q"):
         institute = request.vars["q"]
         if institute != "":
             specific_institute = True
-            reg_users = db(atable.institute == institute).select(*fields)
-            custom_users = db(cftable.institute == institute).select(*fields)
+            reg_users = db(atable.institute == institute).select(*afields)
+            custom_users = db(cftable.institute == institute).select(*cfields)
 
     if specific_institute is False:
-        reg_users = db(atable.id > 0).select(*fields)
-        custom_users = db(cftable.id > 0).select(*fields)
+        reg_users = db(atable).select(*afields)
+        custom_users = db(cftable).select(*cfields)
 
     users = []
 
@@ -275,8 +285,8 @@ def filters():
         page = int(request.args[0])
         page -= 1
 
-    all_languages = db(stable.id > 0).select(stable.lang,
-                                             distinct=True)
+    all_languages = db(stable).select(stable.lang,
+                                      distinct=True)
     languages = []
     for  i in all_languages:
         languages.append(i["lang"])
@@ -291,14 +301,23 @@ def filters():
     cftable = db.custom_friend
     atable = db.auth_user
     ftable = db.friends
+    duplicates = []
 
     if session.auth:
         # Retrieve all the custom users created by the logged-in user
         query = (cftable.first_name.contains(get_vars["name"]))
         query |= (cftable.last_name.contains(get_vars["name"]))
         query &= (cftable.user_id == session.user_id)
-        custom_friends = db(query).select(cftable.id)
-        cusfriends = [x["id"] for x in custom_friends]
+        cust_friends = db(query).select(cftable.id, cftable.duplicate_cu)
+
+        # The Original IDs of duplicate custom_friends
+        custom_friends = []
+        for cus_id in cust_friends:
+            if cus_id.duplicate_cu:
+                duplicates.append((cus_id.id, cus_id.duplicate_cu))
+                custom_friends.append(cus_id.duplicate_cu)
+            else:
+                custom_friends.append(cus_id.id)
 
         # Get the friends of logged in user
         query = (atable.first_name.contains(get_vars["name"]))
@@ -313,15 +332,15 @@ def filters():
         friend_ids = db(query).select(ftable.friend_id)
         friends = [x["friend_id"] for x in friend_ids]
 
-        # Show submissions of user also
-        friends.append(session.user_id)
+        if session.user_id in possible_users:
+            # Show submissions of user also
+            friends.append(session.user_id)
 
         # User in one of the friends
         query = (stable.user_id.belongs(friends))
 
         # User in one of the custom friends
-        query |= (stable.custom_user_id.belongs(cusfriends))
-
+        query |= (stable.custom_user_id.belongs(custom_friends))
     else:
         # Retrieve all the custom users
         query = (cftable.first_name.contains(get_vars["name"]))
@@ -410,7 +429,7 @@ def filters():
     if total_problems % 100 == 0:
         total_pages += 1
 
-    table = utilities.render_table(filtered)
+    table = utilities.render_table(filtered, duplicates)
 
     return dict(languages=languages,
                 table=table,
@@ -639,8 +658,16 @@ def submissions():
     # Get all the friends/custom friends of the logged-in user
     friends, cusfriends = utilities.get_friends(session["user_id"])
 
+    # The Original IDs of duplicate custom_friends
+    custom_friends = []
+    for cus_id in cusfriends:
+        if cus_id[1] == None:
+            custom_friends.append(cus_id[0])
+        else:
+            custom_friends.append(cus_id[1])
+
     query = (stable.user_id.belongs(friends))
-    query |= (stable.custom_user_id.belongs(cusfriends))
+    query |= (stable.custom_user_id.belongs(custom_friends))
     total_count = db(query).count()
 
     PER_PAGE = current.PER_PAGE
@@ -648,30 +675,8 @@ def submissions():
     if total_count % PER_PAGE:
         count += 1
 
-    friend_query = (atable.id.belongs(friends))
-    friends_list = db(friend_query).select(atable.id,
-                                           atable.first_name,
-                                           atable.last_name)
-    all_friends = []
-    for friend in friends_list:
-        friend_name = friend["first_name"] + " " + friend["last_name"]
-        all_friends.append([friend["id"],
-                            friend_name])
-
-    cusfriend_query = (cftable.id.belongs(cusfriends))
-    cusfriends_list = db(cusfriend_query).select(cftable.id,
-                                                 cftable.first_name,
-                                                 cftable.last_name)
-    all_custom_friends = []
-    for friend in cusfriends_list:
-        friend_name = friend["first_name"] + " " + friend["last_name"]
-        all_custom_friends.append([friend["id"],
-                                   friend_name])
-
     if request.extension == "json":
         return dict(count=count,
-                    friends=all_friends,
-                    cusfriends=all_custom_friends,
                     total_rows=1)
 
     offset = PER_PAGE * (int(active) - 1)
@@ -679,7 +684,7 @@ def submissions():
     rows = db(query).select(orderby=~db.submission.time_stamp,
                             limitby=(offset, offset + PER_PAGE))
 
-    table = utilities.render_table(rows)
+    table = utilities.render_table(rows, cusfriends)
     return dict(table=table,
                 friends=friends,
                 cusfriends=cusfriends,

@@ -302,10 +302,9 @@ extra_fields = [Field("institute",
                       requires=[IS_NOT_IN_DB(db,
                                              "auth_user.stopstalk_handle",
                                              error_message=T("Handle taken")),
-                                             IS_NOT_IN_DB(db,
-                                                          "custom_friend.stopstalk_handle",
-                                                          error_message=T("Handle taken"))]
-                                             ),
+                                IS_NOT_IN_DB(db,
+                                             "custom_friend.stopstalk_handle",
+                                             error_message=T("Handle taken"))]),
                 Field("rating",
                       default=0,
                       writable=False),
@@ -404,6 +403,8 @@ custom_friend_fields = [Field("user_id", "reference auth_user"),
                         Field("per_day", "double",
                               default=0.0,
                               writable=False),
+                        Field("duplicate_cu", "reference custom_friend",
+                              default=None)
                         ]
 
 custom_friend_fields += site_handles

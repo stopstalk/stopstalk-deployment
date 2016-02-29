@@ -29,8 +29,9 @@ cftable = db.custom_friend
 fields = ["first_name", "last_name", "stopstalk_handle", "institute"]
 users = db(atable).select(*fields)
 for user in users:
-    print utilities.compute_row(user, update_flag=True)
+    utilities.compute_row(user, update_flag=True)
 
+fields += ["duplicate_cu"]
 custom_users = db(cftable).select(*fields)
 for custom_user in custom_users:
-    print utilities.compute_row(custom_user, custom=True, update_flag=True)
+    utilities.compute_row(custom_user, custom=True, update_flag=True)
