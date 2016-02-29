@@ -310,9 +310,9 @@ def _get_total_users(trending_problems,
                      start_date,
                      end_date):
 
-    if friends == ():
+    if friends == []:
         friends = ["-1"]
-    if cusfriends == ():
+    if cusfriends == []:
         cusfriends = ["-1"]
 
     for problem in trending_problems:
