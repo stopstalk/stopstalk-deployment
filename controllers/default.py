@@ -21,6 +21,10 @@
 """
 
 import time
+import datetime
+import parsedatetime as pdt
+import requests
+from operator import itemgetter
 import utilities
 
 # ----------------------------------------------------------------------------
@@ -107,12 +111,12 @@ def notifications():
     # The table containing users on streak(days)
     table1 = TABLE(THEAD(TR(TH(STRONG("User")),
                             TH(STRONG("Days")))),
-                   _class="striped centered")
+                   _class="col offset-s3 s6 striped centered")
 
     # The table containing users on streak(submissions)
     table2 = TABLE(THEAD(TR(TH(STRONG("User")),
                             TH(STRONG("Submissions")))),
-                   _class="striped centered")
+                   _class="col offset-s3 s6 striped centered")
 
     tbody1 = TBODY()
     tbody2 = TBODY()
@@ -127,8 +131,7 @@ def notifications():
                 TD(str(curr_streak) + " ",
                    I(_class="fa fa-bolt",
                      _style="color:red"),
-                   _class="center",
-                   ))
+                   _class="center"))
         tbody1.append(tr)
 
     table1.append(tbody1)
@@ -156,6 +159,133 @@ def notifications():
                 table2=table2)
 
 # ----------------------------------------------------------------------------
+def sort_contests(a, b):
+    if a["has_started"] and b["has_started"]:
+        return a["end"] < b["end"]
+    elif a["has_started"] and b["has_started"] == False:
+        return False
+    elif a["has_started"] == False and b["has_started"]:
+        return True
+    else:
+        return a["start"] < b["start"]
+
+# ----------------------------------------------------------------------------
+def contests():
+    """
+        Show the upcoming contests
+    """
+
+    today = datetime.datetime.today()
+    today = datetime.datetime.strptime(str(today)[:-7],
+                                       "%Y-%m-%d %H:%M:%S")
+
+    start_date = today.date()
+    end_date = start_date + datetime.timedelta(90)
+    url = "https://contesttrackerapi.herokuapp.com/"
+    response = requests.get(url)
+    if response.status_code == 200:
+        response = response.json()["result"]
+    else:
+        # @todo: something better
+        return dict()
+
+    ongoing = response["ongoing"]
+    upcoming = response["upcoming"]
+    contests = []
+    cal = pdt.Calendar()
+
+    table = TABLE(_class="centered striped")
+    thead = THEAD(TR(TH("Contest Name"),
+                     TH("Site"),
+                     TH("Start"),
+                     TH("Duration/Ending"),
+                     TH("Link"),
+                     TH("Add Reminder")))
+    table.append(thead)
+    tbody = TBODY()
+
+    for i in ongoing:
+
+        if i["Platform"] in ("TOPCODER", "OTHER"):
+            continue
+
+        try:
+            endtime = datetime.datetime.strptime(i["EndTime"],
+                                                 "%a, %d %b %Y %H:%M")
+        except ValueError:
+            continue
+        tr = TR()
+        span = SPAN(_class="green tooltipped",
+                    data={"position": "right",
+                          "delay": "50",
+                          "tooltip": "Live Contest"},
+                    _style="cursor: pointer; " + \
+                            "float:right; " + \
+                            "height:10px; " + \
+                            "width:10px; " + \
+                            "border-radius: 50%;")
+        tr.append(TD(i["Name"], span))
+        tr.append(TD(i["Platform"].capitalize()))
+        tr.append(TD("-"))
+        tr.append(TD(str(endtime),
+                     _class="contest-end-time"))
+        tr.append(TD(A(I(_class="fa fa-external-link-square fa-lg"),
+                       _class="btn-floating btn-small green accent-4 tooltipped",
+                       _href=i["url"],
+                       data={"position": "left",
+                             "tooltip": "Contest Link",
+                             "delay": "50"},
+                       _target="_blank")))
+        tr.append(TD(BUTTON(I(_class="fa fa-calendar-plus-o"),
+                            _class="btn-floating btn-small orange accent-4 tooltipped disabled",
+                            data={"position": "left",
+                                  "tooltip": "Already started!",
+                                  "delay": "50"})))
+        tbody.append(tr)
+
+    # This id is used for uniquely identifying
+    # a particular contest in js
+    button_id = 1
+    for i in upcoming:
+
+        if i["Platform"] in ("TOPCODER", "OTHER"):
+            continue
+
+        start_time = datetime.datetime.strptime(i["StartTime"],
+                                                "%a, %d %b %Y %H:%M")
+        tr = TR(_id="contest-" + str(button_id))
+        tr.append(TD(i["Name"]))
+        tr.append(TD(i["Platform"].capitalize()))
+        tr.append(TD(str(start_time)))
+
+        duration = i["Duration"]
+        duration = duration.replace(" days", "d")
+        duration = duration.replace(" day", "d")
+        tr.append(TD(duration))
+        tr.append(TD(A(I(_class="fa fa-external-link-square fa-lg"),
+                       _class="btn-floating btn-small green accent-4 tooltipped",
+                       _href=i["url"],
+                       data={"position": "left",
+                             "tooltip": "Contest Link",
+                             "delay": "50"},
+                       _target="_blank")))
+        tr.append(TD(BUTTON(I(_class="fa fa-calendar-plus-o"),
+                            _class="btn-floating btn-small orange accent-4 tooltipped",
+                            data={"position": "left",
+                                  "tooltip": "Set Reminder to Google Calendar",
+                                  "delay": "50"},
+                            _id="set-reminder-" + str(button_id))))
+        tbody.append(tr)
+        button_id += 1
+
+    table.append(tbody)
+    return dict(table=table, upcoming=upcoming)
+
+# ------------------------------------------------------------------------------
+def send_reminder():
+    return dict()
+
+# ------------------------------------------------------------------------------
 def leaderboard():
     """
         Get a table with users sorted by rating
@@ -304,6 +434,7 @@ def filters():
     duplicates = []
 
     if session.auth:
+        print session.user_id
         # Retrieve all the custom users created by the logged-in user
         query = (cftable.first_name.contains(get_vars["name"]))
         query |= (cftable.last_name.contains(get_vars["name"]))
@@ -375,7 +506,7 @@ def filters():
     if end_date == "":
         # If end date is empty retrieve all submissions till now(current timestamp)
         # Current date/time
-        end_date = str(datetime.today())
+        end_date = str(datetime.datetime.today())
         # Remove the last milliseconds from the timestamp
         end_date = end_date[:-7]
     else:
@@ -422,7 +553,7 @@ def filters():
     # Apply the complex query and sort by time_stamp DESC
     filtered = db(query).select(limitby=(page * PER_PAGE,
                                          (page + 1) * PER_PAGE),
-                                         orderby=~stable.time_stamp)
+                                orderby=~stable.time_stamp)
 
     total_problems = db(query).count()
     total_pages = total_problems / 100
@@ -588,8 +719,7 @@ def retrieve_users():
         else:
             tr.append(TD(FORM(INPUT(_type="submit",
                                     _value="Unfriend",
-                                    _class="btn waves-light waves-effect red",
-                                    ),
+                                    _class="btn waves-light waves-effect red"),
                               _action=URL("default", "unfriend", args=[user.id]))))
         tbody.append(tr)
 
@@ -733,8 +863,7 @@ def faq():
         li = LI(DIV(B(str(i + 1) + ". " + questions[i]),
                     _class="collapsible-header"),
                 DIV(answers[i],
-                    _class="collapsible-body"),
-                )
+                    _class="collapsible-body"))
         ul.append(li)
 
     div.append(ul)
@@ -764,8 +893,7 @@ def contact_us():
                                      form.vars.email,
                                      form.vars.phone_number) + \
                                   "Subject: %s\n" % form.vars.subject + \
-                                  "Message: %s\n" % form.vars.text_message
-                          )
+                                  "Message: %s\n" % form.vars.text_message)
         redirect(URL("default", "index"))
     elif form.errors:
         response.flash = "Form has errors!"

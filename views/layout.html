@@ -83,7 +83,7 @@
     <!-- Navbar ======================================= -->
     <div class="flash alert alert-dismissable" style="display: none;">{{=response.flash or ''}}</div>
     <header>
-    <ul id="welcome" class="dropdown-content" style="min-width: 180px; color: #536dfe;">
+    <ul id="welcome" class="dropdown-content" style="min-width: 190px; color: #536dfe;">
         {{if session["user_id"]:}}
             <li><a href="{{=URL('user', 'profile')}}">Profile</a></li>
             <li><a href="{{=URL('user', 'submissions')}}">My Submissions</a></li>

@@ -20,7 +20,7 @@
     THE SOFTWARE.
 """
 
-import time
+import time, re
 from datetime import date, datetime
 from gluon import current, IMG, DIV, TABLE, THEAD, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, \
@@ -33,6 +33,46 @@ def get_link(site, handle):
     """
 
     return current.SITES[site] + handle
+
+# -----------------------------------------------------------------------------
+def get_duration(start, end):
+    """
+        Get duration between two datetime objects
+    """
+
+    delta = str(end - start).split(",")
+
+    if len(delta) == 1:
+        t = [int(x) for x in delta[0].split(":")]
+        if t[0] == 0:
+            if t[1] == 0:
+                return "%d seconds" % t[2]
+            else:
+                return "%d minutes, %d seconds" % (t[1], t[2])
+        else:
+            final_duration = "%d hours" % t[0]
+            if t[1]:
+                final_duration += ", %d minutes" % t[1]
+            if t[2]:
+                final_duration += ", %d seconds" % t[2]
+            return final_duration
+    else:
+        return delta[0]
+
+# -----------------------------------------------------------------------------
+def urltosite(url):
+    """
+        Helper function to extract site from url
+    """
+
+    # Note: try/except is not added because this function is not to
+    #       be called for invalid problem urls
+    site = re.search("www\..*?\.com", url).group()
+
+    # Remove www. and .com from the url to get the site
+    site = site[4:-4]
+
+    return site
 
 # -----------------------------------------------------------------------------
 def get_friends(user_id):

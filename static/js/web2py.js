@@ -532,7 +532,6 @@
         Materialize.toast(message, 4000);
       },
       hide_flash: function() {
-
         $('.flash').fadeOut(0).html('');
       },
       show_if_handler: function(target) {

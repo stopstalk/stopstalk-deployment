@@ -58,21 +58,6 @@ def pie_chart_helper():
     return dict(row=row)
 
 # ----------------------------------------------------------------------------
-def urltosite(url):
-    """
-        Helper function to extract site from url
-    """
-
-    # Note: try/except is not added because this function is not to
-    #       be called for invalid problem urls
-    site = re.search("www.*com", url).group()
-
-    # Remove www. and .com from the url to get the site
-    site = site[4:-4]
-
-    return site
-
-# ----------------------------------------------------------------------------
 def index():
     """
         The main problem page
@@ -144,7 +129,7 @@ def index():
                        _rowspan="4")))
     tbody.append(TR(TD(),
                     TD(STRONG("Site:")),
-                    TD(urltosite(problem_link).capitalize())))
+                    TD(utilities.urltosite(problem_link).capitalize())))
     tbody.append(TR(TD(),
                     TD(STRONG("Problem Link:")),
                     TD(A(I(_class="fa fa-link"), " Link",
@@ -241,7 +226,7 @@ def tag():
         tr.append(TD(A(I(_class="fa fa-link"),
                        _href=problem["problem_link"],
                        _target="_blank")))
-        tr.append(TD(urltosite(problem["problem_link"]).capitalize()))
+        tr.append(TD(utilities.urltosite(problem["problem_link"]).capitalize()))
         all_tags = eval(problem["tags"])
         td = TD()
         for tag in all_tags:

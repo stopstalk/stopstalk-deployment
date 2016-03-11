@@ -60,7 +60,11 @@ if session.user_id:
          URL('user', 'edit_custom_friend_details'), []),
     ]
 
-response.menu += [(I(_class="fa fa-bar-chart fa-2x",
+response.menu += [(I(_class="fa fa-calendar-check-o fa-2x",
+                     _title="Upcoming Contests"),
+                   False,
+                   URL('default', 'contests'), []),
+                  (I(_class="fa fa-bar-chart fa-2x",
                      _title="Leaderboard"),
                    False,
                    URL('default', 'leaderboard'), []),
