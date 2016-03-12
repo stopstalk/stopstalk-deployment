@@ -39,11 +39,9 @@ def _debug(first_name, last_name, site, custom=False):
     """
 
     name = first_name + " " + last_name
-    debug_string = "Retrieving " + \
-                   site + \
-                   " submissions for "
+    debug_string = site + ":"
     if custom:
-        debug_string += "CUSTOM USER "
+        debug_string += "CUS:"
     debug_string += name
     print debug_string,
 
@@ -62,7 +60,7 @@ def get_submissions(user_id,
     count = 0
 
     if submissions == {}:
-        print "[0]"
+        print "0"
         return 0
 
     global rows
@@ -109,9 +107,9 @@ def get_submissions(user_id,
 
 
     if count != 0:
-        print "[+%s] " % (count)
+        print "%s" % (count)
     else:
-        print "[0]"
+        print "0"
     return count
 
 # ----------------------------------------------------------------------------
@@ -163,8 +161,7 @@ def retrieve_submissions(reg_user, custom=False):
 
     for submissions in list_of_submissions:
         if submissions[1] == -1:
-            print "PROBLEM CONNECTING TO " + site + \
-                  " FOR " + \
+            print "PROBLEM " + site + " " + \
                   row.stopstalk_handle
 
             return "FAILURE"
