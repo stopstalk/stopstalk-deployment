@@ -413,6 +413,7 @@ def profile():
     flag = "not-friends"
     custom = False
     actual_handle = handle
+    parent_user = None
 
     if len(rows) == 0:
         query = (db.custom_friend.stopstalk_handle == handle)
@@ -425,6 +426,9 @@ def profile():
             flag = "custom"
             custom = True
             row = rows.first()
+            parent_user = (row.user_id.first_name + " " + \
+                                row.user_id.last_name,
+                           row.user_id.stopstalk_handle)
             if row.duplicate_cu:
                 flag = "duplicate-custom"
                 original_row = db.custom_friend(row.duplicate_cu)
@@ -448,6 +452,7 @@ def profile():
     output["handle"] = handle
     output["actual_handle"] = actual_handle
     output["total_submissions"] = total_submissions
+    output["parent_user"] = parent_user
 
     if custom:
         if row.user_id == session.user_id:

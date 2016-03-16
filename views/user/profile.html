@@ -130,9 +130,9 @@
         // ---------------------------------------------------------------------------------
         function drawCalendar() {
 
-            var totalSubmissions = $('#total-submissions').html();
+            var totalSubmissions = '{{=total_submissions}}';
             if (parseInt(totalSubmissions) == 0) {
-                $('#empty-profile').css("display", "block");
+                $('#empty-profile').css('display', 'block');
                 return;
             }
             $.ajax({
@@ -221,7 +221,6 @@
   </head>
 
   <body>
-    <div id="total-submissions" style="display: none;">{{=total_submissions}}</div>
     <div id="empty-profile" style="display: none;">
         <h5>No submissions in the database right now.</h5>
     </div>
@@ -281,8 +280,11 @@
                 </tr>
             </table>
         </div>
+        {{if parent_user:}}
+            <h6>Custom User of <a href="{{=URL('user', 'profile', args=parent_user[1])}}">{{=parent_user[0]}}</a></h6>
+        {{pass}}
         <div class="row center">
-            <h5><strong>Accuracy</strong></h5>
+            <h6><strong>Accuracy</strong></h6>
             {{for site in current.SITES:}}
                 <a href="{{=(current.SITES[site] + row[site.lower() + '_handle'])}}" class="tooltipped" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank">
                     <div class="chip">
@@ -292,13 +294,12 @@
                 </a>
             {{pass}}
         </div>
-        <br/>
         <table class="striped centered">
-            <caption><h5><strong>Streak<strong></h5></caption>
+            <caption><h6><strong>Streak<strong></h6></caption>
             <thead>
                 <tr>
-                    <th colspan="2"><h6>Day Streak</h6></th>
-                    <th colspan="2"><h6>Accepted Solution Streak</h6></th>
+                    <th colspan="2"><strong>Day Streak</strong></th>
+                    <th colspan="2"><strong>Accepted Solution Streak</strong></th>
                 </tr>
                 <tr>
                     <th><h6>Current</h6></th>

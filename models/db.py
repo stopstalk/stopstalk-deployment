@@ -291,6 +291,7 @@ COLLEGES = ["ABES IT Group of Institutions, Ghaziabad",
             "Veltech Multi Tech Dr.Rangarajan Dr.Sakunthala Engineering College, Chennai",
             "Vishwakarma Government Engineering College, Chandkheda",
             "West Bengal University of Technology",
+            "Yeshwantrao Chavan College of Engineering College, Nagpur",
             "YMCA University of Science and Technology, Faridabad",
             "Zakir Hussain College of Engineering and Technology, Aligarh",
             "Other"]
