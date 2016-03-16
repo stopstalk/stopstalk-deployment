@@ -408,6 +408,7 @@ def render_table(submissions, duplicates=[]):
     for submission in submissions:
         tr = TR()
         append = tr.append
+        span = SPAN()
 
         if submission.user_id:
             person_id = submission.user_id
@@ -422,12 +423,22 @@ def render_table(submissions, duplicates=[]):
                 if f[1] == person_id and f[0] != None:
                     person_id = current.db.custom_friend(f[0])
                     break
+            span = SPAN(_class="orange tooltipped",
+                        data={"position": "right",
+                              "delay": "50",
+                              "tooltip": "Custom User"},
+                        _style="cursor: pointer; " + \
+                                "float:right; " + \
+                                "height:10px; " + \
+                                "width:10px; " + \
+                                "border-radius: 50%;")
 
-        append(TD(A(person_id.first_name + " " + person_id.last_name,
-                    _href=URL("user", "profile",
-                              args=[person_id.stopstalk_handle],
-                              extension=False),
-                    _target="_blank")))
+        append(TD(DIV(span,
+                      A(person_id.first_name + " " + person_id.last_name,
+                        _href=URL("user", "profile",
+                                  args=[person_id.stopstalk_handle],
+                                  extension=False),
+                        _target="_blank"))))
         append(TD(submission.site))
         append(TD(A(submission.site_handle,
                     _href=get_link(submission.site,
