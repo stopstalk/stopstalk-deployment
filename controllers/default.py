@@ -295,7 +295,8 @@ def leaderboard():
     atable = db.auth_user
     cftable = db.custom_friend
 
-    afields = ["first_name", "last_name", "stopstalk_handle", "institute"]
+    afields = ["first_name", "last_name", "stopstalk_handle",
+               "institute", "per_day", "rating"]
     cfields = afields + ["duplicate_cu"]
     if request.vars.has_key("q"):
         institute = request.vars["q"]
@@ -308,15 +309,45 @@ def leaderboard():
         reg_users = db(atable).select(*afields)
         custom_users = db(cftable).select(*cfields)
 
-    users = []
+    # Find the total solved problems(Lesser than total accepted)
+    solved_count = {}
+    sql = """
+             SELECT stopstalk_handle, COUNT(DISTINCT(problem_name))
+             FROM submission
+             WHERE user_id IS NOT NULL AND status = 'AC'
+             GROUP BY user_id;
+          """
+    tmplist = db.executesql(sql)
+    for user in tmplist:
+        solved_count[user[0]] = user[1]
 
+    users = []
     for user in reg_users:
-        tup = utilities.compute_row(user)
+        try:
+            solved = solved_count[user.stopstalk_handle]
+        except KeyError:
+            solved = 0
+
+        tup = utilities.compute_row(user, solved)
         if tup is not ():
             users.append(tup)
 
+    sql = sql.replace("user_id", "custom_user_id")
+    tmplist = db.executesql(sql)
+
+    for user in tmplist:
+        solved_count[user[0]] = user[1]
+
     for user in custom_users:
-        tup = utilities.compute_row(user, True)
+        try:
+            if user.duplicate_cu:
+                orig_user = cftable(user.duplicate_cu)
+                solved = solved_count[orig_user.stopstalk_handle]
+            else:
+                solved = solved_count[user.stopstalk_handle]
+        except KeyError:
+            solved = 0
+        tup = utilities.compute_row(user, solved, True)
         if tup is not ():
             users.append(tup)
 

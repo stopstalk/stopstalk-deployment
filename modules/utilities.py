@@ -20,7 +20,8 @@
     THE SOFTWARE.
 """
 
-import time, re
+import time
+import re
 from datetime import date, datetime
 from gluon import current, IMG, DIV, TABLE, THEAD, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, \
@@ -67,7 +68,7 @@ def urltosite(url):
 
     # Note: try/except is not added because this function is not to
     #       be called for invalid problem urls
-    site = re.search("www\..*?\.com", url).group()
+    site = re.search(r"www\..*?\.com", url).group()
 
     # Remove www. and .com from the url to get the site
     site = site[4:-4]
@@ -84,7 +85,6 @@ def get_friends(user_id):
 
     db = current.db
     cftable = db.custom_friend
-    atable = db.auth_user
     ftable = db.friends
 
     cf_to_duplicate = []
@@ -212,7 +212,7 @@ def get_max_streak(handle):
     return max_streak, total_submissions, streak, len(row)
 
 # ----------------------------------------------------------------------------
-def compute_row(user, custom=False, update_flag=False):
+def compute_row(record, solved, custom=False, update_flag=False):
     """
         Computes rating and retrieves other
         information of the specified user
@@ -222,31 +222,19 @@ def compute_row(user, custom=False, update_flag=False):
     stable = db.submission
     cftable = db.custom_friend
 
-    stopstalk_handle = user.stopstalk_handle
+    stopstalk_handle = record.stopstalk_handle
     if custom:
-        if user.duplicate_cu:
-            stopstalk_handle = cftable(user.duplicate_cu).stopstalk_handle
+        if record.duplicate_cu:
+            stopstalk_handle = cftable(record.duplicate_cu).stopstalk_handle
 
     tup = get_max_streak(stopstalk_handle)
     max_streak = tup[0]
     total_submissions = tup[1]
 
-    # Find the total solved problems(Lesser than total accepted)
-    query = (stable.stopstalk_handle == stopstalk_handle)
-    query &= (stable.status == "AC")
-    solved = db(query).select(stable.problem_name, distinct=True)
-    solved = len(solved)
-
     today = datetime.today().date()
     start = datetime.strptime(current.INITIAL_DATE,
                               "%Y-%m-%d %H:%M:%S").date()
-    if custom:
-        table = db.custom_friend
-    else:
-        table = db.auth_user
 
-    query = (table.stopstalk_handle == stopstalk_handle)
-    record = db(query).select(table.per_day, table.rating).first()
     if record.per_day is None or \
        record.per_day == 0.0:
         per_day = total_submissions * 1.0 / (today - start).days
@@ -278,16 +266,20 @@ def compute_row(user, custom=False, update_flag=False):
     if record.rating != rating:
         rating_diff = rating - int(record.rating)
         if update_flag:
+            table = db.auth_user
+            if custom:
+                table = db.custom_friend
+            print table
             # Update the rating ONLY when the function is called by run-it5.py
-            query = (table.stopstalk_handle == stopstalk_handle)
+            query = (table.stopstalk_handle == record.stopstalk_handle)
             db(query).update(per_day=per_day,
                              rating=rating)
     else:
         rating_diff = 0
 
-    return (user.first_name + " " + user.last_name,
-            user.stopstalk_handle,
-            user.institute,
+    return (record.first_name + " " + record.last_name,
+            record.stopstalk_handle,
+            record.institute,
             rating,
             diff,
             custom,
