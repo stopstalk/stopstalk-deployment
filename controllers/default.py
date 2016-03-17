@@ -314,8 +314,8 @@ def leaderboard():
     sql = """
              SELECT stopstalk_handle, COUNT(DISTINCT(problem_name))
              FROM submission
-             WHERE user_id IS NOT NULL AND status = 'AC'
-             GROUP BY user_id;
+             WHERE status = 'AC'
+             GROUP BY user_id, custom_user_id;
           """
     tmplist = db.executesql(sql)
     for user in tmplist:
@@ -331,12 +331,6 @@ def leaderboard():
         tup = utilities.compute_row(user, solved)
         if tup is not ():
             users.append(tup)
-
-    sql = sql.replace("user_id", "custom_user_id")
-    tmplist = db.executesql(sql)
-
-    for user in tmplist:
-        solved_count[user[0]] = user[1]
 
     for user in custom_users:
         try:
