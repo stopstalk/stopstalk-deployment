@@ -269,7 +269,6 @@ def compute_row(record, solved, custom=False, update_flag=False):
             table = db.auth_user
             if custom:
                 table = db.custom_friend
-            print table
             # Update the rating ONLY when the function is called by run-it5.py
             query = (table.stopstalk_handle == record.stopstalk_handle)
             db(query).update(per_day=per_day,
