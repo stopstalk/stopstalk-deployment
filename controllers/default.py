@@ -159,6 +159,81 @@ def notifications():
                 table2=table2)
 
 # ----------------------------------------------------------------------------
+@auth.requires_login()
+def my_friends():
+    """
+        Display the friends data
+    """
+
+    ftable = db.friends
+
+    rows = db(ftable.user_id == session.user_id).select(ftable.friend_id)
+    table = TABLE(THEAD(TR(TH("Friend name"),
+                           TH("Authentic user"),
+                           TH("Institute friend"),
+                           TH("Other friend"),
+                           TH("Claimable"))),
+                      _class="centered col offset-s3 s6")
+
+    tbody = TBODY()
+    check = I(_class="fa fa-check",
+              _style="color: #0f0")
+    cross = I(_class="fa fa-close",
+              _style="color: #f00")
+
+    valid_friends = 0
+    for row in rows:
+        claimable = True
+        thisfriend = row.friend_id
+        name = thisfriend.first_name + " " + thisfriend.last_name
+        tr = TR(TD(A(name, _href=URL("user", "profile",
+                                     args=thisfriend.stopstalk_handle))))
+        claimable &= thisfriend.authentic
+        if thisfriend.authentic:
+            tr.append(check)
+        else:
+            tr.append(cross)
+
+        query = (ftable.user_id == thisfriend)
+        friends_of_friends = db(query).select(ftable.friend_id)
+        institute_friends = 0
+        for fof in friends_of_friends:
+            if fof.friend_id.institute == thisfriend.institute and \
+               fof.friend_id.institute != "Other":
+                institute_friends += 1
+        if institute_friends > 1:
+            tr.append(TD(check))
+            tr.append(TD(check))
+        else:
+            if institute_friends == 0:
+                claimable &= False
+                tr.append(cross)
+                if len(friends_of_friends) >= 2:
+                    tr.append(check)
+                else:
+                    tr.append(cross)
+            else:
+                tr.append(check)
+                if len(friends_of_friends) >= 3:
+                    claimable &= True
+                    tr.append(check)
+                else:
+                    claimable &= False
+                    tr.append(cross)
+
+
+        if claimable:
+            valid_friends += 1
+            tr.append(TD(I(_class="fa fa-thumbs-up")))
+        else:
+            tr.append(TD())
+        tbody.append(tr)
+
+    table.append(tbody)
+    return dict(table=DIV(table, _class="row"),
+                claimable_stickers=valid_friends/3)
+
+# ----------------------------------------------------------------------------
 def sort_contests(a, b):
     if a["has_started"] and b["has_started"]:
         return a["end"] < b["end"]

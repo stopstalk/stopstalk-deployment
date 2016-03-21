@@ -45,6 +45,7 @@ registered_users = db(atable).select(atable.id, atable.authentic)
 for user in registered_users:
     if main_dict.has_key(user.id):
         if main_dict[user.id] > 1 and user.authentic is False:
+            print user.id, "updated"
             user.update_record(authentic=True)
 
 # END =========================================================================

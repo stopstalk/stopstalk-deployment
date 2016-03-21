@@ -1,0 +1,15 @@
+{{extend 'layout.html'}}
+<title>My friends</title>
+<h1>My Friends</h1>
+{{=table}}
+<button class="btn-large waves-effect waves-light purple accent-3" onclick="Materialize.toast('Button becomes active on 10th April', 6000)">Claim {{=claimable_stickers}} stickers</button>
+<h5>How many stickers do I get?</h5>
+<ul>
+    <li>Lets say you have 3 friends X, Y and Z</li>
+    <li>If X has atleast 2 other friends except you, say P and Q</li>
+    <li>P must be from the same institute as X's and Q may be any other(can be from the institute also)</li>
+    <li>This must be followed for Y and Z similarly</li>
+    <li>For every such triplet of friends X, Y and Z you get 1 sticker</li>
+    <li>We have 3 different kinds of stickers ;)</li>
+</ul>
+
