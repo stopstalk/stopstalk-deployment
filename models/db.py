@@ -242,6 +242,10 @@ db.define_table("contact_us",
                 # @ToDo: Not working for some reason
                 Field("text_message", "text", requires=IS_NOT_EMPTY()))
 
+db.define_table("faq",
+                Field("question", requires=IS_NOT_EMPTY()),
+                Field("answer", requires=IS_NOT_EMPTY()))
+
 if session["auth"]:
     session["handle"] = session["auth"]["user"]["stopstalk_handle"]
     session["user_id"] = session["auth"]["user"]["id"]

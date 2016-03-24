@@ -333,7 +333,7 @@ def get_dates():
     today = datetime.datetime.today().date()
 
     # Check if the last streak is continued till today
-    if (today - prev).days > 1:
+    if prev is None or (today - prev).days > 1:
         streak = 0
 
     return dict(total=total_submissions,
@@ -375,6 +375,8 @@ def get_activity():
     stable = db.submission
     post_vars = request.post_vars
     date = post_vars["date"]
+    if date is None:
+        return dict(table="")
     handle = post_vars["handle"]
     start_time = date + " 00:00:00"
     end_time = date + " 23:59:59"
