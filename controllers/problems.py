@@ -245,25 +245,10 @@ def tag():
     return dict(table=table)
 
 # ----------------------------------------------------------------------------
-def _render_trending(caption, rows, flag):
+def _render_trending(caption, problems, flag):
     """
         Create trending table from the rows
     """
-
-    # Sort the rows according to the
-    # number of users who solved the
-    # problem in last PAST_DAYS
-    rows = sorted(rows, key=lambda k: k["unique"], reverse=True)
-    rows = rows[:current.PROBLEMS_PER_PAGE]
-    problems = []
-    for problem in rows:
-        submission = problem["submission"]
-        problems.append([submission["problem_name"],
-                         submission["problem_link"],
-                         problem["_extra"]["COUNT(submission.id)"],
-                         problem["unique"]])
-
-    problems = sorted(problems, key=itemgetter(3), reverse=True)
 
     table = TABLE(_class="striped centered")
     thead = THEAD(TR(TH("Problem"),
@@ -370,27 +355,32 @@ def trending():
                                            custom_friends,
                                            start_date,
                                            end_date)
+        # Sort the rows according to the
+        # number of users who solved the
+        # problem in last PAST_DAYS
+        rows = sorted(friend_trending, key=lambda k: k["unique"], reverse=True)
+        rows = rows[:current.PROBLEMS_PER_PAGE]
+        problems = []
+        for problem in rows:
+            submission = problem["submission"]
+            problems.append([submission["problem_name"],
+                             submission["problem_link"],
+                             problem["_extra"]["COUNT(submission.id)"],
+                             problem["unique"]])
+
         friend_table = _render_trending("Trending among friends",
-                                        friend_trending,
+                                        problems,
                                         "Friends")
 
-    friends = db(atable).select(atable.id)
-    friends = [str(x["id"]) for x in friends.as_list()]
-    cusfriends = db(cftable).select(cftable.id)
-    cusfriends = [str(x["id"]) for x in cusfriends.as_list()]
+    tptable = db.trending_problems
+    rows = db(tptable).select()
+    global_trending = []
+    for problem in rows:
+        global_trending.append([problem["problem_name"],
+                                problem["problem_link"],
+                                problem["submission_count"],
+                                problem["user_count"]])
 
-    query = (stable.time_stamp >= start_date)
-    query &= (stable.time_stamp <= end_date)
-    global_trending = db(query).select(stable.problem_name,
-                                       stable.problem_link,
-                                       count,
-                                       orderby=~count,
-                                       groupby=stable.problem_link)
-    global_trending = _get_total_users(global_trending.as_list(),
-                                       friends,
-                                       cusfriends,
-                                       start_date,
-                                       end_date)
     global_table = _render_trending("Trending Globally",
                                     global_trending,
                                     "Users")
