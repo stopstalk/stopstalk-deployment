@@ -185,7 +185,8 @@ def update_details():
 
         query = (atable.id == session.user_id)
         db(query).update(rating=0,
-                         last_retrieved=current.INITIAL_DATE)
+                         last_retrieved=current.INITIAL_DATE,
+                         per_day=0.0)
         db(db.submission.user_id == session.user_id).delete()
 
         redirect(URL("default", "submissions", args=[1]))
