@@ -82,8 +82,11 @@ initial_date = datetime.strptime("2013-01-01 00:00:00", "%Y-%m-%d %H:%M:%S")
 db.define_table("institutes",
                 Field("name"))
 
-all_institutes = db(db.institutes).select(db.institutes.name)
+itable = db.institutes
+all_institutes = db(itable.name != "Other").select(itable.name,
+                                                   orderby=itable.name)
 all_institutes = [x["name"].strip("\"") for x in all_institutes]
+all_institutes.append("Other")
 extra_fields = [Field("institute",
                       requires=IS_IN_SET(all_institutes,
                                          zero="Institute",
