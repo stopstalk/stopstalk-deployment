@@ -459,7 +459,7 @@ def filters():
     duplicates = []
 
     if session.auth:
-        print session.user_id
+
         # Retrieve all the custom users created by the logged-in user
         query = (cftable.first_name.contains(get_vars["name"]))
         query |= (cftable.last_name.contains(get_vars["name"]))

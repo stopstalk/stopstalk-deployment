@@ -33,12 +33,16 @@ def pie_chart_helper():
     """
 
     problem_link = request.post_vars["plink"]
+    global_submissions = False
+    if request.post_vars["global"] == "True":
+        global_submissions = True
+
     stable = db.submission
     count = stable.id.count()
     query = (stable.problem_link == problem_link)
 
     # Show stats only for friends and logged-in user
-    if session.auth:
+    if global_submissions is False:
         friends, cusfriends = utilities.get_friends(session.user_id)
         # The Original IDs of duplicate custom_friends
         custom_friends = []
@@ -70,6 +74,11 @@ def index():
         session.flash = "Please click on a Problem Link"
         redirect(URL("default", "index"))
 
+    global_submissions = False
+    if request.vars.has_key("global"):
+        if request.vars["global"] == "True":
+            global_submissions = True
+
     stable = db.submission
     ptable = db.problem_tags
     problem_name = request.vars["pname"]
@@ -78,8 +87,8 @@ def index():
     query = (stable.problem_link == problem_link)
 
     cusfriends = []
-    # If a user is logged-in then show his/her friends' submissions
-    if session.auth:
+
+    if global_submissions is False:
         friends, cusfriends = utilities.get_friends(session.user_id)
         # The Original IDs of duplicate custom_friends
         custom_friends = []
@@ -140,18 +149,19 @@ def index():
                     TD(tags)))
     problem_details.append(tbody)
 
-    if len(submissions) == 0:
-        table = DIV(H5("No submissions from your friends for this problem"),
-                    _class="center")
-    else:
-        table = utilities.render_table(submissions, cusfriends)
-        table = TAG[""](H4("Recent Submissions"),
-                        table)
+    table = utilities.render_table(submissions, cusfriends)
+    switch = DIV(LABEL(H6("Friends' Submissions",
+                          INPUT(_type="checkbox", _id="submission-switch"),
+                          SPAN(_class="lever pink accent-3"),
+                          "Global Submissions")),
+                 _class="switch")
+    div = TAG[""](H4("Recent Submissions"), switch, table)
 
     return dict(problem_details=problem_details,
                 problem_name=problem_name,
                 problem_link=problem_link,
-                table=table)
+                global_submissions=global_submissions,
+                div=div)
 
 # ----------------------------------------------------------------------------
 def tag():
