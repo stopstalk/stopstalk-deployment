@@ -447,10 +447,17 @@ def filters():
         languages.append(i["lang"])
 
     table = None
+    global_submissions = False
+    if get_vars.has_key("global"):
+        if get_vars["global"] == "True":
+            global_submissions = True
+
     # If form is not submitted
     if get_vars == {}:
+        print "asds"
         return dict(languages=languages,
-                    table=table)
+                    div=DIV(),
+                    global_submissions=global_submissions)
 
     # Form has been submitted
     cftable = db.custom_friend
@@ -458,31 +465,47 @@ def filters():
     ftable = db.friends
     duplicates = []
 
-    if session.auth:
+    switch = DIV(LABEL(H6("Friends' Submissions",
+                          INPUT(_type="checkbox", _id="submission-switch"),
+                          SPAN(_class="lever pink accent-3"),
+                          "Global Submissions")),
+                 _class="switch")
+    table = TABLE()
+    div = TAG[""](H4("Recent Submissions"), switch, table)
 
+    if global_submissions is False and session.user_id is None:
+        response.flash = "Login to view Friends' submissions"
+        return dict(languages=languages,
+                    div=div,
+                    global_submissions=global_submissions,
+                    total_pages=0)
+
+    query = (cftable.first_name.contains(get_vars["name"]))
+    query |= (cftable.last_name.contains(get_vars["name"]))
+    if global_submissions is False:
         # Retrieve all the custom users created by the logged-in user
-        query = (cftable.first_name.contains(get_vars["name"]))
-        query |= (cftable.last_name.contains(get_vars["name"]))
         query &= (cftable.user_id == session.user_id)
-        cust_friends = db(query).select(cftable.id, cftable.duplicate_cu)
+    cust_friends = db(query).select(cftable.id, cftable.duplicate_cu)
 
-        # The Original IDs of duplicate custom_friends
-        custom_friends = []
-        for cus_id in cust_friends:
-            if cus_id.duplicate_cu:
-                duplicates.append((cus_id.id, cus_id.duplicate_cu))
-                custom_friends.append(cus_id.duplicate_cu)
-            else:
-                custom_friends.append(cus_id.id)
+    # The Original IDs of duplicate custom_friends
+    custom_friends = []
+    for cus_id in cust_friends:
+        if cus_id.duplicate_cu:
+            duplicates.append((cus_id.id, cus_id.duplicate_cu))
+            custom_friends.append(cus_id.duplicate_cu)
+        else:
+            custom_friends.append(cus_id.id)
 
-        # Get the friends of logged in user
-        query = (atable.first_name.contains(get_vars["name"]))
-        query |= (atable.last_name.contains(get_vars["name"]))
+    # Get the friends of logged in user
+    query = (atable.first_name.contains(get_vars["name"]))
+    query |= (atable.last_name.contains(get_vars["name"]))
 
-        # @ToDo: Anyway to use join instead of two such db calls
-        possible_users = db(query).select(atable.id)
-        possible_users = [x["id"] for x in possible_users]
+    # @ToDo: Anyway to use join instead of two such db calls
+    possible_users = db(query).select(atable.id)
+    possible_users = [x["id"] for x in possible_users]
+    friends = possible_users
 
+    if global_submissions is False:
         query = (ftable.user_id == session.user_id)
         query &= (ftable.friend_id.belongs(possible_users))
         friend_ids = db(query).select(ftable.friend_id)
@@ -492,29 +515,11 @@ def filters():
             # Show submissions of user also
             friends.append(session.user_id)
 
-        # User in one of the friends
-        query = (stable.user_id.belongs(friends))
+    # User in one of the friends
+    query = (stable.user_id.belongs(friends))
 
-        # User in one of the custom friends
-        query |= (stable.custom_user_id.belongs(custom_friends))
-    else:
-        # Retrieve all the custom users
-        query = (cftable.first_name.contains(get_vars["name"]))
-        query |= (cftable.last_name.contains(get_vars["name"]))
-        custom_friends = db(query).select(cftable.id)
-        cusfriends = [x["id"] for x in custom_friends]
-
-        # Get the users registered
-        query = (atable.first_name.contains(get_vars["name"]))
-        query |= (atable.last_name.contains(get_vars["name"]))
-        user_ids = db(query).select(atable.id)
-        registered_users = [x["id"] for x in user_ids]
-
-        # User in one of the friends
-        query = (stable.user_id.belongs(registered_users))
-
-        # User in one of the custom friends
-        query |= (stable.custom_user_id.belongs(cusfriends))
+    # User in one of the custom friends
+    query |= (stable.custom_user_id.belongs(custom_friends))
 
     start_date = get_vars["start_date"]
     end_date = get_vars["end_date"]
@@ -586,10 +591,17 @@ def filters():
         total_pages += 1
 
     table = utilities.render_table(filtered, duplicates)
+    switch = DIV(LABEL(H6("Friends' Submissions",
+                          INPUT(_type="checkbox", _id="submission-switch"),
+                          SPAN(_class="lever pink accent-3"),
+                          "Global Submissions")),
+                 _class="switch")
+    div = TAG[""](switch, table)
 
     return dict(languages=languages,
-                table=table,
-                total_pages=total_pages)
+                div=div,
+                total_pages=total_pages,
+                global_submissions=global_submissions)
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()

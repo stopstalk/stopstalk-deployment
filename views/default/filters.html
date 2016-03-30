@@ -3,7 +3,6 @@
 <script src="{{=URL('static', 'js/jquery.bootpag.min.js')}}"></script>
 <script>
 
-    $(function() {
     var get_argument = function() {
         var url = window.location.href;
         var tempElement = document.createElement("a");
@@ -14,9 +13,40 @@
             return "1";
         }
         return argument[0];
-    }
+    };
+
+    var getVars = function() {
+        // @Todo: Better and generalised way to do this?
+        var url = window.location.href;
+        var params = url.split('?').slice(-1)[0];
+        var finalObject = {};
+        var param;
+        params = params.split('&');
+        $.each(params, function(key, value) {
+            param = value.split('=');
+            finalObject[param[0]] = param[1];
+        });
+        return finalObject;
+    };
 
     $(document).ready(function() {
+        var global_submissions = '{{=global_submissions}}';
+        if (global_submissions === 'True') {
+            $('#submission-switch')[0].checked = true;
+        }
+        $('#submission-switch').click(function() {
+            var global = this.checked;
+            var redirectURL = null;
+            var params = getVars();
+            var currentURL = window.location.href;
+            if (global) {
+                params['global'] = 'True';
+            } else {
+                params['global'] = 'False';
+            }
+            window.location.href = currentURL.split('?')[0] + '?' + $.param(params);
+        });
+
         $('.datepicker').pickadate({
             selectMonths: true, // Creates a dropdown to control month
             format: 'yyyy-mm-dd',
@@ -37,7 +67,6 @@
             window.location.href = "{{=URL('default', 'filters')}}" + "/" + num.toString() + "?" + window.location.href.split("?").splice(-1);
         });
     });
-            });
 
 </script>
 <div class="row">
@@ -104,9 +133,8 @@
     </form>
   </div>
 {{if request.args != []:}}
+    <h4>Filtered Submissions</h4>
     <div id="total-pages" style="display: none;">{{=total_pages}}</div>
     <div id="page-selection" class="center"></div>
 {{pass}}
-{{if table:}}
-    {{=table}}
-{{pass}}
+{{=div}}

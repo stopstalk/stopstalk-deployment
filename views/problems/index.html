@@ -7,7 +7,6 @@
       $(document).ready(function() {
           var global_submissions = '{{=global_submissions}}';
           if (global_submissions === 'True') {
-            console.log($('#submission-switch')[0].checked);
             $('#submission-switch')[0].checked = true;
           }
           $('#submission-switch').click(function() {
