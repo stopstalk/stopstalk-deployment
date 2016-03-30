@@ -270,6 +270,12 @@
                                 </div>
                             </div>
                         </th>
+                    {{elif flag == "pending":}}
+                        <th>
+                            <button class="tooltipped btn-floating btn-large disabled" data-position="bottom" data-delay="50" data-tooltip="Friend request sent!">
+                                <i class="fa fa-user-plus fa-3x"></i>
+                            </button>
+                        </th>
                     {{elif flag == "already-friends":}}
                         <th>
                             <a href="{{=URL('default', 'unfriend', args=[row.id])}}" class="tooltipped btn-floating btn-large waves-effect waves-light black" data-position="bottom" data-delay="50" data-tooltip="Unfriend">

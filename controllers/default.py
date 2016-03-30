@@ -734,18 +734,26 @@ def retrieve_users():
             r = db((frtable.from_h == session.user_id) &
                    (frtable.to_h == user.id)).count()
             if r == 0:
-                tr.append(TD(FORM(INPUT(_type="submit",
-                                        _value="Add Friend",
-                                        _class="btn waves-light waves-effect green"),
-                                  _action=URL("default", "mark_friend",
-                                              args=[user.id]))))
+                tr.append(TD(A(I(_class="fa fa-user-plus fa-3x"),
+                               _class="tooltipped btn-floating btn-large waves-effect waves-light green",
+                               data={"position": "bottom",
+                                     "delay": "50",
+                                     "tooltip": "Send friend request"},
+                               _href=URL("default", "mark_friend",
+                                         args=[user.id]))))
             else:
-                tr.append(TD("Friend request sent"))
+                tr.append(TD(BUTTON(I(_class="fa fa-user-plus fa-3x"),
+                                    _class="tooltipped btn-floating btn-large disabled",
+                                    data={"position": "bottom",
+                                          "delay": "50",
+                                          "tooltip": "Send friend request"})))
         else:
-            tr.append(TD(FORM(INPUT(_type="submit",
-                                    _value="Unfriend",
-                                    _class="btn waves-light waves-effect red"),
-                              _action=URL("default", "unfriend", args=[user.id]))))
+            tr.append(TD(A(I(_class="fa fa-user-times fa-3x"),
+                           _class="tooltipped btn-floating btn-large waves-effect waves-light black",
+                           data={"position": "bottom",
+                                 "delay": "50",
+                                 "tooltip": "Friend request sent"},
+                           _href=URL("default", "unfriend", args=[user.id]))))
         tbody.append(tr)
 
     t.append(tbody)
