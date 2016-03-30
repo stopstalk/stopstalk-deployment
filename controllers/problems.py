@@ -43,18 +43,21 @@ def pie_chart_helper():
 
     # Show stats only for friends and logged-in user
     if global_submissions is False:
-        friends, cusfriends = utilities.get_friends(session.user_id)
-        # The Original IDs of duplicate custom_friends
-        custom_friends = []
-        for cus_id in cusfriends:
-            if cus_id[1] == None:
-                custom_friends.append(cus_id[0])
-            else:
-                custom_friends.append(cus_id[1])
+        if session.user_id:
+            friends, cusfriends = utilities.get_friends(session.user_id)
+            # The Original IDs of duplicate custom_friends
+            custom_friends = []
+            for cus_id in cusfriends:
+                if cus_id[1] == None:
+                    custom_friends.append(cus_id[0])
+                else:
+                    custom_friends.append(cus_id[1])
 
-        query &= (stable.user_id.belongs(friends)) | \
-                 (stable.custom_user_id.belongs(custom_friends)) | \
-                 (stable.user_id == session.user_id)
+            query &= (stable.user_id.belongs(friends)) | \
+                     (stable.custom_user_id.belongs(custom_friends)) | \
+                     (stable.user_id == session.user_id)
+        else:
+            query &= (1 == 0)
 
     row = db(query).select(stable.status,
                            count,
@@ -89,21 +92,24 @@ def index():
     cusfriends = []
 
     if global_submissions is False:
-        friends, cusfriends = utilities.get_friends(session.user_id)
-        # The Original IDs of duplicate custom_friends
-        custom_friends = []
-        for cus_id in cusfriends:
-            if cus_id[1] == None:
-                custom_friends.append(cus_id[0])
-            else:
-                custom_friends.append(cus_id[1])
+        if session.user_id:
+            friends, cusfriends = utilities.get_friends(session.user_id)
+            # The Original IDs of duplicate custom_friends
+            custom_friends = []
+            for cus_id in cusfriends:
+                if cus_id[1] == None:
+                    custom_friends.append(cus_id[0])
+                else:
+                    custom_friends.append(cus_id[1])
 
-        query &= (stable.user_id.belongs(friends)) | \
-                 (stable.custom_user_id.belongs(custom_friends)) | \
-                 (stable.user_id == session.user_id)
+            query &= (stable.user_id.belongs(friends)) | \
+                     (stable.custom_user_id.belongs(custom_friends)) | \
+                     (stable.user_id == session.user_id)
+        else:
+            response.flash = "Login to view Friends' Submissions"
+            query &= (1 == 0)
 
     submissions = db(query).select(orderby=~stable.time_stamp)
-
     try:
         query = (ptable.problem_link == problem_link)
         all_tags = db(query).select(ptable.tags).first()
