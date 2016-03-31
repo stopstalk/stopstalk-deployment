@@ -255,7 +255,7 @@ def update_friend():
                 # for correctness we need to remove all the submissions
                 # and retrieve all the submissions again(Will be updated next day)
                 form.vars["last_retrieved"] = current.INITIAL_DATE
-                form.vars["rating"]= 0
+                form.vars["rating"] = 0
                 form.vars["per_day"] = 0.0
                 db(db.submission.custom_user_id == request.args[0]).delete()
 

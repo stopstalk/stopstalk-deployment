@@ -31,7 +31,6 @@ Stop stalking and Start StopStalking :sunglasses:
 
   **Note:**
   * The database will be completely empty after installation
-  * The first user who registers will be the Administrator and will have access to appadmin
 
 6. Done. :smile:
 
@@ -39,7 +38,7 @@ Stop stalking and Start StopStalking :sunglasses:
 
 1. Fork the repository
 2. Clone your forked repository
-3. Find any of the issues from here - [Issues] (https://github.com/raj454raj/stopstalk/issues) and try solving it
+3. Find any of the issues from here - [Issues] (https://github.com/stopstalk/stopstalk-deployment/issues) and try solving it
    or any other enhancements
 4. Solve the bug or enhance the code and send a Pull Request!
 
