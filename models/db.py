@@ -260,6 +260,10 @@ db.define_table("trending_problems",
                 Field("submission_count", "integer", default=0),
                 Field("user_count", "integer", default=0))
 
+db.define_table("stickers_given",
+                Field("user_id", "reference auth_user"),
+                Field("sticker_count", "integer"))
+
 if session["auth"]:
     session["handle"] = session["auth"]["user"]["stopstalk_handle"]
     session["user_id"] = session["auth"]["user"]["id"]
