@@ -83,8 +83,8 @@ db.define_table("institutes",
                 Field("name"))
 
 itable = db.institutes
-all_institutes = db(itable.name != "Other").select(itable.name,
-                                                   orderby=itable.name)
+all_institutes = db(itable).select(itable.name,
+                                   orderby=itable.name)
 all_institutes = [x["name"].strip("\"") for x in all_institutes]
 all_institutes.append("Other")
 extra_fields = [Field("institute",

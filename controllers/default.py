@@ -839,7 +839,7 @@ def retrieve_users():
                            _class="tooltipped btn-floating btn-large waves-effect waves-light black",
                            data={"position": "bottom",
                                  "delay": "50",
-                                 "tooltip": "Friend request sent"},
+                                 "tooltip": "Friend request pending"},
                            _href=URL("default", "unfriend", args=[user.id]))))
         tbody.append(tr)
 
