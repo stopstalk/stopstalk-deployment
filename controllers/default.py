@@ -370,10 +370,12 @@ def leaderboard():
     atable = db.auth_user
     cftable = db.custom_friend
 
+    heading = "Global Leaderboard"
     afields = ["first_name", "last_name", "stopstalk_handle",
                "institute", "per_day", "rating"]
     cfields = afields + ["duplicate_cu"]
     if request.vars.has_key("q"):
+        heading = "Institute Leaderboard"
         institute = request.vars["q"]
         if institute != "":
             specific_institute = True
@@ -483,7 +485,8 @@ def leaderboard():
         rank += 1
 
     table.append(tbody)
-    return dict(table=table)
+    return dict(table=table,
+                heading=heading)
 
 # ----------------------------------------------------------------------------
 def user():
