@@ -1,61 +1,121 @@
 {{extend 'layout.html'}}
-<head><title>StopStalk</title></head>
-<div class="section no-pad-bot" id="index-banner">
-    <div class="container">
-      <br><br>
-      <h1 class="header center">StopStalk</h1>
+  <title>StopStalk</title>
+  <link rel="stylesheet" href="{{=URL('static', 'css/style.css')}}">
+
+      <h1 class="center">StopStalk</h1>
       <div class="row center">
         <h5 class="header col s12 light">Stop stalking and start StopStalking</h5>
       </div>
       <div class="row center">
-        <a href="{{=URL('default', 'user', args=['register'])}}" id="download-button" class="btn-large waves-effect waves-light deep-orange">Get Started</a>
+        <a href="{{=URL('default', 'user', args=['register'])}}" id="download-button" class="btn-large waves-effect waves-light deep-orange">Take me in</a>
       </div>
 
-    </div>
-  </div>
+  <div id="cd-timeline" class="cd-container">
+    <div class="cd-timeline-block">
+      <div class="cd-timeline-img green">
+        <img src="{{=URL('static', 'images/svg/users.svg')}}"></img>
+      </div> <!-- cd-timeline-img -->
 
-  <div class="container" style="overflow: hidden;">
-    <div class="section">
+      <div class="cd-timeline-content">
+        <span class="cd-date"><h4>Make friends and code collectively</h4></span>
+        <p class="light">Stay motivated by seeing your friends competitive programming progress. Add friends to see each others submissions on various Competitive Programming websites(currently Codeforces, Codechef, Spoj, HackerEarth, HackerRank).</p>
+        <img class="materialboxed" src="{{=URL('static', 'images/gifs/friends.gif')}}"></img>
+      </div> <!-- cd-timeline-content -->
+    </div> <!-- cd-timeline-block -->
 
-      <!--   Icon Section   -->
-      <div class="row">
-        <div class="col s12 m3">
-          <div class="icon-block">
-            <h2 class="center light-blue-text"><i class="fa fa-users"></i></h2>
-            <h5 class="center">Find friends</h5>
+    <div class="cd-timeline-block">
+      <div class="cd-timeline-img red">
+        <img src="{{=URL('static', 'images/svg/inbox.svg')}}"></img>
+      </div> <!-- cd-timeline-img -->
 
-            <p class="light">StopStalk becomes the best place when you add a lot of friends. We bring you all the submissions at one place</p>
-          </div>
-        </div>
+      <div class="cd-timeline-content">
+        <span class="cd-date"><h4>Get notified!</h4></span>
+        <p class="light">Get notifications of your friends' Day Streak and Accepted Submission Streak everyday not just on single Competitive Programming website but from all the sites.</p>
+        <img class="materialboxed" src="{{=URL('static', 'images/gifs/notifications.gif')}}"></img>
+      </div> <!-- cd-timeline-content -->
+    </div> <!-- cd-timeline-block -->
 
-        <div class="col s12 m3">
-          <div class="icon-block">
-            <h2 class="center light-blue-text"><i class="fa fa-flash"></i></h2>
-            <h5 class="center">Maintain streak</h5>
+    <div class="cd-timeline-block">
+      <div class="cd-timeline-img blue">
+        <img src="{{=URL('static', 'images/svg/user-secret.svg')}}"></img>
+      </div> <!-- cd-timeline-img -->
 
-            <p class="light">StopStalk will motivate you to keep your competitive programming streak last longer</p>
-          </div>
-        </div>
+      <div class="cd-timeline-content">
+        <span class="cd-date"><h4>Add Custom Friends</h4></span>
+        <p class="light">What if your friend is not on StopStalk? - You should invite him/her. What if he/she does not accept your invite - Add <b>Custom Friends</b> if you know there handles across various Competitive Programming websites.</p>
+        <img class="materialboxed" src="{{=URL('static', 'images/gifs/customfriends.gif')}}"></img>
+      </div> <!-- cd-timeline-content -->
+    </div> <!-- cd-timeline-block -->
 
-        <div class="col s12 m3">
-          <div class="icon-block">
-            <h2 class="center light-blue-text"><i class="fa fa-bar-chart"></i></h2>
-            <h5 class="center">Global Leaderboard</h5>
+    <div class="cd-timeline-block">
+      <div class="cd-timeline-img orange">
+        <img src="{{=URL('static', 'images/svg/calendar-check-o.svg')}}"></img>
+      </div> <!-- cd-timeline-img -->
 
-            <p class="light">Ever thought just one rating for all your competitive progress, here we give you one - StopStalk rating</p>
-          </div>
-        </div>
-        <div class="col s12 m3">
-          <div class="icon-block">
-            <h2 class="center light-blue-text"><i class="fa fa-filter"></i></h2>
-            <h5 class="center">Awesome filters</h5>
+      <div class="cd-timeline-content">
+        <span class="cd-date"><h4>Upcoming contests</h4></span>
+        <p class="light">List of contests on these Competitive programming websites and an option to add a reminder half-an-hour before the contest starts.</p>
+        <img class="materialboxed" src="{{=URL('static', 'images/gifs/contestpage.gif')}}"></img>
+      </div> <!-- cd-timeline-content -->
+    </div> <!-- cd-timeline-block -->
 
-            <p class="light">Find exact submissions or problem or user or code in seconds.</p>
-          </div>
-        </div>
-      </div>
+    <div class="cd-timeline-block">
+      <div class="cd-timeline-img purple">
+        <img src="{{=URL('static', 'images/svg/bar-chart.svg')}}"></img>
+      </div> <!-- cd-timeline-img -->
 
-    </div>
-    <br><br>
+      <div class="cd-timeline-content">
+        <span class="cd-date"><h4>Leaderboard</h4></span>
+        <p class="light">A carefully crafted formula is used to compute <b>StopStalk Rating</b> and rank users on the basis of this rating. Are you able to understand the importance of this - One rating cumulative of all the 5 Competitive Programming websites. This rating incorporates submissions per day and your rating changes everyday, which keeps you motivated to code everyday :)</p>
+        <img class="materialboxed" src="{{=URL('static', 'images/gifs/leaderboardpage.gif')}}"></img>
+      </div> <!-- cd-timeline-content -->
+    </div> <!-- cd-timeline-block -->
 
-  </div>
+    <div class="cd-timeline-block">
+      <div class="cd-timeline-img lime">
+        <img src="{{=URL('static', 'images/svg/line-chart.svg')}}"></img>
+      </div> <!-- cd-timeline-img -->
+
+      <div class="cd-timeline-content">
+        <span class="cd-date"><h4>Trending problems</h4></span>
+        <p class="light">What are the problems your friends are solving across these sites? What are globally trending problems that other coders are solving? We just got a list of such problems.</p>
+        <img class="materialboxed" src="{{=URL('static', 'images/gifs/trending.gif')}}"></img>
+      </div> <!-- cd-timeline-content -->
+    </div> <!-- cd-timeline-block -->
+    <div class="cd-timeline-block">
+      <div class="cd-timeline-img cyan">
+        <img src="{{=URL('static', 'images/svg/tags.svg')}}"></img>
+      </div> <!-- cd-timeline-img -->
+
+      <div class="cd-timeline-content">
+        <span class="cd-date"><h4>Tag Search</h4></span>
+        <p class="light">Why go only to a specific site and search problems with specific tags? Search across such sites and see the number of submissions, accuracy, who solved them, tags, etc. Search any tag and get all the problems with that tag.</p>
+        <img class="materialboxed" src="{{=URL('static', 'images/gifs/tagpage.gif')}}"></img>
+      </div> <!-- cd-timeline-content -->
+    </div> <!-- cd-timeline-block -->
+
+    <div class="cd-timeline-block">
+      <div class="cd-timeline-img pink">
+        <img src="{{=URL('static', 'images/svg/filter.svg')}}"></img>
+      </div> <!-- cd-timeline-img -->
+
+      <div class="cd-timeline-content">
+        <span class="cd-date"><h4>Filters</h4></span>
+        <p class="light">Accurately filter out submissions you are looking for across your friends or globally. The filters include user name, problem name, submission status, language of submission, submission site, start and end date.</p>
+        <img class="materialboxed" src="{{=URL('static', 'images/gifs/filterpage.gif')}}"></img>
+      </div> <!-- cd-timeline-content -->
+    </div> <!-- cd-timeline-block -->
+
+    <div class="cd-timeline-block">
+      <div class="cd-timeline-img deep-purple accent-4">
+        <img src="{{=URL('static', 'images/svg/user.svg')}}"></img>
+      </div> <!-- cd-timeline-img -->
+
+      <div class="cd-timeline-content">
+        <span class="cd-date"><h4>User Profile</h4></span>
+        <p class="light">A unique and cumulative profile page across Competitive programming websites with overall accuracy, sitewise accuracy, streaks and calendar of submissions.</p>
+        <img class="materialboxed" src="{{=URL('static', 'images/gifs/profilepage.gif')}}"></img>
+      </div> <!-- cd-timeline-content -->
+    </div> <!-- cd-timeline-block -->
+
+  </div> <!-- cd-timeline -->

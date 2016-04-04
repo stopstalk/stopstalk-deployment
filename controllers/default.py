@@ -532,7 +532,6 @@ def filters():
 
     # If form is not submitted
     if get_vars == {}:
-        print "asds"
         return dict(languages=languages,
                     div=DIV(),
                     global_submissions=global_submissions)
