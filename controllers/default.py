@@ -369,22 +369,50 @@ def leaderboard():
     specific_institute = False
     atable = db.auth_user
     cftable = db.custom_friend
+    global_leaderboard = False
+    if request.vars.has_key("global"):
+        if request.vars["global"] == "True":
+            global_leaderboard = True
+        else:
+            if session.user_id is None:
+                response.flash = "Login to see Friends Leaderboard"
+                global_leaderboard = True
+    else:
+        if session.user_id is None:
+            global_leaderboard = True
 
     heading = "Global Leaderboard"
     afields = ["first_name", "last_name", "stopstalk_handle",
                "institute", "per_day", "rating"]
     cfields = afields + ["duplicate_cu"]
+
+    aquery = (atable.id > 0)
+    cquery = (cftable.id > 0)
+    if global_leaderboard is False:
+        if session.user_id:
+            heading = "Friends Leaderboard"
+            friends, cusfriends = utilities.get_friends(session.user_id)
+            custom_friends = [x[0] for x in cusfriends]
+            friends.append(session.user_id)
+            aquery &= (atable.id.belongs(friends))
+            cquery &= (cftable.id.belongs(custom_friends))
+        else:
+            aquery &= (1 == 0)
+            cquery &= (1 == 0)
+
     if request.vars.has_key("q"):
         heading = "Institute Leaderboard"
         institute = request.vars["q"]
         if institute != "":
             specific_institute = True
-            reg_users = db(atable.institute == institute).select(*afields)
-            custom_users = db(cftable.institute == institute).select(*cfields)
+            aquery &= (atable.institute == institute)
+            cquery &= (cftable.institute == institute)
+            reg_users = db(aquery).select(*afields)
+            custom_users = db(cquery).select(*cfields)
 
     if specific_institute is False:
-        reg_users = db(atable).select(*afields)
-        custom_users = db(cftable).select(*cfields)
+        reg_users = db(aquery).select(*afields)
+        custom_users = db(cquery).select(*cfields)
 
     # Find the total solved problems(Lesser than total accepted)
     solved_count = {}
@@ -485,8 +513,15 @@ def leaderboard():
         rank += 1
 
     table.append(tbody)
-    return dict(table=table,
-                heading=heading)
+    switch = DIV(LABEL(H6("Friends' Submissions",
+                          INPUT(_type="checkbox", _id="submission-switch"),
+                          SPAN(_class="lever pink accent-3"),
+                          "Global Submissions")),
+                 _class="switch")
+    div = TAG[""](switch, table)
+    return dict(div=div,
+                heading=heading,
+                global_leaderboard=global_leaderboard)
 
 # ----------------------------------------------------------------------------
 def user():
