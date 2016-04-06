@@ -125,6 +125,13 @@
                             thisButton.attr('data-tooltip', 'Friend request pending');
                             thisButton.attr('data-user-id', '');
                             Materialize.toast(response, 4000);
+                        }).error(function(httpObj, textStatus) {
+                            if(httpObj.status == "401") {
+                                Materialize.toast("Login to send friend request", 4000);
+                            }
+                            else {
+                                Materialize.toast("Unexpected error occurred", 4000);
+                            }
                         });
                     }
                     else {
@@ -140,6 +147,8 @@
                             child.removeClass('fa-user-times');
                             child.addClass('fa-user-plus');
                             Materialize.toast(response, 4000);
+                        }).error(function(httpObj, textStatus) {
+                            Materialize.toast("Unexpected error occurred", 4000);
                         });
                     }
                 }
