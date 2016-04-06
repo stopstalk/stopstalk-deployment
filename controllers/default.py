@@ -723,8 +723,7 @@ def mark_friend():
     """
 
     if len(request.args) < 1:
-        session.flash = "Invalid URL"
-        redirect(URL("default", "search"))
+        return "Invalid URL"
 
     frtable = db.friend_requests
     ftable = db.friends
@@ -745,11 +744,9 @@ def mark_friend():
                 session.flash = "Friend request pending..."
                 redirect(URL("default", "search"))
         else:
-            session.flash = "Already friends !!"
-            redirect(URL("default", "search"))
+            return "Already friends !!"
     else:
-        session.flash = "Invalid user argument!"
-        redirect(URL("default", "search"))
+        return "Invalid user argument!"
 
     # Insert a tuple of users' id into the friend_requests table
     db.friend_requests.insert(from_h=session.user_id, to_h=friend_id)
@@ -777,9 +774,7 @@ def mark_friend():
                           host=True,
                           extension=False))
 
-    session.flash = "Friend Request sent"
-    redirect(URL("default", "search.html"))
-    return dict()
+    return "Friend Request sent"
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
@@ -858,26 +853,28 @@ def retrieve_users():
             r = db((frtable.from_h == session.user_id) &
                    (frtable.to_h == user.id)).count()
             if r == 0:
-                tr.append(TD(A(I(_class="fa fa-user-plus fa-3x"),
-                               _class="tooltipped btn-floating btn-large waves-effect waves-light green",
-                               data={"position": "bottom",
-                                     "delay": "50",
-                                     "tooltip": "Send friend request"},
-                               _href=URL("default", "mark_friend",
-                                         args=[user.id]))))
+                tr.append(TD(BUTTON(I(_class="fa fa-user-plus fa-3x"),
+                                    _class="tooltipped btn-floating btn-large waves-effect waves-light green",
+                                    data={"position": "bottom",
+                                          "delay": "50",
+                                          "tooltip": "Send friend request",
+                                          "user-id": str(user.id),
+                                          "type": "add-friend"})))
             else:
                 tr.append(TD(BUTTON(I(_class="fa fa-user-plus fa-3x"),
                                     _class="tooltipped btn-floating btn-large disabled",
                                     data={"position": "bottom",
                                           "delay": "50",
-                                          "tooltip": "Send friend request"})))
+                                          "tooltip": "Send friend request",
+                                          "type": "disabled"})))
         else:
-            tr.append(TD(A(I(_class="fa fa-user-times fa-3x"),
-                           _class="tooltipped btn-floating btn-large waves-effect waves-light black",
-                           data={"position": "bottom",
-                                 "delay": "50",
-                                 "tooltip": "Friend request pending"},
-                           _href=URL("default", "unfriend", args=[user.id]))))
+            tr.append(TD(BUTTON(I(_class="fa fa-user-times fa-3x"),
+                                _class="tooltipped btn-floating btn-large waves-effect waves-light black",
+                                data={"position": "bottom",
+                                      "delay": "50",
+                                      "tooltip": "Friend request pending",
+                                      "user-id": str(user.id),
+                                      "type": "unfriend"})))
         tbody.append(tr)
 
     t.append(tbody)
@@ -891,8 +888,7 @@ def unfriend():
     """
 
     if len(request.args) != 1:
-        session.flash = "Please click on a button!"
-        redirect(URL("default", "search"))
+        return "Please click on a button!"
     else:
         friend_id = long(request.args[0])
         user_id = session["user_id"]
@@ -902,8 +898,8 @@ def unfriend():
         query = (ftable.user_id == user_id) & (ftable.friend_id == friend_id)
         value = db(query).count()
         if value == 0:
-            session.flash = "Invalid URL"
-            redirect(URL("default", "search"))
+            return "Invalid URL"
+
         db(query).delete()
         query = (ftable.user_id == friend_id) & (ftable.friend_id == user_id)
         db(query).delete()
@@ -922,8 +918,7 @@ def unfriend():
                                              extension=False)) + \
                           ") unfriended you on StopStalk")
 
-        session.flash = "Successfully unfriended"
-        redirect(URL("default", "search.html"))
+        return "Successfully unfriended"
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()

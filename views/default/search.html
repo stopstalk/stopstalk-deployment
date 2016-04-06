@@ -11,6 +11,42 @@
                 data: {q: $(this).val()}
             }).done(function(html) {
                 $('#responseDiv').html(html['t']);
+                $('button').click(function() {
+                    var thisButton = $(this);
+                    var userID = thisButton.attr('data-user-id');
+                    var buttonType = thisButton.attr('data-type');
+                    if (buttonType != 'disabled') {
+                        if (buttonType == 'add-friend') {
+                            $.ajax({
+                                method: 'POST',
+                                url: '{{=URL("default", "mark_friend")}}' + '/' + userID
+                            }).done(function(response) {
+                                thisButton.addClass('disabled');
+                                thisButton.removeClass('waves-effect');
+                                thisButton.removeClass('waves-light');
+                                thisButton.attr('data-type', 'disabled');
+                                thisButton.attr('data-tooltip', 'Friend request pending');
+                                thisButton.attr('data-user-id', '');
+                                Materialize.toast(response, 4000);
+                            });
+                        }
+                        else {
+                            $.ajax({
+                                method: 'POST',
+                                url: '{{=URL("default", "unfriend")}}' + '/' + userID
+                            }).done(function(response) {
+                                thisButton.removeClass('black');
+                                thisButton.addClass('green');
+                                thisButton.attr('data-type', 'add-friend');
+                                thisButton.attr('data-tooltip', 'Send friend request');
+                                var child = $(thisButton.children()[0]);
+                                child.removeClass('fa-user-times');
+                                child.addClass('fa-user-plus');
+                                Materialize.toast(response, 4000);
+                            });
+                        }
+                    }
+                });
             });
         });
     });
@@ -25,6 +61,5 @@
         <div class="input-field col s4"></div>
     </div>
 </form>
-
 <div id="responseDiv">
 </div>
