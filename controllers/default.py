@@ -68,7 +68,9 @@ def notifications():
     # with the Custom Users added by the logged-in user
     handles = []
 
+    friends_stopstalk_handles = []
     for user in rows:
+        friends_stopstalk_handles.append("'" + user.stopstalk_handle + "'")
         handles.append((user.stopstalk_handle,
                         user.first_name + " " + user.last_name,
                         user.stopstalk_handle))
@@ -79,6 +81,7 @@ def notifications():
                             cftable.last_name,
                             cftable.duplicate_cu,
                             cftable.stopstalk_handle)
+
     for user in rows:
         name = user.first_name + " " + user.last_name
         actual_handle = user.stopstalk_handle
@@ -89,13 +92,34 @@ def notifications():
             stopstalk_handle = user.stopstalk_handle
 
         handles.append((stopstalk_handle, name, actual_handle))
+        friends_stopstalk_handles.append("'" + stopstalk_handle + "'")
+
+    if friends_stopstalk_handles == []:
+        friends_stopstalk_handles = ["-1"]
+
+    # Build the complex SQL query
+    sql_query = """
+                    SELECT stopstalk_handle, DATE(time_stamp), COUNT(*) as cnt
+                    FROM submission
+                    WHERE stopstalk_handle in (%s)
+                    GROUP BY stopstalk_handle, DATE(submission.time_stamp)
+                    ORDER BY time_stamp;
+                """ % (", ".join(friends_stopstalk_handles))
+
+    user_rows = db.executesql(sql_query)
+    complete_dict = {}
+    for user in user_rows:
+        if complete_dict.has_key(user[0]):
+            complete_dict[user[0]].append((user[1], user[2]))
+        else:
+            complete_dict[user[0]] = [(user[1], user[2])]
 
     # List of users with non-zero streak
     users_on_day_streak = []
     users_on_submission_streak = []
 
     for handle in handles:
-        curr_streak = utilities.get_max_streak(handle[0])[2]
+        curr_streak = utilities.get_max_streak(complete_dict[handle[0]])[2]
         curr_accepted_streak = utilities.get_accepted_streak(handle[0])
 
         # If streak is non-zero append to users_on_streak list
@@ -369,6 +393,7 @@ def leaderboard():
     specific_institute = False
     atable = db.auth_user
     cftable = db.custom_friend
+
     global_leaderboard = False
     if request.vars.has_key("global"):
         if request.vars["global"] == "True":
@@ -393,6 +418,8 @@ def leaderboard():
             heading = "Friends Leaderboard"
             friends, cusfriends = utilities.get_friends(session.user_id)
             custom_friends = [x[0] for x in cusfriends]
+
+            # Add logged-in user to leaderboard
             friends.append(session.user_id)
             aquery &= (atable.id.belongs(friends))
             cquery &= (cftable.id.belongs(custom_friends))
@@ -403,6 +430,7 @@ def leaderboard():
     if request.vars.has_key("q"):
         heading = "Institute Leaderboard"
         institute = request.vars["q"]
+
         if institute != "":
             specific_institute = True
             aquery &= (atable.institute == institute)
@@ -426,6 +454,37 @@ def leaderboard():
     for user in tmplist:
         solved_count[user[0]] = user[1]
 
+    # Prepare a list of stopstalk_handles of the
+    # users relevant to the requested leaderboard
+    friends_stopstalk_handles = []
+    friends_stopstalk_handles.extend(["'" + x.stopstalk_handle + "'"
+                                            for x in reg_users])
+    for custom_user in custom_users:
+        stopstalk_handle = custom_user.stopstalk_handle
+        if custom_user.duplicate_cu:
+            stopstalk_handle = cftable(custom_user.duplicate_cu).stopstalk_handle
+        friends_stopstalk_handles.append("'" + stopstalk_handle + "'")
+
+    if friends_stopstalk_handles == []:
+        friends_stopstalk_handles = ["-1"]
+
+    # Build the complex SQL query
+    sql_query = """
+                    SELECT stopstalk_handle, DATE(time_stamp), COUNT(*) as cnt
+                    FROM submission
+                    WHERE stopstalk_handle in (%s)
+                    GROUP BY stopstalk_handle, DATE(submission.time_stamp)
+                    ORDER BY time_stamp;
+                """ % (", ".join(friends_stopstalk_handles))
+
+    user_rows = db.executesql(sql_query)
+    complete_dict = {}
+    for user in user_rows:
+        if complete_dict.has_key(user[0]):
+            complete_dict[user[0]].append((user[1], user[2]))
+        else:
+            complete_dict[user[0]] = [(user[1], user[2])]
+
     users = []
     for user in reg_users:
         try:
@@ -433,7 +492,7 @@ def leaderboard():
         except KeyError:
             solved = 0
 
-        tup = utilities.compute_row(user, solved)
+        tup = utilities.compute_row(user, complete_dict, solved)
         if tup is not ():
             users.append(tup)
 
@@ -446,7 +505,7 @@ def leaderboard():
                 solved = solved_count[user.stopstalk_handle]
         except KeyError:
             solved = 0
-        tup = utilities.compute_row(user, solved, True)
+        tup = utilities.compute_row(user, complete_dict, solved, True)
         if tup is not ():
             users.append(tup)
 

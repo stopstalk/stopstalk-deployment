@@ -157,38 +157,23 @@ def get_max_accepted_streak(handle):
     return max_streak
 
 # ----------------------------------------------------------------------------
-def get_max_streak(handle):
+def get_max_streak(submissions):
     """
         Get the maximum of all streaks
     """
 
-    db = current.db
-
-    # Build the complex SQL query
-    sql_query = """
-                    SELECT time_stamp, COUNT(*)
-                    FROM submission
-                    WHERE submission.stopstalk_handle='%s'
-                    GROUP BY DATE(submission.time_stamp), submission.status;
-                 """ % (handle)
-
-    row = db.executesql(sql_query)
     streak = 0
     max_streak = 0
     prev = curr = None
     total_submissions = 0
 
-    for i in row:
-
+    for i in submissions:
         total_submissions += i[1]
         if prev is None and streak == 0:
-            prev = time.strptime(str(i[0]), "%Y-%m-%d %H:%M:%S")
-            prev = date(prev.tm_year, prev.tm_mon, prev.tm_mday)
+            prev = i[0]
             streak = 1
         else:
-            curr = time.strptime(str(i[0]), "%Y-%m-%d %H:%M:%S")
-            curr = date(curr.tm_year, curr.tm_mon, curr.tm_mday)
-
+            curr = i[0]
             if (curr - prev).days == 1:
                 streak += 1
             elif curr != prev:
@@ -209,10 +194,10 @@ def get_max_streak(handle):
     if (today - prev).days > 1:
         streak = 0
 
-    return max_streak, total_submissions, streak, len(row)
+    return max_streak, total_submissions, streak, len(submissions)
 
 # ----------------------------------------------------------------------------
-def compute_row(record, solved, custom=False, update_flag=False):
+def compute_row(record, complete_dict, solved, custom=False, update_flag=False):
     """
         Computes rating and retrieves other
         information of the specified user
@@ -227,7 +212,11 @@ def compute_row(record, solved, custom=False, update_flag=False):
         if record.duplicate_cu:
             stopstalk_handle = cftable(record.duplicate_cu).stopstalk_handle
 
-    tup = get_max_streak(stopstalk_handle)
+    try:
+        tup = get_max_streak(complete_dict[stopstalk_handle])
+    except KeyError:
+        # No submissions corresponding to that user
+        tup = get_max_streak([])
     max_streak = tup[0]
     total_submissions = tup[1]
 
