@@ -381,10 +381,6 @@ def contests():
     return dict(table=table, upcoming=upcoming)
 
 # ------------------------------------------------------------------------------
-def send_reminder():
-    return dict()
-
-# ------------------------------------------------------------------------------
 def leaderboard():
     """
         Get a table with users sorted by rating
