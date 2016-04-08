@@ -725,29 +725,41 @@ def filters():
         session.flash = "Start Date greater than End Date"
         redirect(URL("default", "filters"))
 
+    pname = get_vars["pname"]
     # Submissions with problem name containing pname
-    if get_vars["pname"] != "":
-        query &= (stable.problem_name.contains(get_vars["pname"]))
+    if pname != "":
+        pname = pname.split()
+        for token in pname:
+            query &= (stable.problem_name.contains(token))
+
+    # Check if multiple parameters are passed
+    def get_values_list(param_name):
+
+        values_list = None
+        if get_vars.has_key(param_name):
+            values_list = get_vars[param_name]
+            if isinstance(values_list, str):
+                values_list = [values_list]
+        elif get_vars.has_key(param_name + "[]"):
+            values_list = get_vars[param_name + "[]"]
+            if isinstance(values_list, str):
+                values_list = [values_list]
+
+        return values_list
 
     # Submissions from this site
-    if get_vars.has_key("site"):
-        sites = get_vars["site"]
-        if isinstance(sites, str):
-            sites = [sites]
+    sites = get_values_list("site")
+    if sites:
         query &= (stable.site.belongs(sites))
 
     # Submissions with this language
-    if get_vars.has_key("language"):
-        langs = get_vars["language"]
-        if isinstance(langs, str):
-            langs = [langs]
+    langs = get_values_list("language")
+    if langs:
         query &= (stable.lang.belongs(langs))
 
-    # Submissions with this submission status
-    if get_vars.has_key("status"):
-        statuses = get_vars["status"]
-        if isinstance(statuses, str):
-            statuses = [statuses]
+    # Submissions with this status
+    statuses = get_values_list("status")
+    if statuses:
         query &= (stable.status.belongs(statuses))
 
     PER_PAGE = current.PER_PAGE

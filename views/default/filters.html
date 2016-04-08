@@ -16,18 +16,27 @@
     };
 
     var getVars = function() {
-        // @Todo: Better and generalised way to do this?
-        var url = window.location.href;
-        var params = url.split('?').slice(-1)[0];
-        var finalObject = {};
-        var param;
-        params = params.split('&');
-        $.each(params, function(key, value) {
-            param = value.split('=');
-            finalObject[param[0]] = param[1];
-        });
-        return finalObject;
-    };
+        var qs = document.location.search;
+        qs = qs.split("+").join(" ");
+        var params = {},
+            tokens,
+            re = /[?&]?([^=]+)=([^&]*)/g;
+
+        while (tokens = re.exec(qs)) {
+            var tmp = decodeURIComponent(tokens[1]);
+            if(params[tmp] === undefined) {
+                params[tmp] = decodeURIComponent(tokens[2]);
+            }
+            else {
+                /* Multiple values for a parameter */
+                if(params[tmp].constructor != Array){
+                    params[tmp] = [params[tmp]];
+                }
+                params[tmp].push(decodeURIComponent(tokens[2]));
+            }
+        }
+        return params;
+    }
 
     $(document).ready(function() {
         var global_submissions = '{{=global_submissions}}';
