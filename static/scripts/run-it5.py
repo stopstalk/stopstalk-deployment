@@ -52,6 +52,37 @@ tmplist = db.executesql(sql)
 for user in tmplist:
     solved_count[user[0]] = user[1]
 
+# Prepare a list of stopstalk_handles of the
+# users relevant to the requested leaderboard
+friends_stopstalk_handles = []
+friends_stopstalk_handles.extend(["'" + x.stopstalk_handle + "'"
+                                        for x in registered_users])
+for custom_user in custom_users:
+    stopstalk_handle = custom_user.stopstalk_handle
+    if custom_user.duplicate_cu:
+        stopstalk_handle = cftable(custom_user.duplicate_cu).stopstalk_handle
+    friends_stopstalk_handles.append("'" + stopstalk_handle + "'")
+
+if friends_stopstalk_handles == []:
+    friends_stopstalk_handles = ["-1"]
+
+# Build the complex SQL query
+sql_query = """
+                SELECT stopstalk_handle, DATE(time_stamp), COUNT(*) as cnt
+                FROM submission
+                WHERE stopstalk_handle in (%s)
+                GROUP BY stopstalk_handle, DATE(submission.time_stamp)
+                ORDER BY time_stamp;
+            """ % (", ".join(friends_stopstalk_handles))
+
+user_rows = db.executesql(sql_query)
+complete_dict = {}
+for user in user_rows:
+    if complete_dict.has_key(user[0]):
+        complete_dict[user[0]].append((user[1], user[2]))
+    else:
+        complete_dict[user[0]] = [(user[1], user[2])]
+
 users = []
 for user in registered_users:
     try:
@@ -59,7 +90,7 @@ for user in registered_users:
     except KeyError:
         solved = 0
 
-    tup = utilities.compute_row(user, solved, update_flag=True)
+    tup = utilities.compute_row(user, complete_dict, solved, update_flag=True)
 
 sql = sql.replace("user_id", "custom_user_id")
 tmplist = db.executesql(sql)
@@ -76,4 +107,4 @@ for user in custom_friends:
             solved = solved_count[user.stopstalk_handle]
     except KeyError:
         solved = 0
-    tup = utilities.compute_row(user, solved, custom=True, update_flag=True)
+    tup = utilities.compute_row(user, complete_dict, solved, custom=True, update_flag=True)
