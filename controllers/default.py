@@ -545,10 +545,14 @@ def leaderboard():
                        _href=URL("user", "profile", args=[i[1]]),
                        _target="_blank")))
         tr.append(TD(A(i[2],
-                       _href=URL("default", "leaderboard", vars={"q": i[2]}))))
+                       _href=URL("default",
+                                 "leaderboard",
+                                 vars={"q": i[2],
+                                       "global": global_leaderboard}))))
         tr.append(TD(i[3]))
         if i[6] > 0:
-            tr.append(TD(B("+%s" % str(i[6])), _class="green-text text-darken-2"))
+            tr.append(TD(B("+%s" % str(i[6])),
+                         _class="green-text text-darken-2"))
         elif i[6] < 0:
             tr.append(TD(B(i[6]), _class="red-text text-darken-2"))
         else:
