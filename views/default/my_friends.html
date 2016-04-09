@@ -2,7 +2,10 @@
 <title>My friends</title>
 <h1>My Friends</h1>
 {{=table}}
-<button class="btn-large waves-effect waves-light purple accent-3" onclick="Materialize.toast('Button becomes active on 11th April', 6000)">Claim {{=claimable_stickers}} stickers</button>
+<form action="{{=URL('default', 'contact_us')}}" method="POST">
+    <input type="hidden" name="stickers" value="{{=stickers}}"/>
+    <input type="submit" value="Claim stickers" class="btn btn-default"/>
+</form>
 <br/><br/>
 <div class="row">
         <div class="col offset-s3 s2">

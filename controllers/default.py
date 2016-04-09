@@ -1087,17 +1087,30 @@ def contact_us():
     """
 
     ctable = db.contact_us
-    if session["auth"]:
-        user = session["auth"]["user"]
-        ctable.email.default = user["email"]
-        ctable.name.default = user["first_name"] + " " + user["last_name"]
+
+    if session["auth"] and request.post_vars:
+        if request.post_vars.stickers is not None:
+            response.flash = "Fill your address!"
+            user = session.auth.user
+            stickers = eval(request.post_vars["stickers"])
+            if stickers[0] == 0:
+                session.flash = "No claimable stickers"
+                redirect(URL("default", "my_friends"))
+            ctable.email.default = user.email
+            ctable.name.default = user.first_name + " " + user.last_name
+            ctable.subject.default = "Please send me stickers!"
+            ctable.text_message.default = "My address is: "
 
     form = SQLFORM(ctable)
 
-    if form.process(keepvalues=True).accepted:
+    if session["auth"]:
+        user = session["auth"]["user"]
+        ctable.email.default = user["email"]
+
+    if form.process().accepted:
         session.flash = "We will get back to you!"
         current.send_mail(to="contactstopstalk@gmail.com",
-                          subject="We got feedback!",
+                          subject=form.vars.subject,
                           message="From: %s (%s - %s)\n" % \
                                     (form.vars.name,
                                      form.vars.email,
@@ -1106,7 +1119,7 @@ def contact_us():
                                   "Message: %s\n" % form.vars.text_message)
         redirect(URL("default", "index"))
     elif form.errors:
-        response.flash = "Form has errors!"
+        response.flash = "Please fill all the fields!"
 
     return dict(form=form)
 

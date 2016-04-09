@@ -187,34 +187,16 @@ if __name__ == "__main__":
     atable = db.auth_user
     cftable = db.custom_friend
 
-    sql_query = """
-                    SELECT auth_user.id
-                    FROM auth_user
-                    WHERE auth_user.id > (SELECT auth_user.id
-                                          FROM auth_user
-                                          WHERE last_retrieved <> '%s'
-                                          ORDER BY auth_user.id DESC
-                                          LIMIT 1)
-                """ % (current.INITIAL_DATE)
-
-    user_ids = db.executesql(sql_query)
-    new_users = [x[0] for x in user_ids]
+    query = (atable.last_retrieved == current.INITIAL_DATE)
+    user_ids = db(query).select(atable.id)
+    new_users = [x["id"] for x in user_ids]
 
     for user in new_users:
         retrieve_submissions(user)
 
-    sql_query = """
-                    SELECT custom_friend.id
-                    FROM custom_friend
-                    WHERE custom_friend.id > (SELECT custom_friend.id
-                                              FROM custom_friend
-                                              WHERE last_retrieved <> '%s'
-                                              ORDER BY custom_friend.id DESC
-                                              LIMIT 1)
-                """ % (current.INITIAL_DATE)
-
-    custom_user_ids = db.executesql(sql_query)
-    custom_users = [x[0] for x in custom_user_ids]
+    query = (cftable.last_retrieved == current.INITIAL_DATE)
+    custom_user_ids = db(query).select(cftable.id)
+    custom_users = [x["id"] for x in custom_user_ids]
     for custom_user in custom_users:
         retrieve_submissions(custom_user, custom=True)
 
