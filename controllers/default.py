@@ -256,8 +256,19 @@ def my_friends():
         tbody.append(tr)
 
     table.append(tbody)
+
+    claimable_stickers = valid_friends/3
+    stickers = [claimable_stickers/3] * 3
+    residue = claimable_stickers - (claimable_stickers/3) * 3
+    i = 0
+    while residue:
+        stickers[i] += 1
+        i += 1
+        residue -= 1
+
     return dict(table=DIV(table, _class="row"),
-                claimable_stickers=valid_friends/3)
+                claimable_stickers=claimable_stickers,
+                stickers=stickers)
 
 # ----------------------------------------------------------------------------
 def sort_contests(a, b):

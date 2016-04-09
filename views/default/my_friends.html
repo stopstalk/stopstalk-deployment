@@ -2,7 +2,45 @@
 <title>My friends</title>
 <h1>My Friends</h1>
 {{=table}}
-<button class="btn-large waves-effect waves-light purple accent-3" onclick="Materialize.toast('Button becomes active on 10th April', 6000)">Claim {{=claimable_stickers}} stickers</button>
+<button class="btn-large waves-effect waves-light purple accent-3" onclick="Materialize.toast('Button becomes active on 11th April', 6000)">Claim {{=claimable_stickers}} stickers</button>
+<br/><br/>
+<div class="row">
+        <div class="col offset-s3 s2">
+          <div class="card">
+            <div class="card-image">
+              <img src="{{=URL('static', 'images/sticker1.png')}}">
+            </div>
+            <div class="card-content">
+              <p>You get {{=stickers[0]}} of these</p>
+            </div>
+          </div>
+        </div>
+        <div class="col s2">
+          <div class="card">
+            <div class="card-image">
+              <img src="{{=URL('static', 'images/sticker2.png')}}" class="materializeboxed">
+            </div>
+            <div class="card-content">
+              <p>You get {{=stickers[1]}} of these</p>
+            </div>
+          </div>
+        </div>
+        <div class="col s2">
+          <div class="card">
+            <div class="card-image center">
+              <img src="{{=URL('static', 'images/sticker3.png')}}" style="width: 35%; height: 35%; left: 30%;">
+            </div>
+            <div class="card-content">
+              <p>You get {{=stickers[2]}} of these</p>
+            </div>
+          </div>
+        </div>
+</div>
+<div class="row">
+    <div class="col offset-s3 s6">
+        <img class="materialboxed" data-caption="Coming to you soon ;)" width="650" src="{{=URL('static', 'images/stickers.jpg')}}">
+    </div>
+</div>
 <h5>How many stickers do I get?</h5>
 <ul>
     <li>Lets say you have 3 friends X, Y and Z</li>
