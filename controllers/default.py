@@ -328,7 +328,7 @@ def contests():
         tr.append(TD(i["Name"], span))
         tr.append(TD(i["Platform"].capitalize()))
         tr.append(TD("-"))
-        tr.append(TD(str(endtime),
+        tr.append(TD(str(endtime).replace("-", "/"),
                      _class="contest-end-time"))
         tr.append(TD(A(I(_class="fa fa-external-link-square fa-lg"),
                        _class="btn-floating btn-small green accent-4 tooltipped",
