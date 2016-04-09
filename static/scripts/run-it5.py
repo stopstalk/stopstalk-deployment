@@ -32,6 +32,7 @@ afields = ["first_name", "last_name", "stopstalk_handle",
 users = db(atable).select(*afields)
 registered_users = []
 for user in users:
+    print user.first_name, user.last_name
     registered_users.append(user)
 
 cfields = afields + ["duplicate_cu"]
@@ -52,16 +53,20 @@ tmplist = db.executesql(sql)
 for user in tmplist:
     solved_count[user[0]] = user[1]
 
+complete_dict = {}
 # Prepare a list of stopstalk_handles of the
 # users relevant to the requested leaderboard
 friends_stopstalk_handles = []
-friends_stopstalk_handles.extend(["'" + x.stopstalk_handle + "'"
-                                        for x in registered_users])
+for x in registered_users:
+    friends_stopstalk_handles.append("'" + x.stopstalk_handle + "'")
+    complete_dict[x.stopstalk_handle] = []
+
 for custom_user in custom_users:
     stopstalk_handle = custom_user.stopstalk_handle
     if custom_user.duplicate_cu:
         stopstalk_handle = cftable(custom_user.duplicate_cu).stopstalk_handle
     friends_stopstalk_handles.append("'" + stopstalk_handle + "'")
+    complete_dict[stopstalk_handle] = []
 
 if friends_stopstalk_handles == []:
     friends_stopstalk_handles = ["-1"]
@@ -76,9 +81,9 @@ sql_query = """
             """ % (", ".join(friends_stopstalk_handles))
 
 user_rows = db.executesql(sql_query)
-complete_dict = {}
+
 for user in user_rows:
-    if complete_dict.has_key(user[0]):
+    if complete_dict[user[0]] != []:
         complete_dict[user[0]].append((user[1], user[2]))
     else:
         complete_dict[user[0]] = [(user[1], user[2])]
