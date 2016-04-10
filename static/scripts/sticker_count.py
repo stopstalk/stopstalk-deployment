@@ -58,25 +58,4 @@ for user in all_users:
         if claimable:
             valid_friends += 1
 
-    to = user.email
-    subject = "Final call for getting StopStalk goodies!"
-    message = """
-Hello %s,
-
-Today is the final day to make friends and earn laptop stickers.
-At present you are getting %s stickers.
-For more details, we have updated this page - https://www.stopstalk.com/my_friends
-We will only consider total friends made till 10th April 23:59.
-Send friend requests ASAP - https://www.stopstalk.com/search
-Also the people who filled Other as their Institute, please reply to this
-mail with your Institute name to become eligible for goodies.
-
-For more queries contact us at - https://www.stopstalk.com/contact_us
-
-Cheers,
-StopStalk
-              """ % (user.stopstalk_handle, str(valid_friends / 3))
-
-    current.send_mail(to=to,
-                      subject=subject,
-                      message=message)
+    print user.email, valid_friends / 3
