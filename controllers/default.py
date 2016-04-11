@@ -211,6 +211,7 @@ def unsubscribe():
                        submit_button="Unsubscribe")
         if form.process().accepted:
             response.flash = "Successfully unsubscribed!"
+            redirect(URL("default", "unsubscribe"))
         elif form.errors:
             response.flash = "Form has errors"
 
