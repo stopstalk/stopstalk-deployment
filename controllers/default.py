@@ -186,6 +186,39 @@ def notifications():
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
+def unsubscribe():
+
+    utable = db.unsubscriber
+    utable.email.default = session.auth.user.email
+    utable.email.writable = False
+    already_unsubscribed = False
+
+    query = (utable.email == session.auth.user.email)
+    rows = db(query).select()
+    if len(rows) != 0:
+        already_unsubscribed = True
+        form = SQLFORM(utable,
+                       submit_button="Subscribe")
+        if form.validate():
+            for row in rows:
+                row.delete_record()
+            session.flash = "Subscribed successfully!"
+            redirect(URL("default", "unsubscribe"))
+        elif form.errors:
+            response.flash = "Form has errors"
+    else:
+        form = SQLFORM(utable,
+                       submit_button="Unsubscribe")
+        if form.process().accepted:
+            response.flash = "Successfully unsubscribed!"
+        elif form.errors:
+            response.flash = "Form has errors"
+
+    return dict(form=form,
+                already_unsubscribed=already_unsubscribed)
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
 def my_friends():
     """
         Display the friends data
@@ -846,20 +879,27 @@ def mark_friend():
     current.send_mail(to=row.email,
                       subject=session.handle + \
                               " wants to be a friend on StopStalk",
-                      message=session.handle + \
-                              "(" + (URL("user",
+                      message="""
+%s (%s) wants to connect on StopStalk
+To view all friend requests go here - %s
+
+To stop receiving mails - %s
+                              """ % (session.handle,
+                                     URL("user",
                                          "profile",
                                          args=[session.handle],
                                          scheme=True,
                                          host=True,
-                                         extension=False)) + \
-                      ") wants to connect on StopStalk\n\n" + \
-                      "To view all friend requests go here - " + \
-                      URL("user",
-                          "friend_requests",
-                          scheme=True,
-                          host=True,
-                          extension=False))
+                                         extension=False),
+                                     URL("user",
+                                         "friend_requests",
+                                         scheme=True,
+                                         host=True,
+                                         extension=False),
+                                     URL("default", "unsubscribe",
+                                         scheme=True,
+                                         host=True,
+                                         extension=False)))
 
     return "Friend Request sent"
 
@@ -996,14 +1036,21 @@ def unfriend():
         row = db(atable.id == friend_id).select(atable.email).first()
         current.send_mail(to=row.email,
                           subject="A friend unfriended you on StopStalk",
-                          message=session.handle + \
-                                  "(" + (URL("user",
+                          message="""
+%s (%s) unfriended you on StopStalk
+
+To stop receiving mails - %s
+                                  """ % (session.handle,
+                                         URL("user",
                                              "profile",
                                              args=[session.handle],
                                              scheme=True,
                                              host=True,
-                                             extension=False)) + \
-                          ") unfriended you on StopStalk")
+                                             extension=False),
+                                         URL("default", "unsubscribe",
+                                             scheme=True,
+                                             host=True,
+                                             extension=False)))
 
         return "Successfully unfriended"
 

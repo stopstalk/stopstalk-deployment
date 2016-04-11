@@ -40,10 +40,14 @@ Hello StopStalker!!
 You have pending friend requests on StopStalk
 Connect with more to make best use of StopStalk - %s
 
+To stop receiving mails - %s
 Cheers,
 StopStalk
-""" % (URL("user", "friend_requests", scheme="https", host="www.stopstalk.com"))
-
-                              )
+""" % (URL("user", "friend_requests",
+           scheme="https",
+           host="www.stopstalk.com"),
+       URL("default", "unsubscribe",
+           scheme="https",
+           host="www.stopstalk.com")))
 
 # END =========================================================================

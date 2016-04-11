@@ -140,9 +140,14 @@ mail.settings.login = current.sender_mail + ":" + current.sender_password
 
 # -----------------------------------------------------------------------------
 def send_mail(to, subject, message):
-    mail.send(to=to,
-              subject=subject,
-              message=message)
+
+    # Check if user has unsubscibed from email updates
+    utable = db.unsubscriber
+    row = db(utable.email == to).select().first()
+    if row is None:
+        mail.send(to=to,
+                  subject=subject,
+                  message=message)
 
 current.send_mail = send_mail
 ## configure auth policy
@@ -293,6 +298,10 @@ db.define_table("trending_problems",
 db.define_table("stickers_given",
                 Field("user_id", "reference auth_user"),
                 Field("sticker_count", "integer"))
+
+db.define_table("unsubscriber",
+                Field("email",
+                      requires=IS_EMAIL()))
 
 if session["auth"]:
     session["handle"] = session["auth"]["user"]["stopstalk_handle"]

@@ -667,13 +667,18 @@ def accept_fr():
     current.send_mail(row.email,
                       session.handle + \
                       " from StopStalk accepted your friend request!",
-                      session.handle + \
-                      "(" + (URL("user",
-                                 "profile",
+                      """
+%s (%s) accepted your friend request
+
+To stop receiving mails - %s
+                      """ % (session.handle,
+                             URL("user", "profile",
                                  args=[session.handle],
                                  scheme=True,
-                                 host=True)) + \
-                      ") accepted your friend request")
+                                 host=True),
+                             URL("default", "unsubscribe",
+                                 scheme=True,
+                                 host=True)))
 
     session.flash = "Friend added!"
     redirect(URL("user", "friend_requests"))
@@ -704,13 +709,18 @@ def reject_fr():
     current.send_mail(row.email,
                       session.handle + \
                       " from StopStalk rejected your friend request!",
-                      session.handle + \
-                      "(" + (URL("user",
-                                 "profile",
+                      """
+                         %s (%s) rejected your friend request
+
+                         To stop receiving mails - %s
+                      """ % (session.handle,
+                             URL("user", "profile",
                                  args=[session.handle],
                                  scheme=True,
-                                 host=True)) + \
-                      ") rejected your friend request")
+                                 host=True),
+                             URL("default", "unsubscribe",
+                                 scheme=True,
+                                 host=True)))
 
     session.flash = "Friend request rejected!"
     redirect(URL("user", "friend_requests"))
