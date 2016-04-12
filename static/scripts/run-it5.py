@@ -32,7 +32,6 @@ afields = ["first_name", "last_name", "stopstalk_handle",
 users = db(atable).select(*afields)
 registered_users = []
 for user in users:
-    print user.first_name, user.last_name
     registered_users.append(user)
 
 cfields = afields + ["duplicate_cu"]
