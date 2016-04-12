@@ -695,17 +695,23 @@ def filters():
     div = TAG[""](H4("Recent Submissions"), switch, table)
 
     if global_submissions is False and session.user_id is None:
-        response.flash = "Login to view Friends' submissions"
-        return dict(languages=languages,
-                    div=div,
-                    global_submissions=global_submissions,
-                    total_pages=0)
+        session.flash = "Login to view Friends' submissions"
+        new_vars = request.vars
+        new_vars["global"] = True
+        redirect(URL("default", "filters",
+                     vars=new_vars))
 
-    query = (cftable.first_name.contains(get_vars["name"]))
-    query |= (cftable.last_name.contains(get_vars["name"]))
+    query = True
+    username = get_vars["name"]
+    if username != "":
+        tmplist = username.split()
+        for token in tmplist:
+            query &= ((cftable.first_name.contains(token)) | \
+                      (cftable.last_name.contains(token)))
+
     if global_submissions is False:
         # Retrieve all the custom users created by the logged-in user
-        query &= (cftable.user_id == session.user_id)
+        query = (cftable.user_id == session.user_id) & query
     cust_friends = db(query).select(cftable.id, cftable.duplicate_cu)
 
     # The Original IDs of duplicate custom_friends
@@ -717,9 +723,13 @@ def filters():
         else:
             custom_friends.append(cus_id.id)
 
+    query = True
     # Get the friends of logged in user
-    query = (atable.first_name.contains(get_vars["name"]))
-    query |= (atable.last_name.contains(get_vars["name"]))
+    if username != "":
+        tmplist = username.split()
+        for token in tmplist:
+            query &= ((atable.first_name.contains(token)) | \
+                      (atable.last_name.contains(token)))
 
     # @ToDo: Anyway to use join instead of two such db calls
     possible_users = db(query).select(atable.id)

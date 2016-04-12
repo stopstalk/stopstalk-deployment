@@ -106,8 +106,11 @@ def index():
                      (stable.custom_user_id.belongs(custom_friends)) | \
                      (stable.user_id == session.user_id)
         else:
-            response.flash = "Login to view Friends' Submissions"
-            query &= (1 == 0)
+            session.flash = "Login to view Friends' Submissions"
+            new_vars = request.vars
+            new_vars["global"] = True
+            redirect(URL("problems", "index",
+                         vars=new_vars))
 
     submissions = db(query).select(orderby=~stable.time_stamp)
     try:
