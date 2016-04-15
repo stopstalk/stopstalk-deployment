@@ -113,41 +113,18 @@ def get_submissions(user_id,
     return count
 
 # ----------------------------------------------------------------------------
-def retrieve_submissions(reg_user, custom=False):
+def retrieve_submissions(record, custom):
     """
         Retrieve submissions that are not already in the database
     """
 
-    if custom:
-        query = (db.custom_friend.id == reg_user)
-        row = db(query).select().first()
-        table = db.custom_friend
-    else:
-        query = ((db.auth_user.id == reg_user) & \
-                 (db.auth_user.blacklisted == False))
-        row = db(query).select().first()
-
-        if row is None:
-            print "Auth user " + str(reg_user) + " skipped"
-            return
-
-        table = db.auth_user
-
-    # Start retrieving from this date if user registered the first time
-    initial_date = current.INITIAL_DATE
+    last_retrieved = record.last_retrieved
     time_conversion = "%Y-%m-%d %H:%M:%S"
-
-    last_retrieved = db(query).select(table.last_retrieved).first()
-    if last_retrieved:
-        last_retrieved = str(last_retrieved.last_retrieved)
-    else:
-        last_retrieved = initial_date
-
     last_retrieved = time.strptime(str(last_retrieved), time_conversion)
     list_of_submissions = []
 
     for site in current.SITES:
-        site_handle = row[site.lower() + "_handle"]
+        site_handle = record[site.lower() + "_handle"]
         if site_handle:
             Site = globals()[site.lower()]
             P = Site.Profile(site_handle)
@@ -162,21 +139,18 @@ def retrieve_submissions(reg_user, custom=False):
     for submissions in list_of_submissions:
         if submissions[1] == -1:
             print "PROBLEM " + site + " " + \
-                  row.stopstalk_handle
+                  record.stopstalk_handle
 
             return "FAILURE"
 
-    # Update the last retrieved of the user
-    today = datetime.now()
-    db(query).update(last_retrieved=today)
 
     for submissions in list_of_submissions:
         site = submissions[0]
-        site_handle = row[site.lower() + "_handle"]
-        _debug(row.first_name, row.last_name, site, custom)
-        total_retrieved += get_submissions(reg_user,
+        site_handle = record[site.lower() + "_handle"]
+        _debug(record.first_name, record.last_name, site, custom)
+        total_retrieved += get_submissions(record.id,
                                            site_handle,
-                                           row.stopstalk_handle,
+                                           record.stopstalk_handle,
                                            submissions[1],
                                            site,
                                            custom)
@@ -187,18 +161,24 @@ if __name__ == "__main__":
     atable = db.auth_user
     cftable = db.custom_friend
 
-    query = (atable.last_retrieved == current.INITIAL_DATE)
-    user_ids = db(query).select(atable.id)
-    new_users = [x["id"] for x in user_ids]
+    # Update the last retrieved of the user
+    today = datetime.now()
+
+    query = (atable.last_retrieved == current.INITIAL_DATE) & \
+            (atable.blacklisted == False)
+    new_users = db(query).select()
 
     for user in new_users:
-        retrieve_submissions(user)
+        retrieve_submissions(user, False)
+
+    db(query).update(last_retrieved=today)
 
     query = (cftable.last_retrieved == current.INITIAL_DATE)
-    custom_user_ids = db(query).select(cftable.id)
-    custom_users = [x["id"] for x in custom_user_ids]
+    custom_users = db(query).select()
     for custom_user in custom_users:
-        retrieve_submissions(custom_user, custom=True)
+        retrieve_submissions(custom_user, True)
+
+    db(query).update(last_retrieved=today)
 
     columns = "(`user_id`, `custom_user_id`, `stopstalk_handle`, " + \
               "`site_handle`, `site`, `time_stamp`, `problem_name`," + \

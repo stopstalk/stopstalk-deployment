@@ -680,6 +680,14 @@ def filters():
                     div=DIV(),
                     global_submissions=global_submissions)
 
+    # If nothing is filled in the form
+    # these fields should be passed in
+    # the URL with empty value
+    compulsary_keys = ["pname", "name", "end_date", "start_date"]
+    if set(compulsary_keys).issubset(get_vars.keys()) is False:
+        session.flash = "Invalid URL parameters"
+        redirect(URL("default", "filters"))
+
     # Form has been submitted
     cftable = db.custom_friend
     atable = db.auth_user
@@ -699,7 +707,8 @@ def filters():
         new_vars = request.vars
         new_vars["global"] = True
         redirect(URL("default", "filters",
-                     vars=new_vars))
+                     vars=new_vars,
+                     args=request.args))
 
     query = True
     username = get_vars["name"]
