@@ -163,7 +163,34 @@ auth.messages.label_remember_me = "Remember credentials"
 auth.settings.long_expiration = 3600 * 24 * 366 # Remember me for a year
 
 # -----------------------------------------------------------------------------
+def sanitize_fields(form):
+    """
+        1. Strip whitespaces from all the fields
+        2. Remove @ from the HackerEarth handle(if entered)
+        3. Lowercase the handles
+    """
+
+    # 1.
+    for field in form.vars:
+        if isinstance(form.vars[field], basestring):
+            form.vars[field] = form.vars[field].strip()
+
+    # 2.
+    if "HackerEarth" in current.SITES:
+        field = "hackerearth_handle"
+        form.vars[field] = form.vars[field].strip("@")
+
+    # 3.
+    for site in current.SITES:
+        site_handle = site.lower() + "_handle"
+        form.vars[site_handle] = form.vars[site_handle].lower()
+
+# -----------------------------------------------------------------------------
 def register_callback(form):
+    """
+        Send mail to raj454raj@gmail.com about all the users who register
+    """
+
     # Send mail to raj454raj@gmail.com
     to = "raj454raj@gmail.com"
     subject = "New user registered"
@@ -191,6 +218,7 @@ HackerRank handle: %s
                      form.vars.hackerrank_handle)
     send_mail(to=to, subject=subject, message=message)
 
+auth.settings.register_onvalidation = [sanitize_fields]
 auth.settings.register_onaccept.append(register_callback)
 current.response.formstyle = materialize_form
 
@@ -210,9 +238,6 @@ current.response.formstyle = materialize_form
 ## >>> rows=db(db.mytable.myfield=='value').select(db.mytable.ALL)
 ## >>> for row in rows: print row.id, row.myfield
 #########################################################################
-
-## after defining tables, uncomment below to enable auditing
-auth.enable_record_versioning(db)
 
 custom_friend_fields = [Field("user_id", "reference auth_user"),
                         Field("first_name", requires=IS_NOT_EMPTY()),

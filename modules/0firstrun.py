@@ -28,6 +28,7 @@ current.mysql_server = "localhost"
 current.mysql_dbname = "migration"
 
 # Configure mail options
-current.smtp_server = "smtp.gmail.com:587"
-current.sender_mail = "contactstopstalk@gmail.com"
-current.sender_password = "hulsbntklqnriskz"
+# Add your smtp server and mail credentials
+current.smtp_server = ""
+current.sender_mail = ""
+current.sender_password = ""
