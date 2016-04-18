@@ -20,12 +20,12 @@
     THE SOFTWARE.
 """
 
-import time
 import re
-from datetime import date, datetime
+from datetime import datetime
 from gluon import current, IMG, DIV, TABLE, THEAD, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, \
                   TEXTAREA, SELECT, OPTION, URL
+
 
 # -----------------------------------------------------------------------------
 def get_link(site, handle):
@@ -34,6 +34,7 @@ def get_link(site, handle):
     """
 
     return current.SITES[site] + handle
+
 
 # -----------------------------------------------------------------------------
 def get_duration(start, end):
@@ -60,6 +61,7 @@ def get_duration(start, end):
     else:
         return delta[0]
 
+
 # -----------------------------------------------------------------------------
 def urltosite(url):
     """
@@ -74,6 +76,7 @@ def urltosite(url):
     site = site[4:-4]
 
     return site
+
 
 # -----------------------------------------------------------------------------
 def get_friends(user_id):
@@ -101,6 +104,7 @@ def get_friends(user_id):
 
     return friends, cf_to_duplicate
 
+
 # ----------------------------------------------------------------------------
 def get_accepted_streak(handle):
     """
@@ -122,6 +126,7 @@ def get_accepted_streak(handle):
 
     streak = db.executesql(sql_query)
     return streak[0][0]
+
 
 # ----------------------------------------------------------------------------
 def get_max_accepted_streak(handle):
@@ -155,6 +160,7 @@ def get_max_accepted_streak(handle):
 
     max_streak = max(max_streak, streak)
     return max_streak
+
 
 # ----------------------------------------------------------------------------
 def get_max_streak(submissions):
@@ -196,6 +202,7 @@ def get_max_streak(submissions):
 
     return max_streak, total_submissions, streak, len(submissions)
 
+
 # ----------------------------------------------------------------------------
 def compute_row(record, complete_dict, solved, custom=False, update_flag=False):
     """
@@ -204,7 +211,6 @@ def compute_row(record, complete_dict, solved, custom=False, update_flag=False):
     """
 
     db = current.db
-    stable = db.submission
     cftable = db.custom_friend
 
     stopstalk_handle = record.stopstalk_handle
@@ -272,6 +278,7 @@ def compute_row(record, complete_dict, solved, custom=False, update_flag=False):
             diff,
             custom,
             rating_diff)
+
 
 # -----------------------------------------------------------------------------
 def materialize_form(form, fields):
@@ -357,6 +364,7 @@ def materialize_form(form, fields):
 
     return main_div
 
+
 # -----------------------------------------------------------------------------
 def render_table(submissions, duplicates=[]):
     """
@@ -400,7 +408,7 @@ def render_table(submissions, duplicates=[]):
             # when a duplicate custom_user is created and then
             # his name or institute is changed
             for f in duplicates:
-                if f[1] == person_id and f[0] != None:
+                if f[1] == person_id and f[0] is not None:
                     person_id = current.db.custom_friend(f[0])
                     break
             span = SPAN(_class="orange tooltipped",
