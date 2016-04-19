@@ -187,33 +187,23 @@ def sanitize_fields(form):
 #-----------------------------------------------------------------------------
 def inside_institute(form):
         # Send mail to all users form the same college when someone registers
-    to = []
-    for mail in db(utable.email == form.vars.institute).select():
-        to.append(mail)
+    tos=[]
+    rows=db(atable.institute == form.vars.institute).select(atable.email,atable.stopstalk_handle)
+    for row in rows:
+        tos.append(mail)
     subject = "New user registered from your college"
     message = """
-Name: %s %s
-Email: %s
-Institute: %s
-StopStalk handle: %s
-Referrer: %s
-Codechef handle: %s
-Codeforces handle: %s
-Spoj handle: %s
-HackerEarth handle: %s
-HackerRank handle: %s
-              """ % (form.vars.first_name,
-                     form.vars.last_name,
-                     form.vars.email,
-                     form.vars.institute,
-                     form.vars.stopstalk_handle,
-                     form.vars.referrer,
-                     form.vars.codechef_handle,
-                     form.vars.codeforces_handle,
-                     form.vars.spoj_handle,
-                     form.vars.hackerearth_handle,
-                     form.vars.hackerrank_handle)
-    send_mail(to=to, subject=subject, message=message)
+Hello,
+%s from your college has just joined StopStalk
+send him a friend request now %s and improve your experince with StopStalk
+
+Regards,
+StopStalk Team
+              """ % (form.vars.first_name + " " + form.vars.last_name,
+                     URL('default', 'search'),
+                     URL("default", "unsubscribe", scheme=True, host=True, extension=False))
+    for to in tos:
+        send_mail(to=to, subject=subject, message=message)
     
 # -----------------------------------------------------------------------------
 def register_callback(form):
@@ -250,7 +240,7 @@ HackerRank handle: %s
 
 auth.settings.register_onvalidation = [sanitize_fields]
 auth.settings.register_onaccept.append(register_callback)
-auth.settings.register_onaccept = [inside_institute]
+auth.settings.register_onaccept.append(inside_institute)
 current.response.formstyle = materialize_form
 
 #########################################################################
