@@ -186,24 +186,26 @@ def sanitize_fields(form):
         form.vars[site_handle] = form.vars[site_handle].lower()
 #-----------------------------------------------------------------------------
 def inside_institute(form):
-        # Send mail to all users form the same college when someone registers
-    tos=[]
-    rows=db(atable.institute == form.vars.institute).select(atable.email,atable.stopstalk_handle)
-    for row in rows:
-        tos.append(mail)
+    # Send mail to all users form the same college when someone registers
+    query = (atable.institute == form.vars.institute)
+    rows = db(query).select(atable.email, atable.stopstalk_handle)
     subject = "New user registered from your college"
     message = """
-Hello,
+Hello %s,
 %s from your college has just joined StopStalk
-send him a friend request now %s and improve your experince with StopStalk
-
+Send a friend request now %s for better experience on StopStalk
 Regards,
-StopStalk Team
-              """ % (form.vars.first_name + " " + form.vars.last_name,
-                     URL('default', 'search'),
-                     URL("default", "unsubscribe", scheme=True, host=True, extension=False))
-    for to in tos:
-        send_mail(to=to, subject=subject, message=message)
+StopStalk
+              """ % (row.stopstalk_handle,
+                        form.vars.first_name + " " + form.vars.last_name,
+                        URL('default', 'search'),
+                     URL("default", 
+                             "unsubscribe", 
+                             scheme=True, 
+                             host=True, 
+                             extension=False))    
+        for row in rows:
+            send_mail(to=row.email, subject=subject, message=message)
     
 # -----------------------------------------------------------------------------
 def register_callback(form):
