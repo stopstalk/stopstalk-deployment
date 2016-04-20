@@ -211,6 +211,7 @@ def notify_institute_users(form):
     atable = db.auth_user
     query = (atable.institute == form.vars.institute)
     query &= (atable.email != form.vars.email)
+    query &= (atable.institute != "Other")
     rows = db(query).select(atable.email, atable.stopstalk_handle)
 
     subject = "New user registered from your college"
