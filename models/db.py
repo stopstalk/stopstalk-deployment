@@ -185,12 +185,14 @@ def sanitize_fields(form):
         site_handle = site.lower() + "_handle"
         form.vars[site_handle] = form.vars[site_handle].lower()
 #-----------------------------------------------------------------------------
+
 def notify_institute_users(form):
     # Send mail to all users from the same institute when someone registers
     query = (atable.institute == form.vars.institute)
     rows = db(query).select(atable.email, atable.stopstalk_handle)
     subject = "New user registered from your college"
-    message = """
+    for row in rows:
+         message = """
 Hello %s,
 %s from your college has just joined StopStalk
 Send a friend request now %s for better experience on StopStalk
@@ -201,8 +203,7 @@ StopStalk
                     URL('default', 'search'),
                     URL("default", "unsubscribe", scheme=True, host=True, extension=False)
                     )    
-        for row in rows:
-            send_mail(to=row.email, subject=subject, message=message)
+        send_mail(to=row.email, subject=subject, message=message)
     
 # -----------------------------------------------------------------------------
 def register_callback(form):
