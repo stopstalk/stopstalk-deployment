@@ -184,7 +184,27 @@ def sanitize_fields(form):
     for site in current.SITES:
         site_handle = site.lower() + "_handle"
         form.vars[site_handle] = form.vars[site_handle].lower()
+#-----------------------------------------------------------------------------
 
+def notify_institute_users(form):
+    # Send mail to all users from the same institute when someone registers
+    query = (atable.institute == form.vars.institute)
+    rows = db(query).select(atable.email, atable.stopstalk_handle)
+    subject = "New user registered from your college"
+    for row in rows:
+         message = """
+Hello %s,
+%s from your college has just joined StopStalk
+Send a friend request now %s for better experience on StopStalk
+Regards,
+StopStalk
+              """ % (row.stopstalk_handle,
+                    form.vars.first_name + " " + form.vars.last_name,
+                    URL('default', 'search'),
+                    URL("default", "unsubscribe", scheme=True, host=True, extension=False)
+                    )    
+        send_mail(to=row.email, subject=subject, message=message)
+    
 # -----------------------------------------------------------------------------
 def register_callback(form):
     """
@@ -220,6 +240,7 @@ HackerRank handle: %s
 
 auth.settings.register_onvalidation = [sanitize_fields]
 auth.settings.register_onaccept.append(register_callback)
+auth.settings.register_onaccept.append(notify_institute_users)
 current.response.formstyle = materialize_form
 
 #########################################################################
