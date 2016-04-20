@@ -725,8 +725,6 @@ def reject_fr():
     session.flash = "Friend request rejected!"
     redirect(URL("user", "friend_requests"))
 
-    return dict()
-
 # ------------------------------------------------------------------------------
 @auth.requires_login()
 def custom_friend():
@@ -777,7 +775,7 @@ def custom_friend():
 
     # Set the hidden field
     form.vars.user_id = session.user_id
-    form.process()
+    form.process(onvalidation=current.sanitize_fields)
 
     if form.accepted:
         session.flash = "Submissions will be added by tomorrow"

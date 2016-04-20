@@ -165,25 +165,79 @@ auth.settings.long_expiration = 3600 * 24 * 366 # Remember me for a year
 # -----------------------------------------------------------------------------
 def sanitize_fields(form):
     """
+        Display errors for the following:
+
         1. Strip whitespaces from all the fields
         2. Remove @ from the HackerEarth handle(if entered)
         3. Lowercase the handles
+        4. Fill the institute field with "Other" if empty
     """
 
+    handle_fields = ["stopstalk"]
+    handle_fields.extend([x.lower() for x in current.SITES.keys()])
+
     # 1.
-    for field in form.vars:
-        if isinstance(form.vars[field], basestring):
-            form.vars[field] = form.vars[field].strip()
+    for field in handle_fields:
+        field_handle = field + "_handle"
+        if form.vars[field_handle].__contains__(" "):
+            form.errors[field_handle] = "White spaces not allowed"
 
     # 2.
     if "HackerEarth" in current.SITES:
         field = "hackerearth_handle"
-        form.vars[field] = form.vars[field].strip("@")
+        if form.vars[field] and form.vars[field][0] == "@":
+            form.errors[field] = "@ symbol not required"
 
     # 3.
-    for site in current.SITES:
-        site_handle = site.lower() + "_handle"
-        form.vars[site_handle] = form.vars[site_handle].lower()
+    for site in handle_fields:
+        site_handle = site + "_handle"
+        if form.vars[site_handle] != form.vars[site_handle].lower():
+            form.errors[site_handle] = "Please enter in lower case"
+
+    # 4.
+    if form.vars.institute == "":
+        form.errors.institute = "Please select an institute or Other"
+
+    if form.errors:
+        response.flash = "Form has errors!!"
+
+#-----------------------------------------------------------------------------
+def notify_institute_users(form):
+    """
+        Send mail to all users from the same institute
+        when a user registers from that institute
+    """
+
+    atable = db.auth_user
+    query = (atable.institute == form.vars.institute)
+    query &= (atable.email != form.vars.email)
+    rows = db(query).select(atable.email, atable.stopstalk_handle)
+
+    subject = "New user registered from your college"
+    for row in rows:
+        message = """
+Hello %s,
+
+%s from your college has just joined StopStalk.
+Send a friend request now %s for better experience on StopStalk
+
+To stop receiving mails - %s
+
+Regards,
+StopStalk
+                  """ % (row.stopstalk_handle,
+                         form.vars.first_name + " " + form.vars.last_name,
+                         URL("default",
+                             "search",
+                             scheme=True,
+                             host=True,
+                             extension=False),
+                         URL("default",
+                             "unsubscribe",
+                             scheme=True,
+                             host=True,
+                             extension=False))
+        send_mail(to=row.email, subject=subject, message=message)
 
 # -----------------------------------------------------------------------------
 def register_callback(form):
@@ -220,7 +274,9 @@ HackerRank handle: %s
 
 auth.settings.register_onvalidation = [sanitize_fields]
 auth.settings.register_onaccept.append(register_callback)
+auth.settings.register_onaccept.append(notify_institute_users)
 current.response.formstyle = materialize_form
+current.sanitize_fields = sanitize_fields
 
 #########################################################################
 ## Define your tables below (or better in another model file) for example
