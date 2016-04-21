@@ -141,7 +141,7 @@ mail.settings.login = current.sender_mail + ":" + current.sender_password
 # -----------------------------------------------------------------------------
 def send_mail(to, subject, message):
 
-    # Check if user has unsubscibed from email updates
+    # Check if user has unsubscribed from email updates
     utable = db.unsubscriber
     row = db(utable.email == to).select().first()
     if row is None:
