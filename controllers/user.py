@@ -58,9 +58,10 @@ def add_custom_friend():
     rows = [x["stopstalk_handle"] for x in rows]
     stopstalk_handles.extend(rows)
 
-    if stopstalk_handle in stopstalk_handles:
-        session.flash = "Handle already taken"
-        redirect(URL("user", "profile", args=original_handle))
+    for temp_handle in stopstalk_handles:
+        if stopstalk_handle.lower() == temp_handle.lower():
+            session.flash = "Handle already taken"
+            redirect(URL("user", "profile", args=original_handle))
 
     # The total referrals by the logged-in user
     query = (atable.referrer == session["handle"])
@@ -81,6 +82,7 @@ def add_custom_friend():
         referrer = db(atable.stopstalk_handle == row.referrer).count()
 
     # 3 custom friends allowed plus one for each 5 invites
+
     allowed_custom_friends = total_referrals / 5 + default_allowed + referrer
 
     # Custom users already created
@@ -108,7 +110,7 @@ def add_custom_friend():
     cftable.insert(**current_row)
 
     session.flash = "Custom user added!!"
-    redirect(URL("user", "profile", args=original_handle))
+    redirect(URL("user", "profile", args=stopstalk_handle))
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()
