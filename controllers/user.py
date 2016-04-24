@@ -419,14 +419,18 @@ def profile():
     custom = False
     actual_handle = handle
     parent_user = None
+    output = {}
+    output["handle"] = handle
+    output["nouser"] = False
+    output["actual_handle"] = None
+    output["parent_user"] = None
 
     if len(rows) == 0:
         query = (db.custom_friend.stopstalk_handle == handle)
         rows = db(query).select()
         if len(rows) == 0:
             # No such user exists
-            return dict(total_submissions=0,
-                        handle=handle)
+            return dict(nouser=True)
         else:
             flag = "custom"
             custom = True
@@ -434,30 +438,31 @@ def profile():
             parent_user = (row.user_id.first_name + " " + \
                                 row.user_id.last_name,
                            row.user_id.stopstalk_handle)
+            output["parent_user"] = parent_user
             if row.duplicate_cu:
                 flag = "duplicate-custom"
                 original_row = db.custom_friend(row.duplicate_cu)
                 actual_handle = row.stopstalk_handle
+                output["actual_handle"] = actual_handle
                 handle = original_row.stopstalk_handle
+                output["handle"] = handle
                 original_row["first_name"] = row.first_name
                 original_row["last_name"] = row.last_name
                 original_row["institute"] = row.institute
                 original_row["user_id"] = row.user_id
                 row = original_row
+            output["row"] = row
     else:
         row = rows.first()
+        output["row"] = row
+
+    name = row.first_name + " " + row.last_name
+    output["name"] = name
+    output["custom"] = custom
 
     stable = db.submission
     total_submissions = db(stable.stopstalk_handle == handle).count()
-    if total_submissions == 0:
-        return dict(total_submissions=total_submissions,
-                    handle=handle)
-
-    output = {}
-    output["handle"] = handle
-    output["actual_handle"] = actual_handle
     output["total_submissions"] = total_submissions
-    output["parent_user"] = parent_user
 
     if custom:
         if row.user_id == session.user_id:
@@ -483,12 +488,8 @@ def profile():
         else:
             flag = "same-user"
 
-    output["row"] = row
-    output["custom"] = custom
     output["flag"] = flag
 
-    name = row.first_name + " " + row.last_name
-    output["name"] = name
     group_by = [stable.site, stable.status]
     query = (stable.stopstalk_handle == handle)
     rows = db(query).select(stable.site,

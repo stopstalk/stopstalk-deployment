@@ -214,12 +214,12 @@ def notify_institute_users(form):
     query &= (atable.institute != "Other")
     rows = db(query).select(atable.email, atable.stopstalk_handle)
 
-    subject = "New user registered from your college"
+    subject = "New user registered from your Institute"
     for row in rows:
         message = """
 Hello %s,
 
-%s from your college has just joined StopStalk.
+%s from your Institute has just joined StopStalk.
 Send a friend request now %s for better experience on StopStalk
 
 To stop receiving mails - %s
@@ -228,8 +228,9 @@ Regards,
 StopStalk
                   """ % (row.stopstalk_handle,
                          form.vars.first_name + " " + form.vars.last_name,
-                         URL("default",
-                             "search",
+                         URL("user",
+                             "profile",
+                             args=form.vars.stopstalk_handle,
                              scheme=True,
                              host=True,
                              extension=False),
