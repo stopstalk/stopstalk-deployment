@@ -420,10 +420,7 @@ def profile():
     actual_handle = handle
     parent_user = None
     output = {}
-    output["handle"] = handle
     output["nouser"] = False
-    output["actual_handle"] = None
-    output["parent_user"] = None
 
     if len(rows) == 0:
         query = (db.custom_friend.stopstalk_handle == handle)
@@ -438,14 +435,11 @@ def profile():
             parent_user = (row.user_id.first_name + " " + \
                                 row.user_id.last_name,
                            row.user_id.stopstalk_handle)
-            output["parent_user"] = parent_user
             if row.duplicate_cu:
                 flag = "duplicate-custom"
                 original_row = db.custom_friend(row.duplicate_cu)
                 actual_handle = row.stopstalk_handle
-                output["actual_handle"] = actual_handle
                 handle = original_row.stopstalk_handle
-                output["handle"] = handle
                 original_row["first_name"] = row.first_name
                 original_row["last_name"] = row.last_name
                 original_row["institute"] = row.institute
@@ -456,6 +450,9 @@ def profile():
         row = rows.first()
         output["row"] = row
 
+    output["parent_user"] = parent_user
+    output["handle"] = handle
+    output["actual_handle"] = actual_handle
     name = row.first_name + " " + row.last_name
     output["name"] = name
     output["custom"] = custom
