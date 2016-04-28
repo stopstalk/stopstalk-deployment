@@ -746,8 +746,8 @@ def filters():
     friends = possible_users
 
     if global_submissions is False:
-        query = (ftable.user_id == session.user_id)
-        query &= (ftable.friend_id.belongs(possible_users))
+        query = (ftable.user_id == session.user_id) & \
+                (ftable.friend_id.belongs(possible_users))
         friend_ids = db(query).select(ftable.friend_id)
         friends = [x["friend_id"] for x in friend_ids]
 
@@ -788,8 +788,8 @@ def filters():
 
     if end_time > start_time:
         # Submissions in the the range start_date to end_date
-        query &= (stable.time_stamp >= start_date)
-        query &= (stable.time_stamp <= end_date)
+        query &= (stable.time_stamp >= start_date) & \
+                 (stable.time_stamp <= end_date)
     else:
         session.flash = "Start Date greater than End Date"
         redirect(URL("default", "filters"))
@@ -870,14 +870,14 @@ def mark_friend():
     friend_id = long(request.args[0])
 
     if friend_id != session.user_id:
-        query = (ftable.user_id == session.user_id)
-        query &= (ftable.friend_id == friend_id)
+        query = (ftable.user_id == session.user_id) & \
+                (ftable.friend_id == friend_id)
         value = db(query).count()
         if value == 0:
-            query = (frtable.from_h == session.user_id)
-            query &= (frtable.to_h == friend_id)
-            query |= (frtable.from_h == friend_id) & \
-                     (frtable.to_h == session.user_id)
+            query = ((frtable.from_h == session.user_id) & \
+                     (frtable.to_h == friend_id)) | \
+                    ((frtable.from_h == friend_id) & \
+                     (frtable.to_h == session.user_id))
 
             value = db(query).count()
             if value != 0:
@@ -935,9 +935,9 @@ def retrieve_users():
     ftable = db.friends
     q = request.get_vars.get("q", None)
 
-    query = (atable.first_name.contains(q))
-    query |= (atable.last_name.contains(q))
-    query |= (atable.stopstalk_handle.contains(q))
+    query = (atable.first_name.contains(q)) | \
+            (atable.last_name.contains(q)) | \
+            (atable.stopstalk_handle.contains(q))
 
     for site in current.SITES:
         field_name = site.lower() + "_handle"
@@ -1102,8 +1102,8 @@ def submissions():
         else:
             custom_friends.append(cus_id[1])
 
-    query = (stable.user_id.belongs(friends))
-    query |= (stable.custom_user_id.belongs(custom_friends))
+    query = (stable.user_id.belongs(friends)) | \
+            (stable.custom_user_id.belongs(custom_friends))
     total_count = db(query).count()
 
     PER_PAGE = current.PER_PAGE

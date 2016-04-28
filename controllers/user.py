@@ -210,8 +210,8 @@ def update_friend():
 
     cftable = db.custom_friend
 
-    query = (cftable.user_id == session["user_id"])
-    query &= (cftable.id == request.args[0])
+    query = (cftable.user_id == session["user_id"]) & \
+            (cftable.id == request.args[0])
     row = db(query).select(cftable.id)
     if len(row) == 0:
         session.flash = "Please click one of the buttons"
@@ -384,9 +384,9 @@ def get_activity():
     start_time = date + " 00:00:00"
     end_time = date + " 23:59:59"
 
-    query = (stable.time_stamp >= start_time)
-    query &= (stable.time_stamp <= end_time)
-    query &= (stable.stopstalk_handle == handle)
+    query = (stable.time_stamp >= start_time) & \
+            (stable.time_stamp <= end_time) & \
+            (stable.stopstalk_handle == handle)
     submissions = db(query).select()
 
     if len(submissions) > 0:
@@ -468,14 +468,14 @@ def profile():
         if row.id != session.user_id:
             ftable = db.friends
             frtable = db.friend_requests
-            query = (ftable.user_id == session.user_id)
-            query &= (ftable.friend_id == row.id)
+            query = (ftable.user_id == session.user_id) & \
+                    (ftable.friend_id == row.id)
             value = db(query).count()
             if value == 0:
-                query = (frtable.from_h == session.user_id)
-                query &= (frtable.to_h == row.id)
-                query |= (frtable.from_h == row.id) & \
-                         (frtable.to_h == session.user_id)
+                query = ((frtable.from_h == session.user_id) & \
+                         (frtable.to_h == row.id)) | \
+                        ((frtable.from_h == row.id) & \
+                         (frtable.to_h == session.user_id))
 
                 value = db(query).count()
                 if value != 0:

@@ -92,7 +92,6 @@ def refresh_tags():
     difference_list = list((set(updated_problem_list) - \
                             set(current_problem_list)).union(no_tags))
 
-    print "Refreshing "
     threads = []
     workers = 49
 
@@ -135,15 +134,14 @@ def get_tag(link, name):
 
     if row:
         prev_tags = row.tags
-        prev_name = row.problem_name
-        if prev_tags != str(all_tags) or prev_name != name:
-            row.update_record(problem_name=name,
-                              tags=str(all_tags))
-            total_updated += 1
+        if prev_tags != str(all_tags):
+            row.update_record(tags=str(all_tags),
+                              problem_added_on=today)
             print "Updated", link, all_tags
+            total_updated += 1
         else:
             not_updated += 1
-            print "No-change", link, all_tags
+            print "No-change", link
     else:
         total_inserted += 1
         print "Inserted ", link, all_tags
@@ -152,7 +150,6 @@ def get_tag(link, name):
         #       so that they can be used directly by eval
         row = [link, name, str(all_tags), today]
         ptable.insert(problem_link=link,
-                      problem_name=name,
                       tags=str(all_tags),
                       problem_added_on=today)
 

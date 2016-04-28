@@ -209,9 +209,10 @@ def notify_institute_users(form):
     """
 
     atable = db.auth_user
-    query = (atable.institute == form.vars.institute)
-    query &= (atable.email != form.vars.email)
-    query &= (atable.institute != "Other")
+    query = (atable.institute == form.vars.institute) & \
+            (atable.email != form.vars.email) & \
+            (atable.institute != "Other") & \
+            (atable.blaclisted == False)
     rows = db(query).select(atable.email, atable.stopstalk_handle)
 
     subject = "New user registered from your Institute"
@@ -354,7 +355,6 @@ db.define_table("friends",
 
 db.define_table("problem_tags",
                 Field("problem_link"),
-                Field("problem_name"),
                 Field("tags",
                       default="['-']"),
                 Field("problem_added_on", "date"))

@@ -355,10 +355,10 @@ def trending():
             else:
                 custom_friends.append(cus_id[1])
 
-        first_query = (stable.user_id.belongs(friends))
-        first_query |= (stable.custom_user_id.belongs(custom_friends))
-        query = (stable.time_stamp >= start_date)
-        query &= (stable.time_stamp <= end_date)
+        first_query = (stable.user_id.belongs(friends)) | \
+                      (stable.custom_user_id.belongs(custom_friends))
+        query = (stable.time_stamp >= start_date) & \
+                (stable.time_stamp <= end_date)
         query = first_query & query
 
         friend_trending = db(query).select(stable.problem_name,
