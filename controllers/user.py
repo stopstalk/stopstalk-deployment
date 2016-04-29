@@ -427,7 +427,9 @@ def profile():
         rows = db(query).select()
         if len(rows) == 0:
             # No such user exists
-            return dict(nouser=True)
+            return dict(nouser=True,
+                        handle=handle,
+                        actual_handle=actual_handle)
         else:
             flag = "custom"
             custom = True
