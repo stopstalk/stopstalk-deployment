@@ -101,7 +101,10 @@ class Profile(object):
             append(problem_name)
 
             # Problem status
-            status = row["verdict"]
+            try:
+                status = row["verdict"]
+            except KeyError:
+                status = "OTHER"
             st = "AC"
             if status == "OK":
                 st = "AC"

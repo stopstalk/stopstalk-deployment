@@ -355,6 +355,7 @@ db.define_table("friends",
 
 db.define_table("problem_tags",
                 Field("problem_link"),
+                Field("problem_name"),
                 Field("tags",
                       default="['-']"),
                 Field("problem_added_on", "date"))

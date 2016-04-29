@@ -60,6 +60,7 @@ def refresh_tags():
     # Problems that are in problem_tags table
     current_problem_list = db(ptable).select(ptable.problem_link,
                                              ptable.problem_name)
+
     # Problems that are in submission table
     updated_problem_list = db(stable).select(stable.problem_link,
                                              stable.problem_name,
@@ -97,7 +98,7 @@ def refresh_tags():
 
     # Start retrieving tags for the problems
     # that are not in problem_tags table
-    for i in xrange(0, len(difference_list), workers):
+    for i in xrange(0, len(difference_list[:100]), workers):
         threads = []
         # O God I am so smart !!
         for problem in difference_list[i : i + workers]:
@@ -136,8 +137,9 @@ def get_tag(link, name):
         prev_tags = row.tags
         if prev_tags != str(all_tags):
             row.update_record(tags=str(all_tags),
+                              problem_name=name,
                               problem_added_on=today)
-            print "Updated", link, all_tags
+            print "Updated", link, prev_tags, "->", all_tags
             total_updated += 1
         else:
             not_updated += 1
@@ -151,6 +153,7 @@ def get_tag(link, name):
         row = [link, name, str(all_tags), today]
         ptable.insert(problem_link=link,
                       tags=str(all_tags),
+                      problem_name=name,
                       problem_added_on=today)
 
 if __name__ == "__main__":
