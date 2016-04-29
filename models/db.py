@@ -212,7 +212,7 @@ def notify_institute_users(form):
     query = (atable.institute == form.vars.institute) & \
             (atable.email != form.vars.email) & \
             (atable.institute != "Other") & \
-            (atable.blaclisted == False)
+            (atable.blacklisted == False)
     rows = db(query).select(atable.email, atable.stopstalk_handle)
 
     subject = "New user registered from your Institute"
