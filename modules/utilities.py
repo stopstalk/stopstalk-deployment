@@ -23,7 +23,13 @@
 import re
 import time
 from datetime import datetime
+import gevent
+from gevent import monkey
+gevent.monkey.patch_all(thread=False)
+
+# @ToDo: Make this generalized
 from sites import codechef, codeforces, spoj, hackerearth, hackerrank
+
 from gluon import current, IMG, DIV, TABLE, THEAD, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, \
                   TEXTAREA, SELECT, OPTION, URL
@@ -123,6 +129,8 @@ def retrieve_submissions(record, custom):
     time_conversion = "%Y-%m-%d %H:%M:%S"
     last_retrieved = time.strptime(str(last_retrieved), time_conversion)
     list_of_submissions = []
+    threads = []
+    site_submission_dict = {}
 
     for site in current.SITES:
         site_handle = record[site.lower() + "_handle"]
@@ -130,20 +138,21 @@ def retrieve_submissions(record, custom):
             Site = globals()[site.lower()]
             P = Site.Profile(site_handle)
             site_method = P.get_submissions
-            submissions = site_method(last_retrieved)
-            list_of_submissions.append((site, submissions))
-            if submissions == -1:
-                break
+            current_thread = gevent.spawn(site_method, last_retrieved)
+            threads.append(current_thread)
+            site_submission_dict[current_thread] = site
 
-    total_retrieved = 0
+    # Run all the threads asynchronously
+    gevent.joinall(threads)
 
-    for submissions in list_of_submissions:
-        if submissions[1] == -1:
+    for thread in threads:
+        site = site_submission_dict[thread]
+        if thread.value == -1:
             print "PROBLEM " + site + " " + \
                   record.stopstalk_handle
-
             return "FAILURE"
 
+        list_of_submissions.append((site, thread.value))
 
     for submissions in list_of_submissions:
         site = submissions[0]
