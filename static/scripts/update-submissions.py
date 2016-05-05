@@ -20,10 +20,141 @@
     THE SOFTWARE.
 """
 
+import time
 import traceback
 import gevent
 from datetime import datetime
-import utilities
+from gevent import monkey
+gevent.monkey.patch_all(thread=False)
+
+# @ToDo: Make this generalised
+from sites import codechef, codeforces, spoj, hackerearth, hackerrank
+
+rows = []
+
+# -----------------------------------------------------------------------------
+def _debug(first_name, last_name, site, custom=False):
+    """
+        Advanced logging of submissions
+    """
+
+    name = first_name + " " + last_name
+    debug_string = site + ":"
+    if custom:
+        debug_string += "CUS:"
+    debug_string += name
+    print debug_string,
+
+# -----------------------------------------------------------------------------
+def get_submissions(user_id,
+                    handle,
+                    stopstalk_handle,
+                    submissions,
+                    site,
+                    custom=False):
+    """
+        Get the submissions and populate the database
+    """
+
+    db = current.db
+    count = 0
+
+    if submissions == {}:
+        print "0"
+        return 0
+
+    global rows
+
+    for i in sorted(submissions[handle].iterkeys()):
+        for j in sorted(submissions[handle][i].iterkeys()):
+            submission = submissions[handle][i][j]
+            if len(submission) == 7:
+                count += 1
+                row = []
+                if custom:
+                    row.extend(["--", user_id])
+                else:
+                    row.extend([user_id, "--"])
+
+                row.extend([stopstalk_handle,
+                            handle,
+                            site,
+                            submission[0],
+                            submission[2],
+                            submission[1],
+                            submission[5],
+                            submission[3],
+                            submission[4],
+                            submission[6]])
+
+                encoded_row = []
+                for x in row:
+                    if isinstance(x, basestring):
+                        tmp = x.encode("ascii", "ignore")
+
+                        # @ToDo: Dirty hack! Do something with
+                        #        replace and escaping quotes
+                        tmp = tmp.replace("\"", "").replace("'", "")
+                        if tmp == "--":
+                            tmp = "NULL"
+                        else:
+                            tmp = u"\"" + tmp + u"\""
+                        encoded_row.append(tmp)
+                    else:
+                        encoded_row.append(str(x))
+
+                rows.append(u"(" + u", ".join(encoded_row) + u")")
+
+
+    if count != 0:
+        print "%s" % (count)
+    else:
+        print "0"
+    return count
+
+# ----------------------------------------------------------------------------
+def retrieve_submissions(record, custom):
+    """
+        Retrieve submissions that are not already in the database
+    """
+
+    last_retrieved = record.last_retrieved
+    time_conversion = "%Y-%m-%d %H:%M:%S"
+    last_retrieved = time.strptime(str(last_retrieved), time_conversion)
+    list_of_submissions = []
+
+    for site in current.SITES:
+        site_handle = record[site.lower() + "_handle"]
+        if site_handle:
+            Site = globals()[site.lower()]
+            P = Site.Profile(site_handle)
+            site_method = P.get_submissions
+            submissions = site_method(last_retrieved)
+            list_of_submissions.append((site, submissions))
+            if submissions == -1:
+                break
+
+    total_retrieved = 0
+
+    for submissions in list_of_submissions:
+        if submissions[1] == -1:
+            print "PROBLEM " + site + " " + \
+                  record.stopstalk_handle
+
+            return "FAILURE"
+
+
+    for submissions in list_of_submissions:
+        site = submissions[0]
+        site_handle = record[site.lower() + "_handle"]
+        _debug(record.first_name, record.last_name, site, custom)
+        total_retrieved += get_submissions(record.id,
+                                           site_handle,
+                                           record.stopstalk_handle,
+                                           submissions[1],
+                                           site,
+                                           custom)
+    return total_retrieved
 
 if __name__ == "__main__":
 
@@ -37,17 +168,15 @@ if __name__ == "__main__":
             (atable.blacklisted == False)
     new_users = db(query).select()
 
-    all_rows = []
-
     for user in new_users:
-        all_rows.extend(utilities.retrieve_submissions(user, False))
+        retrieve_submissions(user, False)
 
     db(query).update(last_retrieved=today)
 
     query = (cftable.last_retrieved == current.INITIAL_DATE)
     custom_users = db(query).select()
     for custom_user in custom_users:
-        all_rows.extend(utilities.retrieve_submissions(custom_user, True))
+        retrieve_submissions(custom_user, True)
 
     db(query).update(last_retrieved=today)
 
@@ -55,10 +184,10 @@ if __name__ == "__main__":
               "`site_handle`, `site`, `time_stamp`, `problem_name`," + \
               "`problem_link`, `lang`, `status`, `points`, `view_link`)"
 
-    if len(all_rows) != 0:
+    if len(rows) != 0:
         sql_query = """INSERT INTO `submission` """ + \
                     columns + """ VALUES """ + \
-                    ",".join(all_rows) + """;"""
+                    ",".join(rows) + """;"""
         try:
             db.executesql(sql_query)
         except:
