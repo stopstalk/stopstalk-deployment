@@ -139,11 +139,16 @@ mail.settings.sender = current.sender_mail
 mail.settings.login = current.sender_mail + ":" + current.sender_password
 
 # -----------------------------------------------------------------------------
-def send_mail(to, subject, message):
+def send_mail(to, subject, message, mail_type):
 
     # Check if user has unsubscribed from email updates
     utable = db.unsubscriber
-    row = db(utable.email == to).select().first()
+
+    query = (utable.email == to) & \
+            (utable[mail_type] == False)
+
+    row = db(query).select().first()
+
     if row is None:
         mail.send(to=to,
                   subject=subject,
@@ -240,7 +245,11 @@ StopStalk
                              scheme=True,
                              host=True,
                              extension=False))
-        send_mail(to=row.email, subject=subject, message=message)
+
+        send_mail(to=row.email,
+                  subject=subject,
+                  message=message,
+                  mail_type="institute_user")
 
 # -----------------------------------------------------------------------------
 def register_callback(form):
@@ -273,7 +282,7 @@ HackerRank handle: %s
                      form.vars.spoj_handle,
                      form.vars.hackerearth_handle,
                      form.vars.hackerrank_handle)
-    send_mail(to=to, subject=subject, message=message)
+    send_mail(to=to, subject=subject, message=message, mail_type="admin")
 
 auth.settings.register_onvalidation = [sanitize_fields]
 auth.settings.register_onaccept.append(register_callback)
@@ -385,7 +394,31 @@ db.define_table("stickers_given",
 
 db.define_table("unsubscriber",
                 Field("email",
-                      requires=IS_EMAIL()))
+                      requires=IS_EMAIL()),
+                Field("friend_requests",
+                      "boolean",
+                      default=True,
+                      label="Friend requests from users"),
+                Field("acceptance_rejectance",
+                      "boolean",
+                      default=True,
+                      label="Acceptance/Rejectance of friend requests"),
+                Field("unfriend",
+                      "boolean",
+                      default=True,
+                      label="Notify when a friend unfriends me on StopStalk"),
+                Field("feature_updates",
+                      "boolean",
+                      default=True,
+                      label="New feature updates from StopStalk"),
+                Field("pending_requests",
+                      "boolean",
+                      default=True,
+                      label="Weekly reminder for pending friend requests"),
+                Field("institute_user",
+                      "boolean",
+                      default=True,
+                      label="Notify when a user from your Institute registers"))
 
 if session["auth"]:
     session["handle"] = session["auth"]["user"]["stopstalk_handle"]

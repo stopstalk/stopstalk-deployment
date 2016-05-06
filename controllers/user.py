@@ -680,7 +680,8 @@ To stop receiving mails - %s
                                  host=True),
                              URL("default", "unsubscribe",
                                  scheme=True,
-                                 host=True)))
+                                 host=True)),
+                      mail_type="acceptance_rejectance")
 
     session.flash = "Friend added!"
     redirect(URL("user", "friend_requests"))
@@ -722,7 +723,8 @@ def reject_fr():
                                  host=True),
                              URL("default", "unsubscribe",
                                  scheme=True,
-                                 host=True)))
+                                 host=True)),
+                      mail_type="acceptance_rejectance")
 
     session.flash = "Friend request rejected!"
     redirect(URL("user", "friend_requests"))

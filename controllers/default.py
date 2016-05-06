@@ -191,32 +191,24 @@ def unsubscribe():
     utable = db.unsubscriber
     utable.email.default = session.auth.user.email
     utable.email.writable = False
-    already_unsubscribed = False
 
-    query = (utable.email == session.auth.user.email)
-    rows = db(query).select()
-    if len(rows) != 0:
-        already_unsubscribed = True
-        form = SQLFORM(utable,
-                       submit_button="Subscribe")
-        if form.validate():
-            for row in rows:
-                row.delete_record()
-            session.flash = "Subscribed successfully!"
-            redirect(URL("default", "unsubscribe"))
-        elif form.errors:
-            response.flash = "Form has errors"
-    else:
-        form = SQLFORM(utable,
-                       submit_button="Unsubscribe")
-        if form.process().accepted:
-            response.flash = "Successfully unsubscribed!"
-            redirect(URL("default", "unsubscribe"))
-        elif form.errors:
-            response.flash = "Form has errors"
+    form = SQLFORM(utable,
+                   submit_button="Update Subscription")
 
-    return dict(form=form,
-                already_unsubscribed=already_unsubscribed)
+    record = db(utable.email == session.auth.user.email).select().first()
+    if record:
+        form = SQLFORM(utable,
+                       record,
+                       showid=False,
+                       submit_button="Update Subscription")
+
+    if form.process().accepted:
+        response.flash = "Subscription details updated"
+        redirect(URL("default", "unsubscribe"))
+    elif form.errors:
+        response.flash = "Form has errors"
+
+    return dict(form=form)
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
@@ -919,7 +911,8 @@ To stop receiving mails - %s
                                      URL("default", "unsubscribe",
                                          scheme=True,
                                          host=True,
-                                         extension=False)))
+                                         extension=False)),
+                      mail_type="friend_requests")
 
     return "Friend Request sent"
 
@@ -1070,7 +1063,8 @@ To stop receiving mails - %s
                                          URL("default", "unsubscribe",
                                              scheme=True,
                                              host=True,
-                                             extension=False)))
+                                             extension=False)),
+                          mail_type="unfriend")
 
         return "Successfully unfriended"
 
@@ -1183,7 +1177,8 @@ def contact_us():
                                      form.vars.email,
                                      form.vars.phone_number) + \
                                   "Subject: %s\n" % form.vars.subject + \
-                                  "Message: %s\n" % form.vars.text_message)
+                                  "Message: %s\n" % form.vars.text_message,
+                          mail_type="admin")
         redirect(URL("default", "index"))
     elif form.errors:
         response.flash = "Please fill all the fields!"

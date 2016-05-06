@@ -48,6 +48,7 @@ StopStalk
            host="www.stopstalk.com"),
        URL("default", "unsubscribe",
            scheme="https",
-           host="www.stopstalk.com")))
+           host="www.stopstalk.com")),
+                      mail_type="pending_requests")
 
 # END =========================================================================

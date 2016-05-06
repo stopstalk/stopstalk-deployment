@@ -1,11 +1,5 @@
 {{extend 'layout.html'}}
-{{if already_unsubscribed is False:}}
-<title>Unsubscribe me!</title>
+<title>Subscription details</title>
 <h3>Did we do something wrong? :(</h3>
 <h6>{{=MARKMIN("Please write to us for any feedback - [[here " + URL("default", "contact_us") + "]]")}}</h6>
-<p>Note: You wont be able to get any email updates of your friend requests or any other updates from StopStalk</p>
-{{else:}}
-<title>Subscribe me!</title>
-<h3>Subscribe me back</h3>
-{{pass}}
 {{=form}}
