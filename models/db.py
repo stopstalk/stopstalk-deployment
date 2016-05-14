@@ -144,8 +144,9 @@ def send_mail(to, subject, message, mail_type):
     # Check if user has unsubscribed from email updates
     utable = db.unsubscriber
 
-    query = (utable.email == to) & \
-            (utable[mail_type] == False)
+    query = (utable.email == to)
+    if mail_type != "admin":
+        query &= (utable[mail_type] == False)
 
     row = db(query).select().first()
 
