@@ -107,81 +107,80 @@ class Profile(object):
         self.submissions[handle][page] = {}
         x = bs4.BeautifulSoup(d)
 
-        for i in x.find_all("tr"):
+        trs = x.find_all("tr")[1:]
+        for i in trs:
+            self.submissions[handle][page][it] = []
+            submission = self.submissions[handle][page][it]
+            append = submission.append
+
             try:
-                if i["class"][0] == "kol":
+                # tos = time_of_submission
+                tos = i.contents[0].contents[0]
+            except AttributeError:
+                continue
+            tos = str(ast.literal_eval(repr(tos).replace("\\", "")))
+            tos = self.parsetime(tos)
+            curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
 
-                    self.submissions[handle][page][it] = []
-                    submission = self.submissions[handle][page][it]
-                    append = submission.append
+            # So cool optimization!
+            if curr <= last_retrieved:
+                return
 
-                    # tos = time_of_submission
-                    tos = i.contents[0].contents[0]
-                    tos = str(ast.literal_eval(repr(tos).replace("\\", "")))
-                    tos = self.parsetime(tos)
-                    curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
+            append(str(tos))
 
-                    # So cool optimization!
-                    if curr <= last_retrieved:
-                        return
+            # Problem name/url
+            prob = i.contents[1].contents[0]
+            prob["href"] = "http://www.codechef.com" + prob["href"]
+            problem_link = eval(repr(prob["href"]).replace("\\", ""))
+            append(problem_link)
+            try:
+                append(prob.contents[0])
+            except IndexError:
+                append("")
 
-                    append(str(tos))
+            # Submission status
+            stat = i.contents[2].contents[0]
+            stat = stat.find("img")["src"]
+            stat = repr(stat).replace("\\", "")
+            stat = stat[7:-5]
+            st = "AC"
+            if stat == "tick-icon":
+                st = "AC"
+            elif stat == "cross-icon":
+                st = "WA"
+            elif stat == "alert-icon":
+                st = "CE"
+            elif stat == "runtime-error":
+                st = "RE"
+            elif stat == "clock_error":
+                st = "TLE"
+            else:
+                st = "OTH"
+            append(st)
 
-                    # Problem name/url
-                    prob = i.contents[1].contents[0]
-                    prob["href"] = "http://www.codechef.com" + prob["href"]
-                    problem_link = eval(repr(prob["href"]).replace("\\", ""))
-                    append(problem_link)
-                    try:
-                        append(prob.contents[0])
-                    except IndexError:
-                        append("")
+            # Question points
+            pts = i.contents[2].contents[0].contents
+            try:
+                if  len(pts) >= 5:
+                    points = pts[2] + " " + pts[4]
+                else:
+                    points = pts[2]
+            except IndexError:
+                if st == "AC":
+                    points = "100"
+                else:
+                    points = "0"
+            append(points)
 
-                    # Submission status
-                    stat = i.contents[2].contents[0]
-                    stat = stat.find("img")["src"]
-                    stat = repr(stat).replace("\\", "")
-                    stat = stat[7:-5]
-                    st = "AC"
-                    if stat == "tick-icon":
-                        st = "AC"
-                    elif stat == "cross-icon":
-                        st = "WA"
-                    elif stat == "alert-icon":
-                        st = "CE"
-                    elif stat == "runtime-error":
-                        st = "RE"
-                    elif stat == "clock_error":
-                        st = "TLE"
-                    else:
-                        st = "OTH"
-                    append(st)
+            # Language
+            append(i.contents[3].contents[0].strip())
 
-                    # Question points
-                    pts = i.contents[2].contents[0].contents
-                    try:
-                        if  len(pts) >= 5:
-                            points = pts[2] + " " + pts[4]
-                        else:
-                            points = pts[2]
-                    except IndexError:
-                        if st == "AC":
-                            points = "100"
-                        else:
-                            points = "0"
-                    append(points)
+            # View code link
+            # @ToDo: Find a way to get the code link
+            view_link = ""
+            append(view_link)
 
-                    # Language
-                    append(i.contents[3].contents[0].strip())
-
-                    # View code link
-                    # @ToDo: Find a way to get the code link
-                    view_link = ""
-                    append(view_link)
-
-                    it += 1
-            except KeyError:
-                pass
+            it += 1
 
     # -------------------------------------------------------------------------
     def get_submissions(self, last_retrieved):
@@ -234,86 +233,86 @@ class Profile(object):
 
                 submissions[handle][page] = {}
                 x = bs4.BeautifulSoup(d)
-                for i in x.find_all("tr"):
+                trs = x.find_all("tr")[1:]
+                for i in trs:
+
+                    submissions[handle][page][it] = []
+                    submission = submissions[handle][page][it]
+                    append = submission.append
+
                     try:
-                        if i["class"][0] == "kol":
+                        # tos = time_of_submission
+                        tos = i.contents[0].contents[0]
+                    except AttributeError:
+                        continue
+                    tos = str(ast.literal_eval(repr(tos).replace("\\", "")))
 
-                            submissions[handle][page][it] = []
-                            submission = submissions[handle][page][it]
-                            append = submission.append
+                    # Do not retrieve any further because this leads to ambiguity
+                    # If 2 hours ago => 2 hours 20 mins or 2 hours 14 mins ...
+                    # Let the user come back later when the datetime is exact
+                    # This prevents from redundant addition into database
+                    # @ToDo: For now we are allowing redundant submissions
+                    #        for codechef :/ . Find a way to change it.
+                    #if tos.__contains__("hours"):
+                    #   continue
 
-                            # tos = time_of_submission
-                            tos = i.contents[0].contents[0]
-                            tos = str(ast.literal_eval(repr(tos).replace("\\", "")))
+                    tos = self.parsetime(tos)
+                    curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
 
-                            # Do not retrieve any further because this leads to ambiguity
-                            # If 2 hours ago => 2 hours 20 mins or 2 hours 14 mins ...
-                            # Let the user come back later when the datetime is exact
-                            # This prevents from redundant addition into database
-                            # @ToDo: For now we are allowing redundant submissions
-                            #        for codechef :/ . Find a way to change it.
-                            #if tos.__contains__("hours"):
-                            #   continue
+                    if curr <= last_retrieved:
+                        return submissions
+                    append(str(tos))
 
-                            tos = self.parsetime(tos)
-                            curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
+                    # Problem name/url
+                    prob = i.contents[1].contents[0]
+                    prob["href"] = "http://www.codechef.com" + prob["href"]
+                    problem_link = eval(repr(prob["href"]).replace("\\", ""))
+                    append(problem_link)
+                    try:
+                        append(prob.contents[0])
+                    except IndexError:
+                        append("")
 
-                            if curr <= last_retrieved:
-                                return submissions
-                            append(str(tos))
+                    # Submission status
+                    stat = i.contents[2].contents[0]
+                    stat = stat.find("img")["src"]
+                    stat = repr(stat).replace("\\", "")
+                    stat = stat[7:-5]
+                    st = "AC"
+                    if stat == "tick-icon":
+                        st = "AC"
+                    elif stat == "cross-icon":
+                        st = "WA"
+                    elif stat == "alert-icon":
+                        st = "CE"
+                    elif stat == "runtime-error":
+                        st = "RE"
+                    elif stat == "clock_error":
+                        st = "TLE"
+                    else:
+                        st = "OTH"
+                    append(st)
 
-                            # Problem name/url
-                            prob = i.contents[1].contents[0]
-                            prob["href"] = "http://www.codechef.com" + prob["href"]
-                            problem_link = eval(repr(prob["href"]).replace("\\", ""))
-                            append(problem_link)
-                            try:
-                                append(prob.contents[0])
-                            except IndexError:
-                                append("")
+                    # Question points
+                    pts = i.contents[2].contents[0].contents
+                    try:
+                        if  len(pts) >= 5:
+                            points = pts[2] + " " + pts[4]
+                        else:
+                            points = pts[2]
+                    except IndexError:
+                        if st == "AC":
+                            points = "100"
+                        else:
+                            points = "0"
+                    append(points)
 
-                            # Submission status
-                            stat = i.contents[2].contents[0]
-                            stat = stat.find("img")["src"]
-                            stat = repr(stat).replace("\\", "")
-                            stat = stat[7:-5]
-                            st = "AC"
-                            if stat == "tick-icon":
-                                st = "AC"
-                            elif stat == "cross-icon":
-                                st = "WA"
-                            elif stat == "alert-icon":
-                                st = "CE"
-                            elif stat == "runtime-error":
-                                st = "RE"
-                            elif stat == "clock_error":
-                                st = "TLE"
-                            else:
-                                st = "OTH"
-                            append(st)
+                    # Language
+                    append(i.contents[3].contents[0].strip())
 
-                            # Question points
-                            pts = i.contents[2].contents[0].contents
-                            try:
-                                if  len(pts) >= 5:
-                                    points = pts[2] + " " + pts[4]
-                                else:
-                                    points = pts[2]
-                            except IndexError:
-                                if st == "AC":
-                                    points = "100"
-                                else:
-                                    points = "0"
-                            append(points)
+                    # View code link
+                    view_link = ""
+                    append(view_link)
 
-                            # Language
-                            append(i.contents[3].contents[0].strip())
-
-                            # View code link
-                            view_link = ""
-                            append(view_link)
-
-                            it += 1
-                    except KeyError:
-                        pass
+                    it += 1
             return submissions
