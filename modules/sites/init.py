@@ -47,7 +47,7 @@ def get_request(url, headers={}):
                                     timeout=current.TIMEOUT)
         except RuntimeError:
             return -1
-        except:
+        except Exception as e:
             return {}
 
         if response.status_code == 200:
