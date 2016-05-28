@@ -663,24 +663,27 @@ def accept_fr():
     # Delete the friend request row
     db(db.friend_requests.id == row_id).delete()
 
-    # Send acceptance email to the friend
     atable = db.auth_user
     row = db(atable.id == friend_id).select(atable.email).first()
-    current.send_mail(row.email,
-                      session.handle + \
-                      " from StopStalk accepted your friend request!",
-                      """
+
+    subject = session.handle + " from StopStalk accepted your friend request!"
+    message = """
 %s (%s) accepted your friend request
 
 To stop receiving mails - %s
-                      """ % (session.handle,
-                             URL("user", "profile",
-                                 args=[session.handle],
-                                 scheme=True,
-                                 host=True),
-                             URL("default", "unsubscribe",
-                                 scheme=True,
-                                 host=True)),
+              """ % (session.handle,
+                     URL("user", "profile",
+                         args=[session.handle],
+                         scheme=True,
+                         host=True),
+                     URL("default", "unsubscribe",
+                         scheme=True,
+                         host=True))
+
+    # Send acceptance email to the friend
+    current.send_mail(to=row.email,
+                      subject=subject,
+                      message=message,
                       mail_type="acceptance_rejectance")
 
     session.flash = "Friend added!"
@@ -708,22 +711,24 @@ def reject_fr():
     # Simply delete the friend request
     db(db.friend_requests.id == fr_id).delete()
 
-    # Send rejection email to the friend
-    current.send_mail(row.email,
-                      session.handle + \
-                      " from StopStalk rejected your friend request!",
-                      """
-                         %s (%s) rejected your friend request
+    subject = session.handle + " from StopStalk rejected your friend request!"
+    message = """
+%s (%s) rejected your friend request
 
-                         To stop receiving mails - %s
-                      """ % (session.handle,
-                             URL("user", "profile",
-                                 args=[session.handle],
-                                 scheme=True,
-                                 host=True),
-                             URL("default", "unsubscribe",
-                                 scheme=True,
-                                 host=True)),
+To stop receiving mails - %s
+              """ % (session.handle,
+                     URL("user", "profile",
+                         args=[session.handle],
+                         scheme=True,
+                         host=True),
+                     URL("default", "unsubscribe",
+                         scheme=True,
+                         host=True))
+
+    # Send rejection email to the friend
+    current.send_mail(to=row.email,
+                      subject=subject,
+                      message=message,
                       mail_type="acceptance_rejectance")
 
     session.flash = "Friend request rejected!"
