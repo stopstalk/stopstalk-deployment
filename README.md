@@ -2,37 +2,100 @@
 Stop stalking and Start StopStalking :sunglasses:
 
 ## Module Requirements
-1. parsedatetime `pip install parsedatetime` (Version 1.5)
-2. gevent `pip install greenlet` (Version 0.4.9)
-3. beautifulsoup `pip install beautifulsoup4` (Version 4.2.1)
-4. requests `pip install requests` (Version 2.7.0)
+Note: Apply sudo if required for your system.
+
+* parsedatetime (Version 2.1) 
+```
+$ pip install parsedatetime
+```
+
+* gevent (Version 1.1.1)
+```
+$ pip install gevent
+``` 
+
+* greenlet (Version 0.4.9)
+```
+$ pip install greenlet
+``` 
+
+* beautifulsoup (Version 4.4.1)
+```
+$ pip install beautifulsoup4
+``` 
+
+* requests (Version 2.10.0)
+
+```
+$ pip install requests
+```
 
 ## Installation
 1. Install web2py in a directory
-
-    `git clone --recursive https://github.com/web2py/web2py.git`
+    * From source
+    ```
+    $ git clone --recursive https://github.com/web2py/web2py.git
+    ```
+    * From zip
+    
+        Directly [download](http://web2py.com/init/default/download) appropriate zip 
+        and unzip it to get the `web2py` directory set up on your local machine.
+        
+        Note: In this method you will have a fixed version of web2py, whereas in the former
+              you might as well keep on pulling the latest changes made in web2py source.
 
    If you have it already jump to step 2.
 2. Navigate into the applications directory in web2py directory.
 
-    `cd web2py/applications/`
+    ```
+    $ cd web2py/applications/
+    ```
 3. Install StopStalk by cloning this repository
 
-    `git clone https://github.com/raj454raj/stopstalk.git`
-4. Navigate back to the web2py folder and start the web2py server.
+    ```
+    git clone https://github.com/stopstalk/stopstalk-deployment.git
+    ```
+4. Install MySQL - [here](http://dev.mysql.com/downloads/)
+   Make sure you remember the root password for mysql server.
 
-    `cd ..` // Assuming you are in the applications directory
+5. Create a database in MySQL
+    
+    ```
+    $ mysql -u root -p        # Enter your mysql root password after this.
+    
+    mysql> CREATE DATABASE migration;
+    ```
+6. Copy `0firstrun.py` to `models/`
+    
+    ```
+    $ cd applications/stopstalk
+    $ cp modules/0firstrun.py models/
+    ```
+7. Open `0firstrun.py` and change the settings.
+    
+    ```
+    current.mysql_user = "root" # Change if you have given access to any other user in mysql
+    current.mysql_password = "" # As per your mysql password 
+    current.mysql_dbname = "migration" # Will remain same as long as you followed 5.
+    current.smtp_server = "logging" # Mails will not be sent. Will be logged where the web2py server is running 
+                                    # Else you can set it to your smtp server.     
+    current.sender_mail = ""        # Not required if logging
+    current.sender_password = ""    # Not required if logging
+    ```
+8. Navigate back to the web2py folder and start the web2py server.
 
-    `python web2py -a yourPassword` // Choose any password
-
-5. Open the browser and go to the URL -
+    ```
+    $ cd web2py
+    $ python web2py -a yourPassword // Choose any password
+    ```
+9. Open the browser and go to the URL -
 
     `http://localhost:8000/stopstalk/`
 
   **Note:**
   * The database will be completely empty after installation
 
-6. Done. :smile:
+10. Done. :smile:
 
 ## Contribute
 
@@ -45,12 +108,20 @@ Stop stalking and Start StopStalking :sunglasses:
    **Note:** Make sure to add the issue number in the commit message.
 
    Example Commit message: `Solved Issue #5`
-5. I will review it as soon as possible.
+5. We will review it as soon as possible.
 
 ## Configuration
     Configure the models/000_config.py file as per your requirement.
 
 ## Contact
-  > Email: raj454raj@gmail.com
+  > Email: contactstopstalk@gmail.com, raj454raj@gmail.com
+  
+  > Contact Us Page: https://www.stopstalk.com/contact_us
+  
+  > Creator Website: http://raj454raj.com
 
-  > Website: https://whoisraj454raj.com
+## Social Links
+
+* [Facebook] (https://www.facebook.com/stopstalkcommunity/)
+* [Twitter](https://twitter.com/stop_stalk)
+* [Google-Plus](https://plus.google.com/110575194069678651985)
