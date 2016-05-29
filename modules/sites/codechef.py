@@ -73,7 +73,7 @@ class Profile(object):
         all_tags = []
         try:
             tags = t["tags"]
-            all_as = BeautifulSoup(str(tags)).find_all("a")
+            all_as = BeautifulSoup(str(tags), "lxml").find_all("a")
             for i in all_as:
                 all_tags.append(i.contents[0].strip())
             return all_tags
@@ -105,7 +105,7 @@ class Profile(object):
 
         it = 1
         self.submissions[handle][page] = {}
-        x = bs4.BeautifulSoup(d)
+        x = bs4.BeautifulSoup(d, "lxml")
 
         trs = x.find_all("tr")[1:]
         for i in trs:
@@ -232,7 +232,7 @@ class Profile(object):
                 d = ast.literal_eval(tmp.text)["content"]
 
                 submissions[handle][page] = {}
-                x = bs4.BeautifulSoup(d)
+                x = bs4.BeautifulSoup(d, "lxml")
                 trs = x.find_all("tr")[1:]
                 for i in trs:
 

@@ -19,10 +19,11 @@ $ pip install gevent
 $ pip install greenlet
 ``` 
 
-* beautifulsoup (Version 4.4.1)
+* beautifulsoup (Version 4.4.1). Also install `lxml` (Version 3.6.0) parser for best use of BeautifulSoup.
 ```
 $ pip install beautifulsoup4
-``` 
+$ pip install lxml
+```
 
 * requests (Version 2.10.0)
 

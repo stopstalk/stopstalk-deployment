@@ -42,7 +42,7 @@ class Profile(object):
         if response == -1 or response == {}:
             return ["-"]
 
-        b = BeautifulSoup(response.text)
+        b = BeautifulSoup(response.text, "lxml")
         try:
             tags = b.find_all("div", class_="problem-tags")[0]
         except IndexError:
@@ -119,7 +119,7 @@ class Profile(object):
 
                 try:
                     feed_key = "feed" + str(feed_number)
-                    final = bs4.BeautifulSoup((tmp.json()[feed_key]))
+                    final = bs4.BeautifulSoup(tmp.json()[feed_key], "lxml")
                 except KeyError:
                     break
 

@@ -42,7 +42,8 @@ class Profile(object):
         if response == -1 or response == {}:
             return ["-"]
 
-        tags = BeautifulSoup(response.text).find_all("span", class_="tag-box")
+        tags = BeautifulSoup(response.text, "lxml").find_all("span", 
+                                                             class_="tag-box")
         all_tags = []
 
         for tag in tags:

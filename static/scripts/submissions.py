@@ -23,13 +23,14 @@
 import time
 import traceback
 import gevent
+import sys
 from datetime import datetime
 from gevent import monkey
 gevent.monkey.patch_all(thread=False)
 
 # @ToDo: Make this generalised
 from sites import codechef, codeforces, spoj, hackerearth, hackerrank
-N = 1
+N = int(sys.argv[1])
 rows = []
 
 # -----------------------------------------------------------------------------

@@ -42,7 +42,8 @@ class Profile(object):
         if response == -1 or response == {}:
             return ["-"]
 
-        tags = BeautifulSoup(response.text).find_all("div", id="problem-tags")
+        tags = BeautifulSoup(response.text, "lxml").find_all("div", 
+                                                             id="problem-tags")
         try:
             tags = tags[0].findAll("span")
         except IndexError:
@@ -93,7 +94,7 @@ class Profile(object):
             if t == -1:
                 return -1
 
-            soup = bs4.BeautifulSoup(t.text)
+            soup = bs4.BeautifulSoup(t.text, "lxml")
             table_body = soup.find("tbody")
 
             # Check if the page retrieved has no submissions
