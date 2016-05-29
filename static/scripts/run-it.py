@@ -21,7 +21,9 @@
 """
 
 import os
+import sys
 from datetime import datetime
+
 N = int(sys.argv[1])
 stopstalk_logs = "/root/stopstalk-logs/"
 if not os.path.exists(stopstalk_logs):
@@ -40,8 +42,9 @@ os.chdir(today_dir)
 directory = "/home/www-data/web2py/"
 
 print "Retrieving submissions ..."
-command = "python %s -S stopstalk -M -R %sapplications/stopstalk/static/scripts/submissions.py -A %d" % (directory, 
-                                                                                                         directory, 
-                                                                                                         N)
+command = "python %sweb2py.py -S stopstalk -M -R " % directory + \
+          "%sapplications/stopstalk/static/scripts/submissions.py " % directory + \
+          "-A %d > submissions%d.log" % (N, N)
+
 os.system(command)
 os.system("cat " + today_dir + "submissions%d.log" % N)
