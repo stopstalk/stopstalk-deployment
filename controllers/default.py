@@ -24,7 +24,6 @@ import time
 import datetime
 import parsedatetime as pdt
 import requests
-from operator import itemgetter
 import utilities
 
 # ----------------------------------------------------------------------------
@@ -225,7 +224,7 @@ def my_friends():
                            TH("Institute friend"),
                            TH("Other friend"),
                            TH("Claimable"))),
-                      _class="centered col offset-s3 s6")
+                  _class="centered col offset-s3 s6")
 
     tbody = TBODY()
     check = I(_class="fa fa-check",
@@ -295,17 +294,6 @@ def my_friends():
     return dict(table=DIV(table, _class="row"),
                 claimable_stickers=claimable_stickers,
                 stickers=stickers)
-
-# ----------------------------------------------------------------------------
-def sort_contests(a, b):
-    if a["has_started"] and b["has_started"]:
-        return a["end"] < b["end"]
-    elif a["has_started"] and b["has_started"] == False:
-        return False
-    elif a["has_started"] == False and b["has_started"]:
-        return True
-    else:
-        return a["start"] < b["start"]
 
 # ----------------------------------------------------------------------------
 def contests():
@@ -656,9 +644,7 @@ def filters():
 
     all_languages = db(stable).select(stable.lang,
                                       distinct=True)
-    languages = []
-    for  i in all_languages:
-        languages.append(i["lang"])
+    languages = [x["lang"] for x in all_languages]
 
     table = None
     global_submissions = False
@@ -956,7 +942,7 @@ def retrieve_users():
 
     rows = db(query).select(*columns)
 
-    t = TABLE(_class="striped centered")
+    table = TABLE(_class="striped centered")
     tr = TR(TH("Name"),
             TH("StopStalk Handle"))
 
@@ -966,7 +952,7 @@ def retrieve_users():
     tr.append(TH("Friendship Status"))
     thead = THEAD()
     thead.append(tr)
-    t.append(thead)
+    table.append(thead)
 
     tbody = TBODY()
 
@@ -974,7 +960,7 @@ def retrieve_users():
     friends = db(query).select(atable.id,
                                join=ftable.on(ftable.friend_id == atable.id))
     friends = [x["id"] for x in friends]
-
+    btn_class = "tooltipped btn-floating btn-large waves-effect waves-light"
     for user in rows:
 
         tr = TR()
@@ -994,7 +980,7 @@ def retrieve_users():
                    (frtable.to_h == user.id)).count()
             if r == 0:
                 tr.append(TD(BUTTON(I(_class="fa fa-user-plus fa-3x"),
-                                    _class="tooltipped btn-floating btn-large waves-effect waves-light green",
+                                    _class=btn_class + " green",
                                     data={"position": "bottom",
                                           "delay": "50",
                                           "tooltip": "Send friend request",
@@ -1002,14 +988,14 @@ def retrieve_users():
                                           "type": "add-friend"})))
             else:
                 tr.append(TD(BUTTON(I(_class="fa fa-user-plus fa-3x"),
-                                    _class="tooltipped btn-floating btn-large disabled",
+                                    _class=btn_class + " disabled",
                                     data={"position": "bottom",
                                           "delay": "50",
                                           "tooltip": "Send friend request",
                                           "type": "disabled"})))
         else:
             tr.append(TD(BUTTON(I(_class="fa fa-user-times fa-3x"),
-                                _class="tooltipped btn-floating btn-large waves-effect waves-light black",
+                                _class=btn_class + " black",
                                 data={"position": "bottom",
                                       "delay": "50",
                                       "tooltip": "Friend request pending",
@@ -1017,8 +1003,8 @@ def retrieve_users():
                                       "type": "unfriend"})))
         tbody.append(tr)
 
-    t.append(tbody)
-    return dict(t=t)
+    table.append(tbody)
+    return dict(table=table)
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()

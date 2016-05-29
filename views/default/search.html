@@ -10,7 +10,7 @@
                 url: 'retrieve_users.json',
                 data: {q: $(this).val()}
             }).done(function(html) {
-                $('#responseDiv').html(html['t']);
+                $('#responseDiv').html(html['table']);
                 $('button').click(function() {
                     var thisButton = $(this);
                     var userID = thisButton.attr('data-user-id');
