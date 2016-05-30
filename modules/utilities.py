@@ -289,7 +289,7 @@ def materialize_form(form, fields):
     form.add_class("form-horizontal center")
     main_div = DIV(_class="center")
 
-    for field_id, label, controls, field_help in fields:
+    for _, label, controls, _ in fields:
         curr_div = DIV(_class="row")
         input_field = None
         _controls = controls

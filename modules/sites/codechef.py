@@ -139,24 +139,23 @@ class Profile(object):
                 append("")
 
             # Submission status
-            stat = i.contents[2].contents[0]
-            stat = stat.find("img")["src"]
-            stat = repr(stat).replace("\\", "")
-            stat = stat[7:-5]
-            st = "AC"
-            if stat == "tick-icon":
-                st = "AC"
-            elif stat == "cross-icon":
-                st = "WA"
-            elif stat == "alert-icon":
-                st = "CE"
-            elif stat == "runtime-error":
-                st = "RE"
-            elif stat == "clock_error":
-                st = "TLE"
+            status = i.contents[2].contents[0].find("img")["src"]
+            status = repr(status).replace("\\", "")
+            status = status[7:-5]
+            submission_status = "AC"
+            if status == "tick-icon":
+                submission_status = "AC"
+            elif status == "cross-icon":
+                submission_status = "WA"
+            elif status == "alert-icon":
+                submission_status = "CE"
+            elif status == "runtime-error":
+                submission_status = "RE"
+            elif status == "clock_error":
+                submission_status = "TLE"
             else:
-                st = "OTH"
-            append(st)
+                submission_status = "OTH"
+            append(submission_status)
 
             # Question points
             pts = i.contents[2].contents[0].contents
@@ -166,7 +165,7 @@ class Profile(object):
                 else:
                     points = pts[2]
             except IndexError:
-                if st == "AC":
+                if submission_status == "AC":
                     points = "100"
                 else:
                     points = "0"
@@ -274,24 +273,23 @@ class Profile(object):
                         append("")
 
                     # Submission status
-                    stat = i.contents[2].contents[0]
-                    stat = stat.find("img")["src"]
-                    stat = repr(stat).replace("\\", "")
-                    stat = stat[7:-5]
-                    st = "AC"
-                    if stat == "tick-icon":
-                        st = "AC"
-                    elif stat == "cross-icon":
-                        st = "WA"
-                    elif stat == "alert-icon":
-                        st = "CE"
-                    elif stat == "runtime-error":
-                        st = "RE"
-                    elif stat == "clock_error":
-                        st = "TLE"
+                    status = i.contents[2].contents[0].find("img")["src"]
+                    status = repr(status).replace("\\", "")
+                    status = status[7:-5]
+                    submission_status = "AC"
+                    if status == "tick-icon":
+                        submission_status = "AC"
+                    elif status == "cross-icon":
+                        submission_status = "WA"
+                    elif status == "alert-icon":
+                        submission_status = "CE"
+                    elif status == "runtime-error":
+                        submission_status = "RE"
+                    elif status == "clock_error":
+                        submission_status = "TLE"
                     else:
-                        st = "OTH"
-                    append(st)
+                        submission_status = "OTH"
+                    append(submission_status)
 
                     # Question points
                     pts = i.contents[2].contents[0].contents
@@ -301,7 +299,7 @@ class Profile(object):
                         else:
                             points = pts[2]
                     except IndexError:
-                        if st == "AC":
+                        if submission_status == "AC":
                             points = "100"
                         else:
                             points = "0"

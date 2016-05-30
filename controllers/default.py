@@ -1077,7 +1077,7 @@ def submissions():
     # The Original IDs of duplicate custom_friends
     custom_friends = []
     for cus_id in cusfriends:
-        if cus_id[1] == None:
+        if cus_id[1] is None:
             custom_friends.append(cus_id[0])
         else:
             custom_friends.append(cus_id[1])

@@ -36,10 +36,8 @@ def get_request(url, headers={}):
         Make a HTTP GET request to a url
     """
 
-    MAX_TRIES_ALLOWED = current.MAX_TRIES_ALLOWED
     i = 0
-
-    while i < MAX_TRIES_ALLOWED:
+    while i < current.MAX_TRIES_ALLOWED:
         try:
             response = requests.get(url,
                                     headers=headers,

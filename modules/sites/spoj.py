@@ -42,7 +42,7 @@ class Profile(object):
         if response == -1 or response == {}:
             return ["-"]
 
-        tags = BeautifulSoup(response.text, "lxml").find_all("div", 
+        tags = BeautifulSoup(response.text, "lxml").find_all("div",
                                                              id="problem-tags")
         try:
             tags = tags[0].findAll("span")
@@ -134,22 +134,22 @@ class Profile(object):
                     # Problem Status
                     status = str(i.contents[6])
                     if status.__contains__("accepted"):
-                        st = "AC"
+                        submission_status = "AC"
                     elif status.__contains__("wrong"):
-                        st = "WA"
+                        submission_status = "WA"
                     elif status.__contains__("compilation"):
-                        st = "CE"
+                        submission_status = "CE"
                     elif status.__contains__("runtime"):
-                        st = "RE"
+                        submission_status = "RE"
                     elif status.__contains__("time limit"):
-                        st = "TLE"
+                        submission_status = "TLE"
                     else:
-                        st = "OTH"
+                        submission_status = "OTH"
 
-                    append(st)
+                    append(submission_status)
 
                     # Question Points
-                    if st == "AC":
+                    if submission_status == "AC":
                         points = "100"
                     else:
                         points = "0"
@@ -170,4 +170,3 @@ class Profile(object):
                 break
 
         return submissions
-

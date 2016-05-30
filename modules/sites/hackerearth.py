@@ -72,7 +72,7 @@ class Profile(object):
             return t
 
         tmp_string = t.headers["set-cookie"]
-        csrf_token = re.findall("csrftoken=\w*", tmp_string)[0][10:]
+        csrf_token = re.findall(r"csrftoken=\w*", tmp_string)[0][10:]
         url = "https://www.hackerearth.com/AJAX/feed/newsfeed/submission/user/" + handle + "/"
 
         response = {}
@@ -105,6 +105,7 @@ class Profile(object):
                 return -1
             try:
                 final_json = tmp.json()
+            # @ToDo: Specify exception
             except:
                 break
 

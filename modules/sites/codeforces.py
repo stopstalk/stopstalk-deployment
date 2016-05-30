@@ -42,7 +42,7 @@ class Profile(object):
         if response == -1 or response == {}:
             return ["-"]
 
-        tags = BeautifulSoup(response.text, "lxml").find_all("span", 
+        tags = BeautifulSoup(response.text, "lxml").find_all("span",
                                                              class_="tag-box")
         all_tags = []
 
@@ -86,7 +86,6 @@ class Profile(object):
 
             # Time of submission
             append(str(time.strftime("%Y-%m-%d %H:%M:%S", curr)))
-            time_stamp = time.strftime("%Y-%m-%d %H:%M:%S", curr)
 
             arg = "problem/"
             if len(str(row["contestId"])) > 3:
@@ -106,33 +105,34 @@ class Profile(object):
                 status = row["verdict"]
             except KeyError:
                 status = "OTHER"
-            st = "AC"
+            submission_status = "AC"
             if status == "OK":
-                st = "AC"
+                submission_status = "AC"
             elif status == "WRONG_ANSWER":
-                st = "WA"
+                submission_status = "WA"
             elif status == "COMPILATION_ERROR":
-                st = "CE"
+                submission_status = "CE"
             elif status == "SKIPPED":
-                st = "SK"
+                submission_status = "SK"
             elif status == "RUNTIME_ERROR":
-                st = "RE"
+                submission_status = "RE"
             elif status == "TIME_LIMIT_EXCEEDED":
-                st = "TLE"
+                submission_status = "TLE"
             elif status == "CHALLENGED":
-                st = "HCK"
+                submission_status = "HCK"
             elif status == "MEMORY_LIMIT_EXCEEDED":
-                st = "MLE"
+                submission_status = "MLE"
+            # @ToDo: Is this a good and/or correct way?
             elif status == "TESTING":
                 continue
             else:
-                st = "OTH"
-            append(st)
+                submission_status = "OTH"
+            append(submission_status)
 
             # Points
-            if st == "AC":
+            if submission_status == "AC":
                 points = "100"
-            elif st == "HCK":
+            elif submission_status == "HCK":
                 points = "-50"
             else:
                 points = "0"

@@ -20,9 +20,7 @@
     THE SOFTWARE.
 """
 
-import re
 import datetime
-from operator import itemgetter
 import utilities
 
 # ----------------------------------------------------------------------------
@@ -48,7 +46,7 @@ def pie_chart_helper():
             # The Original IDs of duplicate custom_friends
             custom_friends = []
             for cus_id in cusfriends:
-                if cus_id[1] == None:
+                if cus_id[1] is None:
                     custom_friends.append(cus_id[0])
                 else:
                     custom_friends.append(cus_id[1])
@@ -70,8 +68,8 @@ def index():
         The main problem page
     """
 
-    if request.vars.has_key("pname") == False or \
-       request.vars.has_key("plink") == False:
+    if request.vars.has_key("pname") is False or \
+       request.vars.has_key("plink") is False:
 
         # Disables direct entering of a URL
         session.flash = "Please click on a Problem Link"
@@ -97,7 +95,7 @@ def index():
             # The Original IDs of duplicate custom_friends
             custom_friends = []
             for cus_id in cusfriends:
-                if cus_id[1] == None:
+                if cus_id[1] is None:
                     custom_friends.append(cus_id[0])
                 else:
                     custom_friends.append(cus_id[1])
@@ -200,11 +198,7 @@ def tag():
 
     # Enables multiple space seperated tag search
     q = q.split(" ")
-    stable = db.submission
     ptable = db.problem_tags
-    atable = db.auth_user
-    cftable = db.custom_friend
-    ftable = db.friends
 
     query = None
     for tag in q:
@@ -333,8 +327,6 @@ def trending():
     """
 
     stable = db.submission
-    atable = db.auth_user
-    cftable = db.custom_friend
 
     today = datetime.datetime.today()
     # Consider submissions only after PAST_DAYS(customisable)
@@ -350,7 +342,7 @@ def trending():
         # The Original IDs of duplicate custom_friends
         custom_friends = []
         for cus_id in cusfriends:
-            if cus_id[1] == None:
+            if cus_id[1] is None:
                 custom_friends.append(cus_id[0])
             else:
                 custom_friends.append(cus_id[1])
