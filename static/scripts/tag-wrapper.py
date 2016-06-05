@@ -42,6 +42,6 @@ directory = "/home/www-data/web2py/"
 print "Refreshing tags ..."
 os.system("python " + directory + \
           "web2py.py -S stopstalk -M -R " + directory + \
-          "applications/stopstalk/static/scripts/refresh_tags.py > " + \
+          "applications/stopstalk/static/scripts/refresh-tags.py > " + \
           today_dir + "tags.log")
 os.system("cat " + today_dir + "/tags.log")
