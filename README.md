@@ -83,6 +83,9 @@ $ pip install requests
     current.sender_mail = ""        # Not required if logging
     current.sender_password = ""    # Not required if logging
     ```
+   
+   In case if you want to send emails - Install `postfix` for your respective OS and configure the above smtp server accordingly.
+   
 8. Navigate back to the web2py folder and start the web2py server.
 
     ```
