@@ -27,9 +27,9 @@ response.logo = A(B("StopStalk"), _class="navbar-brand",
 response.title = request.application.replace('_',' ').title()
 response.subtitle = ''
 
-response.meta.author = 'Raj Patel raj454raj@gmail.com contactstopstalk@gmail.com StopStalk'
-response.meta.description = 'Retrieve submissions of friends\' from various competitive websites and analyse them'
-response.meta.keywords = 'stopstalk, raj454raj, IIIT, competitive programming, progress'
+response.meta.author = 'StopStalk admin@stopstalk.com'
+response.meta.description = 'Retrieves submissions of friends\' from various competitive websites and analyse them'
+response.meta.keywords = 'stopstalk, raj454raj, competitive programming, algorithms, algorithmic progress'
 response.meta.generator = ''
 
 response.google_analytics_id = None

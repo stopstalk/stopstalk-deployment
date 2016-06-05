@@ -135,7 +135,7 @@ auth.define_tables(username=False, signature=False)
 ## configure email
 mail = auth.settings.mailer
 mail.settings.server = current.smtp_server
-mail.settings.sender = "StopStalk <" + current.sender_mail + ">"
+mail.settings.sender = "Team StopStalk <" + current.sender_mail + ">"
 mail.settings.login = current.sender_mail + ":" + current.sender_password
 
 # -----------------------------------------------------------------------------
