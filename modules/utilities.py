@@ -35,33 +35,6 @@ def get_link(site, handle):
 
     return current.SITES[site] + handle
 
-
-# -----------------------------------------------------------------------------
-def get_duration(start, end):
-    """
-        Get duration between two datetime objects
-    """
-
-    delta = str(end - start).split(",")
-
-    if len(delta) == 1:
-        t = [int(x) for x in delta[0].split(":")]
-        if t[0] == 0:
-            if t[1] == 0:
-                return "%d seconds" % t[2]
-            else:
-                return "%d minutes, %d seconds" % (t[1], t[2])
-        else:
-            final_duration = "%d hours" % t[0]
-            if t[1]:
-                final_duration += ", %d minutes" % t[1]
-            if t[2]:
-                final_duration += ", %d seconds" % t[2]
-            return final_duration
-    else:
-        return delta[0]
-
-
 # -----------------------------------------------------------------------------
 def urltosite(url):
     """
@@ -76,7 +49,6 @@ def urltosite(url):
     site = site[4:-4]
 
     return site
-
 
 # -----------------------------------------------------------------------------
 def get_friends(user_id):
@@ -94,8 +66,9 @@ def get_friends(user_id):
     # Retrieve custom friends
     query = (cftable.user_id == user_id)
     custom_friends = db(query).select(cftable.id, cftable.duplicate_cu)
-    for i in custom_friends:
-        cf_to_duplicate.append((i["id"], i["duplicate_cu"]))
+    for custom_friend in custom_friends:
+        cf_to_duplicate.append((custom_friend.id,
+                                custom_friend.duplicate_cu))
 
     # Retrieve friends
     query = (ftable.user_id == user_id)
@@ -103,7 +76,6 @@ def get_friends(user_id):
     friends = [x["friend_id"] for x in friends]
 
     return friends, cf_to_duplicate
-
 
 # ----------------------------------------------------------------------------
 def get_accepted_streak(handle):
@@ -127,7 +99,6 @@ def get_accepted_streak(handle):
     streak = db.executesql(sql_query)
     return streak[0][0]
 
-
 # ----------------------------------------------------------------------------
 def get_max_accepted_streak(handle):
     """
@@ -147,8 +118,7 @@ def get_max_accepted_streak(handle):
 
     for status in rows:
         if prev is None:
-            if status[0] == "AC":
-                streak = 1
+            streak = 1 if status[0] == "AC" else 0
         elif prev == "AC" and status[0] == "AC":
             streak += 1
         elif prev != "AC" and status[0] == "AC":
@@ -160,7 +130,6 @@ def get_max_accepted_streak(handle):
 
     max_streak = max(max_streak, streak)
     return max_streak
-
 
 # ----------------------------------------------------------------------------
 def get_max_streak(submissions):
@@ -202,9 +171,12 @@ def get_max_streak(submissions):
 
     return max_streak, total_submissions, streak, len(submissions)
 
-
 # ----------------------------------------------------------------------------
-def compute_row(record, complete_dict, solved, custom=False, update_flag=False):
+def compute_row(record,
+                complete_dict,
+                solved,
+                custom=False,
+                update_flag=False):
     """
         Computes rating and retrieves other
         information of the specified user
@@ -230,8 +202,7 @@ def compute_row(record, complete_dict, solved, custom=False, update_flag=False):
     start = datetime.strptime(current.INITIAL_DATE,
                               "%Y-%m-%d %H:%M:%S").date()
 
-    if record.per_day is None or \
-       record.per_day == 0.0:
+    if record.per_day is None or record.per_day == 0.0:
         per_day = total_submissions * 1.0 / (today - start).days
     else:
         per_day = record.per_day
@@ -261,13 +232,10 @@ def compute_row(record, complete_dict, solved, custom=False, update_flag=False):
     if record.rating != rating:
         rating_diff = rating - int(record.rating)
         if update_flag:
-            table = db.auth_user
-            if custom:
-                table = db.custom_friend
+            table = db.custom_friend if custom else db.auth_user
             # Update the rating ONLY when the function is called by run-it5.py
             query = (table.stopstalk_handle == record.stopstalk_handle)
-            db(query).update(per_day=per_day,
-                             rating=rating)
+            db(query).update(per_day=per_day, rating=rating)
     else:
         rating_diff = 0
 
@@ -278,7 +246,6 @@ def compute_row(record, complete_dict, solved, custom=False, update_flag=False):
             diff,
             custom,
             rating_diff)
-
 
 # -----------------------------------------------------------------------------
 def materialize_form(form, fields):
@@ -364,7 +331,6 @@ def materialize_form(form, fields):
 
     return main_div
 
-
 # -----------------------------------------------------------------------------
 def render_table(submissions, duplicates=[]):
     """
@@ -394,8 +360,6 @@ def render_table(submissions, duplicates=[]):
 
     tbody = TBODY()
     for submission in submissions:
-        tr = TR()
-        append = tr.append
         span = SPAN()
 
         if submission.user_id:
@@ -407,10 +371,11 @@ def render_table(submissions, duplicates=[]):
             # We need to do this because there might be a case
             # when a duplicate custom_user is created and then
             # his name or institute is changed
-            for f in duplicates:
-                if f[1] == person_id and f[0] is not None:
-                    person_id = current.db.custom_friend(f[0])
+            for duplicate in duplicates:
+                if duplicate[1] == person_id and duplicate[0]:
+                    person_id = current.db.custom_friend(duplicate[0])
                     break
+
             span = SPAN(_class="orange tooltipped",
                         data={"position": "right",
                               "delay": "50",
@@ -421,10 +386,12 @@ def render_table(submissions, duplicates=[]):
                                 "width:10px; " + \
                                 "border-radius: 50%;")
 
+        tr = TR()
+        append = tr.append
         append(TD(DIV(span,
                       A(person_id.first_name + " " + person_id.last_name,
                         _href=URL("user", "profile",
-                                  args=[person_id.stopstalk_handle],
+                                  args=person_id.stopstalk_handle,
                                   extension=False),
                         _target="_blank"))))
         append(TD(submission.site))

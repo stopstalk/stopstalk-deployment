@@ -90,7 +90,7 @@ def index():
     cusfriends = []
 
     if global_submissions is False:
-        if session.user_id:
+        if auth.is_logged_in():
             friends, cusfriends = utilities.get_friends(session.user_id)
             # The Original IDs of duplicate custom_friends
             custom_friends = []
@@ -336,7 +336,7 @@ def trending():
 
     count = stable.id.count()
 
-    if session.user_id:
+    if auth.is_logged_in():
         friends, cusfriends = utilities.get_friends(session.user_id)
 
         # The Original IDs of duplicate custom_friends
@@ -396,7 +396,7 @@ def trending():
                                     global_trending,
                                     "Users")
 
-    if session.user_id:
+    if auth.is_logged_in():
         div = DIV(_class="row col s12")
         div.append(DIV(friend_table, _class="col s6"))
         div.append(DIV(global_table, _class="col s6"))

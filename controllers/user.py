@@ -64,21 +64,21 @@ def add_custom_friend():
             redirect(URL("user", "profile", args=original_handle))
 
     # The total referrals by the logged-in user
-    query = (atable.referrer == session["handle"])
+    query = (atable.referrer == session.handle)
 
     # User should not enter his/her own
     # stopstalk handle as referrer handle
-    query &= (atable.stopstalk_handle != session["handle"])
+    query &= (atable.stopstalk_handle != session.handle)
     total_referrals = db(query).count()
 
     # Retrieve the total allowed custom users from auth_user table
-    query = (atable.id == session["user_id"])
+    query = (atable.id == session.user_id)
     row = db(query).select(atable.referrer,
                            atable.allowed_cu).first()
     default_allowed = row.allowed_cu
     referrer = 0
     # If a valid referral is applied then award 1 extra CU
-    if row.referrer and row.referrer != session["handle"]:
+    if row.referrer and row.referrer != session.handle:
         referrer = db(atable.stopstalk_handle == row.referrer).count()
 
     # 3 custom friends allowed plus one for each 5 invites
@@ -86,7 +86,7 @@ def add_custom_friend():
     allowed_custom_friends = total_referrals / 5 + default_allowed + referrer
 
     # Custom users already created
-    current_count = db(db.custom_friend.user_id == session["user_id"]).count()
+    current_count = db(db.custom_friend.user_id == session.user_id).count()
 
     if current_count >= allowed_custom_friends:
         session.flash = "Sorry!! All custom users used up!"
@@ -120,7 +120,7 @@ def edit_custom_friend_details():
     """
 
     cftable = db.custom_friend
-    rows = db(cftable.user_id == session["user_id"]).select()
+    rows = db(cftable.user_id == session.user_id).select()
 
     table = TABLE(_class="table")
     tr = TR(TH("Name"),
@@ -210,7 +210,7 @@ def update_friend():
 
     cftable = db.custom_friend
 
-    query = (cftable.user_id == session["user_id"]) & \
+    query = (cftable.user_id == session.user_id) & \
             (cftable.id == request.args[0])
     row = db(query).select(cftable.id)
     if len(row) == 0:
@@ -279,7 +279,7 @@ def get_dates():
     """
 
     if len(request.args) != 1:
-        if session.handle:
+        if auth.is_logged_in():
             handle = str(session.handle)
         else:
             redirect(URL("default", "index"))
@@ -355,7 +355,7 @@ def get_stats():
         redirect(URL("default", "index"))
 
     if len(request.args) < 1:
-        if session.handle:
+        if auth.is_logged_in():
             handle = str(session.handle)
         else:
             redirect(URL("default", "index"))
@@ -405,7 +405,7 @@ def profile():
     """
 
     if len(request.args) < 1:
-        if session.handle:
+        if auth.is_logged_in():
             handle = str(session.handle)
         else:
             redirect(URL("default", "index"))
@@ -536,7 +536,7 @@ def submissions():
     duplicates = []
 
     if len(request.args) < 1:
-        if session.user_id:
+        if auth.is_logged_in():
             user_id = session.user_id
             handle = session.handle
         else:
@@ -744,28 +744,28 @@ def custom_friend():
     atable = db.auth_user
 
     # The total referrals by the logged-in user
-    query = (atable.referrer == session["handle"])
+    query = (atable.referrer == session.handle)
 
     # User should not enter his/her own
     # stopstalk handle as referrer handle
-    query &= (atable.stopstalk_handle != session["handle"])
+    query &= (atable.stopstalk_handle != session.handle)
     total_referrals = db(query).count()
 
     # Retrieve the total allowed custom users from auth_user table
-    query = (atable.id == session["user_id"])
+    query = (atable.id == session.user_id)
     row = db(query).select(atable.referrer,
                            atable.allowed_cu).first()
     default_allowed = row.allowed_cu
     referrer = 0
     # If a valid referral is applied then award 1 extra CU
-    if row.referrer and row.referrer != session["handle"]:
+    if row.referrer and row.referrer != session.handle:
         referrer = db(atable.stopstalk_handle == row.referrer).count()
 
     # 3 custom friends allowed plus one for each 5 invites
     allowed_custom_friends = total_referrals / 5 + default_allowed + referrer
 
     # Custom users already created
-    current_count = db(db.custom_friend.user_id == session["user_id"]).count()
+    current_count = db(db.custom_friend.user_id == session.user_id).count()
 
     if current_count >= allowed_custom_friends:
         return dict(form=None)

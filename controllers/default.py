@@ -35,7 +35,7 @@ def index():
     """
 
     # If the user is logged in
-    if session["auth"]:
+    if auth.is_logged_in():
         session.flash = "Welcome StopStalker!!"
         redirect(URL("default", "submissions", args=[1]))
 
@@ -49,7 +49,7 @@ def notifications():
         the logged-in user is on a streak
     """
 
-    if session["user_id"] is None:
+    if not auth.is_logged_in():
         redirect(URL("default", "index"))
 
     ftable = db.friends
@@ -57,7 +57,7 @@ def notifications():
     cftable = db.custom_friend
 
     # Check for streak of friends on stopstalk
-    query = (ftable.user_id == session["user_id"])
+    query = (ftable.user_id == session.user_id)
     rows = db(query).select(atable.first_name,
                             atable.last_name,
                             atable.stopstalk_handle,
@@ -77,7 +77,7 @@ def notifications():
                         user.stopstalk_handle))
 
     # Check for streak of custom friends
-    query = (cftable.user_id == session["user_id"])
+    query = (cftable.user_id == session.user_id)
     rows = db(query).select(cftable.first_name,
                             cftable.last_name,
                             cftable.duplicate_cu,
@@ -422,11 +422,11 @@ def leaderboard():
         if request.vars["global"] == "True":
             global_leaderboard = True
         else:
-            if session.user_id is None:
+            if not auth.is_logged_in():
                 response.flash = "Login to see Friends Leaderboard"
                 global_leaderboard = True
     else:
-        if session.user_id is None:
+        if not auth.is_logged_in():
             global_leaderboard = True
 
     heading = "Global Leaderboard"
@@ -437,7 +437,7 @@ def leaderboard():
     aquery = (atable.id > 0)
     cquery = (cftable.id > 0)
     if global_leaderboard is False:
-        if session.user_id:
+        if auth.is_logged_in():
             heading = "Friends Leaderboard"
             friends, cusfriends = utilities.get_friends(session.user_id)
             custom_friends = [x[0] for x in cusfriends]
@@ -680,7 +680,7 @@ def filters():
     table = TABLE()
     div = TAG[""](H4("Recent Submissions"), switch, table)
 
-    if global_submissions is False and session.user_id is None:
+    if global_submissions is False and not auth.is_logged_in():
         session.flash = "Login to view Friends' submissions"
         new_vars = request.vars
         new_vars["global"] = True
@@ -956,7 +956,7 @@ def retrieve_users():
 
     tbody = TBODY()
 
-    query = (ftable.user_id == session["user_id"])
+    query = (ftable.user_id == session.user_id)
     friends = db(query).select(atable.id,
                                join=ftable.on(ftable.friend_id == atable.id))
     friends = [x["id"] for x in friends]
@@ -1017,7 +1017,7 @@ def unfriend():
         return "Please click on a button!"
     else:
         friend_id = long(request.args[0])
-        user_id = session["user_id"]
+        user_id = session.user_id
         ftable = db.friends
 
         # Delete records in the friends table
@@ -1072,7 +1072,7 @@ def submissions():
     atable = db.auth_user
 
     # Get all the friends/custom friends of the logged-in user
-    friends, cusfriends = utilities.get_friends(session["user_id"])
+    friends, cusfriends = utilities.get_friends(session.user_id)
 
     # The Original IDs of duplicate custom_friends
     custom_friends = []
@@ -1135,7 +1135,7 @@ def contact_us():
 
     ctable = db.contact_us
 
-    if session["auth"] and request.post_vars:
+    if auth.is_logged_in() and request.post_vars:
         if request.post_vars.stickers is not None:
             response.flash = "Fill your address!"
             user = session.auth.user
@@ -1150,9 +1150,9 @@ def contact_us():
 
     form = SQLFORM(ctable)
 
-    if session["auth"]:
-        user = session["auth"]["user"]
-        ctable.email.default = user["email"]
+    if auth.is_logged_in():
+        user = session.auth.user
+        ctable.email.default = user.email
 
     if form.process().accepted:
         session.flash = "We will get back to you!"
