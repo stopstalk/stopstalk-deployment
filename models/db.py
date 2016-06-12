@@ -169,6 +169,24 @@ auth.messages.label_remember_me = "Remember credentials"
 auth.settings.long_expiration = 3600 * 24 * 366 # Remember me for a year
 
 # -----------------------------------------------------------------------------
+def validate_email(email):
+    """
+        Check if an email is from a valid domain name
+    """
+
+    if email.strip() == "":
+        return False
+
+    import requests
+
+    try:
+        domain = email.split("@")[-1]
+        response = requests.get("http://" + domain, timeout=5)
+        return (response.status_code == 200)
+    except:
+        return False
+
+# -----------------------------------------------------------------------------
 def sanitize_fields(form):
     """
         Display errors for the following:
@@ -177,6 +195,7 @@ def sanitize_fields(form):
         2. Remove @ from the HackerEarth handle(if entered)
         3. Lowercase the handles
         4. Fill the institute field with "Other" if empty
+        5. Email address entered is from a valid domain
     """
 
     handle_fields = ["stopstalk"]
@@ -203,6 +222,10 @@ def sanitize_fields(form):
     # 4.
     if form.vars.institute == "":
         form.errors.institute = "Please select an institute or Other"
+
+    # 5.
+    if validate_email(form.vars.email) is False:
+        form.errors.email = "Invalid email address"
 
     if form.errors:
         response.flash = "Form has errors!!"
