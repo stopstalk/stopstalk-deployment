@@ -224,8 +224,9 @@ def sanitize_fields(form):
         form.errors.institute = "Please select an institute or Other"
 
     # 5.
-    if validate_email(form.vars.email) is False:
-        form.errors.email = "Invalid email address"
+    if form.vars.email:
+        if validate_email(form.vars.email) is False:
+            form.errors.email = "Invalid email address"
 
     if form.errors:
         response.flash = "Form has errors!!"
