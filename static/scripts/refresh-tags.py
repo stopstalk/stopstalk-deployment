@@ -135,7 +135,7 @@ def get_tag(link, name):
 
     if row:
         prev_tags = row.tags
-        if (prev_tags != str(all_tags)) or \
+        if (prev_tags != str(all_tags)) and \
            (prev_tags == "[-]" and str(all_tags) != "[-]"):
             row.update_record(tags=str(all_tags),
                               problem_name=name,
