@@ -28,7 +28,7 @@ for row in rows:
         row.update_record(status="sent")
         print "Email sent to %s" % row.email
     else:
-        if mail.error.__contains__("Mail rate exceeded limit") is False:
+        if str(mail.error).__contains__("Mail rate exceeded limit") is False:
             # Email sending failed with some other reason
             row.update_record(status="failed")
             print "Email sending to %s failed with: %s | %s" % (row.email,
