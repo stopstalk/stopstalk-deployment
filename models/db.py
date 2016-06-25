@@ -192,11 +192,18 @@ def sanitize_fields(form):
         Display errors for the following:
 
         1. Strip whitespaces from all the fields
-        2. Remove @ from the HackerEarth handle(if entered)
+        2. Remove @ from the HackerEarth and Spoj handle (if entered)
         3. Lowercase the handles
         4. Fill the institute field with "Other" if empty
         5. Email address entered is from a valid domain
     """
+
+
+    def remove_at_symbol(site_name):
+        if site_name in current.SITES:
+            field = site_name.lower() + "_handle"
+            if form.vars[field] and form.vars[field][0] == "@":
+                form.errors[field] = "@ symbol not required"
 
     handle_fields = ["stopstalk"]
     handle_fields.extend([x.lower() for x in current.SITES.keys()])
@@ -208,10 +215,8 @@ def sanitize_fields(form):
             form.errors[field_handle] = "White spaces not allowed"
 
     # 2.
-    if "HackerEarth" in current.SITES:
-        field = "hackerearth_handle"
-        if form.vars[field] and form.vars[field][0] == "@":
-            form.errors[field] = "@ symbol not required"
+    remove_at_symbol("HackerEarth")
+    remove_at_symbol("Spoj")
 
     # 3.
     for site in handle_fields:
