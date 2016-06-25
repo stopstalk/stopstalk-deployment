@@ -25,10 +25,11 @@ for row in rows:
     if mail.send(to=row.email,
                  subject=row.subject,
                  message=row.message):
-        row.update_record(status = "sent")
+        row.update_record(status="sent")
         print "Email sent to %s" % row.email
     else:
-        row.update_record(status = "failed")
-        print "Email sending to %s failed with: %s | %s" % (row.email,
-                                                            mail.error,
-                                                            mail.result)
+        if mail.error.__contains__("Mail rate exceeded limit") is False:
+            # Email sending failed with some other reason
+            row.update_record(status="failed")
+            print "Email sending to %s failed with: %s | %s" % (row.email,
+                                                                mail.error)
