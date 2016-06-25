@@ -20,36 +20,15 @@
     THE SOFTWARE.
 """
 
-db = current.db
-atable = db.auth_user
-frtable = db.friend_requests
-
-join_query = (atable.id == frtable.to_h)
-email_ids = db(frtable).select(atable.email,
-                               join=frtable.on(join_query),
-                               distinct=True)
-
-for email in email_ids:
-
-    current.send_mail(to=email["email"],
-                      subject="You have pending requests!",
-                      message=
-"""
-Hello StopStalker!!
-
-You have pending friend requests on StopStalk
-Connect with more to make best use of StopStalk - %s
-
-To stop receiving mails - %s
-Cheers,
-StopStalk
-""" % (URL("user", "friend_requests",
-           scheme="https",
-           host="www.stopstalk.com"),
-       URL("default", "unsubscribe",
-           scheme="https",
-           host="www.stopstalk.com")),
-                      mail_type="pending_requests",
-                      bulk=True)
-
-# END =========================================================================
+rows = db(db.queue.status == "pending").select()
+for row in rows:
+    if mail.send(to=row.email,
+                 subject=row.subject,
+                 message=row.message):
+        row.update_record(status = "sent")
+        print "Email sent to %s" % row.email
+    else:
+        row.update_record(status = "failed")
+        print "Email sending to %s failed with: %s | %s" % (row.email,
+                                                            mail.error,
+                                                            mail.result)

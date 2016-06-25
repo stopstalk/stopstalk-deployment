@@ -139,7 +139,7 @@ mail.settings.sender = "Team StopStalk <" + current.sender_mail + ">"
 mail.settings.login = current.sender_mail + ":" + current.sender_password
 
 # -----------------------------------------------------------------------------
-def send_mail(to, subject, message, mail_type):
+def send_mail(to, subject, message, mail_type, bulk=False):
 
     # Check if user has unsubscribed from email updates
     utable = db.unsubscriber
@@ -151,9 +151,15 @@ def send_mail(to, subject, message, mail_type):
     row = db(query).select().first()
 
     if row is None:
-        mail.send(to=to,
-                  subject=subject,
-                  message=message)
+        if bulk:
+            db.queue.insert(status="pending",
+                            email=to,
+                            subject=subject,
+                            message=message)
+        else:
+            mail.send(to=to,
+                      subject=subject,
+                      message=message)
 
 current.send_mail = send_mail
 ## configure auth policy
@@ -449,6 +455,12 @@ db.define_table("unsubscriber",
                       "boolean",
                       default=True,
                       label="Notify when a user from your Institute registers"))
+
+db.define_table("queue",
+                Field("status"),
+                Field("email"),
+                Field("subject"),
+                Field("message"))
 
 if session["auth"]:
     session["handle"] = session["auth"]["user"]["stopstalk_handle"]
