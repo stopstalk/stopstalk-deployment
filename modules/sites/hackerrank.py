@@ -88,7 +88,7 @@ class Profile(object):
             append(" ".join(time_stamp))
 
             # Problem link
-            append("https://www.hackerrank.com/challenges/" + row["ch_slug"])
+            append("https://www.hackerrank.com" + row["url"])
 
             # Problem name
             append(row["name"])
