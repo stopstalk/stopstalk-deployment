@@ -285,7 +285,8 @@ StopStalk
         send_mail(to=row.email,
                   subject=subject,
                   message=message,
-                  mail_type="institute_user")
+                  mail_type="institute_user",
+                  bulk=True)
 
 # -----------------------------------------------------------------------------
 def register_callback(form):
