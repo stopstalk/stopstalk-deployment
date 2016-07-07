@@ -38,18 +38,35 @@ class Profile(object):
     @staticmethod
     def get_tags(problem_link):
 
-        slug = problem_link.split("/")[-1]
-        url = "https://www.hackerrank.com/rest/contests/master/challenges/" + slug
+        if problem_link.__contains__("/contests/"):
+            # If the problem_link is a contest URL
+            url = problem_link.replace("https://www.hackerrank.com", "")
+            url = "https://www.hackerrank.com/rest/" + url
+        else:
+            # Practice problem URL
+            slug = problem_link.split("/")[-1]
+            url = "https://www.hackerrank.com/rest/contests/master/challenges/" + slug
+
         response = get_request(url)
         if response == {} or response == -1:
             return ["-"]
 
-        track = response.json()["model"]["track"]
-        all_tags = []
+        response = response.json()
+
+        track = response["model"]["track"]
+        primary_contest = response["model"]["primary_contest"]
+        all_tags = ["-"]
         if track:
+            # If the problem is a practice problem
             all_tags = [track["name"]]
-        if all_tags == []:
-            all_tags = ["-"]
+        elif primary_contest["track"]:
+            # If the problem is a contest problem with track
+            all_tags = [primary_contest["track"]["name"]]
+        elif primary_contest["name"]:
+            # If the problem is a contest problem without track
+            # Then consider contest name as tag
+            all_tags = [primary_contest["name"]]
+
         return all_tags
 
     # -------------------------------------------------------------------------
