@@ -134,6 +134,7 @@ def index():
     except AttributeError:
         tags = DIV("No tags available")
 
+    site = utilities.urltosite(problem_link).capitalize()
     problem_details = TABLE(_style="font-size: 140%;")
     tbody = TBODY()
     tbody.append(TR(TD(),
@@ -145,7 +146,7 @@ def index():
                        _rowspan="4")))
     tbody.append(TR(TD(),
                     TD(STRONG("Site:")),
-                    TD(utilities.urltosite(problem_link).capitalize())))
+                    TD(site)))
     tbody.append(TR(TD(),
                     TD(STRONG("Problem Link:")),
                     TD(A(I(_class="fa fa-link"), " Link",
@@ -164,7 +165,8 @@ def index():
                  _class="switch")
     div = TAG[""](H4("Recent Submissions"), switch, table)
 
-    return dict(problem_details=problem_details,
+    return dict(site=site,
+                problem_details=problem_details,
                 problem_name=problem_name,
                 problem_link=problem_link,
                 global_submissions=global_submissions,

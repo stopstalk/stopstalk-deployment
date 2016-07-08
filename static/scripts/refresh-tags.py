@@ -98,7 +98,7 @@ def refresh_tags():
 
     # Start retrieving tags for the problems
     # that are not in problem_tags table
-    for i in xrange(0, len(difference_list[:100]), workers):
+    for i in xrange(0, len(difference_list), workers):
         threads = []
         # O God I am so smart !!
         for problem in difference_list[i : i + workers]:
@@ -135,8 +135,7 @@ def get_tag(link, name):
 
     if row:
         prev_tags = row.tags
-        if (prev_tags != str(all_tags)) and \
-           (prev_tags == "[-]" and str(all_tags) != "[-]"):
+        if prev_tags != str(all_tags):
             row.update_record(tags=str(all_tags),
                               problem_name=name,
                               problem_added_on=today)
