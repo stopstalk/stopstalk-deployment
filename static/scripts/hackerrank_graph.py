@@ -21,10 +21,11 @@
 """
 
 import requests
-import time
+from datetime import datetime, timedelta
 
 handle = "tryingtocode"
-response = requests.get("https://www.hackerrank.com/rest/hackers/" + handle + "/rating_histories2")
+website = "https://www.hackerrank.com/"
+response = requests.get("%srest/hackers/%s/rating_histories2" % (website, handle))
 response = response.json()["models"]
 
 hackerrank_graphs = []
@@ -32,11 +33,12 @@ for contest_class in response:
     final_json = {}
     for contest in contest_class["events"]:
         time_stamp = contest["date"][:-5].split("T")
-        time_stamp = time.strptime(time_stamp[0] + " " + time_stamp[1],
-                                   "%Y-%m-%d %H:%M:%S")
-
+        time_stamp = datetime.strptime(time_stamp[0] + " " + time_stamp[1],
+                                       "%Y-%m-%d %H:%M:%S")
+        # Convert UTC to IST
+        time_stamp += timedelta(hours=5, minutes=30)
         final_json[time_stamp] = {"name": contest["contest_name"],
-                                  "url": contest["contest_slug"],
+                                  "url": website + contest["contest_slug"],
                                   "rating": contest["rating"],
                                   "rank": contest["rank"]}
 
