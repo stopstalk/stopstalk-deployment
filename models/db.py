@@ -457,6 +457,16 @@ db.define_table("unsubscriber",
                       default=True,
                       label="Notify when a user from your Institute registers"))
 
+site_fields = []
+for site in current.SITES:
+    site_fields.append(Field(site.lower(), "integer", default=0))
+
+# Table to store submissions retrieved today
+db.define_table("submissions_today",
+                Field("user_id", "reference auth_user"),
+                Field("custom_user_id", "reference custom_friend"),
+                *site_fields)
+
 db.define_table("queue",
                 Field("status"),
                 Field("email"),
