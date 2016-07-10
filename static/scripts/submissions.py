@@ -149,15 +149,14 @@ def retrieve_submissions(record, custom):
     for submissions in list_of_submissions:
         site = submissions[0]
         _debug(record.first_name, record.last_name, site, custom)
-        site = site.lower()
-        site_handle = record[site + "_handle"]
-        todays_submissions[site] = get_submissions(record.id,
-                                                   site_handle,
-                                                   record.stopstalk_handle,
-                                                   submissions[1],
-                                                   site,
-                                                   custom)
-        total_retrieved += todays_submissions[site]
+        site_handle = record[site.lower() + "_handle"]
+        todays_submissions[site.lower()] = get_submissions(record.id,
+                                                           site_handle,
+                                                           record.stopstalk_handle,
+                                                           submissions[1],
+                                                           site,
+                                                           custom)
+        total_retrieved += todays_submissions[site.lower()]
 
     sttable = db.submissions_today
     query = (sttable.user_id == record.id)

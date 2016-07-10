@@ -371,6 +371,7 @@ custom_friend_fields = [Field("user_id", "reference auth_user"),
 
 custom_friend_fields += site_handles
 db.define_table("custom_friend",
+                format="%(first_name)s %(last_name)s (%(id)s)",
                 *custom_friend_fields)
 
 db.define_table("submission",
@@ -466,6 +467,14 @@ db.define_table("submissions_today",
                 Field("user_id", "reference auth_user"),
                 Field("custom_user_id", "reference custom_friend"),
                 *site_fields)
+
+db.define_table("user_streak",
+                Field("user_id", "reference auth_user"),
+                Field("custom_user_id", "reference custom_friend"),
+                Field("acc_streak", "integer", default=0),
+                Field("max_acc_streak", "integer", default=0),
+                Field("day_streak", "integer", default=0),
+                Field("max_day_streak", "integer", default=0))
 
 db.define_table("queue",
                 Field("status"),
