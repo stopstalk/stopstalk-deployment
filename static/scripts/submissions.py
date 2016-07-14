@@ -190,14 +190,14 @@ if __name__ == "__main__":
     # Update the last retrieved of the user
     today = datetime.now()
 
-    query = (atable.id % 3 == N) & (atable.blacklisted == False)
+    query = (atable.id % 5 == N) & (atable.blacklisted == False)
     registered_users = db(query).select()
     for record in registered_users:
         retrieve_submissions(record, False)
 
     db(query).update(last_retrieved=today)
 
-    query = (cftable.id % 3 == N) & (cftable.duplicate_cu == None)
+    query = (cftable.id % 5 == N) & (cftable.duplicate_cu == None)
     custom_users = db(query).select()
     for record in custom_users:
         retrieve_submissions(record, True)
