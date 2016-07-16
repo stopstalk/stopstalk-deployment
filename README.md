@@ -4,7 +4,7 @@ Stop stalking and Start StopStalking :sunglasses:
 ## Module Requirements
 Note: Apply sudo if required for your system.
 
-* parsedatetime (Version 2.1) 
+* parsedatetime (Version 2.1)
 ```
 $ pip install parsedatetime
 ```
@@ -12,12 +12,12 @@ $ pip install parsedatetime
 * gevent (Version 1.1.1)
 ```
 $ pip install gevent
-``` 
+```
 
 * greenlet (Version 0.4.9)
 ```
 $ pip install greenlet
-``` 
+```
 
 * beautifulsoup (Version 4.4.1). Also install `lxml` (Version 3.6.0) parser for best use of BeautifulSoup.
 ```
@@ -38,10 +38,10 @@ $ pip install requests
     $ git clone --recursive https://github.com/web2py/web2py.git
     ```
     * From zip
-    
-        Directly [download](http://web2py.com/init/default/download) appropriate zip 
+
+        Directly [download](http://web2py.com/init/default/download) appropriate zip
         and unzip it to get the `web2py` directory set up on your local machine.
-        
+
         Note: In this method you will have a fixed version of web2py, whereas in the former
               you might as well keep on pulling the latest changes made in web2py source.
 
@@ -60,32 +60,38 @@ $ pip install requests
    Make sure you remember the root password for mysql server.
 
 5. Create a database in MySQL
-    
+
     ```
     $ mysql -u root -p        # Enter your mysql root password after this.
-    
+
     mysql> CREATE DATABASE migration;
     ```
 6. Copy `0firstrun.py` to `models/`
-    
+
     ```
     $ cd applications/stopstalk
-    $ cp modules/0firstrun.py models/
+    $ cp models/0firstrun.py.sample models/0firstrun.py
     ```
 7. Open `0firstrun.py` and change the settings.
-    
+
     ```
     current.mysql_user = "root" # Change if you have given access to any other user in mysql
-    current.mysql_password = "" # As per your mysql password 
+    current.mysql_password = "" # As per your mysql password
     current.mysql_dbname = "migration" # Will remain same as long as you followed 5.
-    current.smtp_server = "logging" # Mails will not be sent. Will be logged where the web2py server is running 
-                                    # Else you can set it to your smtp server.     
+    current.smtp_server = "logging" # Mails will not be sent. Will be logged where the web2py server is running
+                                    # Else you can set it to your smtp server.
     current.sender_mail = ""        # Not required if logging
     current.sender_password = ""    # Not required if logging
+
+    # Mailer Settings for bulk email
+    current.bulk_smtp_server = "logging" # Mails will not be sent. Will be logged where the web2py server is running
+                                         # Else you can set it to your smtp server.
+    current.bulk_sender_mail = ""        # Not required if logging
+    current.bulk_sender_password = ""    # Not required if logging
     ```
-   
+
    In case if you want to send emails - Install `postfix` for your respective OS and configure the above smtp server accordingly.
-   
+
 8. Navigate back to the web2py folder and start the web2py server.
 
     ```
@@ -118,10 +124,10 @@ $ pip install requests
     Configure the models/000_config.py file as per your requirement.
 
 ## Contact
-  > Email: contactstopstalk@gmail.com, raj454raj@gmail.com
-  
+  > Email: admin@stopstalk.com, contactstopstalk@gmail.com, raj454raj@gmail.com
+
   > Contact Us Page: https://www.stopstalk.com/contact_us
-  
+
   > Creator Website: http://raj454raj.com
 
 ## Social Links
