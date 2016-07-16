@@ -35,4 +35,5 @@ sttable.truncate()
 current.send_mail(to="raj454raj@gmail.com",
                   subject="Today's sessions",
                   message=message,
-                  mail_type="admin")
+                  mail_type="admin",
+                  bulk=True)

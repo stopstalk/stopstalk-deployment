@@ -22,14 +22,14 @@
 
 rows = db(db.queue.status == "pending").select()
 for row in rows:
-    if mail.send(to=row.email,
-                 subject=row.subject,
-                 message=row.message):
+    if bulkmail.send(to=row.email,
+                     subject=row.subject,
+                     message=row.message):
         row.update_record(status="sent")
         print "Email sent to %s" % row.email
     else:
-        if str(mail.error).__contains__("Mail rate exceeded limit") is False:
+        if str(bulkmail.error).__contains__("Mail rate exceeded limit") is False:
             # Email sending failed with some other reason
             row.update_record(status="failed")
             print "Email sending to %s failed with: %s | %s" % (row.email,
-                                                                mail.error)
+                                                                bulkmail.error)

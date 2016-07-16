@@ -27,6 +27,8 @@
 
 ## app configuration made easy. Look inside private/appconfig.ini
 from gluon.contrib.appconfig import AppConfig
+from gluon.tools import Mail
+
 ## once in production, remove reload=True to gain full speed
 myconf = AppConfig(reload=True)
 
@@ -133,10 +135,18 @@ auth.settings.extra_fields["auth_user"] = extra_fields
 auth.define_tables(username=False, signature=False)
 
 ## configure email
+
+# Normal mails go through contactstopstalk@gmail.com
 mail = auth.settings.mailer
 mail.settings.server = current.smtp_server
 mail.settings.sender = "Team StopStalk <" + current.sender_mail + ">"
 mail.settings.login = current.sender_mail + ":" + current.sender_password
+
+# Bulk emails go through admin@stopstalk.com
+bulkmail = Mail()
+bulkmail.settings.server = current.bulk_smtp_server
+bulkmail.settings.sender = "Team StopStalk <" + current.bulk_sender_mail + ">"
+bulkmail.settings.login = current.bulk_sender_mail + ":" + current.bulk_sender_password
 
 # -----------------------------------------------------------------------------
 def send_mail(to, subject, message, mail_type, bulk=False):
