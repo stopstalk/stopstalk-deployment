@@ -1095,6 +1095,12 @@ def submissions():
         return dict(count=count,
                     total_rows=1)
 
+    user = session.auth.user
+    db.sessions_today.insert(message="%s %s %s %s" % (user.first_name,
+                                                      user.last_name,
+                                                      user.institute,
+                                                      datetime.datetime.now()))
+
     offset = PER_PAGE * (int(active) - 1)
     # Retrieve only some number of submissions from the offset
     rows = db(query).select(orderby=~db.submission.time_stamp,

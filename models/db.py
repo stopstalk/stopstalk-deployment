@@ -499,6 +499,9 @@ db.define_table("queue",
                 Field("subject"),
                 Field("message"))
 
+db.define_table("sessions_today",
+                Field("message", "string"))
+
 if session["auth"]:
     session["handle"] = session["auth"]["user"]["stopstalk_handle"]
     session["user_id"] = session["auth"]["user"]["id"]
