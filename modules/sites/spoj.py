@@ -30,6 +30,9 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     def __init__(self, handle=""):
+        """
+            @param handle (String): Spoj handle
+        """
 
         self.site = "Spoj"
         self.handle = handle
@@ -37,6 +40,12 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def get_tags(problem_link):
+        """
+            Get the tags of a particular problem from its URL
+
+            @param problem_link (String): Problem URL
+            @return (List): List of tags for that problem
+        """
 
         response = get_request(problem_link)
         if response == -1 or response == {}:
@@ -59,6 +68,13 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     def get_submissions(self, last_retrieved):
+        """
+            Retrieve Spoj submissions after last retrieved timestamp
+
+            @param last_retrieved (DateTime): Last retrieved timestamp for the user
+            @return (Dict): Dictionary of submissions containing all the
+                            information about the submissions
+        """
 
         if self.handle:
             handle = self.handle
@@ -170,3 +186,5 @@ class Profile(object):
                 break
 
         return submissions
+
+# =============================================================================

@@ -63,3 +63,5 @@ current.PROBLEMS_PER_PAGE = 15
 
 # Number of days in the past that should be considered for trending problems
 current.PAST_DAYS = 10
+
+# =============================================================================

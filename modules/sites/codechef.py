@@ -30,6 +30,9 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     def __init__(self, handle=""):
+        """
+            @param handle (String): Codechef Handle
+        """
 
         self.site = "CodeChef"
         self.handle = handle
@@ -43,6 +46,13 @@ class Profile(object):
             Try to parse any generalised time to
             standard format.
             For now used by Codechef
+
+            @param time_str (String): Time in string format
+                @examples: 01:59 PM 05/06/16
+                           2 min ago
+                           4 hours ago
+
+            @return (DateTime): DateTime object representing the same timestamp
         """
 
         try:
@@ -57,6 +67,12 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def get_tags(problem_link):
+        """
+            Get tags given a problem link
+
+            @param problem_link (String): Problem URL
+            @return (List): List of tags for the Problem
+        """
 
         url = problem_link.split("/")
         url = url[2:]
@@ -84,6 +100,10 @@ class Profile(object):
     def parallelize_codechef(self, handle, page, last_retrieved):
         """
             Helper function for retrieving codechef submissions parallely
+
+            @param handle (String): CodeChef handle
+            @param page (Integer): Pagination page number
+            @param last_retrieved (DateTime): Last retrieved for that user
         """
 
         if self.retrieve_failed:
@@ -183,6 +203,13 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     def get_submissions(self, last_retrieved):
+        """
+            Retrieve CodeChef submissions after last retrieved timestamp
+
+            @param last_retrieved (DateTime): Last retrieved timestamp for the user
+            @return (Dict): Dictionary of submissions containing all the
+                            information about the submissions
+        """
 
         if self.retrieve_failed:
             return -1
@@ -294,7 +321,7 @@ class Profile(object):
                     # Question points
                     pts = i.contents[2].contents[0].contents
                     try:
-                        if  len(pts) >= 5:
+                        if len(pts) >= 5:
                             points = pts[2] + " " + pts[4]
                         else:
                             points = pts[2]
@@ -314,3 +341,5 @@ class Profile(object):
 
                     it += 1
             return submissions
+
+# =============================================================================

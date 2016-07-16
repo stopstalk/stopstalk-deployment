@@ -140,6 +140,15 @@ mail.settings.login = current.sender_mail + ":" + current.sender_password
 
 # -----------------------------------------------------------------------------
 def send_mail(to, subject, message, mail_type, bulk=False):
+    """
+        Email sending helper wrapper around Web2Py Mailer
+
+        @param to (String): Recipient of the mail
+        @param subject (String): Subject of the mail
+        @param message (String): Message body of the mail
+        @param mail_type (String): Mail type (used for handling subscriptions)
+        @param bulk (Boolean): Bulk sending mail
+    """
 
     # Check if user has unsubscribed from email updates
     utable = db.unsubscriber
@@ -178,6 +187,9 @@ auth.settings.long_expiration = 3600 * 24 * 366 # Remember me for a year
 def validate_email(email):
     """
         Check if an email is from a valid domain name
+
+        @param email (String): Email address
+        @return (Boolean): Valid email or not
     """
 
     if email.strip() == "":
@@ -202,8 +214,9 @@ def sanitize_fields(form):
         3. Lowercase the handles
         4. Fill the institute field with "Other" if empty
         5. Email address entered is from a valid domain
-    """
 
+        @param form (FORM): Registration / Add Custom friend form
+    """
 
     def remove_at_symbol(site_name):
         if site_name in current.SITES:
@@ -247,6 +260,8 @@ def notify_institute_users(form):
     """
         Send mail to all users from the same institute
         when a user registers from that institute
+
+        @param form (FORM): Registration form
     """
 
     atable = db.auth_user
@@ -292,6 +307,8 @@ StopStalk
 def register_callback(form):
     """
         Send mail to raj454raj@gmail.com about all the users who register
+
+        @param form (FORM): Register form
     """
 
     # Send mail to raj454raj@gmail.com
@@ -487,3 +504,5 @@ if session["auth"]:
     session["user_id"] = session["auth"]["user"]["id"]
 
 current.db = db
+
+# =============================================================================

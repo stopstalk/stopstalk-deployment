@@ -90,3 +90,5 @@ response.menu += [(I(_class="fa fa-calendar-check-o fa-2x",
                   URL('default', 'contact_us'), [])]
 
 if "auth" in locals(): auth.wikimenu()
+
+# =============================================================================

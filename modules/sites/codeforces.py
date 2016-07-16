@@ -30,6 +30,9 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     def __init__(self, handle=""):
+        """
+            @param handle (String): Codeforces Handle
+        """
 
         self.site = "CodeForces"
         self.handle = handle
@@ -37,6 +40,12 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def get_tags(problem_link):
+        """
+            Get the tags of a particular problem from its URL
+
+            @param problem_link (String): Problem URL
+            @return (List): List of tags for that problem
+        """
 
         response = get_request(problem_link)
         if response == -1 or response == {}:
@@ -44,15 +53,18 @@ class Profile(object):
 
         tags = BeautifulSoup(response.text, "lxml").find_all("span",
                                                              class_="tag-box")
-        all_tags = []
 
-        for tag in tags:
-            all_tags.append(tag.contents[0].strip())
-
-        return all_tags
+        return map(lambda tag: tag.contents[0].strip(), tags)
 
     # -------------------------------------------------------------------------
     def get_submissions(self, last_retrieved):
+        """
+            Retrieve CodeForces submissions after last retrieved timestamp
+
+            @param last_retrieved (DateTime): Last retrieved timestamp for the user
+            @return (Dict): Dictionary of submissions containing all the
+                            information about the submissions
+        """
 
         if self.handle:
             handle = self.handle
@@ -151,3 +163,5 @@ class Profile(object):
             it += 1
 
         return submissions
+
+# =============================================================================

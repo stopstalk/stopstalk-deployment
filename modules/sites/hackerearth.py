@@ -30,6 +30,9 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     def __init__(self, handle=""):
+        """
+            @param handle (String): HackerEarth Handle
+        """
 
         self.site = "HackerEarth"
         self.handle = handle
@@ -37,6 +40,12 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def get_tags(problem_link):
+        """
+            Get tags given a problem link
+
+            @param problem_link (String): Problem URL
+            @return (List): List of tags for the Problem
+        """
 
         response = get_request(problem_link)
         if response == -1 or response == {}:
@@ -60,7 +69,13 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     def get_submissions(self, last_retrieved):
+        """
+            Retrieve HackerEarth submissions after last retrieved timestamp
 
+            @param last_retrieved (DateTime): Last retrieved timestamp for the user
+            @return (Dict): Dictionary of submissions containing all the
+                            information about the submissions
+        """
         if self.handle:
             handle = self.handle
         else:
@@ -192,3 +207,5 @@ class Profile(object):
                 it += 1
 
         return submissions
+
+# =============================================================================

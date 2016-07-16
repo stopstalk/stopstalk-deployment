@@ -30,6 +30,9 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     def __init__(self, handle=""):
+        """
+            @param handle (String): HackerRank handle
+        """
 
         self.site = "HackerRank"
         self.handle = handle
@@ -37,6 +40,12 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def get_tags(problem_link):
+        """
+            Get the tags of a particular problem from its URL
+
+            @param problem_link (String): Problem URL
+            @return (List): List of tags for that problem
+        """
 
         if problem_link.__contains__("/contests/"):
             # If the problem_link is a contest URL
@@ -71,7 +80,13 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     def get_submissions(self, last_retrieved):
+        """
+            Retrieve HackerRank submissions after last retrieved timestamp
 
+            @param last_retrieved (DateTime): Last retrieved timestamp for the user
+            @return (Dict): Dictionary of submissions containing all the
+                            information about the submissions
+        """
         if self.handle:
             handle = self.handle
         else:
@@ -126,3 +141,5 @@ class Profile(object):
             it += 1
 
         return submissions
+
+# =============================================================================

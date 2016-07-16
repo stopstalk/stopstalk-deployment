@@ -31,6 +31,11 @@ from gluon import current, IMG, DIV, TABLE, THEAD, \
 def get_link(site, handle):
     """
         Get the URL of site_handle
+
+        @param site (String): Site name
+        @param handle (String): Site handle
+
+        @return (String): User profile for that site
     """
 
     return current.SITES[site] + handle
@@ -39,6 +44,9 @@ def get_link(site, handle):
 def urltosite(url):
     """
         Helper function to extract site from url
+
+        @param url (String): Site URL
+        @return url (String): Site
     """
 
     # Note: try/except is not added because this function is not to
@@ -55,7 +63,8 @@ def get_friends(user_id):
     """
         Friends of user_id (including custom friends)
 
-        @Return: (list of friend_ids, list of custom_friend_ids)
+        @param user_id (Integer): Number
+        @return (Tuple): (list of friend_ids, list of custom_friend_ids)
     """
 
     db = current.db
@@ -81,6 +90,9 @@ def get_friends(user_id):
 def get_accepted_streak(handle):
     """
         Function that returns current streak of accepted solutions
+
+        @param handle (String): StopStalk handle
+        @return (Integer): Accepted Streak of the user
     """
 
     db = current.db
@@ -103,7 +115,11 @@ def get_accepted_streak(handle):
 def get_max_accepted_streak(handle):
     """
         Return the max accepted solution streak
+
+        @param handle (String): StopStalk handle
+        @return (Integer): Maximum Accepted Streak of the user
     """
+
     db = current.db
     sql_query = """
                     SELECT status
@@ -128,13 +144,15 @@ def get_max_accepted_streak(handle):
             streak = 0
         prev = status[0]
 
-    max_streak = max(max_streak, streak)
-    return max_streak
+    return max(max_streak, streak)
 
 # ----------------------------------------------------------------------------
 def get_max_streak(submissions):
     """
         Get the maximum of all streaks
+
+        @param submissions (List of tuples): [(DateTime object, count)...]
+        @return (Tuple): Returns streaks of the user
     """
 
     streak = 0
@@ -180,6 +198,14 @@ def compute_row(record,
     """
         Computes rating and retrieves other
         information of the specified user
+
+        @param record (Row): User record
+        @param complete_dict (Dict): Dict containing daywise count of submissions
+        @param solved (Integer): Count of problems solved
+        @param custom (Boolean): Custom user or not
+        @param update_flag (Boolean): Update db rating
+
+        @return (Tuple): Tuple of details required for leaderboard
     """
 
     db = current.db
@@ -251,6 +277,11 @@ def compute_row(record,
 def materialize_form(form, fields):
     """
         Change layout of SQLFORM forms
+
+        @params form (FORM): FORM object representing the form DOM
+        @params fields (List): List of fields in the form
+
+        @return (DIV): Materialized form wrapped with a DIV
     """
 
     form.add_class("form-horizontal center")
@@ -335,6 +366,11 @@ def materialize_form(form, fields):
 def render_table(submissions, duplicates=[]):
     """
         Create the HTML table from submissions
+
+        @param submissions (Dict): Dictionary of submissions to display
+        @param duplicates (List): List of duplicate user ids
+
+        @return (TABLE):  HTML TABLE containing all the submissions
     """
 
     status_dict = {"AC": "Accepted",
@@ -429,4 +465,4 @@ def render_table(submissions, duplicates=[]):
     table.append(tbody)
     return table
 
-# END =========================================================================
+# =============================================================================

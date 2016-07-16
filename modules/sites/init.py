@@ -34,6 +34,12 @@ gevent.monkey.patch_all(thread=False)
 def get_request(url, headers={}):
     """
         Make a HTTP GET request to a url
+
+        @param url (String): URL to make get request to
+        @param headers (Dict): Headers to be passed along
+                               with the request headers
+
+        @return: Response object or -1 or {}
     """
 
     i = 0
