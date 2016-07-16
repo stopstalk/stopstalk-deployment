@@ -27,6 +27,48 @@ import requests
 import utilities
 
 # ----------------------------------------------------------------------------
+def handle_error():
+    """
+        Handles errors and shows valid error messages
+        Also notifies the admin by an email
+    """
+
+    code = request.vars.code
+    request_url = request.vars.request_url
+    ticket = request.vars.ticket
+
+    # Make sure error url is not current url to avoid infinite loop.
+    if code is not None and request_url != request.url:
+        # Assign the error status code to the current response
+        response.status = int(code)
+
+    error_message = ""
+    if code == "404":
+        message = request_url
+        error_message = "Not found"
+    elif code == "500":
+        # Get ticket URL:
+        message = A("Ticket", _href=URL("admin", "default", "ticket",
+                                        args=ticket,
+                                        scheme=True,
+                                        host=True))
+        error_message = "Internal Server error"
+    else:
+        error_message = "Other error"
+
+    if auth.is_logged_in():
+        subject = "%s %s occurred" % (session.auth.user.email, code)
+    else:
+        subject = "%s occurred" % code
+
+    current.send_mail(to="raj454raj@gmail.com",
+                      subject=subject,
+                      message=str(message),
+                      mail_type="admin")
+
+    return dict(error_message=error_message)
+
+# ----------------------------------------------------------------------------
 def index():
     """
         The main controller which redirects depending
