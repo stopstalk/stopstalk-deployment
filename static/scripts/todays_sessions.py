@@ -25,8 +25,9 @@ sttable = db.sessions_today
 sessions = db(sttable).select(sttable.message)
 
 # Construct mail message body
-message = reduce(lambda x, y: x + "\n" + y,
-                 map(lambda x: x.message, sessions))
+message = ""
+for i in sessions:
+    message += sessions["message"] + "\n"
 
 # Empty the sessions table
 sttable.truncate()
