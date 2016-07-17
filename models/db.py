@@ -507,7 +507,7 @@ db.define_table("queue",
                 Field("status"),
                 Field("email"),
                 Field("subject"),
-                Field("message"))
+                Field("message", "text"))
 
 db.define_table("sessions_today",
                 Field("message", "string"))
