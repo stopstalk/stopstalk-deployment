@@ -71,11 +71,11 @@ class Profile(object):
     def get_submissions(self, last_retrieved):
         """
             Retrieve HackerEarth submissions after last retrieved timestamp
-
             @param last_retrieved (DateTime): Last retrieved timestamp for the user
             @return (Dict): Dictionary of submissions containing all the
                             information about the submissions
         """
+
         if self.handle:
             handle = self.handle
         else:
@@ -88,7 +88,6 @@ class Profile(object):
 
         tmp_string = t.headers["set-cookie"]
         csrf_token = re.findall(r"csrftoken=\w*", tmp_string)[0][10:]
-        url = "https://www.hackerearth.com/AJAX/feed/newsfeed/submission/user/" + handle + "/"
 
         response = {}
         response["host"] = "www.hackerearth.com"
@@ -107,42 +106,33 @@ class Profile(object):
 
         it = 1
         submissions = {handle: {}}
-        for i in xrange(0, 10000, 20):
-            submissions[handle][i / 20] = {}
-            data = {"index": str(i)}
+        for page_number in xrange(1, 1000):
+            submissions[handle][page_number] = {}
+            url = "https://www.hackerearth.com/AJAX/feed/newsfeed/submission/user/" + handle + "/?page=" + str(page_number)
 
-            tmp = requests.post(url,
-                                data=data,
-                                proxies=current.PROXY,
-                                headers=response)
+            tmp = get_request(url, headers=response)
 
             if tmp.status_code != 200:
                 return -1
-            try:
-                final_json = tmp.json()
-            # @ToDo: Specify exception
-            except:
+
+            json_response = tmp.json()
+            if json_response["status"] == "ERROR":
                 break
 
-            if final_json["count"] == 0:
-                break
+            body = json_response["data"]
+            soup = bs4.BeautifulSoup(body, "lxml")
 
-            for feed_number in xrange(20):
+            trs = soup.find("tbody").find_all("tr")
+            for tr in trs:
 
-                submissions[handle][i / 20][it] = []
-                submission = submissions[handle][i / 20][it]
+                submissions[handle][page_number][it] = []
+                submission = submissions[handle][page_number][it]
                 append = submission.append
 
-                try:
-                    feed_key = "feed" + str(feed_number)
-                    final = bs4.BeautifulSoup(tmp.json()[feed_key], "lxml")
-                except KeyError:
-                    break
-
-                all_as = final.find_all("a")
-                all_tds = final.find_all("td")
-                tos = all_tds[-1].contents[1]["title"]
-                time_stamp = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
+                all_tds = tr.find_all("td")
+                all_as = tr.find_all("a")
+                time_stamp = all_tds[-1].contents[1]["title"]
+                time_stamp = time.strptime(str(time_stamp), "%Y-%m-%d %H:%M:%S")
 
                 # Time of submission
                 time_stamp = datetime.datetime(time_stamp.tm_year,
@@ -152,12 +142,10 @@ class Profile(object):
                                                time_stamp.tm_min,
                                                time_stamp.tm_sec) + \
                                                datetime.timedelta(minutes=630)
-
                 curr = time.strptime(str(time_stamp), "%Y-%m-%d %H:%M:%S")
 
                 if curr <= last_retrieved:
                     return submissions
-
                 append(str(time_stamp))
 
                 # Problem Name/URL
@@ -199,10 +187,11 @@ class Profile(object):
                 language = all_tds[5].contents[0]
                 append(language)
 
-                # View code link
-                view_link = "https://www.hackerearth.com" + \
-                            all_as[-1]["href"]
-                append(view_link)
+                # View Link
+                if len(all_as) == 4:
+                    append("https://www.hackerearth.com" + all_as[-2]["href"])
+                else:
+                    append("")
 
                 it += 1
 
