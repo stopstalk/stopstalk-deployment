@@ -33,14 +33,14 @@ all_contests = {}
 for contest in contest_list:
     all_contests[contest["id"]] = contest
 
-handle = "karanaggarwal"
+handle = "raj454raj"
 url = "%scontests/with/%s" % (website, handle)
 
 response = requests.get(url)
 soup = BeautifulSoup(response.text, "lxml")
 tbody = soup.find("table", class_="tablesorter").find("tbody")
 
-contest_data= {}
+contest_data = {}
 for tr in tbody.find_all("tr"):
     all_tds = tr.find_all("td")
     contest_id = int(all_tds[1].find("a")["href"].split("/")[-1])
