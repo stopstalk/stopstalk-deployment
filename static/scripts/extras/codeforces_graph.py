@@ -49,7 +49,7 @@ for tr in tbody.find_all("tr"):
     rating_change = int(all_tds[4].find("span").contents[0].strip())
     new_rating = int(all_tds[5].contents[0].strip())
     contest = all_contests[contest_id]
-    time_stamp = datetime.fromtimestamp(contest["startTimeSeconds"])
+    time_stamp = str(datetime.fromtimestamp(contest["startTimeSeconds"]))
     contest_data[time_stamp] = {"name": contest["name"],
                                 "url": "%scontest/%d" % (website, contest_id),
                                 "rating": new_rating,

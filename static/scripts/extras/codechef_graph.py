@@ -25,7 +25,7 @@ import requests
 from datetime import datetime
 import re
 
-handle = "pranjalr34"
+handle = "tryingtocode"
 url = "https://www.codechef.com/users/" + handle
 
 response = requests.get(url)
@@ -57,7 +57,7 @@ long_contest_data = {}
 for i in xrange(len(long_ratings)):
     month, year = long_months[i].split("/")
     year = zero_pad(year)
-    time_stamp = datetime.strptime(month + " " + year, "%b %y")
+    time_stamp = str(datetime.strptime(month + " " + year, "%b %y"))
     contest_name = "%s Long Challenge 20%s" % (months[month][0], year)
     contest_url = "https://www.codechef.com/" + months[month][1] + year
     long_contest_data[time_stamp] = {"name": contest_name,
@@ -72,7 +72,7 @@ flag = False
 for i in xrange(len(short_ratings)):
     month, year = short_months[i].split("/")
     year = zero_pad(year)
-    time_stamp = datetime.strptime(month + " " + year, "%b %y")
+    time_stamp = str(datetime.strptime(month + " " + year, "%b %y"))
     contest_name = "%s Cook off 20%s" % (months[month][0], year)
     contest_iterator += 1
     if contest_iterator == 0:

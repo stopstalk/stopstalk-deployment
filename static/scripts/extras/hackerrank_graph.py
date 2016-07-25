@@ -37,6 +37,7 @@ for contest_class in response:
                                        "%Y-%m-%d %H:%M:%S")
         # Convert UTC to IST
         time_stamp += timedelta(hours=5, minutes=30)
+        time_stamp = str(time_stamp)
         final_json[time_stamp] = {"name": contest["contest_name"],
                                   "url": website + contest["contest_slug"],
                                   "rating": contest["rating"],
