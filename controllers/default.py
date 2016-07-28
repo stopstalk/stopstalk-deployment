@@ -54,6 +54,7 @@ def handle_error():
                                         host=True))
         error_message = "Internal Server error"
     else:
+        message="Other error"
         error_message = "Other error"
 
     if auth.is_logged_in():
