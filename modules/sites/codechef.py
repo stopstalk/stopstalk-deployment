@@ -192,10 +192,7 @@ class Profile(object):
             append(language)
 
             # View link
-            try:
-                view_link = "https://www.codechef.com" + all_tds[9].find("a")["href"]
-            except KeyError:
-                view_link = ""
+            view_link = "https://www.codechef.com/" + all_tds[0].contents[0]
             append(view_link)
 
     # -------------------------------------------------------------------------
@@ -264,6 +261,8 @@ class Profile(object):
             url = "https://www.codechef.com/submissions?" + urlencode(params)
             response = get_request(url,
                                    headers={"User-Agent": user_agent})
+            if response == -1 or response == {}:
+                return -1
             soup = bs4.BeautifulSoup(response.text, "lxml")
             trs = soup.find("div", class_="tablebox").find("tbody").find_all("tr")
 

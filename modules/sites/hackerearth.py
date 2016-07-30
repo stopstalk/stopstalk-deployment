@@ -112,7 +112,7 @@ class Profile(object):
 
             tmp = get_request(url, headers=response)
 
-            if tmp.status_code != 200:
+            if tmp == -1 or tmp == {}:
                 return -1
 
             json_response = tmp.json()
