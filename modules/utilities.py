@@ -391,7 +391,7 @@ def render_table(submissions, duplicates=[]):
                           TH("Language"),
                           TH("Status"),
                           TH("Points"),
-                          TH("View Code"))))
+                          TH("View/Download Code"))))
 
     tbody = TBODY()
     for submission in submissions:
@@ -457,8 +457,9 @@ def render_table(submissions, duplicates=[]):
                             _href=submission.view_link,
                             _class="btn waves-light waves-effect",
                             _style="background-color: #FF5722",
-                            _target="_blank")))
-                append(TD(A("Download",
+                            _target="_blank"),
+                          " ",
+                          A("Download",
                             _class="download-submission-button btn waves-light waves-effect",
                             _style="background-color: #2196F3",
                             _target="_blank",
@@ -471,8 +472,9 @@ def render_table(submissions, duplicates=[]):
                             _target="_blank",
                             data={"position": "bottom",
                                   "delay": "50",
-                                  "tooltip": "Login to View"})))
-                append(TD(A("Download",
+                                  "tooltip": "Login to View"}),
+                          " ",
+                          A("Download",
                             _class="btn tooltipped disabled",
                             _style="background-color: #2196F3",
                             _target="_blank",
