@@ -26,7 +26,6 @@ from gluon import current, IMG, DIV, TABLE, THEAD, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, \
                   TEXTAREA, SELECT, OPTION, URL
 
-
 # -----------------------------------------------------------------------------
 def get_link(site, handle):
     """
@@ -453,16 +452,39 @@ def render_table(submissions, duplicates=[]):
         append(TD(submission.points))
 
         if submission.view_link:
-            append(TD(A("View",
-                        _href=submission.view_link,
-                        _class="btn waves-light waves-effect",
-                        _style="background-color: #FF5722",
-                        _target="_blank")))
+            if current.auth.is_logged_in():
+                append(TD(A("View",
+                            _href=submission.view_link,
+                            _class="btn waves-light waves-effect",
+                            _style="background-color: #FF5722",
+                            _target="_blank")))
+                append(TD(A("Download",
+                            _class="download-submission-button btn waves-light waves-effect",
+                            _style="background-color: #2196F3",
+                            _target="_blank",
+                            data={"view-link": submission.view_link,
+                                  "site": submission.site})))
+            else:
+                append(TD(A("View",
+                            _class="btn tooltipped disabled",
+                            _style="background-color: #FF5722",
+                            _target="_blank",
+                            data={"position": "bottom",
+                                  "delay": "50",
+                                  "tooltip": "Login to View"})))
+                append(TD(A("Download",
+                            _class="btn tooltipped disabled",
+                            _style="background-color: #2196F3",
+                            _target="_blank",
+                            data={"position": "bottom",
+                                  "delay": "50",
+                                  "tooltip": "Login to Download"})))
         else:
             append(TD())
 
         tbody.append(tr)
     table.append(tbody)
+
     return table
 
 # =============================================================================

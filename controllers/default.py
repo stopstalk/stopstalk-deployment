@@ -1051,6 +1051,41 @@ def retrieve_users():
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
+def download_submission():
+    """
+        Return the downloaded submission as a string
+    """
+
+    from bs4 import BeautifulSoup
+
+    def retrieve_codechef_submission(view_link):
+        problem_id = view_link.strip("/").split("/")[-1]
+        download_url = "https://www.codechef.com/viewplaintext/" + str(problem_id)
+        response = requests.get(download_url)
+        if response.status_code != 200:
+            return -1
+        return BeautifulSoup(response.text).find("pre").text
+
+    def retrieve_codeforces_submission(view_link):
+        response = requests.get(view_link)
+        if response.status_code != 200:
+            return -1
+
+        return BeautifulSoup(response.text).find("pre").text
+
+    site = request.get_vars["site"]
+    view_link = request.get_vars["viewLink"]
+    db.download_submission_logs.insert(user_id=session.user_id,
+                                       url=view_link)
+    if site == "CodeChef":
+        return retrieve_codechef_submission(view_link)
+    elif site == "CodeForces":
+        return retrieve_codeforces_submission(view_link)
+    else:
+        return -1
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
 def unfriend():
     """
         Unfriend the user

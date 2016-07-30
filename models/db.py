@@ -351,6 +351,7 @@ HackerRank handle: %s
 auth.settings.register_onvalidation = [sanitize_fields]
 auth.settings.register_onaccept.append(register_callback)
 auth.settings.register_onaccept.append(notify_institute_users)
+current.auth = auth
 current.response.formstyle = materialize_form
 current.sanitize_fields = sanitize_fields
 
@@ -511,6 +512,10 @@ db.define_table("queue",
 
 db.define_table("sessions_today",
                 Field("message", "string"))
+
+db.define_table("download_submission_logs",
+                Field("user_id", "reference auth_user"),
+                Field("url", "string"))
 
 if session["auth"]:
     session["handle"] = session["auth"]["user"]["stopstalk_handle"]

@@ -152,6 +152,21 @@
       {{pass}}
 
     </div>
+    <div id="download-submission-modal" class="modal">
+        <div class="modal-content">
+            <h4>Download submission</h4>
+            <p>You are just one click away from downloading the solution. Please enter the filename you want the submission to be downloaded as.</p>
+            <div class="row">
+                <div class="input-field col offset-s3 s6">
+                    <input id="file_name" type="text">
+                    <label for="file_name">File Name</label>
+                </div>
+            </div>
+            <div class="row">
+                <a class="btn waves-light waves-effect" id="final-download-button">Download</a>
+            </div>
+        </div>
+    </div>
     </main>
     <footer class="page-footer" style="background-color: #536dfe;">
           <div class="footer-copyright">
@@ -201,6 +216,16 @@
 
     <script type="text/javascript">
     $(document).ready(function() {
+        var downloadSubmission = function(fileName, text) {
+            var element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            element.setAttribute('download', fileName);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
         $('.collapsible').collapsible({
             accordion : false // A setting that changes the collapsible behavior to expandable instead of the default accordion style
         });
@@ -210,6 +235,33 @@
         if (document.activeElement) {
             document.activeElement.blur();
         }
+
+        $('.download-submission-button').click(function() {
+            $('#download-submission-modal').openModal();
+            var site = $(this).data('site');
+            var viewLink = $(this).data('view-link');
+            $.ajax({
+                method: 'GET',
+                url: '{{=URL("default", "download_submission")}}',
+                data: {site: site, viewLink: viewLink}
+            }).done(function(response) {
+                if (response != -1) {
+                    $('#final-download-button').click(function() {
+                        var fileName = $('#file_name').val();
+                        if (fileName) {
+                            downloadSubmission(fileName, response);
+                            $('#download-submission-modal').closeModal();
+                        }
+                        else {
+                            Materialize.toast("Please enter a file name", 4000);
+                        }
+                    });
+                }
+                else {
+                    Materialize.toast("Unable to Download", 4000);
+                }
+            });
+        });
     });
     </script>
     <script type="application/ld+json">

@@ -192,7 +192,7 @@ class Profile(object):
             append(language)
 
             # View link
-            view_link = "https://www.codechef.com/" + all_tds[0].contents[0]
+            view_link = "https://www.codechef.com/viewsolution/" + all_tds[0].contents[0]
             append(view_link)
 
     # -------------------------------------------------------------------------
