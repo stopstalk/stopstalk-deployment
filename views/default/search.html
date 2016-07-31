@@ -3,63 +3,53 @@
 <h1>Search for friends on StopStalk</h1>
 <script>
     $(document).ready(function() {
-        $('#searchInput').bind('keyup', function() {
-            $(this).val();
-            $.ajax({
-                method: 'GET',
-                url: 'retrieve_users.json',
-                data: {q: $(this).val()}
-            }).done(function(html) {
-                $('#responseDiv').html(html['table']);
-                $('button').click(function() {
-                    var thisButton = $(this);
-                    var userID = thisButton.attr('data-user-id');
-                    var buttonType = thisButton.attr('data-type');
-                    if (buttonType != 'disabled') {
-                        if (buttonType == 'add-friend') {
-                            thisButton.addClass('disabled');
-                            thisButton.removeClass('waves-effect');
-                            thisButton.removeClass('waves-light');
-                            thisButton.attr('data-type', 'disabled');
-                            thisButton.attr('data-tooltip', 'Friend request pending');
-                            thisButton.attr('data-user-id', '');
-                            $.ajax({
-                                method: 'POST',
-                                url: '{{=URL("default", "mark_friend")}}' + '/' + userID
-                            }).done(function(response) {
-                                Materialize.toast(response, 4000);
-                            });
-                        }
-                        else {
-                            thisButton.removeClass('black');
-                            thisButton.addClass('green');
-                            thisButton.attr('data-type', 'add-friend');
-                            thisButton.attr('data-tooltip', 'Send friend request');
-                            $.ajax({
-                                method: 'POST',
-                                url: '{{=URL("default", "unfriend")}}' + '/' + userID
-                            }).done(function(response) {
-                                var child = $(thisButton.children()[0]);
-                                child.removeClass('fa-user-times');
-                                child.addClass('fa-user-plus');
-                                Materialize.toast(response, 4000);
-                            });
-                        }
-                    }
-                });
-            });
+        $('button').click(function() {
+            var thisButton = $(this);
+            var userID = thisButton.attr('data-user-id');
+            var buttonType = thisButton.attr('data-type');
+            if (buttonType != 'disabled') {
+                if (buttonType == 'add-friend') {
+                    thisButton.addClass('disabled');
+                    thisButton.removeClass('waves-effect');
+                    thisButton.removeClass('waves-light');
+                    thisButton.attr('data-type', 'disabled');
+                    thisButton.attr('data-tooltip', 'Friend request pending');
+                    thisButton.attr('data-user-id', '');
+                    $.ajax({
+                        method: 'POST',
+                        url: '{{=URL("default", "mark_friend")}}' + '/' + userID
+                    }).done(function(response) {
+                        Materialize.toast(response, 4000);
+                    });
+                }
+                else {
+                    thisButton.removeClass('black');
+                    thisButton.addClass('green');
+                    thisButton.attr('data-type', 'add-friend');
+                    thisButton.attr('data-tooltip', 'Send friend request');
+                    $.ajax({
+                        method: 'POST',
+                        url: '{{=URL("default", "unfriend")}}' + '/' + userID
+                    }).done(function(response) {
+                        var child = $(thisButton.children()[0]);
+                        child.removeClass('fa-user-times');
+                        child.addClass('fa-user-plus');
+                        Materialize.toast(response, 4000);
+                    });
+                }
+            }
         });
     });
 </script>
-<form class="col s12">
+<form class="col s12" action="" method="POST">
     <div class="row center">
-        <div class="input-field col s4"></div>
-        <div class="input-field col s4">
-            <input id="searchInput" type="text" class="center">
+        <div class="input-field col offset-s4 s4">
+            <input id="searchInput" name="q" type="text" class="center">
             <label for="searchInput">Search</label>
         </div>
-        <div class="input-field col s4"></div>
+    </div>
+    <div class="row center">
+        <input type="submit" value="Search"/>
     </div>
 </form>
-<div id="responseDiv">
-</div>
+{{=table}}

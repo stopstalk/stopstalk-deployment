@@ -663,15 +663,6 @@ def user():
     return dict(form=auth())
 
 # ----------------------------------------------------------------------------
-@auth.requires_login()
-def search():
-    """
-        Search for a user
-    """
-
-    return dict()
-
-# ----------------------------------------------------------------------------
 def filters():
     """
         Apply multiple kind of filters on submissions
@@ -947,15 +938,18 @@ To stop receiving mails - %s
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
-def retrieve_users():
+def search():
     """
         Show the list of registered users
     """
 
+    if len(request.post_vars) == 0:
+        return dict(table=DIV())
+
     atable = db.auth_user
     frtable = db.friend_requests
     ftable = db.friends
-    q = request.get_vars.get("q", None)
+    q = request.post_vars.get("q", None)
 
     query = (atable.first_name.contains(q)) | \
             (atable.last_name.contains(q)) | \
