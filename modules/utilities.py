@@ -453,18 +453,19 @@ def render_table(submissions, duplicates=[]):
 
         if submission.view_link:
             if current.auth.is_logged_in():
-                append(TD(A("View",
-                            _href=submission.view_link,
-                            _class="btn waves-light waves-effect",
-                            _style="background-color: #FF5722",
-                            _target="_blank"),
-                          " ",
-                          A("Download",
-                            _class="download-submission-button btn waves-light waves-effect",
-                            _style="background-color: #2196F3",
-                            _target="_blank",
-                            data={"view-link": submission.view_link,
-                                  "site": submission.site})))
+                td = TD(A("View",
+                          _href=submission.view_link,
+                          _class="btn waves-light waves-effect",
+                          _style="background-color: #FF5722",
+                          _target="_blank"), " ")
+                if submission.site != "HackerEarth":
+                    td.append(A("Download",
+                                _class="download-submission-button btn waves-light waves-effect",
+                                _style="background-color: #2196F3",
+                                _target="_blank",
+                                data={"view-link": submission.view_link,
+                                      "site": submission.site}))
+                append(td)
             else:
                 append(TD(A("View",
                             _class="btn tooltipped disabled",
