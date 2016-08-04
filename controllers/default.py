@@ -344,7 +344,6 @@ def contests():
         Show the upcoming contests
     """
 
-    1 / 0
     today = datetime.datetime.today()
     today = datetime.datetime.strptime(str(today)[:-7],
                                        "%Y-%m-%d %H:%M:%S")
