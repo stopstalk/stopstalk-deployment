@@ -512,6 +512,15 @@ db.define_table("queue",
 db.define_table("sessions_today",
                 Field("message", "string"))
 
+fields = [Field("user_id", "reference auth_user"),
+          Field("custom_user_id", "reference custom_friend")]
+
+for site in current.SITES:
+    if site not in ["Spoj", "HackerEarth"]:
+        fields.append(Field(site.lower() + "_data", "text"))
+
+db.define_table("graph_data", *fields)
+
 if session["auth"]:
     session["handle"] = session["auth"]["user"]["stopstalk_handle"]
     session["user_id"] = session["auth"]["user"]["id"]

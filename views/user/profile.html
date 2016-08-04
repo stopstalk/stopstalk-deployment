@@ -11,7 +11,7 @@
 
         #user-details {
             float: left;
-            margin-top: 10%;
+            margin-top: 2%;
             margin-left: 7%;
         }
 
@@ -31,6 +31,7 @@
 
       // Set a callback to run when the Google Visualization API is loaded.
       google.setOnLoadCallback(drawChart);
+      google.setOnLoadCallback(drawLineChart);
 
 
       // Callback that creates and polates a data table,
@@ -78,8 +79,8 @@
 
               // Set chart options
               var options = {'title':'Total Submissions',
-                             'width':800,
-                             'height':600,
+                             'width':650,
+                             'height':400,
                              'pieHole': 0.5,
                              'slices': {
                                  0: {color: '#109618'},
@@ -100,6 +101,90 @@
               var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
               chart.draw(data, options);
           });
+        }
+
+        function drawLineChart() {
+
+            $.ajax({
+                method: 'GET',
+                url: '{{=URL("user", "get_graph_data", vars={"user_id": row.id, "custom": custom})}}'
+            }).done(function(response) {
+                var graph_data = $.parseJSON(response);
+                console.log(graph_data);
+                if (graph_data.length == 0) {
+                    $("#contest_graphs").html("<p>Graph data would be populated soon</p>")
+                    return;
+                }
+                var data = new google.visualization.DataTable();
+                data.addColumn("datetime", "Day");
+                data.addColumn({'type': 'string', 'role': 'tooltip', 'p': {'html': true}});
+                var reformed_data = {}
+                var noOfGraphs = Object.keys(graph_data).length;
+                $.each(graph_data, function(k, v) {
+
+                    data.addColumn("number", v["title"]);
+                    $.each(v["data"], function(dateStr, contestData) {
+                        if (reformed_data.hasOwnProperty(dateStr)) {
+                            var tmparray = reformed_data[dateStr];
+                            tmparray[k] = contestData["rating"];
+                        }
+                        else {
+                            var tmparray = [];
+                            for(i = 0 ; i < noOfGraphs ; i++) {
+                                tmparray.push(null);
+                            }
+                            tmparray[k] = contestData["rating"];
+                            reformed_data[dateStr] = tmparray;
+                        }
+                    });
+                });
+
+                var completeGraphData = [];
+                $.each(reformed_data, function(k, v) {
+                    v.unshift("<div style='padding: 5px 5px 5px 5px;'>hello</div>");
+                    v.unshift(new Date(k));
+                    console.log(v);
+                    completeGraphData.push(v);
+                });
+                completeGraphData.sort(function(a, b) {
+                    return a[0].getTime() - b[0].getTime();
+                });
+                data.addRows(completeGraphData);
+          var options = {
+            seriesType: "line",
+            width: 900,
+            height: 500,
+            interpolateNulls: true,
+            focusTarget: 'category',
+            tooltip: {
+                trigger: 'selection',
+                isHtml: true
+            },
+            pointSize: 3,
+            explorer: {
+                keepInBounds: true
+            }
+          };
+
+          var chart = new google.visualization.LineChart(document.getElementById('cumulative_graph'));
+          chart.draw(data, options);
+            });
+
+            /*
+          var data = new google.visualization.DataTable();
+          data.addColumn('datetime', 'Day');
+          data.addColumn('number', 'A');
+          data.addColumn('number', 'B');
+          data.addColumn('number', 'C');
+
+          data.addRows([
+            [new Date("2013-01-03 04:56:00"),  37.8, 60.8, 11.8],
+            [new Date("2013-02-03 04:56:00"),  37.8, 64.8, 11.8],
+            [new Date("2013-03-07 15:56:00"),  17.8, null, 41.8],
+            [new Date("2013-04-07 15:56:00"),  18.8, 70, 47.8],
+            [new Date("2013-06-03 04:56:00"),  3.8, 87.8, 33.8],
+            [new Date("2014-01-03 05:16:00"),  39.8, 11.8, 41.8],
+          ]);*/
         }
 
         $(document).ready(function() {
@@ -157,7 +242,6 @@
         });
     </script>
     <script>
-        google.load("visualization", "1.1", {packages:["calendar"]});
         google.setOnLoadCallback(drawCalendar);
 
         // ---------------------------------------------------------------------------------
@@ -359,8 +443,18 @@
             </tbody>
         </table>
     </div>
-    <div id="chart_div" style="margin-left: 45%; padding: 2%; overflow-x: hidden;"></div>
-    <br/><br/>
+    <div id="chart_div" style="margin-left: 55%; margin-top: 6%; overflow: hidden;"></div>
+    <br /><br />
+    <br /><br />
+    <br /><br />
+    <hr>
+    <h5>Contest Ratings</h5>
+    <div id="contest_graphs">
+        <p>Normal scrolling/pinching works for zooming in and out the graph. Right click to reset the zoom.</p>
+        <div id="cumulative_graph" style="margin-left: 17%;"></div>
+    </div>
+    <hr>
+    <h5>Daywise submissions</h5>
     <div id="calendar_basic" class="center" style="margin-left: 18%; width: 70%;"></div>
     <div id="activity"></div>
     {{pass}}

@@ -113,6 +113,40 @@ def add_custom_friend():
     redirect(URL("user", "profile", args=stopstalk_handle))
 
 # ------------------------------------------------------------------------------
+def get_graph_data():
+    user_id = request.get_vars.get("user_id", None)
+    custom = request.get_vars.get("custom", None)
+    empty_list = str([])
+    if user_id is None or custom is None:
+        return empty_list
+
+    gdtable = db.graph_data
+    query = (gdtable.user_id == int(user_id))
+    if custom == "True":
+        query = (gdtable.custom_user_id == int(user_id))
+
+    def get_site_graphs(graph_data):
+        graphs = []
+        if graph_data is None:
+            return []
+        graph_data = eval(graph_data)
+        for i in graph_data:
+            graphs.append(graph_data[i])
+        return graphs
+
+    record = db(query).select().first()
+    if record is None:
+        return empty_list
+
+    graphs = []
+    graphs.extend(get_site_graphs(record.codechef_data))
+    graphs.extend(get_site_graphs(record.codeforces_data))
+    graphs.extend(get_site_graphs(record.hackerrank_data))
+
+    import json
+    return json.dumps(graphs)
+
+# ------------------------------------------------------------------------------
 @auth.requires_login()
 def edit_custom_friend_details():
     """
