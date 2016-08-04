@@ -43,9 +43,17 @@
 </script>
 <form class="col s12" action="" method="POST">
     <div class="row center">
-        <div class="input-field col offset-s4 s4">
+        <div class="input-field col offset-s3 s3">
             <input id="searchInput" name="q" type="text" class="center">
             <label for="searchInput">Search</label>
+        </div>
+        <div class="input-field col s3">
+            <select id="institute" name="institute" class="center browser-default">
+                <option value="" disabled selected>Institute</option>
+                {{for institute in all_institutes:}}
+                    <option value="{{=institute}}">{{=institute}}</option>
+                {{pass}}
+            </select>
         </div>
     </div>
     <div class="row center">

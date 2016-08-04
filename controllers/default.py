@@ -942,17 +942,24 @@ def search():
         Show the list of registered users
     """
 
+    itable = db.institutes
+    all_institutes = db(itable).select(itable.name,
+                                       orderby=itable.name)
+    all_institutes = [x["name"].strip("\"") for x in all_institutes]
+    all_institutes.append("Other")
+
     if len(request.post_vars) == 0:
-        return dict(table=DIV())
+        return dict(all_institutes=all_institutes,
+                    table=DIV())
 
     atable = db.auth_user
     frtable = db.friend_requests
     ftable = db.friends
     q = request.post_vars.get("q", None)
-
-    query = (atable.first_name.contains(q)) | \
-            (atable.last_name.contains(q)) | \
-            (atable.stopstalk_handle.contains(q))
+    institute = request.post_vars.get("institute", None)
+    query = ((atable.first_name.contains(q)) | \
+             (atable.last_name.contains(q)) | \
+             (atable.stopstalk_handle.contains(q)))
 
     for site in current.SITES:
         field_name = site.lower() + "_handle"
@@ -960,6 +967,8 @@ def search():
 
     # Don't show the logged in user in the search
     query &= (atable.id != session.user_id)
+    if institute:
+        query &= (atable.institute == institute)
 
     # Don't show users who have sent friend requests
     # to the logged in user
@@ -1040,7 +1049,7 @@ def search():
         tbody.append(tr)
 
     table.append(tbody)
-    return dict(table=table)
+    return dict(all_institutes=all_institutes, table=table)
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
