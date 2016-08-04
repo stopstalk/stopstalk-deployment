@@ -109,7 +109,7 @@
         <div class="right">
             <span class="left">
                 {{if response.menu:}}
-                    {{=MENU(response.menu, _class='nav navbar-nav',li_class='dropdown',ul_class='dropdown-menu')}}
+                    {{=MENU(response.menu, _class='nav navbar-nav',li_class='dropdown',ul_class='dropdown-menu', mobile=request.user_agent().is_mobile)}}
                 {{pass}}
             </span>
             <ul class="right hide-on-med-and-down" style="float: left;">
