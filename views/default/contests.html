@@ -203,6 +203,9 @@
 </script>
 <script src="https://apis.google.com/js/client.js?onload=checkAuth"></script>
 <body>
-
-{{=table}}
+{{if retrieved:}}
+    {{=table}}
+{{else:}}
+    <p>Error retrieving contests! If the problem persists please <a href="{{=URL('default', 'contact_us')}}">Contact Us</a></p>
+{{pass}}
 </body>

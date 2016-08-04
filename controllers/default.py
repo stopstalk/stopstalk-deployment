@@ -48,10 +48,10 @@ def handle_error():
         error_message = "Not found"
     elif code == "500":
         # Get ticket URL:
-        message = A("Ticket", _href=URL("admin", "default", "ticket",
-                                        args=ticket,
-                                        scheme=True,
-                                        host=True))
+        message = URL("admin", "default", "ticket",
+                      args=ticket,
+                      scheme=True,
+                      host=True)
         error_message = "Internal Server error"
     else:
         message = request_url
@@ -64,7 +64,7 @@ def handle_error():
 
     current.send_mail(to="raj454raj@gmail.com",
                       subject=subject,
-                      message=str(message),
+                      message=message,
                       mail_type="admin")
 
     return dict(error_message=error_message)
@@ -344,6 +344,7 @@ def contests():
         Show the upcoming contests
     """
 
+    1 / 0
     today = datetime.datetime.today()
     today = datetime.datetime.strptime(str(today)[:-7],
                                        "%Y-%m-%d %H:%M:%S")
@@ -355,8 +356,7 @@ def contests():
     if response.status_code == 200:
         response = response.json()["result"]
     else:
-        # @todo: something better
-        return dict()
+        return dict(retrieved=False)
 
     ongoing = response["ongoing"]
     upcoming = response["upcoming"]
@@ -448,7 +448,7 @@ def contests():
         button_id += 1
 
     table.append(tbody)
-    return dict(table=table, upcoming=upcoming)
+    return dict(table=table, upcoming=upcoming, retrieved=True)
 
 # ------------------------------------------------------------------------------
 def leaderboard():
