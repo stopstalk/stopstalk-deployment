@@ -956,7 +956,8 @@ def search():
     for site in current.SITES:
         columns.append(atable[site.lower() + "_handle"])
 
-    rows = db(query).select(*columns)
+    rows = db(query).select(*columns,
+                            orderby=[atable.first_name, atable.last_name])
 
     table = TABLE(_class="striped centered")
     tr = TR(TH("Name"),
