@@ -166,7 +166,7 @@
                 </div>
             </div>
             <div class="row">
-                <a class="btn waves-light waves-effect" id="final-download-button">Download</a>
+                <a class="btn waves-light waves-effect disabled" id="final-download-button">Download</a>
             </div>
         </div>
     </div>
@@ -232,15 +232,26 @@
         $('.collapsible').collapsible({
             accordion : false // A setting that changes the collapsible behavior to expandable instead of the default accordion style
         });
+
         $('select').material_select();
         $('.tooltipped').tooltip({delay: 50});
         // Remove focus from any focused element
         if (document.activeElement) {
             document.activeElement.blur();
         }
+        $(document).on('click', '.download-submission-button', function() {
 
-        $('.download-submission-button').click(function() {
-            $('#download-submission-modal').openModal();
+            var onModalClose = function() {
+                /* Callback function on Modal close */
+                downloadButton.addClass('disabled');
+                $('#file_name').val('');
+            }
+
+            $('#download-submission-modal').openModal({
+                complete: onModalClose
+            });
+
+            var downloadButton = $('#final-download-button');
             var site = $(this).data('site');
             var viewLink = $(this).data('view-link');
             $.ajax({
@@ -249,11 +260,18 @@
                 data: {site: site, viewLink: viewLink}
             }).done(function(response) {
                 if (response != -1) {
-                    $('#final-download-button').click(function() {
+                    downloadButton.removeClass('disabled');
+                    $('#file_name').on('keydown', function() {
+                        if(event.which == 13) {
+                            $('#final-download-button').trigger('click');
+                        }
+                    });
+                    $(document).one('click', '#final-download-button', function() {
                         var fileName = $('#file_name').val();
                         if (fileName) {
                             downloadSubmission(fileName, response);
                             $('#download-submission-modal').closeModal();
+                            onModalClose();
                         }
                         else {
                             Materialize.toast("Please enter a file name", 4000);

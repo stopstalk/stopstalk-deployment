@@ -1032,20 +1032,82 @@ def download_submission():
 
     from bs4 import BeautifulSoup
 
-    def retrieve_codechef_submission(view_link):
-        problem_id = view_link.strip("/").split("/")[-1]
-        download_url = "https://www.codechef.com/viewplaintext/" + str(problem_id)
-        response = requests.get(download_url)
+    def handle_retrieve_error(download_url,
+                              status_code,
+                              error=None,
+                              message_body=None):
+
+        """
+            Error logging for Download submissions
+
+            @param download_url (String): Download URL which failed
+            @param status_code (Number): Status code of response
+            @param error (String): Exception message
+            @param message_body (String): response.text in case of errors
+
+            @return Number: -1 (To signify failure to JS)
+        """
+
+        subject = "Download submission failed: %d" % status_code
+        message = """
+User handle: %s
+Download URL: %s
+Error: %s
+Response text: %s
+                  """ % (session.handle, download_url, error, message_body)
+
+        current.send_mail(to="raj454raj@gmail.com",
+                          subject=subject,
+                          message=message,
+                          mail_type="admin",
+                          bulk=True)
+        return -1
+
+    def response_handler(download_url, response):
+        """
+            Handle the request response
+
+            @param response (Response): Response object after request to the
+                                        view submission link
+            @return Number (-1) / String (Submission code)
+        """
+
         if response.status_code != 200:
-            return -1
-        return BeautifulSoup(response.text).find("pre").text
+            return handle_retrieve_error(download_url,
+                                         response.status_code)
+
+        try:
+            return BeautifulSoup(response.text).find("pre").text
+        except Exception as e:
+            return handle_retrieve_error(download_url,
+                                         response.status_code,
+                                         e,
+                                         response.text)
+
+    def retrieve_codechef_submission(view_link):
+        """
+            Get CodeChef submission from view_link
+
+            @param view_link (String): View link of the submission
+            @return response_handler (Method): Handler for the response
+        """
+
+        problem_id = view_link.strip("/").split("/")[-1]
+        download_url = "https://www.codechef.com/viewplaintext/" + \
+                       str(problem_id)
+        response = requests.get(download_url)
+        return response_handler(download_url, response)
 
     def retrieve_codeforces_submission(view_link):
-        response = requests.get(view_link)
-        if response.status_code != 200:
-            return -1
+        """
+            Get Codeforces submission from view_link
 
-        return BeautifulSoup(response.text).find("pre").text
+            @param view_link (String): View link of the submission
+            @return response_handler (Method): Handler for the response
+        """
+
+        response = requests.get(view_link)
+        return response_handler(view_link, response)
 
     site = request.get_vars["site"]
     view_link = request.get_vars["viewLink"]
