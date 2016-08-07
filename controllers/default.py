@@ -76,7 +76,6 @@ def index():
         on the login status of the user and does some
         extra pre-processing
     """
-
     # If the user is logged in
     if auth.is_logged_in():
         session.flash = "Welcome StopStalker!!"
@@ -960,8 +959,7 @@ def search():
                             orderby=[atable.first_name, atable.last_name])
 
     table = TABLE(_class="striped centered")
-    tr = TR(TH("Name"),
-            TH("StopStalk Handle"))
+    tr = TR(TH("Name"))
 
     for site in current.SITES:
         tr.append(TH(site + " Handle"))

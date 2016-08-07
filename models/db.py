@@ -224,6 +224,7 @@ def sanitize_fields(form):
         3. Lowercase the handles
         4. Fill the institute field with "Other" if empty
         5. Email address entered is from a valid domain
+        6. Email address instead of handles
 
         @param form (FORM): Registration / Add Custom friend form
     """
@@ -237,11 +238,13 @@ def sanitize_fields(form):
     handle_fields = ["stopstalk"]
     handle_fields.extend([x.lower() for x in current.SITES.keys()])
 
-    # 1.
+    # 1. and 6.
     for field in handle_fields:
         field_handle = field + "_handle"
         if form.vars[field_handle].__contains__(" "):
             form.errors[field_handle] = "White spaces not allowed"
+        if IS_EMAIL(error_message="check")(form.vars[field_handle])[1] != "check":
+            form.errors[field_handle] = "Email address instead of handle"
 
     # 2.
     remove_at_symbol("HackerEarth")
