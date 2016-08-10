@@ -24,7 +24,7 @@ import re
 from datetime import datetime
 from gluon import current, IMG, DIV, TABLE, THEAD, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, \
-                  TEXTAREA, SELECT, OPTION, URL
+                  TEXTAREA, SELECT, OPTION, URL, BUTTON
 
 # -----------------------------------------------------------------------------
 def get_link(site, handle):
@@ -452,36 +452,42 @@ def render_table(submissions, duplicates=[]):
         append(TD(submission.points))
 
         if submission.view_link:
+            submission_data = {"view-link": submission.view_link,
+                               "site": submission.site}
+            button_class = "btn waves-light waves-effect"
             if current.auth.is_logged_in():
-                td = TD(A("View",
-                          _href=submission.view_link,
-                          _class="btn waves-light waves-effect",
-                          _style="background-color: #FF5722",
-                          _target="_blank"), " ")
                 if submission.site != "HackerEarth":
-                    td.append(A("Download",
-                                _class="download-submission-button btn waves-light waves-effect",
-                                _style="background-color: #2196F3",
-                                _target="_blank",
-                                data={"view-link": submission.view_link,
-                                      "site": submission.site}))
+                    td = TD(BUTTON("View",
+                                   _class="view-submission-button " + button_class,
+                                   _style="background-color: #FF5722",
+                                   data=submission_data),
+                            " ",
+                            BUTTON("Download",
+                                   _class="download-submission-button " + \
+                                          button_class,
+                                   _style="background-color: #2196F3",
+                                   data=submission_data))
+                else:
+                    td = TD(A("View",
+                              _href=submission.view_link,
+                              _class="btn waves-light waves-effect",
+                              _style="background-color: #FF5722",
+                              _target="_blank"))
                 append(td)
             else:
-                append(TD(A("View",
-                            _class="btn tooltipped disabled",
-                            _style="background-color: #FF5722",
-                            _target="_blank",
-                            data={"position": "bottom",
-                                  "delay": "50",
-                                  "tooltip": "Login to View"}),
+                append(TD(BUTTON("View",
+                                 _class="btn tooltipped disabled",
+                                 _style="background-color: #FF5722",
+                                 data={"position": "bottom",
+                                       "delay": "50",
+                                       "tooltip": "Login to View"}),
                           " ",
-                          A("Download",
-                            _class="btn tooltipped disabled",
-                            _style="background-color: #2196F3",
-                            _target="_blank",
-                            data={"position": "bottom",
-                                  "delay": "50",
-                                  "tooltip": "Login to Download"})))
+                          BUTTON("Download",
+                                 _class="btn tooltipped disabled",
+                                 _style="background-color: #2196F3",
+                                 data={"position": "bottom",
+                                       "delay": "50",
+                                       "tooltip": "Login to Download"})))
         else:
             append(TD())
 

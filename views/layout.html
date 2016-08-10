@@ -79,6 +79,51 @@
         div.error {
             color: red;
         }
+        .prettyprint {
+            -webkit-touch-callout: text;
+            -webkit-user-select: text;
+            -khtml-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+            cursor: text;
+            overflow: hidden;
+        }
+
+        /* desert scheme ported from vim to google prettify */
+        pre.prettyprint { display: block; background-color: #333 }
+        pre .nocode { background-color: none; color: #000 }
+        pre .str { color: #ffa0a0 } /* string  - pink */
+        pre .kwd { color: #f0e68c; font-weight: bold }
+        pre .com { color: #87ceeb } /* comment - skyblue */
+        pre .typ { color: #98fb98 } /* type    - lightgreen */
+        pre .lit { color: #cd5c5c } /* literal - darkred */
+        pre .pun { color: #fff }    /* punctuation */
+        pre .pln { color: #fff }    /* plaintext */
+        pre .tag { color: #f0e68c; font-weight: bold } /* html/xml tag    - lightyellow */
+        pre .atn { color: #bdb76b; font-weight: bold } /* attribute name  - khaki */
+        pre .atv { color: #ffa0a0 } /* attribute value - pink */
+        pre .dec { color: #98fb98 } /* decimal         - lightgreen */
+
+        /* Specify class=linenums on a pre to get line numbering */
+        ol.linenums { margin-top: 0; margin-bottom: 0; color: #AEAEAE } /* IE indents via margin-left */
+        li.L0,li.L1,li.L2,li.L3,li.L5,li.L6,li.L7,li.L8 { list-style-type: none }
+        /* Alternate shading for lines */
+        li.L1,li.L3,li.L5,li.L7,li.L9 { }
+
+        @media print {
+            pre.prettyprint { background-color: none }
+            pre .str, code .str { color: #060 }
+            pre .kwd, code .kwd { color: #006; font-weight: bold }
+            pre .com, code .com { color: #600; font-style: italic }
+            pre .typ, code .typ { color: #404; font-weight: bold }
+            pre .lit, code .lit { color: #044 }
+            pre .pun, code .pun { color: #440 }
+            pre .pln, code .pln { color: #000 }
+            pre .tag, code .tag { color: #006; font-weight: bold }
+            pre .atn, code .atn { color: #404 }
+            pre .atv, code .atv { color: #060 }
+        }
     </style>
   </head>
   <body class="center Site">
@@ -170,6 +215,67 @@
             </div>
         </div>
     </div>
+
+    <div id="view-submission-modal" class="modal">
+        <div class="modal-content">
+            <h4>View submission</h4>
+
+                <button id="copy-to-clipboard" class="btn btn-default waves-light waves-effect green hide">Copy to Clipboard</button>
+                <div id="view-submission-preloader" class="preloader-wrapper big active">
+                  <div class="spinner-layer spinner-blue">
+                    <div class="circle-clipper left">
+                      <div class="circle"></div>
+                    </div><div class="gap-patch">
+                      <div class="circle"></div>
+                    </div><div class="circle-clipper right">
+                      <div class="circle"></div>
+                    </div>
+                  </div>
+
+                  <div class="spinner-layer spinner-red">
+                    <div class="circle-clipper left">
+                      <div class="circle"></div>
+                    </div><div class="gap-patch">
+                      <div class="circle"></div>
+                    </div><div class="circle-clipper right">
+                      <div class="circle"></div>
+                    </div>
+                  </div>
+
+                  <div class="spinner-layer spinner-yellow">
+                    <div class="circle-clipper left">
+                      <div class="circle"></div>
+                    </div><div class="gap-patch">
+                      <div class="circle"></div>
+                    </div><div class="circle-clipper right">
+                      <div class="circle"></div>
+                    </div>
+                  </div>
+
+                  <div class="spinner-layer spinner-green">
+                    <div class="circle-clipper left">
+                      <div class="circle"></div>
+                    </div><div class="gap-patch">
+                      <div class="circle"></div>
+                    </div><div class="circle-clipper right">
+                      <div class="circle"></div>
+                    </div>
+                  </div>
+                </div>
+
+            <pre id="view-submission-pre" class="hide" style="width: 100%; text-align: left; border: 0.5px solid #FEFEFE;"></pre>
+            <p>You are just one click away from downloading the solution. Please enter the filename you want the submission to be downloaded as.</p>
+            <div class="row">
+                <div class="input-field col offset-s3 s6">
+                    <input id="view_download_file_name" type="text">
+                    <label for="view_download_file_name">File Name</label>
+                </div>
+            </div>
+            <div class="row">
+                <a class="btn waves-light waves-effect disabled" id="final-view-download-button">Download</a>
+            </div>
+        </div>
+    </div>
     </main>
     <footer class="page-footer" style="background-color: #536dfe;">
           <div class="footer-copyright">
@@ -202,6 +308,7 @@
     </div>
     <!-- The javascript =============================== -->
     <script src="{{=URL('static','materialize/js/materialize.js')}}"></script>
+    <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
     <script src="{{=URL('static','js/web2py-bootstrap3.js')}}"></script>
     {{block page_js}}{{end page_js}}
     <!-- Analytics ==================================== -->
@@ -228,7 +335,6 @@
             element.click();
             document.body.removeChild(element);
         }
-
         $('.collapsible').collapsible({
             accordion : false // A setting that changes the collapsible behavior to expandable instead of the default accordion style
         });
@@ -239,7 +345,104 @@
         if (document.activeElement) {
             document.activeElement.blur();
         }
+
+        var copyToClipBoard = function(copyText) {
+            var textField = document.createElement('textarea');
+            textField.innerHTML = copyText;
+            document.body.appendChild(textField);
+            textField.select();
+            document.execCommand("copy");
+            textField.remove();
+        }
+
+        $(document).on('click', '.view-submission-button', function() {
+            var downloadButton = $('#final-view-download-button');
+            var site = $(this).data('site');
+            var viewLink = $(this).data('view-link');
+
+            var onModalClose = function() {
+                /* Callback function on Modal close */
+                downloadButton.addClass('disabled');
+                $('#view_download_file_name').val('');
+                $('#view-submission-preloader').removeClass('hide');
+                $('#view-submission-pre').addClass('hide');
+                $('#view-submission-pre').removeClass('prettyprint');
+                $('#view-submission-pre').removeClass('prettyprinted');
+                $('#view-submission-pre').html('');
+                $('#copy-to-clipboard').addClass('hide');
+            }
+
+            $('#view-submission-modal').openModal({
+                complete: onModalClose
+            });
+
+            var htmlifySubmission = function(solutionCode) {
+                return solutionCode.replace(/&/g, "&amp;")
+                                   .replace(/>/g, "&gt;")
+                                   .replace(/</g, "&lt;")
+                                   .replace(/"/g, "&quot;")
+                                   .trim(' ');
+            };
+
+            $.ajax({
+                method: 'GET',
+                url: '{{=URL("default", "download_submission")}}',
+                data: {site: site, viewLink: viewLink}
+            }).done(function(response) {
+                $('#view-submission-preloader').addClass('hide');
+                $('#view-submission-pre').removeClass('hide');
+                $('#copy-to-clipboard').removeClass('hide');
+
+                var solutionText;
+                if (response != -1) {
+                    solutionText = htmlifySubmission(response);
+                }
+                else {
+                    solutionText = "// Unable to retrieve submission from " + site + "\n" + "/* Possible reasons :-\n\t * The submission is from an ongoing contest\n\t * There was some error from our side in which case\n\t   we are notified and will be rectifying it soon\n */";
+                }
+
+                $('#view-submission-pre').html(solutionText);
+                $('#view-submission-modal').one('click', '#copy-to-clipboard', function() {
+                    if (response != -1)
+                        copyToClipBoard(response);
+                    else
+                        copyToClipBoard(solutionText);
+                });
+
+                $('#view-submission-pre').addClass('prettyprint');
+                PR.prettyPrint();
+
+                if (response != -1) {
+                    downloadButton.removeClass('disabled');
+                    $('#view_download_file_name').on('keydown', function() {
+                        if(event.which == 13) {
+                            $('#final-view-download-button').trigger('click');
+                        }
+                    });
+                    $(document).one('click', '#final-view-download-button', function() {
+                        var fileName = $('#view_download_file_name').val();
+                        if (fileName) {
+                            downloadSubmission(fileName, response);
+                            $('#view-submission-modal').closeModal();
+                            onModalClose();
+                        }
+                        else {
+                            Materialize.toast("Please enter a file name", 4000);
+                        }
+                    });
+                }
+                else {
+                    Materialize.toast("Unable to Download", 4000);
+                }
+            });
+
+        });
+
         $(document).on('click', '.download-submission-button', function() {
+
+            var downloadButton = $('#final-download-button');
+            var site = $(this).data('site');
+            var viewLink = $(this).data('view-link');
 
             var onModalClose = function() {
                 /* Callback function on Modal close */
@@ -251,9 +454,6 @@
                 complete: onModalClose
             });
 
-            var downloadButton = $('#final-download-button');
-            var site = $(this).data('site');
-            var viewLink = $(this).data('view-link');
             $.ajax({
                 method: 'GET',
                 url: '{{=URL("default", "download_submission")}}',

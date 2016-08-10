@@ -104,7 +104,7 @@
 
         $(document).ready(function() {
             $('.modal-trigger').leanModal();
-            $('button').click(function() {
+            $('.friends-button').click(function() {
                 var thisButton = $(this);
                 var userID = thisButton.attr('data-user-id');
                 var buttonType = thisButton.attr('data-type');
@@ -277,7 +277,7 @@
                     </th>
                     {{if flag == "not-friends" and custom == False:}}
                         <th>
-                            <button class="tooltipped btn-floating btn-large waves-effect waves-light green" data-position="bottom" data-delay="50" data-tooltip="Send Friend Request" data-user-id="{{=row.id}}" data-type="add-friend">
+                            <button class="tooltipped btn-floating btn-large waves-effect waves-light friends-button green" data-position="bottom" data-delay="50" data-tooltip="Send Friend Request" data-user-id="{{=row.id}}" data-type="add-friend">
                                 <i class="fa fa-user-plus fa-3x"></i>
                             </button>
                         </th>
@@ -307,13 +307,13 @@
                         </th>
                     {{elif flag == "pending":}}
                         <th>
-                            <button class="tooltipped btn-floating btn-large disabled" data-position="bottom" data-delay="50" data-tooltip="Friend request pending!" data-type="disabled">
+                            <button class="tooltipped btn-floating btn-large disabled friends-button" data-position="bottom" data-delay="50" data-tooltip="Friend request pending!" data-type="disabled">
                                 <i class="fa fa-user-plus fa-3x"></i>
                             </button>
                         </th>
                     {{elif flag == "already-friends":}}
                         <th>
-                            <button class="tooltipped btn-floating btn-large waves-effect waves-light black" data-position="bottom" data-delay="50" data-tooltip="Unfriend" data-user-id="{{=row.id}}" data-type="unfriend">
+                            <button class="tooltipped btn-floating btn-large waves-effect waves-light black friends-button" data-position="bottom" data-delay="50" data-tooltip="Unfriend" data-user-id="{{=row.id}}" data-type="unfriend">
                                 <i class="fa fa-user-times fa-3x"></i>
                             </button>
                         </th>
