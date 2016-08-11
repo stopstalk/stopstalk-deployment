@@ -47,6 +47,9 @@ class Profile(object):
             @return (List): List of tags for that problem
         """
 
+        if problem_link.__contains__("gymProblem"):
+            return ["-"]
+
         response = get_request(problem_link)
         if response == -1 or response == {}:
             return ["-"]
@@ -154,10 +157,13 @@ class Profile(object):
             append(row["programmingLanguage"])
 
             # View code link
-            view_link = "http://www.codeforces.com/contest/" + \
-                        str(row["contestId"]) + \
-                        "/submission/" + \
-                        str(row["id"])
+            if problem_link.__contains__("gymProblem"):
+                view_link = ""
+            else:
+                view_link = "http://www.codeforces.com/contest/" + \
+                            str(row["contestId"]) + \
+                            "/submission/" + \
+                            str(row["id"])
             append(view_link)
 
             it += 1
