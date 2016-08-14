@@ -19,6 +19,9 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     THE SOFTWARE.
 """
+import gevent
+from gevent import monkey
+gevent.monkey.patch_all(thread=False)
 
 import datetime
 
@@ -27,20 +30,23 @@ def _get_total_users(trending_problems,
                      start_date,
                      end_date):
 
-    for problem in trending_problems:
+    def _perform_query(problem, start_date):
         sql = """
                  SELECT COUNT(id)
                  FROM `submission`
                  WHERE ((problem_link = '%s')
-                   AND  ((time_stamp >= '%s')
-                     AND (time_stamp <= '%s')))
+                   AND  (time_stamp >= '%s'))
                  GROUP BY user_id, custom_user_id
               """ % (problem["submission"]["problem_link"],
-                     start_date,
-                     end_date)
-
+                     start_date)
         res = db.executesql(sql)
         problem["unique"] = len(res)
+
+    threads = []
+    for problem in trending_problems:
+        threads.append(gevent.spawn(_perform_query, problem, start_date))
+
+    gevent.joinall(threads)
 
     return trending_problems
 

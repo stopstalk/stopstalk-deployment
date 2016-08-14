@@ -1208,9 +1208,9 @@ def submissions():
                     total_rows=1)
 
     user = session.auth.user
-    db.sessions_today.insert(message="%s %s %s %s" % (user.first_name,
+    db.sessions_today.insert(message="%s %s %d %s" % (user.first_name,
                                                       user.last_name,
-                                                      user.institute,
+                                                      user.id,
                                                       datetime.datetime.now()))
 
     offset = PER_PAGE * (int(active) - 1)

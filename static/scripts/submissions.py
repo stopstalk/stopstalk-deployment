@@ -34,16 +34,14 @@ N = int(sys.argv[1])
 rows = []
 
 # -----------------------------------------------------------------------------
-def _debug(first_name, last_name, site, custom=False):
+def _debug(stopstalk_handle, site, custom=False):
     """
         Advanced logging of submissions
     """
 
-    name = first_name + " " + last_name
-    debug_string = site + ":"
+    debug_string = stopstalk_handle + " " + site + " "
     if custom:
-        debug_string += "CUS:"
-    debug_string += name
+        debug_string += "CUS "
     print debug_string,
 
 # -----------------------------------------------------------------------------
@@ -148,7 +146,7 @@ def retrieve_submissions(record, custom):
 
     for submissions in list_of_submissions:
         site = submissions[0]
-        _debug(record.first_name, record.last_name, site, custom)
+        _debug(record.stopstalk_handle, site, custom)
         site_handle = record[site.lower() + "_handle"]
         todays_submissions[site.lower()] = get_submissions(record.id,
                                                            site_handle,
