@@ -153,7 +153,11 @@ class Profile(object):
             problem_link = "https://www.codechef.com" + \
                             all_tds[3].contents[0]["href"]
             append(problem_link)
-            problem_name = all_tds[3].contents[0].contents[0]
+            try:
+                problem_name = all_tds[3].contents[0].contents[0]
+            except:
+                print all_tds
+                continue
             append(problem_name)
 
             # Submission status

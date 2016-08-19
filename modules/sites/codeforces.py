@@ -137,9 +137,6 @@ class Profile(object):
                 submission_status = "HCK"
             elif status == "MEMORY_LIMIT_EXCEEDED":
                 submission_status = "MLE"
-            # @ToDo: Is this a good and/or correct way?
-            elif status == "TESTING":
-                continue
             else:
                 submission_status = "OTH"
             append(submission_status)

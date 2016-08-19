@@ -91,7 +91,7 @@ class Profile(object):
         url = "https://www.spoj.com/users/" + handle
         tmpreq = get_request(url)
 
-        if tmpreq == -1:
+        if tmpreq == -1 or tmpreq == {}:
             return -1
 
         # Bad but correct way of checking if the handle exists
@@ -107,7 +107,7 @@ class Profile(object):
 
             start += 20
             t = get_request(url)
-            if t == -1:
+            if t == -1 or t == {}:
                 return -1
 
             soup = bs4.BeautifulSoup(t.text, "lxml")

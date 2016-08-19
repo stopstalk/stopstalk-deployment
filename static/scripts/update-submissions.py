@@ -90,7 +90,7 @@ def get_submissions(user_id,
                 encoded_row = []
                 for x in row:
                     if isinstance(x, basestring):
-                        tmp = x.encode("ascii", "ignore")
+                        tmp = x.encode("utf-8", "ignore")
 
                         # @ToDo: Dirty hack! Do something with
                         #        replace and escaping quotes
@@ -98,12 +98,12 @@ def get_submissions(user_id,
                         if tmp == "--":
                             tmp = "NULL"
                         else:
-                            tmp = u"\"" + tmp + u"\""
+                            tmp = "\"" + tmp + "\""
                         encoded_row.append(tmp)
                     else:
                         encoded_row.append(str(x))
 
-                rows.append(u"(" + u", ".join(encoded_row) + u")")
+                rows.append("(" + ", ".join(encoded_row) + ")")
 
 
     if count != 0:

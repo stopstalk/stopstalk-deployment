@@ -23,13 +23,17 @@
 ptable = db.problem_tags
 stable = db.submission
 
-all_links = db(ptable).select(ptable.problem_link)
-all_links = [x["problem_link"] for x in all_links]
+plinks = db(ptable.problem_name == "").select(ptable.problem_link)
+plinks = [x["problem_link"] for x in plinks]
 
-query = stable.problem_link.belongs(all_links)
-problems = db(query).select(stable.problem_link,
-                            stable.problem_name)
+splinks = db(stable).select(stable.problem_link, stable.problem_name)
 
-for i in problems:
-    query = (ptable.problem_link == i["problem_link"])
-    db(query).update(problem_name=i["problem_name"])
+all_problems = {}
+for problem in splinks:
+    all_problems[problem["problem_link"]] = problem["problem_name"].strip()
+
+for plink in plinks:
+    if all_problems.has_key(plink) and all_problems[plink] != "":
+        query = (ptable.problem_link == plink)
+        print plink, "*", all_problems[plink], "*"
+        db(query).update(problem_name=all_problems[plink])
