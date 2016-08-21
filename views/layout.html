@@ -79,6 +79,7 @@
         div.error {
             color: red;
         }
+
         .prettyprint {
             -webkit-touch-callout: text;
             -webkit-user-select: text;
@@ -263,7 +264,10 @@
                   </div>
                 </div>
 
+            <br/>
             <pre id="view-submission-pre" class="hide" style="width: 100%; text-align: left; border: 0.5px solid #FEFEFE;"></pre>
+            <a id="link-to-site" class="btn btn-default waves-light waves-effect" href="" target="_blank"></a>
+
             <p>You are just one click away from downloading the solution. Please enter the filename you want the submission to be downloaded as.</p>
             <div class="row">
                 <div class="input-field col offset-s3 s6">
@@ -360,6 +364,9 @@
             var site = $(this).data('site');
             var viewLink = $(this).data('view-link');
 
+            $('#link-to-site').html('View on ' + site);
+            $('#link-to-site').attr('href', viewLink);
+
             var onModalClose = function() {
                 /* Callback function on Modal close */
                 downloadButton.addClass('disabled');
@@ -370,6 +377,8 @@
                 $('#view-submission-pre').removeClass('prettyprinted');
                 $('#view-submission-pre').html('');
                 $('#copy-to-clipboard').addClass('hide');
+                $('#link-to-site').html('');
+                $('#link-to-site').attr('href', '');
             }
 
             $('#view-submission-modal').openModal({
