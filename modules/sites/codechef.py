@@ -180,7 +180,7 @@ class Profile(object):
                 submission_status = "WA"
             elif status == "compilation error":
                 submission_status = "CE"
-            elif status == "runtime error(SIGSEGV)":
+            elif status.__contains__("runtime"):
                 submission_status = "RE"
             elif status == "time limit exceeded":
                 submission_status = "TLE"

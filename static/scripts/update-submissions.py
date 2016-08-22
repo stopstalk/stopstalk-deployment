@@ -192,6 +192,6 @@ if __name__ == "__main__":
             db.executesql(sql_query)
         except:
             traceback.print_exc()
-            print "Error in " + site + " BULK INSERT for " + handle
+            print "Error in BULK INSERT"
 
 # END =========================================================================

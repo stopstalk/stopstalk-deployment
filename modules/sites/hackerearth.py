@@ -160,7 +160,8 @@ class Profile(object):
                 except IndexError:
                     status = "Others"
 
-                if status.__contains__("Accepted"):
+                if status.__contains__("Accepted") or \
+                   status.__contains__("Partially"):
                     status = "AC"
                 elif status.__contains__("Wrong"):
                     status = "WA"
