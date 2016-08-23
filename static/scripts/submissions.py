@@ -189,16 +189,18 @@ if __name__ == "__main__":
 
     user_ids = []
     for record in registered_users:
-        user_ids.append(record.id)
-        retrieve_submissions(record, False)
+        result = retrieve_submissions(record, False)
+        if result != "FAILURE":
+            user_ids.append(record.id)
 
     query = (cftable.id % 5 == N) & (cftable.duplicate_cu == None)
     custom_users = db(query).select()
 
     custom_user_ids = []
     for record in custom_users:
-        custom_user_ids.append(record.id)
-        retrieve_submissions(record, True)
+        result = retrieve_submissions(record, True)
+        if result != "FAILURE":
+            custom_user_ids.append(record.id)
 
     columns = "(`user_id`, `custom_user_id`, `stopstalk_handle`, " + \
               "`site_handle`, `site`, `time_stamp`, `problem_name`," + \

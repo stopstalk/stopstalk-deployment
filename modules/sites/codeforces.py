@@ -83,6 +83,11 @@ class Profile(object):
         if tmp == {} or tmp == -1:
             return tmp
 
+        # This was not supposed to be done here but optimization :p
+        db = current.db
+        ptable = db.problem_tags
+        today = datetime.datetime.now().strftime("%Y-%m-%d")
+
         submissions = {handle: {1: {}}}
         all_submissions = tmp.json()
         if all_submissions["status"] != "OK":
@@ -114,6 +119,24 @@ class Profile(object):
             append(problem_link)
             problem_name = row["problem"]["name"]
             append(problem_name)
+
+            # Problem tags
+            tags = row["problem"]["tags"]
+            if tags == []:
+                tags = ["-"]
+
+            record = db(ptable.problem_link == problem_link).select().first()
+
+            if record is None:
+                print "Codeforces tag inserted", problem_link, tags
+                ptable.insert(problem_link=problem_link,
+                              problem_name=problem_name,
+                              tags=str(tags),
+                              problem_added_on=today)
+            else:
+                if tags != ["-"] and record.tags == "['-']":
+                    print "Codeforces tag updated", problem_link, tags
+                    record.update_record(tags=str(tags))
 
             # Problem status
             try:

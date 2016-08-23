@@ -172,16 +172,18 @@ if __name__ == "__main__":
     user_ids = []
 
     for user in new_users:
-        user_ids.append(user.id)
-        retrieve_submissions(user, False)
+        result = retrieve_submissions(user, False)
+        if result != "FAILURE":
+            user_ids.append(user.id)
 
     query = (cftable.last_retrieved == current.INITIAL_DATE)
     custom_users = db(query).select(limitby=(0, max_limit))
     custom_user_ids = []
 
     for custom_user in custom_users:
-        custom_user_ids.append(custom_user.id)
-        retrieve_submissions(custom_user, True)
+        result = retrieve_submissions(custom_user, True)
+        if result != "FAILURE":
+            custom_user_ids.append(custom_user.id)
 
     columns = "(`user_id`, `custom_user_id`, `stopstalk_handle`, " + \
               "`site_handle`, `site`, `time_stamp`, `problem_name`," + \
