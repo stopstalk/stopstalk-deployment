@@ -181,35 +181,37 @@ if __name__ == "__main__":
     atable = db.auth_user
     cftable = db.custom_friend
 
-    columns = "(`user_id`, `custom_user_id`, `stopstalk_handle`, " + \
-              "`site_handle`, `site`, `time_stamp`, `problem_name`," + \
-              "`problem_link`, `lang`, `status`, `points`, `view_link`)"
-
     # Update the last retrieved of the user
     today = datetime.now()
 
     query = (atable.id % 5 == N) & (atable.blacklisted == False)
     registered_users = db(query).select()
-    for record in registered_users:
-        retrieve_submissions(record, False)
 
-    db(query).update(last_retrieved=today)
+    user_ids = []
+    for record in registered_users:
+        user_ids.append(record.id)
+        retrieve_submissions(record, False)
 
     query = (cftable.id % 5 == N) & (cftable.duplicate_cu == None)
     custom_users = db(query).select()
+
+    custom_user_ids = []
     for record in custom_users:
+        custom_user_ids.append(record.id)
         retrieve_submissions(record, True)
 
-    db(query).update(last_retrieved=today)
+    columns = "(`user_id`, `custom_user_id`, `stopstalk_handle`, " + \
+              "`site_handle`, `site`, `time_stamp`, `problem_name`," + \
+              "`problem_link`, `lang`, `status`, `points`, `view_link`)"
 
     if len(rows) != 0:
         sql_query = """INSERT INTO `submission` """ + \
                     columns + """ VALUES """ + \
                     ",".join(rows) + """;"""
-        try:
-            db.executesql(sql_query)
-        except:
-            traceback.print_exc()
-            print "Error in BULK INSERT"
+        db.executesql(sql_query)
+
+    # Update last retrieved only if DB query is successful
+    db(atable.id.belongs(user_ids)).update(last_retrieved=today)
+    db(cftable.id.belongs(custom_user_ids)).update(last_retrieved=today)
 
 # END =========================================================================

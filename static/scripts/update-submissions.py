@@ -161,24 +161,27 @@ if __name__ == "__main__":
     atable = db.auth_user
     cftable = db.custom_friend
 
+    max_limit = 3
+
     # Update the last retrieved of the user
     today = datetime.now()
 
     query = (atable.last_retrieved == current.INITIAL_DATE) & \
             (atable.blacklisted == False)
-    new_users = db(query).select()
+    new_users = db(query).select(limitby=(0, max_limit))
+    user_ids = []
 
     for user in new_users:
+        user_ids.append(user.id)
         retrieve_submissions(user, False)
 
-    db(query).update(last_retrieved=today)
-
     query = (cftable.last_retrieved == current.INITIAL_DATE)
-    custom_users = db(query).select()
-    for custom_user in custom_users:
-        retrieve_submissions(custom_user, True)
+    custom_users = db(query).select(limitby=(0, max_limit))
+    custom_user_ids = []
 
-    db(query).update(last_retrieved=today)
+    for custom_user in custom_users:
+        custom_user_ids.append(custom_user.id)
+        retrieve_submissions(custom_user, True)
 
     columns = "(`user_id`, `custom_user_id`, `stopstalk_handle`, " + \
               "`site_handle`, `site`, `time_stamp`, `problem_name`," + \
@@ -188,10 +191,10 @@ if __name__ == "__main__":
         sql_query = """INSERT INTO `submission` """ + \
                     columns + """ VALUES """ + \
                     ",".join(rows) + """;"""
-        try:
-            db.executesql(sql_query)
-        except:
-            traceback.print_exc()
-            print "Error in BULK INSERT"
+        db.executesql(sql_query)
+
+    # Update last retrieved only if DB query is successful
+    db(atable.id.belongs(user_ids)).update(last_retrieved=today)
+    db(cftable.id.belongs(custom_user_ids)).update(last_retrieved=today)
 
 # END =========================================================================
