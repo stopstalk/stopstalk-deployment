@@ -189,10 +189,8 @@ class Profile(object):
                 append(language)
 
                 # View Link
-                if len(all_as) == 4:
-                    append("https://www.hackerearth.com" + all_as[-2]["href"])
-                else:
-                    append("")
+                append("https://www.hackerearth.com/submission/" + \
+                       tr["id"].split("-")[-1])
 
                 it += 1
 
