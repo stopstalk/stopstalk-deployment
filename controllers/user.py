@@ -175,7 +175,13 @@ def update_details():
     for site in current.SITES:
         form_fields.append(site.lower() + "_handle")
 
-    record = db.auth_user(session.user_id)
+    atable = db.auth_user
+    record = atable(session.user_id)
+
+    # Do not allow to modify stopstalk_handle and email
+    atable.stopstalk_handle.writable = False
+    atable.email.writable = False
+
     form = SQLFORM(db.auth_user,
                    record,
                    fields=form_fields,
@@ -218,6 +224,10 @@ def update_friend():
         redirect(URL("user", "edit_custom_friend_details"))
 
     record = cftable(request.args[0])
+
+    # Do not allow to modify stopstalk_handle
+    cftable.stopstalk_handle.writable = False
+
     form_fields = ["first_name",
                    "last_name",
                    "institute",
