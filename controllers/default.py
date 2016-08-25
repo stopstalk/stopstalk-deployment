@@ -1182,9 +1182,13 @@ def submissions():
     """
 
     if len(request.args) == 0:
-        active = "1"
+        active = 1
     else:
-        active = request.args[0]
+        try:
+            active = int(request.args[0])
+        except ValueError:
+            # The pagination page number is not integer
+            raise HTTP(404)
 
     cftable = db.custom_friend
     ftable = db.friends
@@ -1221,7 +1225,7 @@ def submissions():
                                                       user.id,
                                                       datetime.datetime.now()))
 
-    offset = PER_PAGE * (int(active) - 1)
+    offset = PER_PAGE * (active - 1)
     # Retrieve only some number of submissions from the offset
     rows = db(query).select(orderby=~db.submission.time_stamp,
                             limitby=(offset, offset + PER_PAGE))

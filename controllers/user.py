@@ -437,9 +437,7 @@ def profile():
         rows = db(query).select()
         if len(rows) == 0:
             # No such user exists
-            return dict(nouser=True,
-                        handle=handle,
-                        actual_handle=actual_handle)
+            raise HTTP(404)
         else:
             flag = "custom"
             custom = True
@@ -564,7 +562,7 @@ def submissions():
                     duplicates = [(row.id, row.duplicate_cu)]
                     handle = row.duplicate_cu.stopstalk_handle
             else:
-                redirect(URL("default", "index"))
+                raise HTTP(404)
 
     if request.vars["page"]:
         page = request.vars["page"]
