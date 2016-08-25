@@ -62,10 +62,12 @@ def handle_error():
     else:
         subject = "%s occurred" % code
 
-    current.send_mail(to="raj454raj@gmail.com",
-                      subject=subject,
-                      message=message,
-                      mail_type="admin")
+    if code != "400":
+        # Send mail except 400 errors mostly occurred due to crawlers
+        current.send_mail(to="raj454raj@gmail.com",
+                          subject=subject,
+                          message=message,
+                          mail_type="admin")
 
     return dict(error_message=error_message)
 
