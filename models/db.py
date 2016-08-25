@@ -450,13 +450,6 @@ db.define_table("faq",
                 Field("question", requires=IS_NOT_EMPTY()),
                 Field("answer", requires=IS_NOT_EMPTY()))
 
-# Table to store globally trending problems in db
-db.define_table("trending_problems",
-                Field("problem_name"),
-                Field("problem_link"),
-                Field("submission_count", "integer", default=0),
-                Field("user_count", "integer", default=0))
-
 db.define_table("stickers_given",
                 Field("user_id", "reference auth_user"),
                 Field("sticker_count", "integer"))
