@@ -629,6 +629,14 @@ def user():
     """
         Use the standard auth for user
     """
+
+    # /default/user/profile will enable users to update email
+    # and stopstalk_handle which will lead to issues
+    if auth.is_logged_in() and \
+       len(request.args) > 0 and \
+       request.args[0] == "profile":
+        redirect(URL("user", "update_details"))
+
     return dict(form=auth())
 
 # ----------------------------------------------------------------------------
