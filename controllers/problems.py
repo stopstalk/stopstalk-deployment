@@ -274,13 +274,14 @@ def _render_trending(caption, problems, flag):
 
     for problem in problems:
         tr = TR()
-        tr.append(TD(A(problem[0],
+        tr.append(TD(A(problem[1]["name"],
                        _href=URL("problems", "index",
-                                 vars={"pname": problem[0],
-                                       "plink": problem[1]}),
+                                 vars={"pname": problem[1]["name"],
+                                       "plink": problem[0]}),
                        _target="_blank")))
-        tr.append(TD(problem[2]))
-        tr.append(TD(problem[3]))
+        tr.append(TD(problem[1]["total_submissions"]))
+        tr.append(TD(len(problem[1]["users"]) + \
+                     len(problem[1]["custom_users"])))
         tbody.append(tr)
 
     table.append(tbody)
@@ -331,12 +332,14 @@ def trending():
     stable = db.submission
 
     today = datetime.datetime.today()
-    # Consider submissions only after PAST_DAYS(customisable)
+    # Consider submissions only after PAST_DAYS(customizable)
     # for trending problems
     start_date = str(today - datetime.timedelta(days=current.PAST_DAYS))
-    end_date = str(today)
-
-    count = stable.id.count()
+    query = (stable.time_stamp >= start_date)
+    last_submissions = db(query).select(stable.problem_name,
+                                        stable.problem_link,
+                                        stable.user_id,
+                                        stable.custom_user_id)
 
     if auth.is_logged_in():
         friends, cusfriends = utilities.get_friends(session.user_id)
@@ -349,59 +352,69 @@ def trending():
             else:
                 custom_friends.append(cus_id[1])
 
-        first_query = (stable.user_id.belongs(friends)) | \
-                      (stable.custom_user_id.belongs(custom_friends))
-        query = (stable.time_stamp >= start_date) & \
-                (stable.time_stamp <= end_date)
-        query = first_query & query
+    problems_dict = {}
+    friends_problems_dict = {}
+    for submission in last_submissions:
+        plink = submission.problem_link
+        pname = submission.problem_name
+        uid = submission.user_id
+        cid = submission.custom_user_id
 
-        friend_trending = db(query).select(stable.problem_name,
-                                           stable.problem_link,
-                                           count,
-                                           orderby=~count,
-                                           groupby=stable.problem_link)
+        # @ToDo: Improve this code
+        if problems_dict.has_key(plink):
+            problems_dict[plink]["total_submissions"] += 1
+        else:
+            problems_dict[plink] = {"name": pname,
+                                    "total_submissions": 1,
+                                    "users": set([]),
+                                    "custom_users": set([])}
 
-        friends = [str(x) for x in friends]
-        custom_friends = [str(x) for x in custom_friends]
-        friend_trending = _get_total_users(friend_trending.as_list(),
-                                           friends,
-                                           custom_friends,
-                                           start_date,
-                                           end_date)
-        # Sort the rows according to the
-        # number of users who solved the
-        # problem in last PAST_DAYS
-        rows = sorted(friend_trending, key=lambda k: k["unique"], reverse=True)
-        rows = rows[:current.PROBLEMS_PER_PAGE]
-        problems = []
-        for problem in rows:
-            submission = problem["submission"]
-            problems.append([submission["problem_name"],
-                             submission["problem_link"],
-                             problem["_extra"]["COUNT(submission.id)"],
-                             problem["unique"]])
+        if auth.is_logged_in() and \
+           ((uid and uid in friends) or \
+            (cid and cid in custom_friends)):
 
-        friend_table = _render_trending("Trending among friends",
-                                        problems,
-                                        "Friends")
+            if friends_problems_dict.has_key(plink):
+                friends_problems_dict[plink]["total_submissions"] += 1
+            else:
+                friends_problems_dict[plink] = {"name": pname,
+                                                "total_submissions": 1,
+                                                "users": set([]),
+                                                "custom_users": set([])}
+            if uid:
+                friends_problems_dict[plink]["users"].add(uid)
+            else:
+                friends_problems_dict[plink]["custom_users"].add(cid)
 
-    tptable = db.trending_problems
-    rows = db(tptable).select()
-    global_trending = []
-    for problem in rows:
-        global_trending.append([problem["problem_name"],
-                                problem["problem_link"],
-                                problem["submission_count"],
-                                problem["user_count"]])
+        if uid:
+            problems_dict[plink]["users"].add(uid)
+        else:
+            problems_dict[plink]["custom_users"].add(cid)
+
+    # Sort the rows according to the number of users
+    # who solved the problem in last PAST_DAYS
+    custom_compare = lambda x: (len(x[1]["users"]) + \
+                                len(x[1]["custom_users"]),
+                                x[1]["total_submissions"])
+
+    global_trending = sorted(problems_dict.items(),
+                             key=custom_compare,
+                             reverse=True)
 
     global_table = _render_trending("Trending Globally",
-                                    global_trending,
+                                    global_trending[:current.PROBLEMS_PER_PAGE],
                                     "Users")
-
     if auth.is_logged_in():
-        div = DIV(_class="row col s12")
-        div.append(DIV(friend_table, _class="col s6"))
-        div.append(DIV(global_table, _class="col s6"))
+        friends_trending = sorted(friends_problems_dict.items(),
+                                  key=custom_compare,
+                                  reverse=True)
+
+        friend_table = _render_trending("Trending among friends",
+                                        friends_trending[:current.PROBLEMS_PER_PAGE],
+                                        "Friends")
+
+        div = DIV(DIV(friend_table, _class="col s6"),
+                  DIV(global_table, _class="col s6"),
+                  _class="row col s12")
     else:
         div = DIV(global_table, _class="center")
 

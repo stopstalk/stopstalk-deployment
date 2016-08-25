@@ -19,6 +19,15 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     THE SOFTWARE.
 """
+
+"""
+    ****************************************
+               NO LONGER IN USE
+    ****************************************
+    Proof of how bad code was used for very simple problem
+    which ran in a CRON for more than an hour ;)
+"""
+
 import gevent
 from gevent import monkey
 gevent.monkey.patch_all(thread=False)
