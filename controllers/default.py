@@ -707,7 +707,9 @@ def filters():
         tmplist = username.split()
         for token in tmplist:
             query &= ((cftable.first_name.contains(token)) | \
-                      (cftable.last_name.contains(token)))
+                      (cftable.last_name.contains(token)) | \
+                      (cftable.stopstalk_handle.contains(token)))
+
 
     if global_submissions is False:
         # Retrieve all the custom users created by the logged-in user
