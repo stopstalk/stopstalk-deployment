@@ -77,15 +77,16 @@ $ pip install requests
     ```
     current.mysql_user = "root" # Change if you have given access to any other user in mysql
     current.mysql_password = "" # As per your mysql password
+    current.mysql_server = "localhost"
     current.mysql_dbname = "migration" # Will remain same as long as you followed 5.
+
+    # Configure mail options
     current.smtp_server = "logging" # Mails will not be sent. Will be logged where the web2py server is running
                                     # Else you can set it to your smtp server.
     current.sender_mail = ""        # Not required if logging
     current.sender_password = ""    # Not required if logging
 
-    # Mailer Settings for bulk email
-    current.bulk_smtp_server = "logging" # Mails will not be sent. Will be logged where the web2py server is running
-                                         # Else you can set it to your smtp server.
+    current.bulk_smtp_server = "logging"
     current.bulk_sender_mail = ""        # Not required if logging
     current.bulk_sender_password = ""    # Not required if logging
     ```
