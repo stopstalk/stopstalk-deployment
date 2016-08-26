@@ -486,20 +486,6 @@ site_fields = []
 for site in current.SITES:
     site_fields.append(Field(site.lower(), "integer", default=0))
 
-# Table to store submissions retrieved today
-db.define_table("submissions_today",
-                Field("user_id", "reference auth_user"),
-                Field("custom_user_id", "reference custom_friend"),
-                *site_fields)
-
-db.define_table("user_streak",
-                Field("user_id", "reference auth_user"),
-                Field("custom_user_id", "reference custom_friend"),
-                Field("acc_streak", "integer", default=0),
-                Field("max_acc_streak", "integer", default=0),
-                Field("day_streak", "integer", default=0),
-                Field("max_day_streak", "integer", default=0))
-
 db.define_table("queue",
                 Field("status"),
                 Field("email"),

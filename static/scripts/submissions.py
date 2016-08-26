@@ -121,10 +121,8 @@ def retrieve_submissions(record, custom):
     time_conversion = "%Y-%m-%d %H:%M:%S"
     last_retrieved = time.strptime(str(last_retrieved), time_conversion)
     list_of_submissions = []
-    todays_submissions = {}
 
     for site in current.SITES:
-        todays_submissions[site.lower()] = 0
         site_handle = record[site.lower() + "_handle"]
         if site_handle:
             Site = globals()[site.lower()]
@@ -134,8 +132,6 @@ def retrieve_submissions(record, custom):
             list_of_submissions.append((site, submissions))
             if submissions == -1:
                 break
-
-    total_retrieved = 0
 
     for submissions in list_of_submissions:
         if submissions[1] == -1:
@@ -148,33 +144,14 @@ def retrieve_submissions(record, custom):
         site = submissions[0]
         _debug(record.stopstalk_handle, site, custom)
         site_handle = record[site.lower() + "_handle"]
-        todays_submissions[site.lower()] = get_submissions(record.id,
-                                                           site_handle,
-                                                           record.stopstalk_handle,
-                                                           submissions[1],
-                                                           site,
-                                                           custom)
-        total_retrieved += todays_submissions[site.lower()]
+        get_submissions(record.id,
+                        site_handle,
+                        record.stopstalk_handle,
+                        submissions[1],
+                        site,
+                        custom)
 
-    sttable = db.submissions_today
-    query = (sttable.user_id == record.id)
-    if custom:
-        query = (sttable.custom_user_id == record.id)
-
-    result = db(query).select().first()
-
-    # @ToDo: Can be converted to bulk insert
-    if result:
-        result.update_record(**todays_submissions)
-    else:
-        if custom:
-            db.submissions_today.insert(custom_user_id=record.id,
-                                        **todays_submissions)
-        else:
-            db.submissions_today.insert(user_id=record.id,
-                                        **todays_submissions)
-
-    return total_retrieved
+    return "SUCCESS"
 
 if __name__ == "__main__":
 

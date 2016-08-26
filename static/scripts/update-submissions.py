@@ -134,8 +134,6 @@ def retrieve_submissions(record, custom):
             if submissions == -1:
                 break
 
-    total_retrieved = 0
-
     for submissions in list_of_submissions:
         if submissions[1] == -1:
             print "PROBLEM " + site + " " + \
@@ -148,13 +146,14 @@ def retrieve_submissions(record, custom):
         site = submissions[0]
         site_handle = record[site.lower() + "_handle"]
         _debug(record.first_name, record.last_name, site, custom)
-        total_retrieved += get_submissions(record.id,
-                                           site_handle,
-                                           record.stopstalk_handle,
-                                           submissions[1],
-                                           site,
-                                           custom)
-    return total_retrieved
+        get_submissions(record.id,
+                        site_handle,
+                        record.stopstalk_handle,
+                        submissions[1],
+                        site,
+                        custom)
+
+    return "SUCCESS"
 
 if __name__ == "__main__":
 
