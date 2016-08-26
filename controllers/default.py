@@ -731,7 +731,8 @@ def filters():
         tmplist = username.split()
         for token in tmplist:
             query &= ((atable.first_name.contains(token)) | \
-                      (atable.last_name.contains(token)))
+                      (atable.last_name.contains(token)) | \
+                      (atable.stopstalk_handle.contains(token)))
 
     # @ToDo: Anyway to use join instead of two such db calls
     possible_users = db(query).select(atable.id)
