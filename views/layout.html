@@ -329,34 +329,6 @@
     <script src="{{=URL('static', 'js/main.js')}}"></script> <!-- Resource jQuery -->
 
     <script type="text/javascript">
-    /* Handle the case of single digit in a time stamp */
-    var formatTimeStamp = function(num) {
-        var strnum = num.toString();
-        return strnum.length == 1 ? '0' + strnum : strnum;
-    }
-
-    var transformTimestamps = function() {
-        var clientOffset = new Date().getTimezoneOffset() * 60 * 1000;
-        var ISTOffset = -330 * 60 * 1000;
-        var convertedTimestamp, ISTTimestamp, d;
-        $('.stopstalk-timestamp').each(function(i, td) {
-            ISTTimestamp = new Date(td.textContent).getTime();
-            d = new Date(ISTTimestamp + ISTOffset - clientOffset);
-            convertedTimestamp = [d.getFullYear(),
-                                  d.getMonth() + 1,
-                                  d.getDate()]
-                                  .map(formatTimeStamp)
-                                  .join('-') +
-                                 " " +
-                                 [d.getHours(),
-                                  d.getMinutes(),
-                                  d.getSeconds()]
-                                  .map(formatTimeStamp)
-                                  .join(':');
-            $(this).html(convertedTimestamp);
-        });
-    };
-
     $(document).ready(function() {
         var downloadSubmission = function(fileName, text) {
             var element = document.createElement('a');
@@ -367,9 +339,6 @@
             element.click();
             document.body.removeChild(element);
         }
-
-        transformTimestamps();
-
         $('.collapsible').collapsible({
             accordion : false // A setting that changes the collapsible behavior to expandable instead of the default accordion style
         });

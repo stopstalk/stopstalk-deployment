@@ -434,7 +434,7 @@ def render_table(submissions, duplicates=[]):
                     _href=get_link(submission.site,
                                    submission.site_handle),
                     _target="_blank")))
-        append(TD(submission.time_stamp, _class="stopstalk-timestamp"))
+        append(TD(submission.time_stamp))
         append(TD(A(submission.problem_name,
                     _href=URL("problems",
                               "index",

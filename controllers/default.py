@@ -396,7 +396,7 @@ def contests():
         tr = TR(_id="contest-" + str(button_id))
         tr.append(TD(i["Name"]))
         tr.append(TD(i["Platform"].capitalize()))
-        tr.append(TD(str(start_time), _class="stopstalk-timestamp"))
+        tr.append(TD(str(start_time)))
 
         duration = i["Duration"]
         duration = duration.replace(" days", "d")
