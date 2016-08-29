@@ -340,7 +340,7 @@
         var ISTOffset = -330 * 60 * 1000;
         var convertedTimestamp, ISTTimestamp, d;
         $('.stopstalk-timestamp').each(function(i, td) {
-            ISTTimestamp = new Date(td.textContent).getTime();
+            ISTTimestamp = new Date(td.textContent.replace(/-/g , '/')).getTime();
             d = new Date(ISTTimestamp + ISTOffset - clientOffset);
             convertedTimestamp = [d.getFullYear(),
                                   d.getMonth() + 1,
