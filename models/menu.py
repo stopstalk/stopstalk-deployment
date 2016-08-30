@@ -53,14 +53,10 @@ if session.user_id:
            data=get_tooltip_data("Search friends")),
          False,
          URL('default', 'search'), []),
-        (I(_class="fa fa-plus-circle fa-2x tooltipped",
-           data=get_tooltip_data("Add Custom Friend")),
+        (I(_class="fa fa-user-secret fa-2x tooltipped",
+           data=get_tooltip_data("Custom Friend")),
          False,
          URL('user', 'custom_friend'), []),
-        (I(_class="fa fa-pencil fa-2x tooltipped",
-           data=get_tooltip_data("Edit Custom Friend Details")),
-         False,
-         URL('user', 'edit_custom_friend_details'), []),
     ]
 
 response.menu += [(I(_class="fa fa-calendar-check-o fa-2x tooltipped",

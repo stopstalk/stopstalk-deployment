@@ -1,10 +1,21 @@
 {{extend 'layout.html'}}
-<head><title>Add Custom Friend</title></head>
-<h1>Make a custom friend</h1>
+<head><title>Custom Friend</title></head>
+<h2>Custom Friend</h2>
 <p>Have a friend who is still not on StopStalk, or not accepting your friend request? We got you covered ;) - just enter his/her details and you are all set!</p>
+<h6>Allowed Custom Friends: <b>{{=allowed}}</b></h6>
+<br/>
+<div class="row">
+<div class="col offset-s1 s4 z-depth-2">
+<h5>Add a Custom Friend</h5>
 {{if form:}}
     {{=form}}
 {{else:}}
-    <h5>You have reached the limit for creating custom friends</h5>
-    <h5>Refer more to increase the limit</h5>
+    <p>You have reached the limit for creating custom friends</p>
+    <p>Refer 3 more friends to increase your limit</p>
 {{pass}}
+</div>
+<div class="col offset-s1 s5 z-depth-2">
+<h5>Update details</h5>
+{{=table}}
+</div>
+</div>

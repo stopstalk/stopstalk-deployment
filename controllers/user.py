@@ -114,53 +114,6 @@ def add_custom_friend():
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()
-def edit_custom_friend_details():
-    """
-        Edit Custom User details
-    """
-
-    cftable = db.custom_friend
-    rows = db(cftable.user_id == session.user_id).select()
-
-    table = TABLE(_class="table")
-    tr = TR(TH("Name"),
-            TH("StopStalk Handle"))
-
-    for site in current.SITES:
-        tr.append(TH(site + " Handle"))
-    tr.append(TH("Update"))
-    table.append(tr)
-
-    for row in rows:
-        tr = TR()
-        tr.append(TD(A(row.first_name + " " + row.last_name,
-                       _href=URL("user",
-                                 "profile",
-                                 args=[row.stopstalk_handle]),
-                       _target="_blank")))
-        tr.append(TD(row.stopstalk_handle))
-
-        for site in current.SITES:
-            tmp_handle = row[site.lower() + "_handle"]
-            if tmp_handle:
-                tr.append(TD(A(tmp_handle,
-                               _href=current.SITES[site] + tmp_handle,
-                               _target="_blank")))
-            else:
-                tr.append(TD())
-        tr.append(TD(FORM(INPUT(_class="btn yellow",
-                                _style="color: black;",
-                                _value="Update",
-                                _type="submit"),
-                          _action=URL("user",
-                                      "update_friend",
-                                      args=[row.id]))))
-        table.append(tr)
-
-    return dict(table=table)
-
-# ------------------------------------------------------------------------------
-@auth.requires_login()
 def update_details():
     """
         Update user details
@@ -212,7 +165,7 @@ def update_friend():
 
     if len(request.args) != 1:
         session.flash = "Please click one of the buttons"
-        redirect(URL("user", "edit_custom_friend_details"))
+        redirect(URL("user", "custom_friend"))
 
     cftable = db.custom_friend
 
@@ -221,7 +174,7 @@ def update_friend():
     row = db(query).select(cftable.id)
     if len(row) == 0:
         session.flash = "Please click one of the buttons"
-        redirect(URL("user", "edit_custom_friend_details"))
+        redirect(URL("user", "custom_friend"))
 
     record = cftable(request.args[0])
 
@@ -248,7 +201,7 @@ def update_friend():
             # If delete checkbox is checked => just process it redirect back
             session.flash = "Custom User deleted"
             db(cftable.id == record.id).delete()
-            redirect(URL("user", "edit_custom_friend_details"))
+            redirect(URL("user", "custom_friend"))
         else:
             ## UPDATE
             # If delete checkbox is not checked
@@ -274,7 +227,7 @@ def update_friend():
             record.update_record(**dict(form.vars))
 
             session.flash = "User details updated"
-            redirect(URL("user", "edit_custom_friend_details"))
+            redirect(URL("user", "custom_friend"))
 
     elif form.errors:
         response.flash = "Form has errors"
@@ -769,14 +722,42 @@ def custom_friend():
     if row.referrer and row.referrer != session.handle:
         referrer = db(atable.stopstalk_handle == row.referrer).count()
 
-    # 3 custom friends allowed plus one for each 5 invites
-    allowed_custom_friends = total_referrals / 5 + default_allowed + referrer
+    # 3 custom friends allowed plus one for each 3 invites
+    allowed_custom_friends = total_referrals / 3 + default_allowed + referrer
 
     # Custom users already created
-    current_count = db(db.custom_friend.user_id == session.user_id).count()
+    rows = db(db.custom_friend.user_id == session.user_id).select()
 
-    if current_count >= allowed_custom_friends:
-        return dict(form=None)
+    table = TABLE(_class="table striped centered")
+    tr = TR(TH("Name"),
+            TH("StopStalk Handle"))
+
+    tr.append(TH("Update"))
+    table.append(THEAD(tr))
+
+    tbody = TBODY()
+
+    for row in rows:
+        tr = TR()
+        tr.append(TD(A(row.first_name + " " + row.last_name,
+                       _href=URL("user",
+                                 "profile",
+                                 args=[row.stopstalk_handle]),
+                       _target="_blank")))
+        tr.append(TD(row.stopstalk_handle))
+
+        tr.append(TD(FORM(INPUT(_class="btn yellow",
+                                _style="color: black;",
+                                _value="Update",
+                                _type="submit"),
+                          _action=URL("user",
+                                      "update_friend",
+                                      args=[row.id]))))
+        tbody.append(tr)
+
+    table.append(tbody)
+    if len(rows) >= allowed_custom_friends:
+        return dict(form=None, table=table, allowed=allowed_custom_friends)
 
     list_fields = ["first_name",
                    "last_name",
@@ -798,6 +779,6 @@ def custom_friend():
         session.flash = "Submissions will be added by tomorrow"
         redirect(URL("default", "submissions", args=[1]))
 
-    return dict(form=form)
+    return dict(form=form, table=table, allowed=allowed_custom_friends)
 
 # ==============================================================================
