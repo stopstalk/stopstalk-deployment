@@ -86,46 +86,60 @@ def get_friends(user_id):
     return friends, cf_to_duplicate
 
 # ----------------------------------------------------------------------------
-def get_accepted_streak(handle):
+def get_accepted_streak(user_id, custom):
     """
         Function that returns current streak of accepted solutions
 
-        @param handle (String): StopStalk handle
+        @param user_id (Integer): user_id or custom_user_id
+        @param custom (Boolean): custom user or not
+
         @return (Integer): Accepted Streak of the user
     """
+
+    if custom:
+        attribute = "submission.custom_user_id"
+    else:
+        attribute = "submission.user_id"
 
     db = current.db
     sql_query = """
                     SELECT COUNT( * )
                     FROM  `submission`
-                    WHERE stopstalk_handle='%s'
+                    WHERE %s=%d
                     AND time_stamp > (SELECT time_stamp
                                         FROM  `submission`
-                                        WHERE stopstalk_handle='%s'
+                                        WHERE %s=%d
                                           AND STATUS <>  'AC'
                                         ORDER BY time_stamp DESC
                                         LIMIT 1);
-                """ % (handle, handle)
+                """ % (attribute, user_id, attribute, user_id)
 
     streak = db.executesql(sql_query)
     return streak[0][0]
 
 # ----------------------------------------------------------------------------
-def get_max_accepted_streak(handle):
+def get_max_accepted_streak(user_id, custom):
     """
         Return the max accepted solution streak
 
-        @param handle (String): StopStalk handle
+        @param user_id (Integer): user_id or custom_user_id
+        @param custom (Boolean): custom user or not
+
         @return (Integer): Maximum Accepted Streak of the user
     """
+
+    if custom:
+        attribute = "submission.custom_user_id"
+    else:
+        attribute = "submission.user_id"
 
     db = current.db
     sql_query = """
                     SELECT status
                     FROM `submission`
-                    WHERE stopstalk_handle='%s'
+                    WHERE %s=%d
                     ORDER BY time_stamp;
-                """ % (handle)
+                """ % (attribute, user_id)
     rows = db.executesql(sql_query)
 
     prev = None

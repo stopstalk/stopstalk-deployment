@@ -241,20 +241,24 @@ def get_dates():
         on each date
     """
 
-    if len(request.args) != 1:
-        if auth.is_logged_in():
-            handle = str(session.handle)
-        else:
-            redirect(URL("default", "index"))
+    if request.vars.user_id and request.vars.custom:
+        user_id = int(request.vars.user_id)
+        custom = (request.vars.custom == "True")
     else:
-        handle = str(request.args[0])
+        raise HTTP(400, "Bad request")
+        return
+
+    if custom:
+        attribute = "submission.custom_user_id"
+    else:
+        attribute = "submission.user_id"
 
     sql_query = """
                     SELECT status, time_stamp, COUNT(*)
                     FROM submission
-                    WHERE submission.stopstalk_handle='%s'
+                    WHERE %s=%d
                     GROUP BY DATE(submission.time_stamp), submission.status;
-                """ % (handle)
+                """ % (attribute, user_id)
 
     row = db.executesql(sql_query)
     total_submissions = {}
@@ -264,8 +268,8 @@ def get_dates():
     prev = curr = None
 
     # For accepted solutions streak
-    curr_accepted_streak = utilities.get_accepted_streak(handle)
-    max_accepted_streak = utilities.get_max_accepted_streak(handle)
+    curr_accepted_streak = utilities.get_accepted_streak(user_id, custom)
+    max_accepted_streak = utilities.get_max_accepted_streak(user_id, custom)
 
     for i in row:
 
@@ -315,19 +319,21 @@ def get_stats():
     """
 
     if request.extension != "json":
-        redirect(URL("default", "index"))
+        raise HTTP(400, "Bad request")
+        return
 
-    if len(request.args) < 1:
-        if auth.is_logged_in():
-            handle = str(session.handle)
-        else:
-            redirect(URL("default", "index"))
+    if request.vars.user_id and request.vars.custom:
+        user_id = int(request.vars.user_id)
+        custom = (request.vars.custom == "True")
     else:
-        handle = str(request.args[0])
+        raise HTTP(400, "Bad request")
+        return
 
     stable = db.submission
     count = stable.id.count()
-    query = (stable.stopstalk_handle == handle)
+    query = (stable.user_id == user_id)
+    if custom:
+        query = (stable.custom_user_id == user_id)
     row = db(query).select(stable.status,
                            count,
                            groupby=stable.status)
@@ -338,18 +344,30 @@ def get_activity():
 
     if request.extension != "json":
         return dict(table="")
+
+    if request.vars.user_id and request.vars.custom:
+        user_id = int(request.vars.user_id)
+        custom = (request.vars.custom == "True")
+    else:
+        raise HTTP(400, "Bad request")
+        return
+        redirect(URL("default", "index"))
+
     stable = db.submission
     post_vars = request.post_vars
     date = post_vars["date"]
     if date is None:
         return dict(table="")
-    handle = post_vars["handle"]
     start_time = date + " 00:00:00"
     end_time = date + " 23:59:59"
 
     query = (stable.time_stamp >= start_time) & \
-            (stable.time_stamp <= end_time) & \
-            (stable.stopstalk_handle == handle)
+            (stable.time_stamp <= end_time)
+
+    if custom:
+        query &= (stable.custom_user_id == user_id)
+    else:
+        query &= (stable.user_id == user_id)
     submissions = db(query).select()
 
     if len(submissions) > 0:
@@ -391,6 +409,7 @@ def profile():
         if len(rows) == 0:
             # No such user exists
             raise HTTP(404)
+            return
         else:
             flag = "custom"
             custom = True
@@ -421,7 +440,12 @@ def profile():
     output["custom"] = custom
 
     stable = db.submission
-    total_submissions = db(stable.stopstalk_handle == handle).count()
+
+    user_query = (stable.user_id == row.id)
+    if custom:
+        user_query = (stable.custom_user_id == row.id)
+    total_submissions = db(user_query).count()
+
     output["total_submissions"] = total_submissions
 
     if custom:
@@ -450,13 +474,10 @@ def profile():
 
     output["flag"] = flag
 
-    group_by = [stable.site, stable.status]
-    query = (stable.stopstalk_handle == handle)
-    rows = db(query).select(stable.site,
-                            stable.status,
-                            stable.id.count(),
-                            groupby=group_by)
-
+    rows = db(user_query).select(stable.site,
+                                 stable.status,
+                                 stable.id.count(),
+                                 groupby=[stable.site, stable.status])
 
     data = {}
     for site in current.SITES:
@@ -495,6 +516,7 @@ def submissions():
     cftable = db.custom_friend
     handle = None
     duplicates = []
+    row = None
 
     if len(request.args) < 1:
         if auth.is_logged_in():
@@ -511,11 +533,15 @@ def submissions():
             row = db(query).select().first()
             if row:
                 custom = True
+                user_id = row.id
                 if row.duplicate_cu:
                     duplicates = [(row.id, row.duplicate_cu)]
-                    handle = row.duplicate_cu.stopstalk_handle
+                    user_id = row.duplicate_cu.id
             else:
                 raise HTTP(404)
+                return
+        else:
+            user_id = row.id
 
     if request.vars["page"]:
         page = request.vars["page"]
@@ -523,7 +549,10 @@ def submissions():
         page = "1"
 
     stable = db.submission
-    query = (stable.stopstalk_handle == handle)
+
+    query = (stable.user_id == user_id)
+    if custom:
+        query = (stable.custom_user_id == user_id)
 
     PER_PAGE = current.PER_PAGE
 

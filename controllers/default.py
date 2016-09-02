@@ -62,8 +62,8 @@ def handle_error():
     else:
         subject = "%s occurred" % code
 
-    if code != "400":
-        # Send mail except 400 errors mostly occurred due to crawlers
+    if request_url:
+        # If request_url is not None send email
         current.send_mail(to="raj454raj@gmail.com",
                           subject=subject,
                           message=message,
@@ -1194,6 +1194,7 @@ def submissions():
         except ValueError:
             # The pagination page number is not integer
             raise HTTP(404)
+            return
 
     cftable = db.custom_friend
     ftable = db.friends

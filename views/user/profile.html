@@ -52,7 +52,7 @@
 
           $.ajax({
               method: 'GET',
-              url: '{{=URL("user", "get_stats", args=handle, extension="json")}}'
+              url: '{{=URL("user", "get_stats", vars={"user_id": row.id, "custom": custom}, extension="json")}}'
           }).done(function(data) {
 
               var statuses = data['row'];
@@ -170,7 +170,7 @@
 
             $.ajax({
                 method: 'GET',
-                url: '{{=URL("user", "get_dates", args=handle, extension="json")}}'
+                url: '{{=URL("user", "get_dates", vars={"user_id": row.id, "custom": custom}, extension="json")}}'
             }).done(function(total){
                 var dataTable = new google.visualization.DataTable();
                 dataTable.addColumn({ type: 'date', id: 'Date' });
@@ -208,8 +208,8 @@
                         var dd  = dateObj.getDate().toString();
                         var finalDate = yyyy + '-' + (mm[1]?mm:'0'+mm[0]) + '-' + (dd[1]?dd:'0'+dd[0]);
                         $.ajax({
-                            url: '{{=URL("user", "get_activity", extension="json")}}',
-                            data: {'date': finalDate, 'handle': '{{=handle}}'},
+                            url: '{{=URL("user", "get_activity", vars={"user_id": row.id, "custom": custom}, extension="json")}}',
+                            data: {'date': finalDate},
                             method: 'POST',
                         }).done(function(response) {
                             $("#activity").html(response["table"]);
