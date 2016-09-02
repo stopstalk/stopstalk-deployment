@@ -408,6 +408,10 @@ def render_table(submissions, duplicates=[]):
                           TH("View/Download Code"))))
 
     tbody = TBODY()
+    # Dictionary to optimize lookup for solved and unsolved problems
+    # Multiple lookups in the main set is bad
+    plink_to_class = {}
+
     for submission in submissions:
         span = SPAN()
 
@@ -449,12 +453,28 @@ def render_table(submissions, duplicates=[]):
                                    submission.site_handle),
                     _target="_blank")))
         append(TD(submission.time_stamp, _class="stopstalk-timestamp"))
+
+        link_class = ""
+        plink = submission.problem_link
+        if plink_to_class.has_key(plink):
+            link_class = plink_to_class[plink]
+        else:
+            if plink in current.solved_problems:
+                link_class = "solved-problem"
+            elif plink in current.unsolved_problems:
+                link_class = "unsolved-problem"
+            else:
+                # This will prevent from further lookups
+                link_class = "unattempted-problem"
+            plink_to_class[plink] = link_class
+
         append(TD(A(submission.problem_name,
                     _href=URL("problems",
                               "index",
                               vars={"pname": submission.problem_name,
                                     "plink": submission.problem_link},
                               extension=False),
+                    _class=link_class,
                     _target="_blank")))
         append(TD(submission.lang))
         append(TD(IMG(_src=URL("static",

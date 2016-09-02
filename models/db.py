@@ -499,9 +499,37 @@ db.define_table("download_submission_logs",
                 Field("user_id", "reference auth_user"),
                 Field("url", "string"))
 
+def get_solved_problems(user_id):
+    """
+        Get the solved and unsolved problems of a user
+
+        @param user_id(Integer): user_id of the logged in user
+    """
+    try:
+        # Session variables already set
+        current.solved_problems
+        current.unsolved_problems
+        return
+    except AttributeError:
+        pass
+
+    stable = db.submission
+    query = (stable.user_id == user_id) & (stable.status == "AC")
+    problems = db(query).select(stable.problem_link, distinct=True)
+    solved_problems = set([x.problem_link for x in problems])
+
+    query = (stable.user_id == user_id)
+    problems = db(query).select(stable.problem_link, distinct=True)
+    all_problems = set([x.problem_link for x in problems])
+    unsolved_problems = all_problems - solved_problems
+
+    current.solved_problems = solved_problems
+    current.unsolved_problems = unsolved_problems
+
 if session["auth"]:
     session["handle"] = session["auth"]["user"]["stopstalk_handle"]
     session["user_id"] = session["auth"]["user"]["id"]
+    get_solved_problems(session["user_id"])
 
 current.db = db
 
