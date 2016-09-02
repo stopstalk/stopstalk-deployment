@@ -530,6 +530,9 @@ if session["auth"]:
     session["handle"] = session["auth"]["user"]["stopstalk_handle"]
     session["user_id"] = session["auth"]["user"]["id"]
     get_solved_problems(session["user_id"])
+else:
+    current.solved_problems = set([])
+    current.unsolved_problems = set([])
 
 current.db = db
 
