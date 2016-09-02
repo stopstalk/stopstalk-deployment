@@ -161,7 +161,7 @@ if __name__ == "__main__":
     # Update the last retrieved of the user
     today = datetime.now()
 
-    query = (atable.id % 5 == N) & (atable.blacklisted == False)
+    query = (atable.id % 10 == N) & (atable.blacklisted == False)
     registered_users = db(query).select()
 
     user_ids = []
@@ -170,7 +170,7 @@ if __name__ == "__main__":
         if result != "FAILURE":
             user_ids.append(record.id)
 
-    query = (cftable.id % 5 == N) & (cftable.duplicate_cu == None)
+    query = (cftable.id % 10 == N) & (cftable.duplicate_cu == None)
     custom_users = db(query).select()
 
     custom_user_ids = []
