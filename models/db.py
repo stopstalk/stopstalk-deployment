@@ -499,6 +499,10 @@ db.define_table("download_submission_logs",
                 Field("user_id", "reference auth_user"),
                 Field("url", "string"))
 
+db.define_table("failed_retrieval",
+                Field("user_id", "reference auth_user"),
+                Field("custom_user_id", "reference custom_friend"))
+
 def get_solved_problems(user_id):
     """
         Get the solved and unsolved problems of a user

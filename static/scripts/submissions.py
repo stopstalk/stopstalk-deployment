@@ -30,8 +30,9 @@ gevent.monkey.patch_all(thread=False)
 
 # @ToDo: Make this generalised
 from sites import codechef, codeforces, spoj, hackerearth, hackerrank
-N = int(sys.argv[1])
 rows = []
+atable = db.auth_user
+cftable = db.custom_friend
 
 # -----------------------------------------------------------------------------
 def _debug(stopstalk_handle, site, custom=False):
@@ -41,7 +42,7 @@ def _debug(stopstalk_handle, site, custom=False):
 
     debug_string = stopstalk_handle + " " + site + " "
     if custom:
-        debug_string += "CUS "
+        debug_string += "CUS"
     print debug_string,
 
 # -----------------------------------------------------------------------------
@@ -151,33 +152,86 @@ def retrieve_submissions(record, custom):
                         site,
                         custom)
 
+    # Immediately update the last_retrieved of the record
+    record.update_record(last_retrieved=datetime.now())
     return "SUCCESS"
 
-if __name__ == "__main__":
+def new_users():
+    """
+        Get the user_ids and custom_user_ids added after last_retrieved
 
-    atable = db.auth_user
-    cftable = db.custom_friend
+        @return (Tuple): (list of user_ids, list of custom_user_ids)
+    """
+    max_limit = 3
+    query = (atable.last_retrieved == current.INITIAL_DATE) & \
+            (atable.blacklisted == False)
+    new_users = db(query).select(limitby=(0, max_limit))
 
-    # Update the last retrieved of the user
-    today = datetime.now()
+    query = (cftable.last_retrieved == current.INITIAL_DATE)
+    custom_users = db(query).select(limitby=(0, max_limit))
 
+    return (new_users, custom_users)
+
+def daily_retrieve():
+    """
+        Get the user_ids and custom_user_ids for daily retrieval
+        according to the param provided (sys.argv[2])
+
+        @return (Tuple): (list of user_ids, list of custom_user_ids)
+    """
+
+    N = int(sys.argv[2])
     query = (atable.id % 10 == N) & (atable.blacklisted == False)
     registered_users = db(query).select()
-
-    user_ids = []
-    for record in registered_users:
-        result = retrieve_submissions(record, False)
-        if result != "FAILURE":
-            user_ids.append(record.id)
 
     query = (cftable.id % 10 == N) & (cftable.duplicate_cu == None)
     custom_users = db(query).select()
 
-    custom_user_ids = []
+    return (registered_users, custom_users)
+
+def re_retrieve():
+    """
+        Get the user_ids and custom_user_ids whose retrieval was
+        failed
+
+        @return (Tuple): (list of user_ids, list of custom_user_ids)
+    """
+
+    users = []
+    custom_users = []
+    frtable = db.failed_retrieval
+    rows = db(frtable).select()
+    for record in rows:
+        if record.user_id:
+            users.append(atable(record.user_id))
+        else:
+            custom_users.append(cftable(record.custom_user_id))
+
+    # Remove all the records after retrieving their submissions
+    frtable.truncate()
+    return (users, custom_users)
+
+if __name__ == "__main__":
+
+    retrieval_type = sys.argv[1]
+    if retrieval_type == "new_users":
+        users, custom_users = new_users()
+    elif retrieval_type == "daily_retrieve":
+        users, custom_users = daily_retrieve()
+    elif retrieval_type == "re_retrieve":
+        users, custom_users = re_retrieve()
+
+    failed_user_ids = []
+    for record in users:
+        result = retrieve_submissions(record, False)
+        if result == "FAILURE":
+            failed_user_ids.append(str(record.id))
+
+    failed_custom_user_ids = []
     for record in custom_users:
         result = retrieve_submissions(record, True)
-        if result != "FAILURE":
-            custom_user_ids.append(record.id)
+        if result == "FAILURE":
+            failed_custom_user_ids.append(str(record.id))
 
     columns = "(`user_id`, `custom_user_id`, `stopstalk_handle`, " + \
               "`site_handle`, `site`, `time_stamp`, `problem_name`," + \
@@ -189,8 +243,17 @@ if __name__ == "__main__":
                     ",".join(rows) + """;"""
         db.executesql(sql_query)
 
-    # Update last retrieved only if DB query is successful
-    db(atable.id.belongs(user_ids)).update(last_retrieved=today)
-    db(cftable.id.belongs(custom_user_ids)).update(last_retrieved=today)
+    # Insert user_ids and custom_user_ids into failed_retrieval
+    # for which the retrieval failed for further re-retrieval
+    insert_query = "INSERT INTO failed_retrieval (user_id, custom_user_id) VALUES"
+    if len(failed_user_ids):
+        failed_user_ids = ["(" + x + ", NULL)" for x in failed_user_ids]
+        sql_query = "%s %s" % (insert_query, ", ".join(failed_user_ids))
+        db.executesql(sql_query)
+
+    if len(failed_custom_user_ids):
+        failed_custom_user_ids = ["(NULL, " + x + ")" for x in failed_custom_user_ids]
+        sql_query = "%s %s" % (insert_query, ", ".join(failed_custom_user_ids))
+        db.executesql(sql_query)
 
 # END =========================================================================

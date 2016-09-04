@@ -44,7 +44,7 @@ directory = "/home/www-data/web2py/"
 print "Retrieving submissions ..."
 command = "python %sweb2py.py -S stopstalk -M -R " % directory + \
           "%sapplications/stopstalk/static/scripts/submissions.py " % directory + \
-          "-A %d > submissions%d.log" % (N, N)
+          "-A daily_retrieve %d > submissions%d.log" % (N, N)
 
 os.system(command)
 os.system("cat " + today_dir + "submissions%d.log" % N)
