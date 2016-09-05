@@ -40,7 +40,7 @@ def _debug(stopstalk_handle, site, custom=False):
         Advanced logging of submissions
     """
 
-    debug_string = stopstalk_handle + " " + site + " "
+    debug_string = stopstalk_handle + " " + site
     if custom:
         debug_string += "CUS"
     print debug_string,
