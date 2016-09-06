@@ -89,6 +89,8 @@ $ pip install requests
     current.bulk_smtp_server = "logging"
     current.bulk_sender_mail = ""        # Not required if logging
     current.bulk_sender_password = ""    # Not required if logging
+
+    current.analytics_id = "" # Leave it empty if you don't want Google Analytics on Localhost
     ```
 
    In case if you want to send emails - Install `postfix` for your respective OS and configure the above smtp server accordingly.

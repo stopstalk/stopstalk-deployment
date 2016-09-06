@@ -37,4 +37,6 @@ current.bulk_smtp_server = "logging"
 current.bulk_sender_mail = ""
 current.bulk_sender_password = ""
 
+# Google Analytics ID
+current.analytics_id = ""
 # =============================================================================
