@@ -50,10 +50,10 @@ def get_request(url, headers={}):
                                     proxies=current.PROXY,
                                     timeout=current.TIMEOUT)
         except RuntimeError:
-            print "RuntimeError", response.status_code
+            print "RuntimeError", url
             return -1
         except Exception as e:
-            print e, response.status_code
+            print e, url
             return {}
 
         if response.status_code == 200:
