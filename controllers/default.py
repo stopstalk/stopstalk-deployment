@@ -931,15 +931,15 @@ def search():
     all_institutes = [x["name"].strip("\"") for x in all_institutes]
     all_institutes.append("Other")
 
-    if len(request.post_vars) == 0:
+    if len(request.get_vars) == 0:
         return dict(all_institutes=all_institutes,
                     table=DIV())
 
     atable = db.auth_user
     frtable = db.friend_requests
     ftable = db.friends
-    q = request.post_vars.get("q", None)
-    institute = request.post_vars.get("institute", None)
+    q = request.get_vars.get("q", None)
+    institute = request.get_vars.get("institute", None)
     query = ((atable.first_name.contains(q)) | \
              (atable.last_name.contains(q)) | \
              (atable.stopstalk_handle.contains(q)))
@@ -997,7 +997,6 @@ def search():
                                  args=[user.stopstalk_handle],
                                  extension=False),
                        _target="_blank")))
-        tr.append(TD(user.stopstalk_handle))
 
         for site in current.SITES:
             tr.append(TD(user[site.lower() + "_handle"]))
