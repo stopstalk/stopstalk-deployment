@@ -1,20 +1,21 @@
 {{extend 'layout.html'}}
-<head><title>Find Friends</title></head>
-<h1>Search for friends on StopStalk</h1>
+<head><title>Find {{if auth.is_logged_in():}} Friends {{else:}} Users {{pass}}</title></head>
+<h1>Search for {{if auth.is_logged_in():}} Friends {{else:}} Users {{pass}} on StopStalk</h1>
 <script>
     $(document).ready(function() {
         $('button').click(function() {
             var thisButton = $(this);
-            var userID = thisButton.attr('data-user-id');
-            var buttonType = thisButton.attr('data-type');
+            var userID = thisButton.attr('data-userid');
+            var buttonType = thisButton.attr('data-buttontype');
+
             if (buttonType != 'disabled') {
                 if (buttonType == 'add-friend') {
                     thisButton.addClass('disabled');
                     thisButton.removeClass('waves-effect');
                     thisButton.removeClass('waves-light');
-                    thisButton.attr('data-type', 'disabled');
+                    thisButton.attr('data-buttontype', 'disabled');
                     thisButton.attr('data-tooltip', 'Friend request pending');
-                    thisButton.attr('data-user-id', '');
+                    thisButton.attr('data-userid', '');
                     $.ajax({
                         method: 'POST',
                         url: '{{=URL("default", "mark_friend")}}' + '/' + userID
@@ -25,7 +26,7 @@
                 else {
                     thisButton.removeClass('black');
                     thisButton.addClass('green');
-                    thisButton.attr('data-type', 'add-friend');
+                    thisButton.attr('data-buttontype', 'add-friend');
                     thisButton.attr('data-tooltip', 'Send friend request');
                     $.ajax({
                         method: 'POST',

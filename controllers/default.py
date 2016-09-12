@@ -919,18 +919,19 @@ To stop receiving mails - %s
     return "Friend Request sent"
 
 # ----------------------------------------------------------------------------
-@auth.requires_login()
 def search():
     """
         Show the list of registered users
     """
 
+    # Get all the list of institutes for the dropdown
     itable = db.institutes
     all_institutes = db(itable).select(itable.name,
                                        orderby=itable.name)
     all_institutes = [x["name"].strip("\"") for x in all_institutes]
     all_institutes.append("Other")
 
+    # Return if form is not submitted
     if len(request.get_vars) == 0:
         return dict(all_institutes=all_institutes,
                     table=DIV())
@@ -940,24 +941,29 @@ def search():
     ftable = db.friends
     q = request.get_vars.get("q", None)
     institute = request.get_vars.get("institute", None)
+
+    # Build query for searching by first_name, last_name & stopstalk_handle
     query = ((atable.first_name.contains(q)) | \
              (atable.last_name.contains(q)) | \
              (atable.stopstalk_handle.contains(q)))
 
+    # Search by profile site handle
     for site in current.SITES:
         field_name = site.lower() + "_handle"
         query |= (atable[field_name].contains(q))
 
-    # Don't show the logged in user in the search
-    query &= (atable.id != session.user_id)
+    if auth.is_logged_in():
+        # Don't show the logged in user in the search
+        query &= (atable.id != session.user_id)
+        # Don't show users who have sent friend requests
+        # to the logged in user
+        tmprows = db(frtable.to_h == session.user_id).select(frtable.from_h)
+        for row in tmprows:
+            query &= (atable.id != row.from_h)
+
+    # Search by institute (if provided)
     if institute:
         query &= (atable.institute == institute)
-
-    # Don't show users who have sent friend requests
-    # to the logged in user
-    tmprows = db(frtable.to_h == session.user_id).select(frtable.from_h)
-    for row in tmprows:
-        query &= (atable.id != row.from_h)
 
     # Columns of auth_user to be retrieved
     columns = [atable.id,
@@ -977,18 +983,34 @@ def search():
     for site in current.SITES:
         tr.append(TH(site + " Handle"))
 
-    tr.append(TH("Friendship Status"))
+    if auth.is_logged_in():
+        tr.append(TH("Friendship Status"))
+
     thead = THEAD()
     thead.append(tr)
     table.append(thead)
 
     tbody = TBODY()
 
-    query = (ftable.user_id == session.user_id)
-    friends = db(query).select(atable.id,
-                               join=ftable.on(ftable.friend_id == atable.id))
-    friends = [x["id"] for x in friends]
+    if auth.is_logged_in():
+        query = (ftable.user_id == session.user_id)
+        join_query = (ftable.friend_id == atable.id)
+        friends = db(query).select(atable.id,
+                                   join=ftable.on(join_query))
+        friends = set([x["id"] for x in friends])
+
+    def get_tooltip_data(tooltip, buttontype, user_id):
+        """
+            Function to return data attributes for the tooltipped buttons
+        """
+        return dict(position="left",
+                    delay="50",
+                    tooltip=tooltip,
+                    buttontype=buttontype,
+                    userid=user_id)
+
     btn_class = "tooltipped btn-floating btn-large waves-effect waves-light"
+
     for user in rows:
 
         tr = TR()
@@ -1001,33 +1023,37 @@ def search():
         for site in current.SITES:
             tr.append(TD(user[site.lower() + "_handle"]))
 
+        # If user is not logged in then no need to show the
+        # friend request buttons
+        if auth.is_logged_in() is False:
+            tbody.append(tr)
+            continue
+
+        # Tooltip data attributes
+        tooltip_attrs = [None, None, str(user.id)]
+
         # Check if the current user is already a friend or not
         if user.id not in friends:
             r = db((frtable.from_h == session.user_id) &
                    (frtable.to_h == user.id)).count()
             if r == 0:
+                # Not a friend and no friend request pending
+                tooltip_attrs[:2] = "Send friend request", "add-friend"
                 tr.append(TD(BUTTON(I(_class="fa fa-user-plus fa-3x"),
                                     _class=btn_class + " green",
-                                    data={"position": "bottom",
-                                          "delay": "50",
-                                          "tooltip": "Send friend request",
-                                          "user-id": str(user.id),
-                                          "type": "add-friend"})))
+                                    data=get_tooltip_data(*tooltip_attrs))))
             else:
+                # Not a friend and friend request pending
+                tooltip_attrs[:2] = "Friend request pending", "disabled"
                 tr.append(TD(BUTTON(I(_class="fa fa-user-plus fa-3x"),
                                     _class=btn_class + " disabled",
-                                    data={"position": "bottom",
-                                          "delay": "50",
-                                          "tooltip": "Send friend request",
-                                          "type": "disabled"})))
+                                    data=get_tooltip_data(*tooltip_attrs))))
         else:
+            # Already friends
+            tooltip_attrs[:2] = "Unfriend", "unfriend"
             tr.append(TD(BUTTON(I(_class="fa fa-user-times fa-3x"),
                                 _class=btn_class + " black",
-                                data={"position": "bottom",
-                                      "delay": "50",
-                                      "tooltip": "Friend request pending",
-                                      "user-id": str(user.id),
-                                      "type": "unfriend"})))
+                                data=get_tooltip_data(*tooltip_attrs))))
         tbody.append(tr)
 
     table.append(tbody)

@@ -42,7 +42,7 @@ def _debug(stopstalk_handle, site, custom=False):
 
     debug_string = stopstalk_handle + " " + site
     if custom:
-        debug_string += "CUS"
+        debug_string += " CUS"
     print debug_string,
 
 # -----------------------------------------------------------------------------
