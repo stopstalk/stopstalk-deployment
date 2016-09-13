@@ -232,11 +232,14 @@ def tag():
 
         tr = TR()
 
-        link_class = ""
         if problem["problem_link"] in current.solved_problems:
             link_class = "solved-problem"
         elif problem["problem_link"] in current.unsolved_problems:
             link_class = "unsolved-problem"
+        else:
+            link_class = "unattempted-problem"
+
+        link_title = (" ".join(link_class.split("-"))).capitalize()
 
         tr.append(TD(A(problem["problem_name"],
                        _href=URL("problems",
@@ -244,6 +247,7 @@ def tag():
                                  vars={"pname": problem["problem_name"],
                                        "plink": problem["problem_link"]}),
                        _class=link_class,
+                       _title=link_title,
                        _target="_blank")))
         tr.append(TD(A(I(_class="fa fa-link"),
                        _href=problem["problem_link"],
@@ -282,7 +286,6 @@ def _render_trending(caption, problems, flag):
     for problem in problems:
         tr = TR()
 
-        link_class = ""
         if problem[0] in current.solved_problems:
             link_class = "solved-problem"
         elif problem[0] in current.unsolved_problems:
@@ -290,11 +293,14 @@ def _render_trending(caption, problems, flag):
         else:
             link_class = "unattempted-problem"
 
+        link_title = (" ".join(link_class.split("-"))).capitalize()
+
         tr.append(TD(A(problem[1]["name"],
                        _href=URL("problems", "index",
                                  vars={"pname": problem[1]["name"],
                                        "plink": problem[0]}),
                        _class=link_class,
+                       _title=link_title,
                        _target="_blank")))
         tr.append(TD(problem[1]["total_submissions"]))
         tr.append(TD(len(problem[1]["users"]) + \

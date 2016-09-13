@@ -468,6 +468,8 @@ def render_table(submissions, duplicates=[]):
                 link_class = "unattempted-problem"
             plink_to_class[plink] = link_class
 
+        link_title = (" ".join(link_class.split("-"))).capitalize()
+
         append(TD(A(submission.problem_name,
                     _href=URL("problems",
                               "index",
@@ -475,6 +477,7 @@ def render_table(submissions, duplicates=[]):
                                     "plink": submission.problem_link},
                               extension=False),
                     _class=link_class,
+                    _title=link_title,
                     _target="_blank")))
         append(TD(submission.lang))
         append(TD(IMG(_src=URL("static",
