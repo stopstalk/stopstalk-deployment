@@ -729,10 +729,16 @@ def filters():
     # Get the friends of logged in user
     if username != "":
         tmplist = username.split()
+        username_query = False
         for token in tmplist:
-            query &= ((atable.first_name.contains(token)) | \
-                      (atable.last_name.contains(token)) | \
-                      (atable.stopstalk_handle.contains(token)))
+            username_query |= ((atable.first_name.contains(token)) | \
+                               (atable.last_name.contains(token)) | \
+                               (atable.stopstalk_handle.contains(token)))
+            for site in current.SITES:
+                username_query |= (atable[site.lower() + \
+                                   "_handle"].contains(token))
+
+        query &= username_query
 
     # @ToDo: Anyway to use join instead of two such db calls
     possible_users = db(query).select(atable.id)
