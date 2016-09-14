@@ -131,6 +131,16 @@ def update_details():
     atable = db.auth_user
     record = atable(session.user_id)
 
+    def handles_updated(form):
+        """
+            Check if any of the handles are updated
+        """
+        for site in current.SITES:
+            site_handle = site.lower() + "_handle"
+            if record[site_handle] != form.vars[site_handle]:
+                return True
+        return False
+
     # Do not allow to modify stopstalk_handle and email
     atable.stopstalk_handle.writable = False
     atable.email.writable = False
@@ -144,11 +154,14 @@ def update_details():
         session.flash = "User details updated"
         atable = db.auth_user
 
-        query = (atable.id == session.user_id)
-        db(query).update(rating=0,
-                         last_retrieved=current.INITIAL_DATE,
-                         per_day=0.0)
-        db(db.submission.user_id == session.user_id).delete()
+        if handles_updated(form):
+            # Reset the user only if any of the profile site handle is updated
+            query = (atable.id == session.user_id)
+            db(query).update(rating=0,
+                             last_retrieved=current.INITIAL_DATE,
+                             per_day=0.0,
+                             authentic=False)
+            db(db.submission.user_id == session.user_id).delete()
 
         redirect(URL("default", "submissions", args=[1]))
     elif form.errors:
@@ -195,6 +208,16 @@ def update_friend():
                    deletable=True,
                    showid=False)
 
+    def handles_updated(form):
+        """
+            Check if any of the handles are updated
+        """
+        for site in current.SITES:
+            site_handle = site.lower() + "_handle"
+            if record[site_handle] != form.vars[site_handle]:
+                return True
+        return False
+
     if form.validate():
         if form.deleted:
             ## DELETE
@@ -204,17 +227,7 @@ def update_friend():
             redirect(URL("user", "custom_friend"))
         else:
             ## UPDATE
-            # If delete checkbox is not checked
-            updated_handles = False
-
-            # Check if any of the site handle is updated
-            for site in current.SITES:
-                site_handle = site.lower() + "_handle"
-                if record[site_handle] != form.vars[site_handle]:
-                    updated_handles = True
-                    break
-
-            if updated_handles:
+            if handles_updated(form):
                 form.vars["duplicate_cu"] = None
                 # Since there may be some updates in the handle
                 # for correctness we need to remove all the submissions

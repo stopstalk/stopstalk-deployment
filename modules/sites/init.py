@@ -52,7 +52,6 @@ def get_request(url, headers={}):
     i = 0
     while i < current.MAX_TRIES_ALLOWED:
         try:
-            print url
             response = requests.get(url,
                                     headers=headers,
                                     proxies=current.PROXY,
