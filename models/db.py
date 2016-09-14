@@ -503,6 +503,10 @@ db.define_table("failed_retrieval",
                 Field("user_id", "reference auth_user"),
                 Field("custom_user_id", "reference custom_friend"))
 
+db.define_table("invalid_handle",
+                Field("handle"),
+                Field("site"))
+
 def get_solved_problems(user_id):
     """
         Get the solved and unsolved problems of a user

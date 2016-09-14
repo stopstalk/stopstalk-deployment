@@ -57,7 +57,7 @@ class Profile(object):
             url = "https://www.hackerrank.com/rest/contests/master/challenges/" + slug
 
         response = get_request(url)
-        if response == {} or response == -1:
+        if response in REQUEST_FAILURES:
             return ["-"]
 
         response = response.json()
@@ -87,17 +87,14 @@ class Profile(object):
             @return (Dict): Dictionary of submissions containing all the
                             information about the submissions
         """
-        if self.handle:
-            handle = self.handle
-        else:
-            return -1
 
+        handle = self.handle
         url = "https://www.hackerrank.com/rest/hackers/" + \
               handle + \
               "/recent_challenges?offset=0&limit=50000"
 
         tmp = get_request(url)
-        if tmp == {} or tmp == -1:
+        if tmp in REQUEST_FAILURES:
             return tmp
 
         all_submissions = tmp.json()["models"]

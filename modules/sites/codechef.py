@@ -48,6 +48,9 @@ class Profile(object):
         self.handle = handle
         self.submissions = {handle: {}}
         self.retrieve_failed = False
+        # Used to store the error message in case
+        # of failed requests (40x/50x)
+        self.retrieve_status = None
 
     # -------------------------------------------------------------------------
     @staticmethod
@@ -92,7 +95,8 @@ class Profile(object):
         url = "https://" + "/".join(url)
 
         response = get_request(url)
-        if response == -1 or response == {}:
+        if response in REQUEST_FAILURES:
+            # @ToDo: Need to blacklist 404 urls also
             return ["-"]
 
         t = response.json()
@@ -139,6 +143,7 @@ class Profile(object):
             # So cool optimization!
             if curr <= self.last_retrieved:
                 return "DONE"
+
             # Do not retrieve any further because this leads to ambiguity
             # If 2 hours ago => 2 hours 20 mins or 2 hours 14 mins ...
             # Let the user come back later when the datetime is exact
@@ -213,8 +218,9 @@ class Profile(object):
             return
 
         response = get_request(url, headers={"User-Agent": user_agent})
-        if response == -1 or response == {}:
+        if response in REQUEST_FAILURES:
             self.retrieve_failed = True
+            self.retrieve_status = response
             return
 
         soup = bs4.BeautifulSoup(response.text, "lxml")
@@ -250,29 +256,41 @@ class Profile(object):
             @return (Dict): Dictionary of submissions containing all the
                             information about the submissions
         """
-        if self.handle:
-            handle = self.handle
-        else:
-            return -1
 
+        handle = self.handle
         self.last_retrieved = last_retrieved
         PARAMS["handle"] = handle
         start_year = int(current.INITIAL_DATE.split("-")[0])
         current_year = datetime.datetime.now().year
+
+        # To identify invalid handles
+        total_retrieved = 0
+
         for year in xrange(current_year, start_year - 1, -1):
+            # Years processed in the reverse order to break out when
+            # last_retrieved time_stamp is matched
             params = dict(PARAMS)
             params["year"] = year
             url = "https://www.codechef.com/submissions?" + urlencode(params)
             response = get_request(url,
                                    headers={"User-Agent": user_agent})
-            if response == -1 or response == {}:
-                return -1
-            soup = bs4.BeautifulSoup(response.text, "lxml")
-            trs = soup.find("div", class_="tablebox").find("tbody").find_all("tr")
+            if response in REQUEST_FAILURES:
+                return response
 
-            self.submissions[handle]["%d_%d" % (year, 0)] = {}
+            if self.retrieve_failed:
+                # One of the threads failed from the previous iteration (year)
+                return self.retrieve_status
+
+            soup = bs4.BeautifulSoup(response.text, "lxml")
+            trs = soup.find("div",
+                            class_="tablebox").find("tbody").find_all("tr")
+
+            year_index = "%d_%d" % (year, 0)
+            self.submissions[handle][year_index] = {}
             ret = self.process_trs(year, 0, trs)
-            if ret:
+            total_retrieved += len(self.submissions[handle][year_index][1])
+
+            if ret == "DONE":
                 return self.submissions
 
             pagination = soup.find("div", class_="pageinfo")
@@ -280,6 +298,12 @@ class Profile(object):
                 last_page = pagination.contents[0].split(" of ")[1]
                 self.process_parallely(year, int(last_page))
 
-        return self.submissions
+        if total_retrieved == 0:
+            # User not found
+            # Note: This will include users who haven't made any submission
+            #       at all on CodeChef
+            return NOT_FOUND
+        else:
+            return self.submissions
 
 # =============================================================================

@@ -51,7 +51,7 @@ class Profile(object):
             return ["-"]
 
         response = get_request(problem_link)
-        if response == -1 or response == {}:
+        if response in REQUEST_FAILURES:
             return ["-"]
 
         tags = BeautifulSoup(response.text, "lxml").find_all("span",
@@ -69,10 +69,7 @@ class Profile(object):
                             information about the submissions
         """
 
-        if self.handle:
-            handle = self.handle
-        else:
-            return -1
+        handle = self.handle
 
         url = "http://www.codeforces.com/api/user.status?handle=" + \
               handle + \
@@ -80,7 +77,7 @@ class Profile(object):
 
         tmp = get_request(url, headers={"User-Agent": user_agent})
 
-        if tmp == {} or tmp == -1:
+        if tmp in REQUEST_FAILURES:
             return tmp
 
         # This was not supposed to be done here but optimization :p

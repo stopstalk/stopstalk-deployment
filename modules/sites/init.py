@@ -31,6 +31,13 @@ from bs4 import BeautifulSoup
 user_agent = "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5"
 gevent.monkey.patch_all(thread=False)
 
+# Constants to be used in case of request failures
+SERVER_FAILURE = "SERVER_FAILURE"
+NOT_FOUND = "NOT_FOUND"
+OTHER_FAILURE = "OTHER_FAILURE"
+REQUEST_FAILURES = (SERVER_FAILURE, NOT_FOUND, OTHER_FAILURE)
+
+# -----------------------------------------------------------------------------
 def get_request(url, headers={}):
     """
         Make a HTTP GET request to a url
@@ -45,19 +52,22 @@ def get_request(url, headers={}):
     i = 0
     while i < current.MAX_TRIES_ALLOWED:
         try:
+            print url
             response = requests.get(url,
                                     headers=headers,
                                     proxies=current.PROXY,
                                     timeout=current.TIMEOUT)
         except Exception as e:
             print e, url
-            return -1
+            return SERVER_FAILURE
 
         if response.status_code == 200:
             return response
+        elif response.status_code == 404 or response.status_code == 400:
+            # User not found
+            # 400 for CodeForces users
+            return NOT_FOUND
         i += 1
 
-    if response.status_code == 404 or response.status_code == 400:
-        return {}
-
-    return -1
+    # Request unsuccessful even after MAX_TRIES_ALLOWED
+    return OTHER_FAILURE

@@ -34,6 +34,12 @@ rows = []
 atable = db.auth_user
 cftable = db.custom_friend
 
+SERVER_FAILURE = "SERVER_FAILURE"
+NOT_FOUND = "NOT_FOUND"
+OTHER_FAILURE = "OTHER_FAILURE"
+
+INVALID_HANDLES = None
+
 # -----------------------------------------------------------------------------
 def _debug(stopstalk_handle, site, custom=False):
     """
@@ -113,10 +119,23 @@ def get_submissions(user_id,
     return count
 
 # ----------------------------------------------------------------------------
+def handle_not_found(site, site_handle):
+    """
+        Add this handle to the invalid_handle table
+
+        @param site (String): Profile Site
+        @param site_handle (String): Site handle which returned 404
+    """
+
+    db.invalid_handle.insert(site=site, handle=site_handle)
+
+# ----------------------------------------------------------------------------
 def retrieve_submissions(record, custom):
     """
         Retrieve submissions that are not already in the database
     """
+
+    global INVALID_HANDLES
 
     last_retrieved = record.last_retrieved
     time_conversion = "%Y-%m-%d %H:%M:%S"
@@ -124,22 +143,26 @@ def retrieve_submissions(record, custom):
     list_of_submissions = []
 
     for site in current.SITES:
+
         site_handle = record[site.lower() + "_handle"]
+
+        if (site_handle, site) in INVALID_HANDLES:
+            print "Not found %s %s" % (site_handle, site)
+            continue
+
         if site_handle:
             Site = globals()[site.lower()]
             P = Site.Profile(site_handle)
             site_method = P.get_submissions
             submissions = site_method(last_retrieved)
-            list_of_submissions.append((site, submissions))
-            if submissions == -1:
-                break
-
-    for submissions in list_of_submissions:
-        if submissions[1] == -1:
-            print "PROBLEM " + site + " " + \
-                  record.stopstalk_handle
-
-            return "FAILURE"
+            if submissions in (SERVER_FAILURE, OTHER_FAILURE):
+                print "%s %s %s" % (submissions, site, record.stopstalk_handle)
+                return "FAILURE"
+            elif submissions == NOT_FOUND:
+                print "New invalid handle %s %s" % (site_handle, site)
+                handle_not_found(site, site_handle)
+            else:
+                list_of_submissions.append((site, submissions))
 
     for submissions in list_of_submissions:
         site = submissions[0]
@@ -154,8 +177,10 @@ def retrieve_submissions(record, custom):
 
     # Immediately update the last_retrieved of the record
     record.update_record(last_retrieved=datetime.now())
+
     return "SUCCESS"
 
+# ----------------------------------------------------------------------------
 def new_users():
     """
         Get the user_ids and custom_user_ids added after last_retrieved
@@ -172,6 +197,7 @@ def new_users():
 
     return (new_users, custom_users)
 
+# ----------------------------------------------------------------------------
 def daily_retrieve():
     """
         Get the user_ids and custom_user_ids for daily retrieval
@@ -189,6 +215,7 @@ def daily_retrieve():
 
     return (registered_users, custom_users)
 
+# ----------------------------------------------------------------------------
 def re_retrieve():
     """
         Get the user_ids and custom_user_ids whose retrieval was
@@ -220,6 +247,10 @@ if __name__ == "__main__":
         users, custom_users = daily_retrieve()
     elif retrieval_type == "re_retrieve":
         users, custom_users = re_retrieve()
+
+    # Get the handles which returned 404 before
+    INVALID_HANDLES = db(db.invalid_handle).select()
+    INVALID_HANDLES = set([(x.handle, x.site) for x in INVALID_HANDLES])
 
     failed_user_ids = []
     for record in users:

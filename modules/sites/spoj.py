@@ -48,7 +48,7 @@ class Profile(object):
         """
 
         response = get_request(problem_link)
-        if response == -1 or response == {}:
+        if response in REQUEST_FAILURES:
             return ["-"]
 
         tags = BeautifulSoup(response.text, "lxml").find_all("div",
@@ -76,11 +76,7 @@ class Profile(object):
                             information about the submissions
         """
 
-        if self.handle:
-            handle = self.handle
-        else:
-            return -1
-
+        handle = self.handle
         submissions = {handle: {}}
         start = 0
         it = 1
@@ -91,12 +87,12 @@ class Profile(object):
         url = "https://www.spoj.com/users/" + handle
         tmpreq = get_request(url)
 
-        if tmpreq == -1 or tmpreq == {}:
-            return -1
+        if tmpreq in REQUEST_FAILURES:
+            return tmpreq
 
         # Bad but correct way of checking if the handle exists
         if tmpreq.text.find("History of submissions") == -1:
-            return submissions
+            return NOT_FOUND
 
         while 1:
             flag = 0
@@ -107,8 +103,8 @@ class Profile(object):
 
             start += 20
             t = get_request(url)
-            if t == -1 or t == {}:
-                return -1
+            if t in REQUEST_FAILURES:
+                return t
 
             soup = bs4.BeautifulSoup(t.text, "lxml")
             table_body = soup.find("tbody")

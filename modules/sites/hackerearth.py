@@ -48,7 +48,7 @@ class Profile(object):
         """
 
         response = get_request(problem_link)
-        if response == -1 or response == {}:
+        if response in REQUEST_FAILURES:
             return ["-"]
 
         b = BeautifulSoup(response.text, "lxml")
@@ -76,33 +76,30 @@ class Profile(object):
                             information about the submissions
         """
 
-        if self.handle:
-            handle = self.handle
-        else:
-            return {}
+        handle = self.handle
 
         url = "https://www.hackerearth.com/submissions/" + handle
         t = get_request(url)
-        if t == -1 or t == {}:
+
+        if t in REQUEST_FAILURES:
             return t
 
         tmp_string = t.headers["set-cookie"]
         csrf_token = re.findall(r"csrftoken=\w*", tmp_string)[0][10:]
 
-        response = {}
-        response["host"] = "www.hackerearth.com"
-        response["user-agent"] = user_agent
-        response["accept"] = "application/json, text/javascript, */*; q=0.01"
-        response["accept-language"] = "en-US,en;q=0.5"
-        response["accept-encoding"] = "gzip, deflate"
-        response["content-type"] = "application/x-www-form-urlencoded"
-        response["X-CSRFToken"] = csrf_token
-        response["X-Requested-With"] = "XMLHttpRequest"
-        response["Referer"] = "https://www.hackerearth.com/submissions/" + handle + "/"
-        response["Connection"] = "keep-alive"
-        response["Pragma"] = "no-cache"
-        response["Cache-Control"] = "no-cache"
-        response["Cookie"] = tmp_string
+        headers = {"host": "www.hackerearth.com",
+                   "user-agent": user_agent,
+                   "accept": "application/json, text/javascript, */*; q=0.01",
+                   "accept-language": "en-US,en;q=0.5",
+                   "accept-encoding": "gzip, deflate",
+                   "content-type": "application/x-www-form-urlencoded",
+                   "X-CSRFToken": csrf_token,
+                   "X-Requested-With": "XMLHttpRequest",
+                   "Referer": "https://www.hackerearth.com/submissions/" + handle + "/",
+                   "Connection": "keep-alive",
+                   "Pragma": "no-cache",
+                   "Cache-Control": "no-cache",
+                   "Cookie": tmp_string}
 
         it = 1
         submissions = {handle: {}}
@@ -110,10 +107,10 @@ class Profile(object):
             submissions[handle][page_number] = {}
             url = "https://www.hackerearth.com/AJAX/feed/newsfeed/submission/user/" + handle + "/?page=" + str(page_number)
 
-            tmp = get_request(url, headers=response)
+            tmp = get_request(url, headers=headers)
 
-            if tmp == -1 or tmp == {}:
-                return -1
+            if tmp in REQUEST_FAILURES:
+                return tmp
 
             json_response = tmp.json()
             if json_response["status"] == "ERROR":
