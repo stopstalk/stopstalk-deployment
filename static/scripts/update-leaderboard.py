@@ -21,7 +21,9 @@
 """
 
 import utilities
+import sys
 
+update_flag = (int(sys.argv[1]) == 1)
 db = current.db
 atable = db.auth_user
 cftable = db.custom_friend
@@ -90,7 +92,10 @@ for user in registered_users:
     except KeyError:
         solved = 0
 
-    tup = utilities.compute_row(user, complete_dict, solved, update_flag=True)
+    tup = utilities.compute_row(user,
+                                complete_dict,
+                                solved,
+                                update_flag=update_flag)
 
 sql = sql.replace("user_id", "custom_user_id")
 tmplist = db.executesql(sql)
@@ -107,4 +112,8 @@ for user in custom_friends:
             solved = solved_count[user.stopstalk_handle]
     except KeyError:
         solved = 0
-    tup = utilities.compute_row(user, complete_dict, solved, custom=True, update_flag=True)
+    tup = utilities.compute_row(user,
+                                complete_dict,
+                                solved,
+                                custom=True,
+                                update_flag=update_flag)

@@ -268,17 +268,17 @@ def compute_row(record,
                   per_day * 150
     rating = int(rating)
 
-    record.update_record(prev_rating=record.rating)
+    if update_flag:
+        record.update_record(prev_rating=record.rating)
     if record.rating != rating:
         rating_diff = rating - int(record.rating)
-        if update_flag:
-            table = db.custom_friend if custom else db.auth_user
-            # Update the rating ONLY when the function
-            # is called by update-leaderboard.py
-            query = (table.stopstalk_handle == record.stopstalk_handle)
-            db(query).update(per_day=per_day,
-                             rating=rating,
-                             per_day_change=str(diff))
+        table = db.custom_friend if custom else db.auth_user
+        # Update the rating ONLY when the function
+        # is called by update-leaderboard.py
+        query = (table.stopstalk_handle == record.stopstalk_handle)
+        db(query).update(per_day=per_day,
+                         rating=rating,
+                         per_day_change=str(diff))
     else:
         rating_diff = 0
 

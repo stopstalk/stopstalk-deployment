@@ -238,6 +238,24 @@ def re_retrieve():
     frtable.truncate()
     return (users, custom_users)
 
+# ----------------------------------------------------------------------------
+def specific_user():
+    """
+        Get the user_ids and custom_user_ids whose retrieval was
+        failed
+
+        @return (Tuple): (list of user_ids, list of custom_user_ids)
+    """
+    custom = (sys.argv[2] == "custom") # Else "normal"
+    user_id = int(sys.argv[3])
+    users = []
+    custom_users = []
+    if custom:
+        custom_users.append(cftable(user_id))
+    else:
+        users.append(atable(user_id))
+    return (users, custom_users)
+
 if __name__ == "__main__":
 
     retrieval_type = sys.argv[1]
@@ -247,6 +265,11 @@ if __name__ == "__main__":
         users, custom_users = daily_retrieve()
     elif retrieval_type == "re_retrieve":
         users, custom_users = re_retrieve()
+    elif retrieval_type == "specific_user":
+        users, custom_users = specific_user()
+    else:
+        print "Invalid arguments"
+        sys.exit()
 
     # Get the handles which returned 404 before
     INVALID_HANDLES = db(db.invalid_handle).select()
