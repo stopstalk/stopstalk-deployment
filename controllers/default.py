@@ -444,8 +444,8 @@ def leaderboard():
             global_leaderboard = True
 
     heading = "Global Leaderboard"
-    afields = ["first_name", "last_name", "stopstalk_handle",
-               "institute", "per_day", "rating"]
+    afields = ["first_name", "last_name", "stopstalk_handle", "rating",
+               "institute", "per_day", "prev_rating", "per_day_change"]
     cfields = afields + ["duplicate_cu"]
 
     aquery = (atable.id > 0)
