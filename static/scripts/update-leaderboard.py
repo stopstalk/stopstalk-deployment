@@ -26,16 +26,12 @@ db = current.db
 atable = db.auth_user
 cftable = db.custom_friend
 
-afields = ["first_name", "last_name", "stopstalk_handle", "rating",
-           "institute", "per_day", "prev_rating", "per_day_change"]
-
-users = db(atable).select(*afields)
+users = db(atable).select()
 registered_users = []
 for user in users:
     registered_users.append(user)
 
-cfields = afields + ["duplicate_cu"]
-custom_users = db(cftable).select(*cfields)
+custom_users = db(cftable).select()
 custom_friends = []
 for custom_user in custom_users:
     custom_friends.append(custom_user)

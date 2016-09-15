@@ -268,8 +268,9 @@ def compute_row(record,
                   per_day * 150
     rating = int(rating)
 
-    if record.prev_rating != rating:
-        rating_diff = rating - int(record.prev_rating)
+    record.update_record(prev_rating=record.rating)
+    if record.rating != rating:
+        rating_diff = rating - int(record.rating)
         if update_flag:
             table = db.custom_friend if custom else db.auth_user
             # Update the rating ONLY when the function
