@@ -479,75 +479,28 @@ def leaderboard():
         reg_users = db(aquery).select(*afields)
         custom_users = db(cquery).select(*cfields)
 
-    # Find the total solved problems(Lesser than total accepted)
-    solved_count = {}
-    sql = """
-             SELECT stopstalk_handle, COUNT(DISTINCT(problem_name))
-             FROM submission
-             WHERE status = 'AC'
-             GROUP BY user_id, custom_user_id;
-          """
-    tmplist = db.executesql(sql)
-    for user in tmplist:
-        solved_count[user[0]] = user[1]
-
-    complete_dict = {}
-    # Prepare a list of stopstalk_handles of the
-    # users relevant to the requested leaderboard
-    friends_stopstalk_handles = []
-    for x in reg_users:
-        friends_stopstalk_handles.append("'" + x.stopstalk_handle + "'")
-        complete_dict[x.stopstalk_handle] = []
-
-    for custom_user in custom_users:
-        stopstalk_handle = custom_user.stopstalk_handle
-        if custom_user.duplicate_cu:
-            stopstalk_handle = cftable(custom_user.duplicate_cu).stopstalk_handle
-        friends_stopstalk_handles.append("'" + stopstalk_handle + "'")
-        complete_dict[stopstalk_handle] = []
-
-    if friends_stopstalk_handles == []:
-        friends_stopstalk_handles = ["-1"]
-
-    # Build the complex SQL query
-    sql_query = """
-                    SELECT stopstalk_handle, DATE(time_stamp), COUNT(*) as cnt
-                    FROM submission
-                    WHERE stopstalk_handle in (%s)
-                    GROUP BY stopstalk_handle, DATE(submission.time_stamp)
-                    ORDER BY time_stamp;
-                """ % (", ".join(friends_stopstalk_handles))
-
-    user_rows = db.executesql(sql_query)
-    for user in user_rows:
-        if complete_dict[user[0]] != []:
-            complete_dict[user[0]].append((user[1], user[2]))
-        else:
-            complete_dict[user[0]] = [(user[1], user[2])]
-
     users = []
     for user in reg_users:
-        try:
-            solved = solved_count[user.stopstalk_handle]
-        except KeyError:
-            solved = 0
-
-        tup = utilities.compute_row(user, complete_dict, solved)
-        if tup is not ():
-            users.append(tup)
+        users.append((user.first_name + " " + user.last_name,
+                      user.stopstalk_handle,
+                      user.institute,
+                      int(user.rating),
+                      float(user.per_day_change),
+                      False,
+                      int(user.rating) - int(user.prev_rating)))
 
     for user in custom_users:
-        try:
-            if user.duplicate_cu:
-                orig_user = cftable(user.duplicate_cu)
-                solved = solved_count[orig_user.stopstalk_handle]
-            else:
-                solved = solved_count[user.stopstalk_handle]
-        except KeyError:
-            solved = 0
-        tup = utilities.compute_row(user, complete_dict, solved, True)
-        if tup is not ():
-            users.append(tup)
+        if user.duplicate_cu:
+            record = cftable(user.duplicate_cu)
+        else:
+            record = user
+        users.append((user.first_name + " " + user.last_name,
+                      user.stopstalk_handle,
+                      user.institute,
+                      int(record.rating),
+                      float(record.per_day_change),
+                      True,
+                      int(record.rating) - int(record.prev_rating)))
 
     # Sort users according to the rating
     users = sorted(users, key=lambda x: x[3], reverse=True)
