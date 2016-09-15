@@ -160,6 +160,7 @@ def update_details():
             db(query).update(rating=0,
                              last_retrieved=current.INITIAL_DATE,
                              per_day=0.0,
+                             per_day_change="0.0",
                              authentic=False)
             db(db.submission.user_id == session.user_id).delete()
 
@@ -235,6 +236,7 @@ def update_friend():
                 form.vars["last_retrieved"] = current.INITIAL_DATE
                 form.vars["rating"] = 0
                 form.vars["per_day"] = 0.0
+                form.vars["per_day_change"] = "0.0"
                 db(db.submission.custom_user_id == request.args[0]).delete()
 
             record.update_record(**dict(form.vars))
