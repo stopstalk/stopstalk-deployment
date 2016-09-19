@@ -317,8 +317,13 @@ def log_contest():
     """
 
     pvars = request.post_vars
-    if all(pvars.values()) is False:
+
+    if pvars.contest_name is None or \
+       pvars.site_name is None or \
+       pvars.contest_link is None or \
+       pvars.logging_type is None:
         raise HTTP(400, "Bad Request")
+        return
 
     contest_details = "%s %s %s" % (pvars.contest_name,
                                     pvars.site_name,
