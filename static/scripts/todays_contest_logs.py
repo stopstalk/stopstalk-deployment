@@ -20,26 +20,25 @@
     THE SOFTWARE.
 """
 
-from gluon import *
-# Configure mysql server
-current.mysql_user = "root"
-current.mysql_password = "PASSWORD"
-current.mysql_server = "localhost"
-current.mysql_dbname = "migration"
+db = current.db
+cltable = db.contest_logging
+records = db(cltable).select()
 
-# Configure mail options
-current.smtp_server = "logging"
-current.sender_mail = ""
-current.sender_password = ""
+# Construct mail message body
+message = ""
+for i in records:
+    message += "%s %s %s %s" % (i.click_type,
+                                i.contest_details,
+                                i.stopstalk_handle,
+                                str(i.time_stamp))
+    message += "\n"
 
-# Configure mail options
-current.bulk_smtp_server = "logging"
-current.bulk_sender_mail = ""
-current.bulk_sender_password = ""
+# Empty the sessions table
+cltable.truncate()
 
-# Google Analytics ID
-current.analytics_id = ""
-
-# Client ID for Google Calendar API
-current.calender_token = ""
-# =============================================================================
+# Send mail to the admin
+current.send_mail(to="raj454raj@gmail.com",
+                  subject="Today's contest logs",
+                  message=message,
+                  mail_type="admin",
+                  bulk=True)

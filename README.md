@@ -91,6 +91,7 @@ $ pip install requests
     current.bulk_sender_password = ""    # Not required if logging
 
     current.analytics_id = "" # Leave it empty if you don't want Google Analytics on Localhost
+    current.calendar_token = "" # Leave it empty if you don't have an access token ID for Google Calendar API
     ```
 
    In case if you want to send emails - Install `postfix` for your respective OS and configure the above smtp server accordingly.

@@ -311,6 +311,27 @@ def my_friends():
                 stickers=stickers)
 
 # ----------------------------------------------------------------------------
+def log_contest():
+    """
+        Logging contests into DB
+    """
+
+    pvars = request.post_vars
+    if all(pvars.values()) is False:
+        raise HTTP(400, "Bad Request")
+
+    contest_details = "%s %s %s" % (pvars.contest_name,
+                                    pvars.site_name,
+                                    pvars.contest_link)
+
+    handle = session.handle if auth.is_logged_in() else "NA"
+
+    db.contest_logging.insert(click_type=pvars.logging_type,
+                              contest_details=contest_details,
+                              stopstalk_handle=handle,
+                              time_stamp=datetime.datetime.now())
+
+# ----------------------------------------------------------------------------
 def contests():
     """
         Show the upcoming contests
@@ -344,6 +365,10 @@ def contests():
     table.append(thead)
     tbody = TBODY()
 
+    button_class = "btn-floating btn-small accent-4 tooltipped"
+    view_link_class = button_class + " green view-contest"
+    reminder_class = button_class + " orange"
+
     for i in ongoing:
 
         if i["Platform"] in ("TOPCODER", "OTHER"):
@@ -370,22 +395,19 @@ def contests():
         tr.append(TD(str(endtime).replace("-", "/"),
                      _class="contest-end-time"))
         tr.append(TD(A(I(_class="fa fa-external-link-square fa-lg"),
-                       _class="btn-floating btn-small green accent-4 tooltipped",
+                       _class=view_link_class,
                        _href=i["url"],
                        data={"position": "left",
                              "tooltip": "Contest Link",
                              "delay": "50"},
                        _target="_blank")))
         tr.append(TD(BUTTON(I(_class="fa fa-calendar-plus-o"),
-                            _class="btn-floating btn-small orange accent-4 tooltipped disabled",
+                            _class=reminder_class + " disabled",
                             data={"position": "left",
                                   "tooltip": "Already started!",
                                   "delay": "50"})))
         tbody.append(tr)
 
-    # This id is used for uniquely identifying
-    # a particular contest in js
-    button_id = 1
     for i in upcoming:
 
         if i["Platform"] in ("TOPCODER", "OTHER"):
@@ -393,7 +415,7 @@ def contests():
 
         start_time = datetime.datetime.strptime(i["StartTime"],
                                                 "%a, %d %b %Y %H:%M")
-        tr = TR(_id="contest-" + str(button_id))
+        tr = TR()
         tr.append(TD(i["Name"]))
         tr.append(TD(i["Platform"].capitalize()))
         tr.append(TD(str(start_time), _class="stopstalk-timestamp"))
@@ -403,20 +425,18 @@ def contests():
         duration = duration.replace(" day", "d")
         tr.append(TD(duration))
         tr.append(TD(A(I(_class="fa fa-external-link-square fa-lg"),
-                       _class="btn-floating btn-small green accent-4 tooltipped",
+                       _class=view_link_class,
                        _href=i["url"],
                        data={"position": "left",
                              "tooltip": "Contest Link",
                              "delay": "50"},
                        _target="_blank")))
         tr.append(TD(BUTTON(I(_class="fa fa-calendar-plus-o"),
-                            _class="btn-floating btn-small orange accent-4 tooltipped",
+                            _class=reminder_class,
                             data={"position": "left",
                                   "tooltip": "Set Reminder to Google Calendar",
-                                  "delay": "50"},
-                            _id="set-reminder-" + str(button_id))))
+                                  "delay": "50"})))
         tbody.append(tr)
-        button_id += 1
 
     table.append(tbody)
     return dict(table=table, upcoming=upcoming, retrieved=True)

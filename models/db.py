@@ -409,8 +409,7 @@ custom_friend_fields = [Field("user_id", "reference auth_user"),
                               default="0.0",
                               writable=False),
                         Field("duplicate_cu", "reference custom_friend",
-                              default=None)
-                        ]
+                              default=None)]
 
 custom_friend_fields += site_handles
 db.define_table("custom_friend",
@@ -430,9 +429,7 @@ db.define_table("submission",
                 Field("status"),
                 Field("points"),
                 Field("view_link",
-                      default="",
-                      ),
-                )
+                      default=""))
 
 db.define_table("friend_requests",
                 Field("from_h", "reference auth_user"),
@@ -518,6 +515,12 @@ db.define_table("failed_retrieval",
 db.define_table("invalid_handle",
                 Field("handle"),
                 Field("site"))
+
+db.define_table("contest_logging",
+                Field("click_type"),
+                Field("contest_details", "text"),
+                Field("stopstalk_handle"),
+                Field("time_stamp", "datetime"))
 
 def get_solved_problems(user_id):
     """

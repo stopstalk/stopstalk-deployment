@@ -44,7 +44,7 @@
 
             // Your Client ID can be retrieved from your project in the Google
             // Developer Console, https://console.developers.google.com
-            var CLIENT_ID = '825830221794-5ko968tnphp11f5aql2ut2flhflmai2h.apps.googleusercontent.com';
+            var CLIENT_ID = '{{=current.calendar_token}}';
             var SCOPES = ['https://www.googleapis.com/auth/calendar'];
 
             var startTimeStamp = new Date(startTime.replace(/-/g , '/'));
@@ -187,10 +187,22 @@
             runCounter($(this));
         });
 
+        /* Log Contest for analytics */
+        function logContest(contestName, siteName, contestLink, loggingType) {
+            var data = {"contest_name": contestName,
+                        "site_name": siteName,
+                        "contest_link": contestLink,
+                        "logging_type": loggingType};
+
+            $.ajax({
+                url: '{{=URL("default", "log_contest")}}',
+                method: 'POST',
+                data: data
+            });
+        }
+
         $('button').click(function() {
-            var buttonId = $(this).attr('id');
-            var rowNumber = buttonId.split('-').splice(-1)[0];
-            var children = $('#contest-' + rowNumber).children();
+            var children = this.parentElement.parentElement.children;
             var contestName = children[0].textContent;
             var siteName = children[1].textContent;
             var startTime = children[2].textContent;
@@ -198,6 +210,15 @@
             var duration = children[3].textContent;
             var contestLink = children[4].firstChild.href;
             setReminder(contestName, siteName, startTime, duration, contestLink);
+            logContest(contestName, siteName, contestLink, "Reminder");
+        });
+
+        $('.view-contest').click(function() {
+            var children = this.parentElement.parentElement.children;
+            var contestName = children[0].textContent;
+            var siteName = children[1].textContent;
+            var contestLink = children[4].firstChild.href;
+            logContest(contestName, siteName, contestLink, "View");
         });
     });
 </script>
