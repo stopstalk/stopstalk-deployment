@@ -226,11 +226,12 @@ def sanitize_fields(form):
         Display errors for the following:
 
         1. Strip whitespaces from all the fields
-        2. Remove @ from the HackerEarth and Spoj handle (if entered)
+        2. Remove @ from the HackerEarth
         3. Lowercase the handles
         4. Fill the institute field with "Other" if empty
         5. Email address entered is from a valid domain
         6. Email address instead of handles
+        7. Spoj follows a specific convention for handle naming
 
         @param form (FORM): Registration / Add Custom friend form
     """
@@ -240,6 +241,13 @@ def sanitize_fields(form):
             field = site_name.lower() + "_handle"
             if form.vars[field] and form.vars[field][0] == "@":
                 form.errors[field] = "@ symbol not required"
+
+    def _valid_spoj_handle(handle):
+        from re import match
+        try:
+            return match("[a-z]+[0-9a-z_]*", handle).group() == handle
+        except AttributeError:
+            return False
 
     handle_fields = ["stopstalk"]
     handle_fields.extend([x.lower() for x in current.SITES.keys()])
@@ -254,7 +262,12 @@ def sanitize_fields(form):
 
     # 2.
     remove_at_symbol("HackerEarth")
-    remove_at_symbol("Spoj")
+
+    # 7.
+    if "Spoj" in current.SITES:
+        if form.vars["spoj_handle"] and \
+           not _valid_spoj_handle(form.vars["spoj_handle"]):
+            form.errors["spoj_handle"] = "Handle should only contain lower case letters 'a'-'z', underscores '_', digits '0'-'9', and must start with a letter!"
 
     # 3.
     for site in handle_fields:
