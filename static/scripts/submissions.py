@@ -189,7 +189,8 @@ def new_users():
     """
     max_limit = 3
     query = (atable.last_retrieved == current.INITIAL_DATE) & \
-            (atable.blacklisted == False)
+            (atable.blacklisted == False) & \
+            (atable.registration_key == "") # Unverified email
     new_users = db(query).select(limitby=(0, max_limit))
 
     query = (cftable.last_retrieved == current.INITIAL_DATE)
@@ -207,7 +208,9 @@ def daily_retrieve():
     """
 
     N = int(sys.argv[2])
-    query = (atable.id % 10 == N) & (atable.blacklisted == False)
+    query = (atable.id % 10 == N) & \
+            (atable.blacklisted == False) & \
+            (atable.registration_key == "") # Unverified email
     registered_users = db(query).select()
 
     query = (cftable.id % 10 == N) & (cftable.duplicate_cu == None)

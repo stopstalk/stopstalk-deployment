@@ -489,6 +489,9 @@ def leaderboard():
             aquery &= (1 == 0)
             cquery &= (1 == 0)
 
+    # Do not display unverified users in the leaderboard
+    aquery &= (atable.registration_key == "")
+
     if request.vars.has_key("q"):
         heading = "Institute Leaderboard"
         institute = request.vars["q"]
@@ -948,6 +951,8 @@ def search():
     # Search by institute (if provided)
     if institute:
         query &= (atable.institute == institute)
+
+    query &= (atable.registration_key == "")
 
     # Columns of auth_user to be retrieved
     columns = [atable.id,

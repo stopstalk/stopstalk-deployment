@@ -20,14 +20,21 @@
     THE SOFTWARE.
 """
 
+atable = db.auth_user
+emails = db(atable.registration_key != "").select(atable.email)
+unverified_emails = set([x.email for x in emails])
+
 rows = db(db.queue.status == "pending").select()
 for row in rows:
+    if row.email in unverified_emails:
+        continue
     if bulkmail.send(to=row.email,
                      subject=row.subject,
                      message=row.message):
         row.update_record(status="sent")
         print "Email sent to %s" % row.email
     else:
+        print "ERROR: " + str(bulkmail.error)
         if str(bulkmail.error).__contains__("Mail rate exceeded limit") is False:
             # Email sending failed with some other reason
             row.update_record(status="failed")

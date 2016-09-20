@@ -288,17 +288,17 @@ def sanitize_fields(form):
         response.flash = "Form has errors!!"
 
 #-----------------------------------------------------------------------------
-def notify_institute_users(form):
+def notify_institute_users(record):
     """
         Send mail to all users from the same institute
-        when a user registers from that institute
+        when a user registers from that institute (after email verification)
 
-        @param form (FORM): Registration form
+        @param record (Row): Record having the user details
     """
 
     atable = db.auth_user
-    query = (atable.institute == form.vars.institute) & \
-            (atable.email != form.vars.email) & \
+    query = (atable.institute == record.institute) & \
+            (atable.email != record.email) & \
             (atable.institute != "Other") & \
             (atable.blacklisted == False)
     rows = db(query).select(atable.email, atable.stopstalk_handle)
@@ -316,10 +316,10 @@ To stop receiving mails - %s
 Regards,
 StopStalk
                   """ % (row.stopstalk_handle,
-                         form.vars.first_name + " " + form.vars.last_name,
+                         record.first_name + " " + record.last_name,
                          URL("user",
                              "profile",
-                             args=form.vars.stopstalk_handle,
+                             args=record.stopstalk_handle,
                              scheme=True,
                              host=True,
                              extension=False),
@@ -372,7 +372,7 @@ HackerRank handle: %s
 
 auth.settings.register_onvalidation = [sanitize_fields]
 auth.settings.register_onaccept.append(register_callback)
-auth.settings.register_onaccept.append(notify_institute_users)
+auth.settings.verify_email_onaccept.append(notify_institute_users)
 current.auth = auth
 current.response.formstyle = materialize_form
 current.sanitize_fields = sanitize_fields
