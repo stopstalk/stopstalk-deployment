@@ -129,17 +129,8 @@ def update_details():
         form_fields.append(site.lower() + "_handle")
 
     atable = db.auth_user
+    stable = db.submission
     record = atable(session.user_id)
-
-    def handles_updated(form):
-        """
-            Check if any of the handles are updated
-        """
-        for site in current.SITES:
-            site_handle = site.lower() + "_handle"
-            if record[site_handle] != form.vars[site_handle]:
-                return True
-        return False
 
     # Do not allow to modify stopstalk_handle and email
     atable.stopstalk_handle.writable = False
@@ -152,17 +143,27 @@ def update_details():
 
     if form.process().accepted:
         session.flash = "User details updated"
-        atable = db.auth_user
 
-        if handles_updated(form):
+        updated_sites = utilities.handles_updated(record, form)
+        if updated_sites != []:
+            site_lrs = {}
+            submission_query = (stable.user_id == session.user_id)
+            for site in updated_sites:
+                site_lrs[site.lower() + "_lr"] = current.INITIAL_DATE
+                submission_query &= (stable.site == site)
+
             # Reset the user only if any of the profile site handle is updated
             query = (atable.id == session.user_id)
             db(query).update(rating=0,
-                             last_retrieved=current.INITIAL_DATE,
+                             prev_rating=0,
                              per_day=0.0,
                              per_day_change="0.0",
-                             authentic=False)
-            db(db.submission.user_id == session.user_id).delete()
+                             authentic=False,
+                             **site_lrs)
+
+            # Only delete the submission of those particular sites
+            # whose site handles are updated
+            db(submission_query).delete()
 
         redirect(URL("default", "submissions", args=[1]))
     elif form.errors:
@@ -182,6 +183,7 @@ def update_friend():
         redirect(URL("user", "custom_friend"))
 
     cftable = db.custom_friend
+    stable = db.submission
 
     query = (cftable.user_id == session.user_id) & \
             (cftable.id == request.args[0])
@@ -208,17 +210,6 @@ def update_friend():
                    fields=form_fields,
                    deletable=True,
                    showid=False)
-
-    def handles_updated(form):
-        """
-            Check if any of the handles are updated
-        """
-        for site in current.SITES:
-            site_handle = site.lower() + "_handle"
-            if record[site_handle] != form.vars[site_handle]:
-                return True
-        return False
-
     if form.validate():
         if form.deleted:
             ## DELETE
@@ -227,17 +218,24 @@ def update_friend():
             db(cftable.id == record.id).delete()
             redirect(URL("user", "custom_friend"))
         else:
+            updated_sites = utilities.handles_updated(record, form)
             ## UPDATE
-            if handles_updated(form):
+            if updated_sites != []:
+
+                submission_query = (stable.custom_user_id == request.args[0])
+                for site in updated_sites:
+                    form.vars[site.lower() + "_lr"] = current.INITIAL_DATE
+                    submission_query &= (stable.site == site)
+
                 form.vars["duplicate_cu"] = None
-                # Since there may be some updates in the handle
-                # for correctness we need to remove all the submissions
-                # and retrieve all the submissions again(Will be updated next day)
-                form.vars["last_retrieved"] = current.INITIAL_DATE
                 form.vars["rating"] = 0
+                form.vars["prev_rating"] = 0
                 form.vars["per_day"] = 0.0
                 form.vars["per_day_change"] = "0.0"
-                db(db.submission.custom_user_id == request.args[0]).delete()
+
+                # Only delete the submission of those particular sites
+                # whose site handles are updated
+                db(submission_query).delete()
 
             record.update_record(**dict(form.vars))
 

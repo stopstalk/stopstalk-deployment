@@ -137,14 +137,14 @@ def retrieve_submissions(record, custom):
 
     global INVALID_HANDLES
 
-    last_retrieved = record.last_retrieved
     time_conversion = "%Y-%m-%d %H:%M:%S"
-    last_retrieved = time.strptime(str(last_retrieved), time_conversion)
     list_of_submissions = []
 
     for site in current.SITES:
 
         site_handle = record[site.lower() + "_handle"]
+        last_retrieved = record[site.lower() + "_lr"]
+        last_retrieved = time.strptime(str(last_retrieved), time_conversion)
 
         if (site_handle, site) in INVALID_HANDLES:
             print "Not found %s %s" % (site_handle, site)
@@ -161,8 +161,14 @@ def retrieve_submissions(record, custom):
             elif submissions == NOT_FOUND:
                 print "New invalid handle %s %s" % (site_handle, site)
                 handle_not_found(site, site_handle)
+                # Update the last retrieved of an invalid handle as we don't
+                # want new_user script to pick this user again and again
+                record.update({site.lower() + "_lr": datetime.now()})
             else:
                 list_of_submissions.append((site, submissions))
+                # Immediately update the last_retrieved of the record
+                # Note: Only the record object is updated & not reflected in DB
+                record.update({site.lower() + "_lr": datetime.now()})
 
     for submissions in list_of_submissions:
         site = submissions[0]
@@ -175,25 +181,33 @@ def retrieve_submissions(record, custom):
                         site,
                         custom)
 
-    # Immediately update the last_retrieved of the record
-    record.update_record(last_retrieved=datetime.now())
+    # To reflect all the updates to record into DB
+    record.update_record()
 
     return "SUCCESS"
 
 # ----------------------------------------------------------------------------
 def new_users():
     """
-        Get the user_ids and custom_user_ids added after last_retrieved
+        Get the user_ids and custom_user_ids whose any of the last_retrieved
+        is equal to INITIAL_DATE
 
         @return (Tuple): (list of user_ids, list of custom_user_ids)
     """
+
+    def _get_initial_query(table):
+        query = False
+        for site in current.SITES:
+            query |= (table[site.lower() + "_lr"] == current.INITIAL_DATE)
+        return query
+
     max_limit = 3
-    query = (atable.last_retrieved == current.INITIAL_DATE) & \
+    query = _get_initial_query(atable) & \
             (atable.blacklisted == False) & \
             (atable.registration_key == "") # Unverified email
     new_users = db(query).select(limitby=(0, max_limit))
 
-    query = (cftable.last_retrieved == current.INITIAL_DATE)
+    query = _get_initial_query(cftable)
     custom_users = db(query).select(limitby=(0, max_limit))
 
     return (new_users, custom_users)

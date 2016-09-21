@@ -40,6 +40,23 @@ def get_link(site, handle):
     return current.SITES[site] + handle
 
 # -----------------------------------------------------------------------------
+def handles_updated(record, form):
+    """
+        Check if any of the handles are updated
+
+        @param record (Row object): Record containing original user details
+        @param form (Form object): Form containing values entered by user
+        @return (List): The sites corresponding to site handles that are updated
+    """
+    # List of sites whose site handles are updated
+    updated_sites = []
+    for site in current.SITES:
+        site_handle = site.lower() + "_handle"
+        if record[site_handle] != form.vars[site_handle]:
+            updated_sites.append(site)
+    return updated_sites
+
+# -----------------------------------------------------------------------------
 def urltosite(url):
     """
         Helper function to extract site from url
