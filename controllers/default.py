@@ -33,6 +33,33 @@ def handle_error():
         Also notifies the admin by an email
     """
 
+    def _get_similar_handles(url):
+
+        from difflib import SequenceMatcher
+        handle = (url.replace("users", "")
+                     .replace("user", "")
+                     .replace("profiles", "")
+                     .replace("profile", "")
+                     .replace("submissions", "")
+                     .replace("submission", "")
+                     .replace("/", ""))
+        atable = db.auth_user
+        cftable = db.custom_friend
+        handles = []
+        user_handles = db(atable).select(atable.stopstalk_handle)
+        custom_user_handles = db(cftable).select(cftable.stopstalk_handle)
+        handles.extend([x.stopstalk_handle for x in user_handles])
+        handles.extend([x.stopstalk_handle for x in custom_user_handles])
+        similar_handles = []
+        for user_handle in handles:
+            diff = SequenceMatcher(None, user_handle, handle).ratio()
+            if diff >= 0.7:
+                similar_handles.append((user_handle, diff))
+
+        similar_handles.sort(key=lambda x: x[1], reverse=True)
+
+        return [x[0] for x in similar_handles]
+
     code = request.vars.code
     request_url = request.vars.request_url
     ticket = request.vars.ticket
@@ -43,8 +70,10 @@ def handle_error():
         response.status = int(code)
 
     error_message = ""
+    similar_handles = []
     if code == "404":
-        message = request_url
+        similar_handles = _get_similar_handles(request_url)
+        message = request_url + " " + str(similar_handles)
         error_message = "Not found"
     elif code == "500":
         # Get ticket URL:
@@ -69,7 +98,7 @@ def handle_error():
                           message=message,
                           mail_type="admin")
 
-    return dict(error_message=error_message)
+    return dict(error_message=error_message, similar_handles=similar_handles)
 
 # ----------------------------------------------------------------------------
 def index():

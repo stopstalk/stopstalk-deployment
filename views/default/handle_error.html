@@ -4,6 +4,13 @@
 {{if error_message == "Not found":}}
     <h4> Yes you, you are lost ;) </h4>
     <p> We have been notified and will be fixing if there is any problem from our side </p>
+    {{if similar_handles != []:}}
+        <p> You might be looking for: |
+        {{for i in similar_handles:}}
+            <a href="{{=URL('user', 'profile', args=i)}}"> {{=i}} </a> |
+        {{pass}}
+        </p>
+    {{pass}}
     <p> If you are trying to find a user and getting this, then try adding a <a href="{{=URL('user', 'custom_friend')}}">Custom Friend</a> and track his/her progress. :D </p>
 {{else:}}
     <h4> Oops! There is indeed some problem here </h4>
