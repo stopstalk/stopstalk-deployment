@@ -42,19 +42,34 @@ def handle_error():
                      .replace("profile", "")
                      .replace("submissions", "")
                      .replace("submission", "")
-                     .replace("/", ""))
+                     .replace("/", "")
+                     .lower())
         atable = db.auth_user
         cftable = db.custom_friend
-        handles = []
-        user_handles = db(atable).select(atable.stopstalk_handle)
-        custom_user_handles = db(cftable).select(cftable.stopstalk_handle)
-        handles.extend([x.stopstalk_handle for x in user_handles])
-        handles.extend([x.stopstalk_handle for x in custom_user_handles])
+        prospects = []
+        users = db(atable).select(atable.first_name,
+                                  atable.last_name,
+                                  atable.stopstalk_handle)
+        custom_users = db(cftable).select(cftable.first_name,
+                                          cftable.last_name,
+                                          cftable.stopstalk_handle)
+
+        prospects.extend([(x.first_name,
+                           x.last_name,
+                           x.stopstalk_handle) for x in users])
+        prospects.extend([(x.first_name,
+                           x.last_name,
+                           x.stopstalk_handle) for x in custom_users])
+
         similar_handles = []
-        for user_handle in handles:
-            diff = SequenceMatcher(None, user_handle, handle).ratio()
-            if diff >= 0.7:
-                similar_handles.append((user_handle, diff))
+        for prospect in prospects:
+            fname, lname, stopstalk_handle = prospect
+            diff1 = SequenceMatcher(None, fname.lower(), handle).ratio()
+            diff2 = SequenceMatcher(None, lname.lower(), handle).ratio()
+            diff3 = SequenceMatcher(None, stopstalk_handle.lower(), handle).ratio()
+            diff = max(diff1, diff2, diff3)
+            if diff >= 0.8:
+                similar_handles.append((stopstalk_handle, diff))
 
         similar_handles.sort(key=lambda x: x[1], reverse=True)
 
