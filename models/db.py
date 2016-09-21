@@ -132,10 +132,15 @@ extra_fields = [Field("institute",
                       writable=False)]
 
 site_handles = []
+all_last_retrieved = []
 for site in current.SITES:
-    site_handles += [Field(site.lower() + "_handle")]
+    site_handles.append(Field(site.lower() + "_handle"))
+    all_last_retrieved.append(Field(site.lower() + "_lr", "datetime",
+                                    default=initial_date,
+                                    writable=False))
 
 extra_fields += site_handles
+extra_fields += all_last_retrieved
 auth.settings.extra_fields["auth_user"] = extra_fields
 
 auth.define_tables(username=False, signature=False)
@@ -425,6 +430,7 @@ custom_friend_fields = [Field("user_id", "reference auth_user"),
                               default=None)]
 
 custom_friend_fields += site_handles
+custom_friend_fields += all_last_retrieved
 db.define_table("custom_friend",
                 format="%(first_name)s %(last_name)s (%(id)s)",
                 *custom_friend_fields)
