@@ -1131,7 +1131,7 @@ Response text: %s
                                          response.status_code)
 
         try:
-            return BeautifulSoup(response.text).find("pre").text
+            return BeautifulSoup(response.text, "lxml").find("pre").text
         except Exception as e:
             return handle_retrieve_error(download_url,
                                          response.status_code,

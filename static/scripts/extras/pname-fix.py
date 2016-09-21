@@ -28,7 +28,7 @@ def retrieve_pname(problem_link):
     if response.status_code != 200:
         print problem_link, response.status_code
         return -1
-    soup = BeautifulSoup(response.text)
+    soup = BeautifulSoup(response.text, "lxml")
     title = soup.find("title").contents[0]
     if title.__contains__("Problem"):
         pname = soup.find(class_="title").contents[0]

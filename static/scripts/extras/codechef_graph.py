@@ -29,7 +29,7 @@ handle = "tryingtocode"
 url = "https://www.codechef.com/users/" + handle
 
 response = requests.get(url)
-soup = BeautifulSoup(response.text)
+soup = BeautifulSoup(response.text, "lxml")
 
 script = str(soup.find_all("script")[33])
 data = re.findall(r"\[.*?\]", script)
