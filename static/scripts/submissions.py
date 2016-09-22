@@ -143,7 +143,8 @@ def retrieve_submissions(record, custom):
     for site in current.SITES:
 
         site_handle = record[site.lower() + "_handle"]
-        last_retrieved = record[site.lower() + "_lr"]
+        site_lr = site.lower() + "_lr"
+        last_retrieved = record[site_lr]
         last_retrieved = time.strptime(str(last_retrieved), time_conversion)
 
         if (site_handle, site) in INVALID_HANDLES:
@@ -163,12 +164,16 @@ def retrieve_submissions(record, custom):
                 handle_not_found(site, site_handle)
                 # Update the last retrieved of an invalid handle as we don't
                 # want new_user script to pick this user again and again
-                record.update({site.lower() + "_lr": datetime.now()})
+                record.update({site_lr: datetime.now()})
             else:
                 list_of_submissions.append((site, submissions))
                 # Immediately update the last_retrieved of the record
                 # Note: Only the record object is updated & not reflected in DB
-                record.update({site.lower() + "_lr": datetime.now()})
+                record.update({site_lr: datetime.now()})
+        else:
+            # Update this time so that this user is not picked
+            # up again and again by new_user cron
+            record.update({site_lr: datetime.now()})
 
     for submissions in list_of_submissions:
         site = submissions[0]
