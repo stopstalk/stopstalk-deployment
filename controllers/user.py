@@ -818,7 +818,7 @@ def custom_friend():
     form.process(onvalidation=current.sanitize_fields)
 
     if form.accepted:
-        session.flash = "Submissions will be added by tomorrow"
+        session.flash = "Submissions will be added in some time"
         redirect(URL("default", "submissions", args=[1]))
 
     return dict(form=form, table=table, allowed=allowed_custom_friends)
