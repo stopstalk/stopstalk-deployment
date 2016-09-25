@@ -460,6 +460,11 @@ db.define_table("problem_tags",
                       default="['-']"),
                 Field("problem_added_on", "date"))
 
+db.define_table("problem_editorial",
+                Field("problem_link"),
+                Field("editorial_link", default=None),
+                Field("problem_added_on", "date"))
+
 db.define_table("contact_us",
                 Field("name", requires=IS_NOT_EMPTY()),
                 Field("email", requires=[IS_NOT_EMPTY(), IS_EMAIL()]),

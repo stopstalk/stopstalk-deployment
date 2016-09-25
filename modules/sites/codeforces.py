@@ -68,6 +68,9 @@ class Profile(object):
             @param problem_link (String): Problem URL
             @return (String/None): Editorial URL
         """
+        if problem_link.__contains__("gymProblem"):
+            return None
+
         editorial_link = None
         response = get_request(problem_link)
         if response in REQUEST_FAILURES:
