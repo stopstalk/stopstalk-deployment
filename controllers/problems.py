@@ -82,11 +82,12 @@ def index():
 
     stable = db.submission
     ptable = db.problem_tags
+    petable = db.problem_editorial
+
     problem_name = request.vars["pname"]
     problem_link = request.vars["plink"]
 
     query = (stable.problem_link == problem_link)
-
     cusfriends = []
 
     if global_submissions is False:
@@ -111,6 +112,7 @@ def index():
                          vars=new_vars))
 
     submissions = db(query).select(orderby=~stable.time_stamp)
+
     try:
         query = (ptable.problem_link == problem_link)
         all_tags = db(query).select(ptable.tags).first()
@@ -147,11 +149,24 @@ def index():
     tbody.append(TR(TD(),
                     TD(STRONG("Site:")),
                     TD(site)))
+
+    links = DIV(DIV(A(I(_class="fa fa-link"), " Problem",
+                      _href=problem_link,
+                      _style="color: black;"),
+                    _class="chip lime accent-3"),
+                _class="center")
+
+    row = db(petable.problem_link == problem_link).select().first()
+    if row and row.editorial_link:
+        links.append(" ")
+        links.append(DIV(A(I(_class="fa fa-book"), " Editorial",
+                           _href=row.editorial_link,
+                           _style="color: white;",
+                           _target="_blank"),
+                         _class="chip deep-purple darken-1"))
     tbody.append(TR(TD(),
-                    TD(STRONG("Problem Link:")),
-                    TD(A(I(_class="fa fa-link"), " Link",
-                         _href=problem_link,
-                         _target="_blank"))))
+                    TD(STRONG("Links:")),
+                    links))
     tbody.append(TR(TD(),
                     TD(STRONG("Tags:")),
                     TD(tags)))
