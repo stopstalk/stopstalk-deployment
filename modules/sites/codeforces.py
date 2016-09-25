@@ -82,7 +82,12 @@ class Profile(object):
         for link in all_as:
             url = link.contents[0]
             if url.__contains__("Tutorial"):
-                editorial_link = "http://www.codeforces.com" + link["href"]
+                # Some problems have complete url -_-
+                # Example: http://codeforces.com/problemset/problem/358/C
+                if link["href"][0] == "/":
+                    editorial_link = "http://www.codeforces.com" + link["href"]
+                else:
+                    editorial_link = link["href"]
                 break
 
         return editorial_link
