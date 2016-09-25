@@ -111,6 +111,34 @@ class Profile(object):
             return all_tags
 
     # -------------------------------------------------------------------------
+    @staticmethod
+    def get_editorial_link(problem_link):
+        """
+            Get editorial link given a problem link
+
+            @param problem_link (String): Problem URL
+            @return (String/None): Editorial URL
+        """
+        editorial_link = None
+        response = get_request(problem_link)
+        if response in REQUEST_FAILURES:
+            return None
+
+        soup = BeautifulSoup(response.text)
+        all_as = soup.find_all("a")
+
+        for link in all_as:
+            try:
+                url = link.contents[0]
+            except IndexError:
+                continue
+            if url.__contains__("discuss.codechef.com"):
+                editorial_link = url
+                break
+
+        return editorial_link
+
+    # -------------------------------------------------------------------------
     def process_trs(self, year, page, trs):
         """
             Process all the trs from the /submissions page of CodeChef

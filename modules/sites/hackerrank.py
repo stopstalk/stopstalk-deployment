@@ -79,6 +79,29 @@ class Profile(object):
         return all_tags
 
     # -------------------------------------------------------------------------
+    @staticmethod
+    def get_editorial_link(problem_link):
+        """
+            Get editorial link given a problem link
+
+            @param problem_link (String): Problem URL
+            @return (String/None): Editorial URL
+        """
+        editorial_link = None
+        if problem_link.__contains__("contests"):
+            rest_url = problem_link.replace("contests/",
+                                            "rest/contests/")
+        else:
+            rest_url = problem_link.replace("challenges/",
+                                            "rest/contests/master/challenges/")
+        response = get_request(rest_url)
+        if response in REQUEST_FAILURES:
+            return editorial_link
+
+        editorial_present = response.json()["model"]["is_editorial_available"]
+        return problem_link + "/editorial/" if editorial_present else None
+
+    # -------------------------------------------------------------------------
     def get_submissions(self, last_retrieved):
         """
             Retrieve HackerRank submissions after last retrieved timestamp

@@ -60,6 +60,31 @@ class Profile(object):
         return map(lambda tag: tag.contents[0].strip(), tags)
 
     # -------------------------------------------------------------------------
+    @staticmethod
+    def get_editorial_link(problem_link):
+        """
+            Get editorial link given a problem link
+
+            @param problem_link (String): Problem URL
+            @return (String/None): Editorial URL
+        """
+        editorial_link = None
+        response = get_request(problem_link)
+        if response in REQUEST_FAILURES:
+            return None
+
+        soup = BeautifulSoup(response.text)
+        all_as = soup.find_all("a")
+
+        for link in all_as:
+            url = link.contents[0]
+            if url.__contains__("Tutorial"):
+                editorial_link = "http://www.codeforces.com" + link["href"]
+                break
+
+        return editorial_link
+
+    # -------------------------------------------------------------------------
     def get_submissions(self, last_retrieved):
         """
             Retrieve CodeForces submissions after last retrieved timestamp

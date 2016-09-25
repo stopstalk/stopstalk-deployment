@@ -68,6 +68,17 @@ class Profile(object):
         return all_tags
 
     # -------------------------------------------------------------------------
+    @staticmethod
+    def get_editorial_link(problem_link):
+        """
+            Get editorial link given a problem link
+
+            @param problem_link (String): Problem URL
+            @return (String/None): Editorial URL
+        """
+        return problem_link + "editorial/"
+
+    # -------------------------------------------------------------------------
     def get_submissions(self, last_retrieved):
         """
             Retrieve HackerEarth submissions after last retrieved timestamp
