@@ -124,7 +124,7 @@ class Profile(object):
         if response in REQUEST_FAILURES:
             return None
 
-        soup = BeautifulSoup(response.text)
+        soup = BeautifulSoup(response.text, "lxml")
         all_as = soup.find_all("a")
 
         for link in all_as:
