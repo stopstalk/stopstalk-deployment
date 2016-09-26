@@ -234,9 +234,21 @@ def sanitize_fields(form):
         5. Email address entered is from a valid domain
         6. Email address instead of handles
         7. Spoj follows a specific convention for handle naming
+        8. stopstalk_handle is alphanumeric
 
         @param form (FORM): Registration / Add Custom friend form
     """
+
+    from re import match
+
+    # 8.
+    stopstalk_handle_error = "Expected alphanumeric (Underscore allowed)"
+    try:
+        group = match("[0-9a-zA-Z_]*", form.vars.stopstalk_handle).group()
+        if group != form.vars.stopstalk_handle:
+            form.errors.stopstalk_handle = stopstalk_handle_error
+    except AttributeError:
+        form.errors.stopstalk_handle = stopstalk_handle_error
 
     def remove_at_symbol(site_name):
         if site_name in current.SITES:
@@ -245,7 +257,6 @@ def sanitize_fields(form):
                 form.errors[field] = "@ symbol not required"
 
     def _valid_spoj_handle(handle):
-        from re import match
         try:
             return match("[a-z]+[0-9a-z_]*", handle).group() == handle
         except AttributeError:
