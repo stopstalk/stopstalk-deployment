@@ -40,3 +40,6 @@ for row in rows:
             row.update_record(status="failed")
             print "Email sending to %s failed with: %s | %s" % (row.email,
                                                                 bulkmail.error)
+        else:
+            # Email sending failed due to Mail rate
+            break
