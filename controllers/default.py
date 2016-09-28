@@ -827,7 +827,7 @@ def filters():
             query &= (stable.problem_name.contains(token))
 
     # Check if multiple parameters are passed
-    def get_values_list(param_name):
+    def _get_values_list(param_name):
 
         values_list = None
         if get_vars.has_key(param_name):
@@ -842,17 +842,17 @@ def filters():
         return values_list
 
     # Submissions from this site
-    sites = get_values_list("site")
+    sites = _get_values_list("site")
     if sites:
         query &= (stable.site.belongs(sites))
 
     # Submissions with this language
-    langs = get_values_list("language")
+    langs = _get_values_list("language")
     if langs:
         query &= (stable.lang.belongs(langs))
 
     # Submissions with this status
-    statuses = get_values_list("status")
+    statuses = _get_values_list("status")
     if statuses:
         query &= (stable.status.belongs(statuses))
 
@@ -1032,7 +1032,7 @@ def search():
                                    join=ftable.on(join_query))
         friends = set([x["id"] for x in friends])
 
-    def get_tooltip_data(tooltip, buttontype, user_id):
+    def _get_tooltip_data(tooltip, buttontype, user_id):
         """
             Function to return data attributes for the tooltipped buttons
         """
@@ -1074,19 +1074,19 @@ def search():
                 tooltip_attrs[:2] = "Send friend request", "add-friend"
                 tr.append(TD(BUTTON(I(_class="fa fa-user-plus fa-3x"),
                                     _class=btn_class + " green",
-                                    data=get_tooltip_data(*tooltip_attrs))))
+                                    data=_get_tooltip_data(*tooltip_attrs))))
             else:
                 # Not a friend and friend request pending
                 tooltip_attrs[:2] = "Friend request pending", "disabled"
                 tr.append(TD(BUTTON(I(_class="fa fa-user-plus fa-3x"),
                                     _class=btn_class + " disabled",
-                                    data=get_tooltip_data(*tooltip_attrs))))
+                                    data=_get_tooltip_data(*tooltip_attrs))))
         else:
             # Already friends
             tooltip_attrs[:2] = "Unfriend", "unfriend"
             tr.append(TD(BUTTON(I(_class="fa fa-user-times fa-3x"),
                                 _class=btn_class + " black",
-                                data=get_tooltip_data(*tooltip_attrs))))
+                                data=_get_tooltip_data(*tooltip_attrs))))
         tbody.append(tr)
 
     table.append(tbody)
@@ -1101,10 +1101,10 @@ def download_submission():
 
     from bs4 import BeautifulSoup
 
-    def handle_retrieve_error(download_url,
-                              status_code,
-                              error=None,
-                              message_body=None):
+    def _handle_retrieve_error(download_url,
+                               status_code,
+                               error=None,
+                               message_body=None):
 
         """
             Error logging for Download submissions
@@ -1132,7 +1132,7 @@ Response text: %s
                           bulk=True)
         return -1
 
-    def response_handler(download_url, response):
+    def _response_handler(download_url, response):
         """
             Handle the request response
 
@@ -1142,50 +1142,50 @@ Response text: %s
         """
 
         if response.status_code != 200:
-            return handle_retrieve_error(download_url,
-                                         response.status_code)
+            return _handle_retrieve_error(download_url,
+                                          response.status_code)
 
         try:
             return BeautifulSoup(response.text, "lxml").find("pre").text
         except Exception as e:
-            return handle_retrieve_error(download_url,
-                                         response.status_code,
-                                         e,
-                                         response.text)
+            return _handle_retrieve_error(download_url,
+                                          response.status_code,
+                                          e,
+                                          response.text)
 
-    def retrieve_codechef_submission(view_link):
+    def _retrieve_codechef_submission(view_link):
         """
             Get CodeChef submission from view_link
 
             @param view_link (String): View link of the submission
-            @return response_handler (Method): Handler for the response
+            @return _response_handler (Method): Handler for the response
         """
 
         problem_id = view_link.strip("/").split("/")[-1]
         download_url = "https://www.codechef.com/viewplaintext/" + \
                        str(problem_id)
         response = requests.get(download_url)
-        return response_handler(download_url, response)
+        return _response_handler(download_url, response)
 
-    def retrieve_codeforces_submission(view_link):
+    def _retrieve_codeforces_submission(view_link):
         """
             Get Codeforces submission from view_link
 
             @param view_link (String): View link of the submission
-            @return response_handler (Method): Handler for the response
+            @return _response_handler (Method): Handler for the response
         """
 
         response = requests.get(view_link)
-        return response_handler(view_link, response)
+        return _response_handler(view_link, response)
 
     site = request.get_vars["site"]
     view_link = request.get_vars["viewLink"]
     db.download_submission_logs.insert(user_id=session.user_id,
                                        url=view_link)
     if site == "CodeChef":
-        return retrieve_codechef_submission(view_link)
+        return _retrieve_codechef_submission(view_link)
     elif site == "CodeForces":
-        return retrieve_codeforces_submission(view_link)
+        return _retrieve_codeforces_submission(view_link)
     else:
         return -1
 
