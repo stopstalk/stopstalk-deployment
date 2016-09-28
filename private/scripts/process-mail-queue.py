@@ -24,10 +24,15 @@ atable = db.auth_user
 emails = db(atable.registration_key != "").select(atable.email)
 unverified_emails = set([x.email for x in emails])
 
-rows = db(db.queue.status == "pending").select(limitby=(0, 40))
+rows = db(db.queue.status == "pending").select()
+
+count = 0
 for row in rows:
+    if count == 40:
+        break
     if row.email in unverified_emails:
         continue
+    count += 1
     if bulkmail.send(to=row.email,
                      subject=row.subject,
                      message=row.message):
