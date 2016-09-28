@@ -747,13 +747,15 @@ def custom_friend():
     atable = db.auth_user
 
     # The total referrals by the logged-in user
-    query = (atable.referrer == session.handle)
+    query = (atable.referrer == session.handle) & \
+            (atable.registration_key == "")
 
     # User should not enter his/her own
     # stopstalk handle as referrer handle
     query &= (atable.stopstalk_handle != session.handle)
     total_referrals = db(query).count()
 
+    print total_referrals
     # Retrieve the total allowed custom users from auth_user table
     query = (atable.id == session.user_id)
     row = db(query).select(atable.referrer,
@@ -762,7 +764,9 @@ def custom_friend():
     referrer = 0
     # If a valid referral is applied then award 1 extra CU
     if row.referrer and row.referrer != session.handle:
-        referrer = db(atable.stopstalk_handle == row.referrer).count()
+        query = (atable.stopstalk_handle == row.referrer) & \
+                (atable.registration_key == "")
+        referrer = db(query).count()
 
     # 3 custom friends allowed plus one for each 3 invites
     allowed_custom_friends = total_referrals / 3 + default_allowed + referrer
