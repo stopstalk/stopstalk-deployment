@@ -755,7 +755,6 @@ def custom_friend():
     query &= (atable.stopstalk_handle != session.handle)
     total_referrals = db(query).count()
 
-    print total_referrals
     # Retrieve the total allowed custom users from auth_user table
     query = (atable.id == session.user_id)
     row = db(query).select(atable.referrer,
