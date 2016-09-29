@@ -132,12 +132,22 @@ class Profile(object):
             append = submission.append
 
             # Time of submission
+            # @Todo: This is ugly
             time_stamp = row["created_at"][:-5].split("T")
-            curr = time.strptime(time_stamp[0] + " " + time_stamp[1],
-                                 "%Y-%m-%d %H:%M:%S")
+            time_stamp = time.strptime(time_stamp[0] + " " + time_stamp[1],
+                                       "%Y-%m-%d %H:%M:%S")
+            time_stamp = datetime.datetime(time_stamp.tm_year,
+                                           time_stamp.tm_mon,
+                                           time_stamp.tm_mday,
+                                           time_stamp.tm_hour,
+                                           time_stamp.tm_min,
+                                           time_stamp.tm_sec) + \
+                                           datetime.timedelta(minutes=330)
+            curr = time.strptime(str(time_stamp), "%Y-%m-%d %H:%M:%S")
+
             if curr <= last_retrieved:
                 return submissions
-            append(" ".join(time_stamp))
+            append(str(time_stamp))
 
             # Problem link
             append("https://www.hackerrank.com" + row["url"])
