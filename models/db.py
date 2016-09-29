@@ -250,7 +250,7 @@ def sanitize_fields(form):
     except AttributeError:
         form.errors.stopstalk_handle = stopstalk_handle_error
 
-    def remove_at_symbol(site_name):
+    def _remove_at_symbol(site_name):
         if site_name in current.SITES:
             field = site_name.lower() + "_handle"
             if form.vars[field] and form.vars[field][0] == "@":
@@ -274,7 +274,7 @@ def sanitize_fields(form):
             form.errors[field_handle] = "Email address instead of handle"
 
     # 2.
-    remove_at_symbol("HackerEarth")
+    _remove_at_symbol("HackerEarth")
 
     # 7.
     if "Spoj" in current.SITES:
