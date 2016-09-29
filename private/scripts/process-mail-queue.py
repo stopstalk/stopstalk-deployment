@@ -43,8 +43,9 @@ for row in rows:
         if str(bulkmail.error).__contains__("Mail rate exceeded limit") is False:
             # Email sending failed with some other reason
             row.update_record(status="failed")
-            print "Email sending to %s failed with: %s | %s" % (row.email,
-                                                                bulkmail.error)
+            print "Email sending to %s failed with: %s" % (row.email,
+                                                           bulkmail.error)
         else:
             # Email sending failed due to Mail rate
             break
+    db.commit()
