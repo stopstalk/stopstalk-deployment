@@ -4,31 +4,10 @@ Stop stalking and Start StopStalking :sunglasses:
 ## Module Requirements
 Note: Apply sudo if required for your system.
 
-* parsedatetime (Version 2.1)
-```
-$ pip install parsedatetime
-```
-
-* gevent (Version 1.1.1)
-```
-$ pip install gevent
-```
-
-* greenlet (Version 0.4.9)
-```
-$ pip install greenlet
-```
-
-* beautifulsoup (Version 4.4.1). Also install `lxml` (Version 3.6.0) parser for best use of BeautifulSoup.
-```
-$ pip install beautifulsoup4
-$ pip install lxml
-```
-
-* requests (Version 2.10.0)
+Install the required packages by running:
 
 ```
-$ pip install requests
+pip install -r requirements.txt
 ```
 
 ## Installation
