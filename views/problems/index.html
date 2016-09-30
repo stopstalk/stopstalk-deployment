@@ -39,8 +39,9 @@
                          'CE': 0,
                          'RE': 0,
                          'SK': 0,
-                         'OTH': 0,
-                         'HCK': 0
+                         'PS': 0,
+                         'HCK': 0,
+                         'OTH': 0
                          };
 
           var pname = $('#problem_name').html();
@@ -67,26 +68,32 @@
                   data.addColumn('number', 'numberOfSubmissions');
                   data.addRows([
                       ['Accepted', numJSON['AC']],
-                      ['Compile Error', numJSON['CE']],
+                      ['Partially Solved', numJSON['PS']],
                       ['Wrong Answer', numJSON['WA']],
                       ['Time Limit Exceeded', numJSON['TLE']],
                       ['Memory Limit Exceeded', numJSON['MLE']],
                       ['Runtime Error', numJSON['RE']],
+                      ['Compile Error', numJSON['CE']],
                       ['Hacked', numJSON['HCK']],
                       ['Skipped', numJSON['SK']],
                       ['Others', numJSON['OTH']]
                   ]);
+
 
                   // Set chart options
                   var options = {'title':'Total Submissions',
                                  'chartArea': {width:'90%',height:'80%'},
                                  'pieHole': 0.5,
                                  'slices': {0: {color: '#109618'},
-                                            1: {color: '#FF9900'},
+                                            1: {color: '#FEFF00'},
                                             2: {color: '#DC3912'},
                                             3: {color: '#3366CC'},
                                             4: {color: '#0099C6'},
-                                            5: {color: '#990099'}}
+                                            5: {color: '#990099'},
+                                            6: {color: '#FF9900'},
+                                            7: {color: '#620462'},
+                                            8: {color: '#E5F01A'},
+                                            9: {color: '#CCCCCC'}}
                                  };
 
                   // Instantiate and draw our chart, passing in some options.

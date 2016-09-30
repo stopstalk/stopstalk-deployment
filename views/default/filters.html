@@ -99,6 +99,7 @@
           <select name="status" multiple>
               <option value="" selected disabled>Submission Status</option>
               {{for status in (("AC", "Accepted"),
+                               ("PS", "Partially Solved"),
                                ("WA", "Wrong Answer"),
                                ("TLE", "Time Limit Exceeded"),
                                ("MLE", "Memory Limit Exceeded"),

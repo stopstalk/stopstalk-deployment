@@ -415,6 +415,7 @@ def render_table(submissions, duplicates=[]):
                    "CE": "Compile Error",
                    "SK": "Skipped",
                    "HCK": "Hacked",
+                   "PS": "Partially Solved",
                    "OTH": "Others"}
 
     table = TABLE(_class="striped centered")
