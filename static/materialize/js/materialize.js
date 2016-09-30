@@ -1093,9 +1093,10 @@ else {
               origin.removeClass('active');
               doneAnimating = true;
               $(this).remove();
-
-              // Remove overflow overrides on ancestors
-              ancestorsChanged.css('overflow', '');
+              // Remove overflow overrides on ancestors (if defined)
+              if (ancestorsChanged) {
+                ancestorsChanged.css('overflow', '');
+              }
             }
           });
 
