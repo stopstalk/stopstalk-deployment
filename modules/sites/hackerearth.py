@@ -168,9 +168,10 @@ class Profile(object):
                 except IndexError:
                     status = "Others"
 
-                if status.__contains__("Accepted") or \
-                   status.__contains__("Partially"):
+                if status.__contains__("Accepted"):
                     status = "AC"
+                elif status.__contains__("Partially"):
+                    status = "PS"
                 elif status.__contains__("Wrong"):
                     status = "WA"
                 elif status.__contains__("Compilation"):
