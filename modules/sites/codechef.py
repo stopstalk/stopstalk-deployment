@@ -205,7 +205,6 @@ class Profile(object):
             points = "0"
             if status.__contains__("pts"):
                 submission_status = "AC"
-                points = re.sub("\[.*?\]", "", status)
             elif status == "accepted":
                 points = "100"
                 submission_status = "AC"

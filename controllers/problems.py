@@ -152,7 +152,8 @@ def index():
 
     links = DIV(DIV(A(I(_class="fa fa-link"), " Problem",
                       _href=problem_link,
-                      _style="color: black;"),
+                      _style="color: black;",
+                      _target="blank"),
                     _class="chip lime accent-3"),
                 _class="center")
 
