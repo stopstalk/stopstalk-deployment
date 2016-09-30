@@ -29,19 +29,17 @@
             });
 
         });
-        $('#searchButton').click(function() {
-            window.location.href = "{{=URL('problems', 'tag')}}" + "/?q=" + $('#search').val() + "&page=1";
-        });
     });
 </script>
 <h3>Search problems by tags</h3>
 <div class="row center">
     <div class="input-field col offset-s4 s4">
-        <input id="search" type="text"/>
-        <label for="search">Search Tags...</label>
-        <a id="searchButton" class="blue btn waves-effect waves-light">
-            <i class="fa fa-search"></i>
-        </a>
+        <form id="tagSearchForm" method="GET" action="">
+            <input id="search" name="q" type="text"/>
+            <input id="page" name="page" type="hidden" value="1"/>
+            <label for="search">Search Tags...</label>
+            <button type="submit" class="blue btn waves-effect waves-light"><i class="fa fa-search"></i></button>
+        </form>
     </div>
 </div>
 <div id="page-selection" class="center"></div>
