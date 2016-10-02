@@ -79,8 +79,9 @@ pip install -r requirements.txt
 
     ```
     $ cd web2py
-    $ python web2py -a yourPassword // Choose any password
+    $ python web2py.py -a yourPassword // Choose any password
     ```
+
 9. Open the browser and go to the URL -
 
     `http://localhost:8000/stopstalk/`
