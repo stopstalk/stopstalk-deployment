@@ -26,6 +26,7 @@ import parsedatetime as pdt
 import requests
 import utilities
 
+
 # ----------------------------------------------------------------------------
 def handle_error():
     """
@@ -115,6 +116,7 @@ def handle_error():
 
     return dict(error_message=error_message, similar_handles=similar_handles)
 
+
 # ----------------------------------------------------------------------------
 def index():
     """
@@ -128,6 +130,7 @@ def index():
         redirect(URL("default", "submissions", args=[1]))
 
     return dict()
+
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
@@ -242,10 +245,10 @@ def notifications():
 
     return dict(table=table)
 
+
 # ----------------------------------------------------------------------------
 @auth.requires_login()
 def unsubscribe():
-
     utable = db.unsubscriber
     utable.email.default = session.auth.user.email
     utable.email.writable = False
@@ -267,6 +270,7 @@ def unsubscribe():
         response.flash = "Form has errors"
 
     return dict(form=form)
+
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
@@ -331,7 +335,6 @@ def my_friends():
                     claimable &= False
                     tr.append(cross)
 
-
         if claimable:
             valid_friends += 1
             tr.append(TD(I(_class="fa fa-thumbs-up")))
@@ -353,6 +356,7 @@ def my_friends():
     return dict(table=DIV(table, _class="row"),
                 claimable_stickers=claimable_stickers,
                 stickers=stickers)
+
 
 # ----------------------------------------------------------------------------
 def log_contest():
@@ -380,6 +384,7 @@ def log_contest():
                               stopstalk_handle=handle,
                               time_stamp=datetime.datetime.now())
 
+
 # ----------------------------------------------------------------------------
 def contests():
     """
@@ -404,19 +409,25 @@ def contests():
     contests = []
     cal = pdt.Calendar()
 
-    table = TABLE(_class="centered striped")
+    button_class = "btn-floating btn-small accent-4 tooltipped"
+    view_link_class = button_class + " green view-contest"
+    reminder_class = button_class + " orange set-reminder"
+
+    table = TABLE(_class="centered striped", _id="contests-table")
     thead = THEAD(TR(TH("Contest Name"),
                      TH("Site"),
                      TH("Start"),
                      TH("Duration/Ending"),
                      TH("Link"),
-                     TH("Add Reminder")))
+                     TH("Add Reminder",
+                        BUTTON(I(_class="fa fa-refresh"),
+                            _class=button_class + " green refresh-reminders",
+                            data={"position": "left",
+                                  "tooltip": "Check the contests whose reminders are already added!",
+                                  "delay": "50"}))))
     table.append(thead)
     tbody = TBODY()
 
-    button_class = "btn-floating btn-small accent-4 tooltipped"
-    view_link_class = button_class + " green view-contest"
-    reminder_class = button_class + " orange"
 
     for i in ongoing:
 
@@ -489,6 +500,7 @@ def contests():
 
     table.append(tbody)
     return dict(table=table, upcoming=upcoming, retrieved=True)
+
 
 # ------------------------------------------------------------------------------
 def leaderboard():
@@ -651,6 +663,7 @@ def leaderboard():
                 heading=heading,
                 global_leaderboard=global_leaderboard)
 
+
 # ----------------------------------------------------------------------------
 def user():
     """
@@ -665,6 +678,7 @@ def user():
         redirect(URL("user", "update_details"))
 
     return dict(form=auth())
+
 
 # ----------------------------------------------------------------------------
 def filters():
@@ -734,7 +748,6 @@ def filters():
             query &= ((cftable.first_name.contains(token)) | \
                       (cftable.last_name.contains(token)) | \
                       (cftable.stopstalk_handle.contains(token)))
-
 
     if global_submissions is False:
         # Retrieve all the custom users created by the logged-in user
@@ -880,6 +893,7 @@ def filters():
                 total_pages=total_pages,
                 global_submissions=global_submissions)
 
+
 # ----------------------------------------------------------------------------
 @auth.requires_login()
 def mark_friend():
@@ -948,6 +962,7 @@ To stop receiving mails - %s
                       mail_type="friend_requests")
 
     return "Friend Request sent"
+
 
 # ----------------------------------------------------------------------------
 def search():
@@ -1092,6 +1107,7 @@ def search():
     table.append(tbody)
     return dict(all_institutes=all_institutes, table=table)
 
+
 # ----------------------------------------------------------------------------
 @auth.requires_login()
 def download_submission():
@@ -1189,6 +1205,7 @@ Response text: %s
     else:
         return -1
 
+
 # ----------------------------------------------------------------------------
 @auth.requires_login()
 def unfriend():
@@ -1236,6 +1253,7 @@ To stop receiving mails - %s
                           mail_type="unfriend")
 
         return "Successfully unfriended"
+
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
@@ -1300,6 +1318,7 @@ def submissions():
                 cusfriends=cusfriends,
                 total_rows=len(rows))
 
+
 # ----------------------------------------------------------------------------
 def faq():
     """
@@ -1320,6 +1339,7 @@ def faq():
     div.append(ul)
 
     return dict(div=div)
+
 
 # ----------------------------------------------------------------------------
 def contact_us():
@@ -1364,6 +1384,7 @@ def contact_us():
         response.flash = "Please fill all the fields!"
 
     return dict(form=form)
+
 
 # ----------------------------------------------------------------------------
 def call():
