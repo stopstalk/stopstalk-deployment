@@ -34,7 +34,9 @@ pip install -r requirements.txt
 
     ```
     git clone https://github.com/stopstalk/stopstalk-deployment.git
+    mv stopstalk-deployment stopstalk
     ```
+    Note: Web2Py does not allow appname to contain hyphens.
 4. Install MySQL - [here](http://dev.mysql.com/downloads/)
    Make sure you remember the root password for mysql server.
 
