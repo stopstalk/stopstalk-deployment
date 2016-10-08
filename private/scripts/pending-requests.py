@@ -35,14 +35,15 @@ for email in email_ids:
                       subject="You have pending requests!",
                       message=
 """<html>
-Hello StopStalker!!
+Hello StopStalker!! <br />
 
-You have pending friend requests on StopStalk
-Connect with more to make best use of StopStalk - %s
+You have pending friend requests on StopStalk <br />
+Connect with more to make best use of StopStalk - %s <br />
 
-To stop receiving mails - <a href="https://www.stopstalk.com/unsubscribe">Unsubscribe</a></html>
-Cheers,
+To stop receiving mails - <a href="https://www.stopstalk.com/unsubscribe">Unsubscribe</a> <br />
+Cheers, <br />
 StopStalk
+</html>
 """ % (URL("user", "friend_requests",
            scheme="https",
            host="www.stopstalk.com")),

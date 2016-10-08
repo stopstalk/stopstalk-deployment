@@ -671,7 +671,7 @@ def accept_fr():
 
     subject = session.handle + " from StopStalk accepted your friend request!"
     message = """<html>
-%s (%s) accepted your friend request
+%s (%s) accepted your friend request. <br />
 
 To stop receiving mails - <a href="https://www.stopstalk.com/unsubscribe">Unsubscribe</a></html>
               """ % (session.handle,
@@ -713,7 +713,7 @@ def reject_fr():
 
     subject = session.handle + " from StopStalk rejected your friend request!"
     message = """<html>
-%s (%s) rejected your friend request
+%s (%s) rejected your friend request. <br />
 
 To stop receiving mails - <a href="https://www.stopstalk.com/unsubscribe">Unsubscribe</a></html>
               """ % (session.handle,
