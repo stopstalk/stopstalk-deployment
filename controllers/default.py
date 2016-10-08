@@ -922,14 +922,14 @@ def mark_friend():
     row = db(query).select(atable.email,
                            atable.stopstalk_handle).first()
     current.send_mail(to=row.email,
-                      subject=session.handle + \
+                      subject=(session.handle).capitalize() + \
                               " wants to be a friend on StopStalk",
-                      message="""
-%s (%s) wants to connect on StopStalk
-To view all friend requests go here - %s
+                      message="""<html>
+%s (%s) wants to connect on StopStalk <br />
+To view all friend requests go here - %s <br />
 
-To stop receiving mails - %s
-                              """ % (session.handle,
+To stop receiving mails - <a href="https://www.stopstalk.com/unsubscribe">Unsubscribe</a></html>
+                              """ % ((session.handle).capitalize(),
                                      URL("user",
                                          "profile",
                                          args=[session.handle],
@@ -938,10 +938,6 @@ To stop receiving mails - %s
                                          extension=False),
                                      URL("user",
                                          "friend_requests",
-                                         scheme=True,
-                                         host=True,
-                                         extension=False),
-                                     URL("default", "unsubscribe",
                                          scheme=True,
                                          host=True,
                                          extension=False)),
@@ -1218,18 +1214,14 @@ def unfriend():
         row = db(atable.id == friend_id).select(atable.email).first()
         current.send_mail(to=row.email,
                           subject="A friend unfriended you on StopStalk",
-                          message="""
+                          message="""<html>
 %s (%s) unfriended you on StopStalk
 
-To stop receiving mails - %s
+To stop receiving mails - <a href="https://www.stopstalk.com/unsubscribe">Unsubscribe</a></html>
                                   """ % (session.handle,
                                          URL("user",
                                              "profile",
                                              args=[session.handle],
-                                             scheme=True,
-                                             host=True,
-                                             extension=False),
-                                         URL("default", "unsubscribe",
                                              scheme=True,
                                              host=True,
                                              extension=False)),
