@@ -924,11 +924,11 @@ def mark_friend():
     current.send_mail(to=row.email,
                       subject=session.handle + \
                               " wants to be a friend on StopStalk",
-                      message="""
-%s (%s) wants to connect on StopStalk
-To view all friend requests go here - %s
+                      message="""<html>
+%s (%s) wants to connect on StopStalk <br />
+To view all friend requests go here - %s <br />
 
-To stop receiving mails - %s
+To stop receiving mails - <a href="%s">Unsubscribe</a></html>
                               """ % (session.handle,
                                      URL("user",
                                          "profile",
@@ -1218,10 +1218,10 @@ def unfriend():
         row = db(atable.id == friend_id).select(atable.email).first()
         current.send_mail(to=row.email,
                           subject="A friend unfriended you on StopStalk",
-                          message="""
-%s (%s) unfriended you on StopStalk
+                          message="""<html>
+%s (%s) unfriended you on StopStalk <br />
 
-To stop receiving mails - %s
+To stop receiving mails - <a href="%s">Unsubscribe</a></html>
                                   """ % (session.handle,
                                          URL("user",
                                              "profile",

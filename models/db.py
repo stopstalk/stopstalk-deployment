@@ -318,17 +318,17 @@ def notify_institute_users(record):
 
     subject = "New user registered from your Institute"
     for row in rows:
-        message = """
-Hello %s,
+        message = """<html>
+Hello %s,<br />
 
-%s from your Institute has just joined StopStalk.
-Send a friend request now %s for better experience on StopStalk
+%s from your Institute has just joined StopStalk.<br />
+Send a friend request now %s for better experience on StopStalk<br />
 
-To stop receiving mails - %s
+To stop receiving mails - <a href="%s">Unsubscribe</a> <br />
 
-Regards,
+Regards,<br />
 StopStalk
-                  """ % (row.stopstalk_handle,
+                  </html>""" % (row.stopstalk_handle,
                          record.first_name + " " + record.last_name,
                          URL("user",
                              "profile",

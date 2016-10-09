@@ -34,15 +34,16 @@ for email in email_ids:
     current.send_mail(to=email["email"],
                       subject="You have pending requests!",
                       message=
-"""
-Hello StopStalker!!
+"""<html>
+Hello StopStalker!! <br />
 
-You have pending friend requests on StopStalk
-Connect with more to make best use of StopStalk - %s
+You have pending friend requests on StopStalk <br />
+Connect with more to make best use of StopStalk - %s <br />
 
-To stop receiving mails - %s
-Cheers,
+To stop receiving mails - <a href="%s">Unsubscribe</a> <br />
+Cheers, <br />
 StopStalk
+</html>
 """ % (URL("user", "friend_requests",
            scheme="https",
            host="www.stopstalk.com"),

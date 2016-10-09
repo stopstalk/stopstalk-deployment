@@ -670,10 +670,10 @@ def accept_fr():
     row = db(atable.id == friend_id).select(atable.email).first()
 
     subject = session.handle + " from StopStalk accepted your friend request!"
-    message = """
-%s (%s) accepted your friend request
+    message = """<html>
+%s (%s) accepted your friend request. <br />
 
-To stop receiving mails - %s
+To stop receiving mails - <a href="%s">Unsubscribe</a></html>
               """ % (session.handle,
                      URL("user", "profile",
                          args=[session.handle],
@@ -715,10 +715,10 @@ def reject_fr():
     db(db.friend_requests.id == fr_id).delete()
 
     subject = session.handle + " from StopStalk rejected your friend request!"
-    message = """
-%s (%s) rejected your friend request
+    message = """<html>
+%s (%s) rejected your friend request. <br />
 
-To stop receiving mails - %s
+To stop receiving mails - <a href="%s">Unsubscribe</a></html>
               """ % (session.handle,
                      URL("user", "profile",
                          args=[session.handle],
