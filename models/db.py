@@ -324,7 +324,7 @@ Hello %s,<br />
 %s from your Institute has just joined StopStalk.<br />
 Send a friend request now %s for better experience on StopStalk<br />
 
-To stop receiving mails - <a href="https://www.stopstalk.com/unsubscribe">Unsubscribe</a> <br />
+To stop receiving mails - <a href="%s">Unsubscribe</a> <br />
 
 Regards,<br />
 StopStalk
@@ -333,6 +333,11 @@ StopStalk
                          URL("user",
                              "profile",
                              args=record.stopstalk_handle,
+                             scheme=True,
+                             host=True,
+                             extension=False),
+                         URL("default",
+                             "unsubscribe",
                              scheme=True,
                              host=True,
                              extension=False))

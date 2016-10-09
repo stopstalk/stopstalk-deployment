@@ -928,7 +928,7 @@ def mark_friend():
 %s (%s) wants to connect on StopStalk <br />
 To view all friend requests go here - %s <br />
 
-To stop receiving mails - <a href="https://www.stopstalk.com/unsubscribe">Unsubscribe</a></html>
+To stop receiving mails - <a href="%s">Unsubscribe</a></html>
                               """ % ((session.handle),
                                      URL("user",
                                          "profile",
@@ -938,6 +938,10 @@ To stop receiving mails - <a href="https://www.stopstalk.com/unsubscribe">Unsubs
                                          extension=False),
                                      URL("user",
                                          "friend_requests",
+                                         scheme=True,
+                                         host=True,
+                                         extension=False),
+                                     URL("default", "unsubscribe",
                                          scheme=True,
                                          host=True,
                                          extension=False)),
@@ -1217,11 +1221,15 @@ def unfriend():
                           message="""<html>
 %s (%s) unfriended you on StopStalk <br />
 
-To stop receiving mails - <a href="https://www.stopstalk.com/unsubscribe">Unsubscribe</a></html>
+To stop receiving mails - <a href="%s">Unsubscribe</a></html>
                                   """ % (session.handle,
                                          URL("user",
                                              "profile",
                                              args=[session.handle],
+                                             scheme=True,
+                                             host=True,
+                                             extension=False),
+                                         URL("default", "unsubscribe",
                                              scheme=True,
                                              host=True,
                                              extension=False)),

@@ -673,12 +673,15 @@ def accept_fr():
     message = """<html>
 %s (%s) accepted your friend request. <br />
 
-To stop receiving mails - <a href="https://www.stopstalk.com/unsubscribe">Unsubscribe</a></html>
+To stop receiving mails - <a href="%s">Unsubscribe</a></html>
               """ % (session.handle,
                      URL("user", "profile",
                          args=[session.handle],
                          scheme=True,
-                         host=True))
+                         host=True),
+                     URL("default", "unsubscribe",
+                         scheme=True,
+                         host=True)
 
     # Send acceptance email to the friend
     current.send_mail(to=row.email,
@@ -715,10 +718,13 @@ def reject_fr():
     message = """<html>
 %s (%s) rejected your friend request. <br />
 
-To stop receiving mails - <a href="https://www.stopstalk.com/unsubscribe">Unsubscribe</a></html>
+To stop receiving mails - <a href="%s">Unsubscribe</a></html>
               """ % (session.handle,
                      URL("user", "profile",
                          args=[session.handle],
+                         scheme=True,
+                         host=True),
+                     URL("default", "unsubscribe",
                          scheme=True,
                          host=True))
 

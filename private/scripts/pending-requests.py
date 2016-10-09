@@ -40,11 +40,14 @@ Hello StopStalker!! <br />
 You have pending friend requests on StopStalk <br />
 Connect with more to make best use of StopStalk - %s <br />
 
-To stop receiving mails - <a href="https://www.stopstalk.com/unsubscribe">Unsubscribe</a> <br />
+To stop receiving mails - <a href="%s">Unsubscribe</a> <br />
 Cheers, <br />
 StopStalk
 </html>
 """ % (URL("user", "friend_requests",
+           scheme="https",
+           host="www.stopstalk.com"),
+       URL("default", "unsubscribe",
            scheme="https",
            host="www.stopstalk.com")),
                       mail_type="pending_requests",
