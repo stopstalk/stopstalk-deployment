@@ -681,7 +681,7 @@ To stop receiving mails - <a href="%s">Unsubscribe</a></html>
                          host=True),
                      URL("default", "unsubscribe",
                          scheme=True,
-                         host=True)
+                         host=True))
 
     # Send acceptance email to the friend
     current.send_mail(to=row.email,
