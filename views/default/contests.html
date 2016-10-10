@@ -167,6 +167,7 @@
                         var duration = this.children[3].textContent;
                         var contestLink = this.children[4].firstChild.href;
                         var calendarButton = $('.set-reminder', this);
+                        var calendarIcon = $('.set-reminder > i', this);
 
                         var startTimeStamp = new Date(startTime.replace(/-/g, '/'));
                         var endTimeStamp = dateToTimeStamp(addMinutes(startTimeStamp, getMinutes(duration) - 5));
@@ -184,20 +185,19 @@
                         /* check contest existence */
                         request.execute(function (resp) {
                             var events = resp.items;
-                            calendarButton.removeClass('disabled fa-check');
-                            calendarButton.addClass('fa-calendar-plus-o')
+                            calendarButton.removeClass('disabled');
+                            calendarIcon.removeClass('fa-check').addClass('fa-calendar-plus-o');
                             calendarButton.attr('data-tooltip', 'Set Reminder to Google Calendar');
                             $.each(events, function (index, element) {
                                 if (this.summary === 'Contest at ' + siteName && this.location === contestLink) {
-                                    calendarButton.removeClass('fa-calendar-plus-o');
-                                    calendarButton.addClass('disabled fa-check');
+                                    calendarIcon.removeClass('fa-calendar-plus-o').addClass('fa-check');
+                                    calendarButton.addClass('disabled');
                                     calendarButton.attr('data-tooltip', 'Already set!');
                                     return false;
                                 }
                             });
                         });
                     });
-            $.web2py.flash("Reminders refreshed!");
         }
 
         /* Run the decrement counter for a running contest */
