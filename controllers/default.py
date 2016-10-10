@@ -404,10 +404,6 @@ def contests():
     contests = []
     cal = pdt.Calendar()
 
-    button_class = "btn-floating btn-small accent-4 tooltipped"
-    view_link_class = button_class + " green view-contest"
-    reminder_class = button_class + " orange set-reminder"
-
     table = TABLE(_class="centered striped", _id="contests-table")
     thead = THEAD(TR(TH("Contest Name"),
                      TH("Site"),
@@ -418,6 +414,9 @@ def contests():
     table.append(thead)
     tbody = TBODY()
 
+    button_class = "btn-floating btn-small accent-4 tooltipped"
+    view_link_class = button_class + " green view-contest"
+    reminder_class = button_class + " orange set-reminder"
 
     for i in ongoing:
 
