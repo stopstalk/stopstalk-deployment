@@ -214,7 +214,6 @@
         function runCounter(thisElement) {
 
             var lastDiff = null;
-
             function updateTime(thisElement) {
                 var diff = lastDiff;
                 if (lastDiff === null) {
@@ -274,7 +273,7 @@
             });
         }
 
-        $(document).on('click', '.set-reminder:not(.disabled)', function () {
+        $(document).on('click', '.set-reminder:not(.disabled)', function() {
             var children = this.parentElement.parentElement.children;
             var contestName = children[0].textContent;
             var siteName = children[1].textContent;
