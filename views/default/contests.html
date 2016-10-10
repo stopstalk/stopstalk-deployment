@@ -40,7 +40,7 @@
         }
 
         /* Authorize Google Calendar user */
-        function handleAuthorize(callback) {
+        function handleAuthorize(callback, showDialog) {
 
             // Your Client ID can be retrieved from your project in the Google
             // Developer Console, https://console.developers.google.com
@@ -49,11 +49,16 @@
 
             /* Check if current user has authorized this application. */
             function checkAuth() {
-                gapi.auth.authorize({
+                if(gapi.auth) {
+                    gapi.auth.authorize({
                         'client_id': CLIENT_ID,
                         'scope': SCOPES.join(' '),
                         'immediate': true
                     }, handleAuthResult);
+                } else {
+                    /* If gapi library was still loading, try again after 2 sec */
+                    window.setTimeout(checkAuth, 5000);
+                }
             }
 
             /**
@@ -66,7 +71,8 @@
                     // Hide auth UI, then load client library.
                     loadCalendarApi();
                 }
-                else {
+                /* If the failed request was not immediate */
+                else if(authResult['error'] != "immediate_failed") {
                     $.web2py.flash("Error Authorizing to Google Calendar!");
                 }
             }
@@ -93,7 +99,11 @@
                 gapi.client.load('calendar', 'v3', callback);
             }
 
-            handleAuthClick();
+            if(showDialog) {
+                handleAuthClick();
+            } else {
+                checkAuth();
+            }
         }
 
         /* Set Reminder in Google Calendar */
@@ -145,7 +155,7 @@
             }
 
             /* Call Auth for Google Calendar */
-            handleAuthorize(addEventToCalendar);
+            handleAuthorize(addEventToCalendar, true);
         }
 
         /* Check contests using link and data/time */
@@ -283,6 +293,9 @@
             var contestLink = children[4].firstChild.href;
             logContest(contestName, siteName, contestLink, "View");
         });
+
+        /* Call Auth for Google Calendar to refresh marked contests */
+        handleAuthorize(checkMarkedContests, false);
     });
 </script>
 <script src="https://apis.google.com/js/client.js?onload=checkAuth"></script>
