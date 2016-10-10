@@ -44,7 +44,7 @@
 
             // Your Client ID can be retrieved from your project in the Google
             // Developer Console, https://console.developers.google.com
-            var CLIENT_ID = '{{=current.calenda r_token}}';
+            var CLIENT_ID = '{{=current.calendar_token}}';
             var SCOPES = ['https://www.googleapis.com/auth/calendar'];
 
             /* Check if current user has authorized this application. */
@@ -57,10 +57,10 @@
             }
 
             /**
-             * Handle response from authorization server.
-             *
-             * @param {Object} authResult Authorization result.
-             */
+              * Handle response from authorization server.
+              *
+              * @param {Object} authResult Authorization result.
+              */
             function handleAuthResult(authResult) {
                 if (authResult && !authResult.error) {
                     // Hide auth UI, then load client library.
@@ -140,7 +140,7 @@
 
                 request.execute(function (event) {
                     $.web2py.flash("Reminder added!");
-                    checkContests();
+                    checkMarkedContests();
                 });
             }
 
@@ -149,7 +149,7 @@
         }
 
         /* Check contests using link and data/time */
-        function checkContests() {
+        function checkMarkedContests() {
             $('#contests-table').find('> tbody > tr')
                     /* only ongoing contests*/
                     .filter(function (index, element) {
@@ -184,11 +184,13 @@
                         /* check contest existence */
                         request.execute(function (resp) {
                             var events = resp.items;
-                            calendarButton.removeClass('disabled');
+                            calendarButton.removeClass('disabled fa-check');
+                            calendarButton.addClass('fa-calendar-plus-o')
                             calendarButton.attr('data-tooltip', 'Set Reminder to Google Calendar');
                             $.each(events, function (index, element) {
                                 if (this.summary === 'Contest at ' + siteName && this.location === contestLink) {
-                                    calendarButton.addClass('disabled');
+                                    calendarButton.removeClass('fa-calendar-plus-o');
+                                    calendarButton.addClass('disabled fa-check');
                                     calendarButton.attr('data-tooltip', 'Already set!');
                                     return false;
                                 }
@@ -196,13 +198,6 @@
                         });
                     });
             $.web2py.flash("Reminders refreshed!");
-        }
-
-        /* Mark the contests whose reminders are already added */
-        function refreshReminders() {
-
-            /* Call Auth for Google Calendar */
-            handleAuthorize(checkContests);
         }
 
         /* Run the decrement counter for a running contest */
@@ -268,10 +263,6 @@
                 data: data
             });
         }
-
-        $('.refresh-reminders').click(function () {
-            refreshReminders();
-        });
 
         $(document).on('click', '.set-reminder:not(.disabled)', function () {
             var children = this.parentElement.parentElement.children;

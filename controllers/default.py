@@ -414,12 +414,7 @@ def contests():
                      TH("Start"),
                      TH("Duration/Ending"),
                      TH("Link"),
-                     TH("Add Reminder",
-                        BUTTON(I(_class="fa fa-refresh"),
-                            _class=button_class + " green refresh-reminders",
-                            data={"position": "left",
-                                  "tooltip": "Check the contests whose reminders are already added!",
-                                  "delay": "50"}))))
+                     TH("Add Reminder")))
     table.append(thead)
     tbody = TBODY()
 
