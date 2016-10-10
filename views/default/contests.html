@@ -34,26 +34,26 @@
 
         function dateToTimeStamp(d) {
             return [d.getFullYear(), d.getMonth() + 1, d.getDate()].map(formatTimeStamp).join('-')
-                    + 'T'
-                    + [d.getHours(), d.getMinutes(), d.getSeconds()].map(formatTimeStamp).join(':')
-                    + '+05:30';
+                 + 'T'
+                 + [d.getHours(), d.getMinutes(), d.getSeconds()].map(formatTimeStamp).join(':')
+                 + '+05:30';
         }
 
-        /* Authorize Google Calendar user*/
+        /* Authorize Google Calendar user */
         function handleAuthorize(callback) {
 
             // Your Client ID can be retrieved from your project in the Google
             // Developer Console, https://console.developers.google.com
-            var CLIENT_ID = '{{=current.calender_token}}';
+            var CLIENT_ID = '{{=current.calenda r_token}}';
             var SCOPES = ['https://www.googleapis.com/auth/calendar'];
 
             /* Check if current user has authorized this application. */
             function checkAuth() {
                 gapi.auth.authorize({
-                    'client_id': CLIENT_ID,
-                    'scope': SCOPES.join(' '),
-                    'immediate': true
-                }, handleAuthResult);
+                        'client_id': CLIENT_ID,
+                        'scope': SCOPES.join(' '),
+                        'immediate': true
+                    }, handleAuthResult);
             }
 
             /**
@@ -72,10 +72,10 @@
             }
 
             /**
-             * Initiate auth flow in response to user clicking authorize button.
-             *
-             * @param {Event} event Button click event.
-             */
+              * Initiate auth flow in response to user clicking authorize button.
+              *
+              * @param {Event} event Button click event.
+              */
             function handleAuthClick() {
                 gapi.auth.authorize({
                     client_id: CLIENT_ID,
@@ -86,14 +86,14 @@
             }
 
             /**
-             * Load Google Calendar client library. List upcoming events
-             * once client library is loaded.
-             */
+              * Load Google Calendar client library. List upcoming events
+              * once client library is loaded.
+              */
             function loadCalendarApi() {
                 gapi.client.load('calendar', 'v3', callback);
             }
 
-            handleAuthClick()
+            handleAuthClick();
         }
 
         /* Set Reminder in Google Calendar */
@@ -104,10 +104,10 @@
             startTimeStamp = dateToTimeStamp(startTimeStamp);
 
             /**
-             * Print the summary and start datetime/date of the next ten events in
-             * the authorized user's calendar. If no events are found an
-             * appropriate message is printed.
-             */
+              * Print the summary and start datetime/date of the next ten events in
+              * the authorized user's calendar. If no events are found an
+              * appropriate message is printed.
+              */
             function addEventToCalendar() {
                 // Refer to the JavaScript quickstart on how to setup the environment:
                 // https://developers.google.com/google-apps/calendar/quickstart/js
@@ -148,7 +148,7 @@
             handleAuthorize(addEventToCalendar);
         }
 
-        /* check contests using link and data/time */
+        /* Check contests using link and data/time */
         function checkContests() {
             $('#contests-table').find('> tbody > tr')
                     /* only ongoing contests*/
@@ -285,7 +285,7 @@
             logContest(contestName, siteName, contestLink, "Reminder");
         });
 
-        $('.view-contest').click(function () {
+        $('.view-contest').click(function() {
             var children = this.parentElement.parentElement.children;
             var contestName = children[0].textContent;
             var siteName = children[1].textContent;
