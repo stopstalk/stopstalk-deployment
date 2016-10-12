@@ -50,7 +50,7 @@ pip install -r requirements.txt
 6. Copy `0firstrun.py` to `models/`
 
     ```
-    $ cd applications/stopstalk
+    $ cd stopstalk/
     $ cp models/0firstrun.py.sample models/0firstrun.py
     ```
 7. Open `0firstrun.py` and change the settings.
