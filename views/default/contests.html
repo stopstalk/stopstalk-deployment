@@ -49,14 +49,14 @@
 
             /* Check if current user has authorized this application. */
             function checkAuth() {
-                if(gapi.auth) {
+                if(gapi && gapi.auth) {
                     gapi.auth.authorize({
                         'client_id': CLIENT_ID,
-                        'scope': SCOPES.join(' '),
+                        'scope': SCOPES,
                         'immediate': true
                     }, handleAuthResult);
                 } else {
-                    /* If gapi library was still loading, try again after 2 sec */
+                    /* If gapi library was still loading, try again after 5 sec */
                     window.setTimeout(checkAuth, 5000);
                 }
             }
@@ -180,8 +180,8 @@
                         var calendarIcon = $('.set-reminder > i', this);
 
                         var startTimeStamp = new Date(startTime.replace(/-/g, '/'));
-                        var endTimeStamp = dateToTimeStamp(addMinutes(startTimeStamp, getMinutes(duration) - 5));
-                        startTimeStamp = dateToTimeStamp(addMinutes(startTimeStamp, -5));
+                        var endTimeStamp = dateToTimeStamp(addMinutes(startTimeStamp, getMinutes(duration)));
+                        startTimeStamp = dateToTimeStamp(startTimeStamp);
 
                         var request = gapi.client.calendar.events.list({
                             'calendarId': 'primary',
