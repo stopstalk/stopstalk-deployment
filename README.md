@@ -109,6 +109,16 @@ pip install -r requirements.txt
 ## Configuration
     Configure the models/000_config.py file as per your requirement.
 
+### Configuring Calendar API client ID
+
+1. Goto [Google developers console] (https://console.developers.google.com/) and click on New Project.
+2. Give the project a name like stopstalk-test and create the project.
+3. Goto API Manager.
+4. Search and select Google Calendar API and enable it.
+5. Click on Go To Credentials and fill out the form
+6. Copy client ID and paste it in models/0firstrun.py
+7. Done. :smile:
+
 ## Contact
   > Email: admin@stopstalk.com, contactstopstalk@gmail.com, raj454raj@gmail.com
 
