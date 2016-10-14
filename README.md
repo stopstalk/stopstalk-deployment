@@ -55,7 +55,7 @@ pip install -r requirements.txt
     ```
 7. Open `0firstrun.py` and change the settings.
 
-    ```
+    ```python
     current.mysql_user = "root" # Change if you have given access to any other user in mysql
     current.mysql_password = "" # As per your mysql password
     current.mysql_server = "localhost"
