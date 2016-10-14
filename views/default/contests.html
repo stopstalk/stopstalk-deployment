@@ -52,7 +52,7 @@
                 if(gapi && gapi.auth) {
                     gapi.auth.authorize({
                         'client_id': CLIENT_ID,
-                        'scope': SCOPES,
+                        'scope': SCOPES.join(' '),
                         'immediate': true
                     }, handleAuthResult);
                 } else {
