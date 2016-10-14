@@ -46,6 +46,7 @@ current.SITES["HackerRank"] = "https://www.hackerrank.com/"
 # If you are not under a PROXY
 current.PROXY = {}
 
+
 # The initial date from which the submissions need to be added
 current.INITIAL_DATE = "2013-01-01 00:00:00"
 
