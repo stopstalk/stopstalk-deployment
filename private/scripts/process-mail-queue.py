@@ -37,7 +37,7 @@ for row in rows:
                      subject=row.subject,
                      message=row.message):
         row.update_record(status="sent")
-        print "Email sent to %s" % row.email
+        print "Sent to %s %s" % (row.email, row.subject)
     else:
         print "ERROR: " + str(bulkmail.error)
         if str(bulkmail.error).__contains__("Mail rate exceeded limit") is False:
