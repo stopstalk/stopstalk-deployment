@@ -106,12 +106,11 @@ def handle_error():
     else:
         subject = "%s occurred" % code
 
-    if request_url:
-        # If request_url is not None send email
-        current.send_mail(to="raj454raj@gmail.com",
-                          subject=subject,
-                          message=message,
-                          mail_type="admin")
+    current.send_mail(to="raj454raj@gmail.com",
+                      subject=subject,
+                      message=message,
+                      mail_type="admin",
+                      bulk=True)
 
     return dict(error_message=error_message, similar_handles=similar_handles)
 
