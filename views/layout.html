@@ -44,6 +44,13 @@
     (left_sidebar_enabled and 1 or 0)+(right_sidebar_enabled and 1 or 0)]
     }}
     <style>
+        footer.footer {
+          height: 140px;
+          padding-top: 20px;
+          background-color: #536dfe;
+          color: rgba(255, 255, 255, 0.8);
+        }
+
         input.form-control {
             width: 50%;
             text-align:  center;
@@ -291,15 +298,18 @@
         </div>
     </div>
     </main>
-    <footer class="page-footer" style="background-color: #536dfe;">
-          <div class="footer-copyright">
-            <div class="container">
+    <footer class="footer">
+        <div class="data" style="padding-top: 10px; padding-bottom: 20px;">
+            <a href="/stopstalk/default/contact_us"><i class="fa fa-phone fa-3x tooltipped" data-delay="40" data-position="top" data-tooltip="Contact Us" style="color: white;"></i></a>
+            <p style="display: inline; font-size: 35px; padding-left: 60px; padding-right: 60px;">|</p>
+            <a href="/stopstalk/default/faq"><i class="fa fa-question fa-3x tooltipped" data-delay="40" data-position="top" data-tooltip="FAQs" style="color: white;"></i></a>
+        </div>
+        <div class="container">
             <div class="left"> © 2015-2016 StopStalk </div>
             <div class="right">
                <span>Carefully crafted by: <a href="http://www.raj454raj.com" style="color: white;" target="_blank">Raj Patel</a></span>
             </div>
-            </div>
-          </div>
+        </div>
     </footer>
     <div class="fixed-action-btn horizontal click-to-toggle" style="bottom: 45px; right: 24px;">
         <a class="btn-floating btn-large pink accent-3">
