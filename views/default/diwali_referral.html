@@ -1,0 +1,22 @@
+{{extend 'layout.html'}}
+<title>Diwali Referral</title>
+<h1>Diwali Referral</h1>
+<h6>3+ valid referrals before Diwali and you get 3 StopStalk stickers!</h6>
+<h5>Your Referrals: {{=referrals}}</h5>
+<div class="row">
+    <div class="col offset-s3 s6">
+        <img class="materialboxed" data-caption="Diwali's gonna be big" width="650" src="{{=URL('static', 'images/diwali-offer.png')}}">
+    </div>
+</div>
+<form action="{{=URL('default', 'contact_us')}}" method="POST">
+    <input type="hidden" name="referrals" value="{{=referrals}}"/>
+    <input type="submit" value="Claim stickers" class="btn btn-default"/>
+</form>
+<h5>Details</h5>
+<ul class="center-align">
+    <li>New user should register with your stopstalk_handle as Referrer's StopStalk handle</li>
+    <li>New user must verify his / her email address</li>
+    <li>You must have atleast 3 referrals to claim stickers</li>
+    <li>Valid referrals between 20th and 30th October 2016</li>
+</ul>
+
