@@ -104,7 +104,7 @@ The project also depends on a number of other open source packages, some of whic
 - [Python Requests Library](http://docs.python-requests.org/en/master/)
 - [Beautiful Soup](https://www.crummy.com/software/BeautifulSoup/)
 
-If you are a new to open source contributing or want to learn more about this project, please feel free to go through the links above.
+If you are inexperienced at contributing to open source or want to learn more about this project, please feel free to go through the links above.
 Contribution guidelines are also given below.
 
 ## Contribute
