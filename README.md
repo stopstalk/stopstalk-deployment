@@ -93,6 +93,20 @@ pip install -r requirements.txt
 
 10. Done. :smile:
 
+## Project Dependencies
+
+StopStalk is built on the [Web2Py Framework](http://www.web2py.com), which is a Python based MVC framework.
+The project also depends on a number of other open source packages, some of which are 
+
+- [MySQL](http://www.mysql.com)
+- [Google Calender API](https://developers.google.com/google-apps/calendar/)
+- [Google Charts API](https://developers.google.com/chart/)
+- [Python Requests Library](http://docs.python-requests.org/en/master/)
+- [Beautiful Soup](https://www.crummy.com/software/BeautifulSoup/)
+
+If you are a new to open source contributing or want to learn more about this project, please feel free to go through the links above.
+Contribution guidelines are also given below.
+
 ## Contribute
 
 1. Fork the repository
