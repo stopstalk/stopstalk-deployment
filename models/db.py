@@ -213,6 +213,10 @@ def validate_email(email):
     if email.strip() == "":
         return False
 
+    # Temporary fix
+    if domain == "yahoo.com":
+        return True
+
     import requests
 
     try:
