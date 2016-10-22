@@ -213,6 +213,7 @@ def validate_email(email):
     if email.strip() == "":
         return False
 
+    domain = email.split("@")[-1]
     # Temporary fix
     if domain == "yahoo.com":
         return True
@@ -220,7 +221,6 @@ def validate_email(email):
     import requests
 
     try:
-        domain = email.split("@")[-1]
         response = requests.get("http://" + domain, timeout=5)
         return (response.status_code == 200)
     except:
