@@ -155,7 +155,7 @@ class Profile(object):
             if tags == []:
                 tags = ["-"]
 
-            record = db(ptable.problem_link == problem_link).select().first()
+            record = db(ptable.link == problem_link).select().first()
 
             if record is None:
                 print "Codeforces tag inserted", problem_link, tags
