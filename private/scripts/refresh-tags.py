@@ -54,22 +54,20 @@ def refresh_tags():
         Refresh tags in the database
     """
 
-    ptable = db.problem_tags
+    ptable = db.problem
     stable = db.submission
 
-    # Problems that are in problem_tags table
-    current_problem_list = db(ptable).select(ptable.problem_link,
-                                             ptable.problem_name)
+    # Problems that are in problem table
+    current_problem_list = db(ptable).select(ptable.link,
+                                             ptable.name)
 
     # Problems that are in submission table
     updated_problem_list = db(stable).select(stable.problem_link,
                                              stable.problem_name,
                                              distinct=True)
-    current_problem_list = map(lambda x: (x["problem_link"],
-                                          x["problem_name"]),
+    current_problem_list = map(lambda x: (x.link, x.name),
                                current_problem_list)
-    updated_problem_list = map(lambda x: (x["problem_link"],
-                                          x["problem_name"]),
+    updated_problem_list = map(lambda x: (x.problem_link, x.problem_name),
                                updated_problem_list)
 
     today = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -82,27 +80,30 @@ def refresh_tags():
     #   => The problem is from a contest and they'll be
     #      updating tags shortly(assuming 15 days)
     #   => Page was not reachable due to some reason
-    query = (ptable.problem_added_on >= before_15)
+    query = (ptable.tags_added_on >= before_15)
     query &= (ptable.tags == "['-']")
-    no_tags = db(query).select(ptable.problem_link,
-                               ptable.problem_name)
-    no_tags = map(lambda x: (x["problem_link"], x["problem_name"]),
-                  no_tags)
+    no_tags = db(query).select(ptable.link,
+                               ptable.name)
+    no_tags = map(lambda x: (x.link, x.name), no_tags)
 
     # Compute difference between the lists
     difference_list = list((set(updated_problem_list) - \
                             set(current_problem_list)).union(no_tags))
 
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
     threads = []
     workers = 49
 
     # Start retrieving tags for the problems
-    # that are not in problem_tags table
+    # that are not in problem table
     for i in xrange(0, len(difference_list), workers):
         threads = []
         # O God I am so smart !!
         for problem in difference_list[i : i + workers]:
-            threads.append(gevent.spawn(get_tag, problem[0], problem[1]))
+            threads.append(gevent.spawn(get_tag,
+                                        problem[0],
+                                        problem[1],
+                                        today))
 
         gevent.joinall(threads)
 
@@ -110,13 +111,13 @@ def refresh_tags():
     print "Total Updated: [%d]" % (total_updated)
     print "Total Not-changed: [%d]" % (not_updated)
 
-def get_tag(link, name):
+def get_tag(link, name, today):
 
     global total_inserted
     global total_updated
     global not_updated
 
-    ptable = db.problem_tags
+    ptable = db.problem
     site = urltosite(link)
 
     try:
@@ -128,17 +129,17 @@ def get_tag(link, name):
     except AttributeError:
         all_tags = ["-"]
 
-    today = datetime.datetime.now().strftime("%Y-%m-%d")
     # If record already exists only update
     # name and tags not problem_added_on
-    row = db(ptable.problem_link == link).select().first()
+    row = db(ptable.link == link).select().first()
 
     if row:
         prev_tags = row.tags
         if prev_tags != str(all_tags):
             row.update_record(tags=str(all_tags),
-                              problem_name=name,
-                              problem_added_on=today)
+                              name=name,
+                              tags_added_on=today,
+                              editorial_added_on=today)
             print "Updated", link, prev_tags, "->", all_tags
             total_updated += 1
         else:
@@ -147,14 +148,15 @@ def get_tag(link, name):
     else:
         total_inserted += 1
         print "Inserted ", link, all_tags
-        # Insert tags in problem_tags table
+        # Insert tags in problem table
         # Note: Tags are stored in a stringified list
         #       so that they can be used directly by eval
         row = [link, name, str(all_tags), today]
-        ptable.insert(problem_link=link,
+        ptable.insert(link=link,
                       tags=str(all_tags),
-                      problem_name=name,
-                      problem_added_on=today)
+                      name=name,
+                      tags_added_on=today,
+                      editorial_added_on=today)
 
 if __name__ == "__main__":
 

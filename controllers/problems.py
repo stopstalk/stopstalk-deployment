@@ -81,8 +81,7 @@ def index():
             global_submissions = True
 
     stable = db.submission
-    ptable = db.problem_tags
-    petable = db.problem_editorial
+    ptable = db.problem
 
     problem_name = request.vars["pname"]
     problem_link = request.vars["plink"]
@@ -114,7 +113,7 @@ def index():
     submissions = db(query).select(orderby=~stable.time_stamp)
 
     try:
-        query = (ptable.problem_link == problem_link)
+        query = (ptable.link == problem_link)
         all_tags = db(query).select(ptable.tags).first()
         if all_tags:
             all_tags = eval(all_tags["tags"])
@@ -157,7 +156,7 @@ def index():
                     _class="chip lime accent-3"),
                 _class="center")
 
-    row = db(petable.problem_link == problem_link).select().first()
+    row = db(ptable.link == problem_link).select().first()
     if row and row.editorial_link:
         links.append(" ")
         links.append(DIV(A(I(_class="fa fa-book"), " Editorial",
@@ -216,7 +215,7 @@ def tag():
 
     # Enables multiple space seperated tag search
     q = q.split(" ")
-    ptable = db.problem_tags
+    ptable = db.problem
 
     query = None
     for tag in q:
@@ -236,8 +235,8 @@ def tag():
     if request.extension == "json":
         return dict(total_pages=total_pages)
 
-    all_problems = db(query).select(ptable.problem_name,
-                                    ptable.problem_link,
+    all_problems = db(query).select(ptable.name,
+                                    ptable.link,
                                     ptable.tags,
                                     distinct=True,
                                     limitby=((curr_page - 1) * PER_PAGE,
@@ -248,28 +247,28 @@ def tag():
 
         tr = TR()
 
-        if problem["problem_link"] in current.solved_problems:
+        if problem.link in current.solved_problems:
             link_class = "solved-problem"
-        elif problem["problem_link"] in current.unsolved_problems:
+        elif problem.link in current.unsolved_problems:
             link_class = "unsolved-problem"
         else:
             link_class = "unattempted-problem"
 
         link_title = (" ".join(link_class.split("-"))).capitalize()
 
-        tr.append(TD(A(problem["problem_name"],
+        tr.append(TD(A(problem.name,
                        _href=URL("problems",
                                  "index",
-                                 vars={"pname": problem["problem_name"],
-                                       "plink": problem["problem_link"]}),
+                                 vars={"pname": problem.name,
+                                       "plink": problem.link}),
                        _class=link_class,
                        _title=link_title,
                        _target="_blank")))
         tr.append(TD(A(I(_class="fa fa-link"),
-                       _href=problem["problem_link"],
+                       _href=problem.link,
                        _target="_blank")))
-        tr.append(TD(utilities.urltosite(problem["problem_link"]).capitalize()))
-        all_tags = eval(problem["tags"])
+        tr.append(TD(utilities.urltosite(problem.link).capitalize()))
+        all_tags = eval(problem.tags)
         td = TD()
         for tag in all_tags:
             td.append(DIV(A(tag,

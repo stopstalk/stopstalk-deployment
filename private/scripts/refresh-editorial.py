@@ -54,26 +54,27 @@ def refresh_editorials():
         Refresh editorial links in the database
     """
 
-    petable = db.problem_editorial
+    ptable = db.problem
     stable = db.submission
 
-    # Problems that are in problem_tags table
-    current_problem_list = db(petable).select(petable.problem_link)
+    # Problems that are in problem table
+    current_problem_list = db(ptable).select(ptable.link)
 
     # Problems that are in submission table
     updated_problem_list = db(stable).select(stable.problem_link,
                                              distinct=True)
-    current_problem_list = [x.problem_link for x in current_problem_list]
+    current_problem_list = [x.link for x in current_problem_list]
     updated_problem_list = [x.problem_link for x in updated_problem_list]
 
     today = datetime.datetime.now().strftime("%Y-%m-%d")
     before_15 = (datetime.datetime.now() - \
                  datetime.timedelta(15)).strftime("%Y-%m-%d")
 
-    query = (petable.problem_added_on >= before_15) & \
-            (petable.editorial_link == None)
-    no_editorial = db(query).select(petable.problem_link)
-    no_editorial = [x.problem_link for x in no_editorial]
+    query = ((ptable.editorial_added_on == None) |
+             (ptable.editorial_added_on >= before_15)) & \
+            (ptable.editorial_link == None)
+    no_editorial = db(query).select(ptable.link)
+    no_editorial = [x.link for x in no_editorial]
 
     # Compute difference between the lists
     difference_list = list((set(updated_problem_list) - \
@@ -85,7 +86,7 @@ def refresh_editorials():
     workers = 49
 
     # Start retrieving tags for the problems
-    # that are not in problem_tags table
+    # that are not in problem table
     for i in xrange(0, len(difference_list), workers):
         threads = []
         # O God I am so smart !!
@@ -104,30 +105,34 @@ def get_editorial(link, today):
     global total_updated
     global not_updated
 
-    petable = db.problem_editorial
+    ptable = db.problem
     site = urltosite(link)
 
     Site = globals()[site]
     editorial_func = Site.Profile().get_editorial_link
     editorial_link = editorial_func(link)
 
-    row = db(petable.problem_link == link).select().first()
+    row = db(ptable.link == link).select().first()
     if row:
         if editorial_link:
             row.update_record(editorial_link=editorial_link,
-                              problem_added_on=today)
+                              editorial_added_on=today)
             print "Updated", link, "->", editorial_link
             total_updated += 1
         else:
             not_updated += 1
             print "No-change", link
     else:
+        print "****************Should not be here****************"
         total_inserted += 1
         print "Inserted", link, editorial_link
-        # Insert editorial_link in problem_editorial table
-        petable.insert(problem_link=link,
-                       editorial_link=editorial_link,
-                       problem_added_on=today)
+        # Intentional raising error to fix the issue
+        1 / 0
+        # Insert editorial_link in problem table
+        ptable.insert(link=link,
+                      editorial_link=editorial_link,
+                      editorial_added_on=today,
+                      tags_added_on=today)
 
 if __name__ == "__main__":
 
