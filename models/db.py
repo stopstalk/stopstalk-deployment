@@ -480,6 +480,14 @@ db.define_table("problem_editorial",
                 Field("editorial_link", default=None),
                 Field("problem_added_on", "date"))
 
+db.define_table("problem",
+                Field("name"),
+                Field("link"),
+                Field("tags", default="['-']"),
+                Field("editorial_link", default=None),
+                Field("tags_added_on", "date"),
+                Field("editorial_added_on", "date"))
+
 db.define_table("contact_us",
                 Field("name", requires=IS_NOT_EMPTY()),
                 Field("email", requires=[IS_NOT_EMPTY(), IS_EMAIL()]),
