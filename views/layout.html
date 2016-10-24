@@ -44,13 +44,6 @@
     (left_sidebar_enabled and 1 or 0)+(right_sidebar_enabled and 1 or 0)]
     }}
     <style>
-        footer.footer {
-          height: 65px;
-          padding-top: 20px;
-          background-color: #536dfe;
-          color: rgba(255, 255, 255, 0.8);
-        }
-
         input.form-control {
             width: 50%;
             text-align:  center;
@@ -298,17 +291,21 @@
         </div>
     </div>
     </main>
-    <footer class="footer">
-        <div class="container">
-            <div class="left"> © 2015-2016 StopStalk </div>
-            <div class="right">
-                <span><a href="/stopstalk/default/faq" style="color: white;" target="_blank">FAQs</a></span>
-                <span> | </span>
-                <span><a href="/stopstalk/default/contact_us" style="color: white;" target="_blank">Contact Us</a></span>
-                <span> | </span>
-                <span><a href="https://github.com/stopstalk/stopstalk-deployment/blob/master/LICENSE" style="color: white;" target="_blank">MIT License</a></span>
-                <span> | </span>
-                <span>Carefully crafted by: <a href="http://www.raj454raj.com" style="color: white;" target="_blank">Raj Patel</a></span>
+    <footer class="page-footer" style="background-color: #536dfe;">
+        <div class="footer-copyright">
+            <div class="container">
+                <div class="left"> © 2015-2016 StopStalk </div>
+                <div class="right">
+                    <span><a href="{{=URL('default', 'faq')}}" style="color: white;" target="_blank">FAQs</a></span>
+                    <span> | </span>
+                    <span><a href="{{=URL('default', 'contact_us')}}" style="color: white;" target="_blank">Contact Us</a></span>
+                    <span> | </span>
+                    <span><a href="https://github.com/stopstalk/stopstalk-deployment/blob/master/LICENSE" style="color: white;" target="_blank">MIT License</a></span>
+                    <span> | </span>
+                    <span><a href="https://github.com/stopstalk/stopstalk-deployment/graphs/contributors" style="color: white;" target="_blank">Contributors</a></span>
+                    <span> | </span>
+                    <span>Carefully crafted by: <a href="http://www.raj454raj.com" style="color: white;" target="_blank">Raj Patel</a></span>
+                </div>
             </div>
         </div>
     </footer>
