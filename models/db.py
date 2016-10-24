@@ -216,11 +216,7 @@ def validate_email(email):
     import requests
 
     domain = email.split("@")[-1]
-    whitelisted_domains = ["yahoo.com",
-                           "yahoo.co.in",
-                           "ymail.com",
-                           "gmail.com",
-                           "hotmail.com"]
+    whitelisted_domains = ["yahoo.co.in", "ymail.com"]
 
     def _fallback_email_validation(email):
         """
