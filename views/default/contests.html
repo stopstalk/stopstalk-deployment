@@ -39,25 +39,26 @@
                  + '+05:30';
         }
 
-        /* Set Reminder in Google Calendar */
-        function setReminder(contestName, siteName, startTime, duration, contestLink) {
+        /* Authorize Google Calendar user */
+        function handleAuthorize(callback, showDialog) {
 
             // Your Client ID can be retrieved from your project in the Google
             // Developer Console, https://console.developers.google.com
             var CLIENT_ID = '{{=current.calendar_token}}';
             var SCOPES = ['https://www.googleapis.com/auth/calendar'];
 
-            var startTimeStamp = new Date(startTime.replace(/-/g , '/'));
-            var endTimeStamp = dateToTimeStamp(addMinutes(startTimeStamp, getMinutes(duration)));
-            startTimeStamp = dateToTimeStamp(startTimeStamp);
-
             /* Check if current user has authorized this application. */
             function checkAuth() {
-                gapi.auth.authorize({
+                if(gapi && gapi.auth) {
+                    gapi.auth.authorize({
                         'client_id': CLIENT_ID,
                         'scope': SCOPES.join(' '),
                         'immediate': true
                     }, handleAuthResult);
+                } else {
+                    /* If gapi library was still loading, try again after 5 sec */
+                    window.setTimeout(checkAuth, 5000);
+                }
             }
 
             /**
@@ -70,7 +71,8 @@
                     // Hide auth UI, then load client library.
                     loadCalendarApi();
                 }
-                else {
+                /* If the failed request was not immediate */
+                else if(authResult['error'] != "immediate_failed") {
                     $.web2py.flash("Error Authorizing to Google Calendar!");
                 }
             }
@@ -84,7 +86,8 @@
                 gapi.auth.authorize({
                     client_id: CLIENT_ID,
                     scope: SCOPES,
-                    immediate: false}, handleAuthResult);
+                    immediate: false
+                }, handleAuthResult);
                 return false;
             }
 
@@ -93,8 +96,22 @@
               * once client library is loaded.
               */
             function loadCalendarApi() {
-                gapi.client.load('calendar', 'v3', addEventToCalendar);
+                gapi.client.load('calendar', 'v3', callback);
             }
+
+            if(showDialog) {
+                handleAuthClick();
+            } else {
+                checkAuth();
+            }
+        }
+
+        /* Set Reminder in Google Calendar */
+        function setReminder(contestName, siteName, startTime, duration, contestLink) {
+
+            var startTimeStamp = new Date(startTime.replace(/-/g, '/'));
+            var endTimeStamp = dateToTimeStamp(addMinutes(startTimeStamp, getMinutes(duration)));
+            startTimeStamp = dateToTimeStamp(startTimeStamp);
 
             /**
               * Print the summary and start datetime/date of the next ten events in
@@ -133,11 +150,64 @@
 
                 request.execute(function(event) {
                     $.web2py.flash("Reminder added!");
+                    checkMarkedContests();
                 });
             }
 
             /* Call Auth for Google Calendar */
-            handleAuthClick();
+            handleAuthorize(addEventToCalendar, true);
+        }
+
+        /* Check contests using link and data/time */
+        function checkMarkedContests() {
+            $('#contests-table').find('> tbody > tr')
+                    /* only ongoing contests*/
+                    .filter(function (index, element) {
+                        return this.children.length === 6 && $('.stopstalk-timestamp', this).length === 1;
+                    })
+                    /* refer to https://developers.google.com/google-apps/calendar/v3/reference/events/list
+                     * for more info about constructing listing request
+                     */
+                    .each(function () {
+
+                        var contestName = this.children[0].textContent;
+                        var siteName = this.children[1].textContent;
+                        var startTime = this.children[2].textContent;
+                        // Note this will always be duration and not endtime
+                        var duration = this.children[3].textContent;
+                        var contestLink = this.children[4].firstChild.href;
+                        var calendarButton = $('.set-reminder', this);
+                        var calendarIcon = $('.set-reminder > i', this);
+
+                        var startTimeStamp = new Date(startTime.replace(/-/g, '/'));
+                        var endTimeStamp = dateToTimeStamp(addMinutes(startTimeStamp, getMinutes(duration)));
+                        startTimeStamp = dateToTimeStamp(startTimeStamp);
+
+                        var request = gapi.client.calendar.events.list({
+                            'calendarId': 'primary',
+                            'maxResults': 20,
+                            'singleEvents': 'true',
+                            'orderBy': 'startTime',
+                            'q': contestLink,
+                            'timeMin': startTimeStamp,
+                            'timeMax': endTimeStamp
+                        });
+                        /* check contest existence */
+                        request.execute(function (resp) {
+                            var events = resp.items;
+                            calendarButton.removeClass('disabled');
+                            calendarIcon.removeClass('fa-check').addClass('fa-calendar-plus-o');
+                            calendarButton.attr('data-tooltip', 'Set Reminder to Google Calendar');
+                            $.each(events, function (index, element) {
+                                if (this.summary === 'Contest at ' + siteName && this.location === contestLink) {
+                                    calendarIcon.removeClass('fa-calendar-plus-o').addClass('fa-check');
+                                    calendarButton.addClass('disabled');
+                                    calendarButton.attr('data-tooltip', 'Already set!');
+                                    return false;
+                                }
+                            });
+                        });
+                    });
         }
 
         /* Run the decrement counter for a running contest */
@@ -189,10 +259,12 @@
 
         /* Log Contest for analytics */
         function logContest(contestName, siteName, contestLink, loggingType) {
-            var data = {"contest_name": contestName,
-                        "site_name": siteName,
-                        "contest_link": contestLink,
-                        "logging_type": loggingType};
+            var data = {
+                "contest_name": contestName,
+                "site_name": siteName,
+                "contest_link": contestLink,
+                "logging_type": loggingType
+            };
 
             $.ajax({
                 url: '{{=URL("default", "log_contest")}}',
@@ -201,7 +273,7 @@
             });
         }
 
-        $('button').click(function() {
+        $(document).on('click', '.set-reminder:not(.disabled)', function() {
             var children = this.parentElement.parentElement.children;
             var contestName = children[0].textContent;
             var siteName = children[1].textContent;
@@ -220,6 +292,9 @@
             var contestLink = children[4].firstChild.href;
             logContest(contestName, siteName, contestLink, "View");
         });
+
+        /* Call Auth for Google Calendar to refresh marked contests */
+        handleAuthorize(checkMarkedContests, false);
     });
 </script>
 <script src="https://apis.google.com/js/client.js?onload=checkAuth"></script>

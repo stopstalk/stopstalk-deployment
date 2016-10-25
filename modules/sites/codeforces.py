@@ -115,7 +115,7 @@ class Profile(object):
 
         # This was not supposed to be done here but optimization :p
         db = current.db
-        ptable = db.problem_tags
+        ptable = db.problem
         today = datetime.datetime.now().strftime("%Y-%m-%d")
 
         submissions = {handle: {1: {}}}
@@ -155,14 +155,14 @@ class Profile(object):
             if tags == []:
                 tags = ["-"]
 
-            record = db(ptable.problem_link == problem_link).select().first()
+            record = db(ptable.link == problem_link).select().first()
 
             if record is None:
                 print "Codeforces tag inserted", problem_link, tags
-                ptable.insert(problem_link=problem_link,
-                              problem_name=problem_name,
+                ptable.insert(link=problem_link,
+                              name=problem_name,
                               tags=str(tags),
-                              problem_added_on=today)
+                              tags_added_on=today)
             else:
                 if tags != ["-"] and record.tags == "['-']":
                     print "Codeforces tag updated", problem_link, tags

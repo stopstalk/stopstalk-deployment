@@ -78,15 +78,7 @@ response.menu += [(I(_class="fa fa-search fa-2x tooltipped",
                   (I(_class="fa fa-tag fa-2x tooltipped",
                      data=get_tooltip_data("Search by tags")),
                    False,
-                   URL('problems', 'tag'), []),
-                  (I(_class="fa fa-question fa-2x tooltipped",
-                     data=get_tooltip_data("FAQs")),
-                   False,
-                   URL('default', 'faq'), []),
-                  (I(_class="fa fa-phone fa-2x tooltipped",
-                     data=get_tooltip_data("Contact Us")),
-                  False,
-                  URL('default', 'contact_us'), [])]
+                   URL('problems', 'tag'), [])]
 
 if "auth" in locals(): auth.wikimenu()
 

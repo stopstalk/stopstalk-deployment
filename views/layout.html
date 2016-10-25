@@ -146,7 +146,7 @@
         {{if session["user_id"]:}}
             <li><a href="{{=URL('user', 'profile')}}">Profile</a></li>
             <li><a href="{{=URL('user', 'submissions')}}">My Submissions</a></li>
-            <li><a href="{{=URL('default', 'my_friends')}}">My Friends</a></li>
+            <li><a href="{{=URL('default', 'diwali_referral')}}">Diwali Referrals</a></li>
             <li><a href="{{=URL('user', 'update_details')}}">Update Details</a></li>
             <li><a href="{{=URL('default', 'user', args=['change_password'])}}">Change Password</a></li>
             <li><a href="{{=URL('default', 'unsubscribe')}}">Unsubscribe</a></li>
@@ -292,14 +292,22 @@
     </div>
     </main>
     <footer class="page-footer" style="background-color: #536dfe;">
-          <div class="footer-copyright">
+        <div class="footer-copyright">
             <div class="container">
-            <div class="left"> © 2015-2016 StopStalk </div>
-            <div class="right">
-               <span>Carefully crafted by: <a href="http://www.raj454raj.com" style="color: white;" target="_blank">Raj Patel</a></span>
+                <div class="left"> © 2015-2016 StopStalk </div>
+                <div class="right">
+                    <span><a href="{{=URL('default', 'faq')}}" style="color: white;" target="_blank">FAQs</a></span>
+                    <span> | </span>
+                    <span><a href="{{=URL('default', 'contact_us')}}" style="color: white;" target="_blank">Contact Us</a></span>
+                    <span> | </span>
+                    <span><a href="https://github.com/stopstalk/stopstalk-deployment/blob/master/LICENSE" style="color: white;" target="_blank">MIT License</a></span>
+                    <span> | </span>
+                    <span><a href="https://github.com/stopstalk/stopstalk-deployment/graphs/contributors" style="color: white;" target="_blank">Contributors</a></span>
+                    <span> | </span>
+                    <span>Carefully crafted by: <a href="http://www.raj454raj.com" style="color: white;" target="_blank">Raj Patel</a></span>
+                </div>
             </div>
-            </div>
-          </div>
+        </div>
     </footer>
     <div class="fixed-action-btn horizontal click-to-toggle" style="bottom: 45px; right: 24px;">
         <a class="btn-floating btn-large pink accent-3">
@@ -449,7 +457,7 @@
                     solutionText = htmlifySubmission(response);
                 }
                 else {
-                    solutionText = "// Unable to retrieve submission from " + site + "\n" + "/* Possible reasons :-\n\t * The submission is from an ongoing contest\n\t * There was some error from our side in which case\n\t   we are notified and will be rectifying it soon\n */";
+                    solutionText = "// Unable to retrieve submission from " + site + "\n" + "/* Possible reasons :-\n\t * The submission is from an ongoing contest\n\t * There was some error from our side. \n\t   Please write to us (https://www.stopstalk.com/contact_us)\n */";
                 }
 
                 $('#view-submission-pre').html(solutionText);

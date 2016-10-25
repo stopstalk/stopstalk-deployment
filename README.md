@@ -55,7 +55,7 @@ pip install -r requirements.txt
     ```
 7. Open `0firstrun.py` and change the settings.
 
-    ```
+    ```python
     current.mysql_user = "root" # Change if you have given access to any other user in mysql
     current.mysql_password = "" # As per your mysql password
     current.mysql_server = "localhost"
@@ -73,6 +73,7 @@ pip install -r requirements.txt
 
     current.analytics_id = "" # Leave it empty if you don't want Google Analytics on Localhost
     current.calendar_token = "" # Leave it empty if you don't have an access token ID for Google Calendar API
+    current.mailboxlayer_key = "" # Leave it empty for very basic email validation
     ```
 
    In case if you want to send emails - Install `postfix` for your respective OS and configure the above smtp server accordingly.
@@ -93,6 +94,17 @@ pip install -r requirements.txt
 
 10. Done. :smile:
 
+## Project Dependencies
+
+StopStalk is built on the [Web2Py Framework](http://www.web2py.com), which is a Python based MVC framework.
+The project also depends on a number of other open source packages, some of which are
+
+- [MySQL](http://www.mysql.com)
+- [Google Calender API](https://developers.google.com/google-apps/calendar/)
+- [Google Charts API](https://developers.google.com/chart/)
+- [Python Requests Library](http://docs.python-requests.org/en/master/)
+- [Beautiful Soup](https://www.crummy.com/software/BeautifulSoup/)
+
 ## Contribute
 
 1. Fork the repository
@@ -108,6 +120,16 @@ pip install -r requirements.txt
 
 ## Configuration
     Configure the models/000_config.py file as per your requirement.
+
+### Configuring Calendar API client ID
+
+1. Goto [Google developers console] (https://console.developers.google.com/) and click on New Project.
+2. Give the project a name like stopstalk-test and create the project.
+3. Goto API Manager.
+4. Search and select Google Calendar API and enable it.
+5. Click on Go To Credentials and fill out the form
+6. Copy client ID and paste it in models/0firstrun.py
+7. Done. :smile:
 
 ## Contact
   > Email: admin@stopstalk.com, contactstopstalk@gmail.com, raj454raj@gmail.com

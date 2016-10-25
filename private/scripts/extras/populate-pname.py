@@ -20,6 +20,10 @@
     THE SOFTWARE.
 """
 
+# +++++++++++++++++++++++++++++++++++++
+# DEPRECATED after adding problem table
+# +++++++++++++++++++++++++++++++++++++
+
 ptable = db.problem_tags
 stable = db.submission
 

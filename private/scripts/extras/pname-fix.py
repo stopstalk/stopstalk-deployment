@@ -20,6 +20,10 @@
     THE SOFTWARE.
 """
 
+# +++++++++++++++++++++++++++++++++++++
+# DEPRECATED after adding problem table
+# +++++++++++++++++++++++++++++++++++++
+
 import requests
 from bs4 import BeautifulSoup
 

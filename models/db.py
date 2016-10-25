@@ -215,11 +215,66 @@ def validate_email(email):
 
     import requests
 
+    domain = email.split("@")[-1]
+    whitelisted_domains = ["yahoo.co.in", "ymail.com"]
+
+    def _fallback_email_validation(email):
+        """
+            Called in the following cases
+
+            1. access_key is empty or not mentioned in 0firstrun.py
+            2. Network failure for MailboxLayer API
+            3. API Limit exceeded (or any other unexpected errors)
+        """
+        if domain in whitelisted_domains:
+            return True
+
+        try:
+            response = requests.get("http://" + domain, timeout=3)
+            return (response.status_code == 200)
+        except:
+            return False
+
     try:
-        domain = email.split("@")[-1]
-        response = requests.get("http://" + domain, timeout=5)
-        return (response.status_code == 200)
-    except:
+        access_key = current.mailboxlayer_key
+    except AttributeError:
+        access_key = ""
+
+    if access_key == "":
+        return _fallback_email_validation(email)
+
+    params = {"access_key": access_key,
+              "email": email,
+              "smtp": 1,
+              "format": 1}
+
+    response = requests.get("http://apilayer.net/api/check", params=params)
+    if response.status_code != 200:
+        # In case of Network Failures
+        send_mail(to="raj454raj@gmail.com",
+                  subject="%s %s MailboxLayer" % (str(response.status_code),
+                                                  email),
+                  message="EOM",
+                  mail_type="admin",
+                  bulk=True)
+        return _fallback_email_validation(email)
+
+    result = response.json()
+
+    if result.has_key("success"):
+        # In case of usage limit is exceeded or server failures
+        send_mail(to="raj454raj@gmail.com",
+                  subject="%s %s MailboxLayer" % (str(result["error"]["code"]),
+                                                  email),
+                  message=result["error"]["info"],
+                  mail_type="admin",
+                  bulk=True)
+        return _fallback_email_validation(email)
+
+    if result["format_valid"]:
+        return (result["mx_found"] and result["smtp_check"]) or \
+               (domain in whitelisted_domains)
+    else:
         return False
 
 # -----------------------------------------------------------------------------
@@ -475,6 +530,14 @@ db.define_table("problem_editorial",
                 Field("problem_link"),
                 Field("editorial_link", default=None),
                 Field("problem_added_on", "date"))
+
+db.define_table("problem",
+                Field("name"),
+                Field("link"),
+                Field("tags", default="['-']"),
+                Field("editorial_link", default=None),
+                Field("tags_added_on", "date"),
+                Field("editorial_added_on", "date"))
 
 db.define_table("contact_us",
                 Field("name", requires=IS_NOT_EMPTY()),

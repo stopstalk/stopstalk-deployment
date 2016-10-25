@@ -20,30 +20,29 @@
     THE SOFTWARE.
 """
 
-from gluon import *
-# Configure mysql server
-current.mysql_user = "root"
-current.mysql_password = "PASSWORD"
-current.mysql_server = "localhost"
-current.mysql_dbname = "migration"
+pttable = db.problem_tags
+petable = db.problem_editorial
 
-# Configure mail options
-current.smtp_server = "logging"
-current.sender_mail = ""
-current.sender_password = ""
+ptable = db.problem
+ptable.truncate()
 
-# Configure mail options
-current.bulk_smtp_server = "logging"
-current.bulk_sender_mail = ""
-current.bulk_sender_password = ""
+problem_tags = db(pttable).select()
+problem_editorials = db(petable).select()
 
-# Google Analytics ID
-current.analytics_id = ""
+link_to_id = {}
 
-# Client ID for Google Calendar API
-current.calendar_token = ""
+for problem in problem_tags:
+    print "Inserting " + problem.problem_name
+    row_id = ptable.insert(name=problem.problem_name,
+                           link=problem.problem_link,
+                           tags=problem.tags,
+                           tags_added_on=problem.problem_added_on)
+    link_to_id[problem.problem_link] = row_id
 
-# MailboxLayer API access key https://mailboxlayer.com/documentation
-# Make an account here to get access_key for your local env
-current.mailboxlayer_key = ""
-# =============================================================================
+db.commit()
+
+for problem in problem_editorials:
+    row = ptable(link_to_id[problem.problem_link])
+    print "Updating " + row.name
+    row.update_record(editorial_link=problem.editorial_link,
+                      editorial_added_on=problem.problem_added_on)

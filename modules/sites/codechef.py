@@ -254,7 +254,16 @@ class Profile(object):
             return
 
         soup = bs4.BeautifulSoup(response.text, "lxml")
-        trs = soup.find("div", class_="tablebox").find("tbody").find_all("tr")
+
+        # CodeChef blocks the submissions endpoint
+        # for an ongoing important contest
+        try:
+            trs = soup.find("div", class_="tablebox").find("tbody").find_all("tr")
+        except AttributeError:
+            self.retrieve_failed = True
+            self.retrieve_status = SERVER_FAILURE
+            return
+
         self.process_trs(year, page, trs)
 
     # -------------------------------------------------------------------------
@@ -312,8 +321,14 @@ class Profile(object):
                 return self.retrieve_status
 
             soup = bs4.BeautifulSoup(response.text, "lxml")
-            trs = soup.find("div",
-                            class_="tablebox").find("tbody").find_all("tr")
+
+            # CodeChef blocks the submissions endpoint
+            # for an ongoing important contest
+            try:
+                trs = soup.find("div",
+                                class_="tablebox").find("tbody").find_all("tr")
+            except AttributeError:
+                return SERVER_FAILURE
 
             year_index = "%d_%d" % (year, 0)
             self.submissions[handle][year_index] = {}

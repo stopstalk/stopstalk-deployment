@@ -106,12 +106,11 @@ def handle_error():
     else:
         subject = "%s occurred" % code
 
-    if request_url:
-        # If request_url is not None send email
-        current.send_mail(to="raj454raj@gmail.com",
-                          subject=subject,
-                          message=message,
-                          mail_type="admin")
+    current.send_mail(to="raj454raj@gmail.com",
+                      subject=subject,
+                      message=message,
+                      mail_type="admin",
+                      bulk=True)
 
     return dict(error_message=error_message, similar_handles=similar_handles)
 
@@ -270,89 +269,21 @@ def unsubscribe():
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
-def my_friends():
+def diwali_referral():
     """
-        Display the friends data
+        Diwali referral system
+        3 valid referrals => 3 stickers
     """
 
-    ftable = db.friends
+    atable = db.auth_user
+    query = (atable.referrer == session.handle) & \
+            (atable.registration_key == "") & \
+            (atable.stopstalk_handle != session.handle) & \
+            (atable.id > 1609)
 
-    rows = db(ftable.user_id == session.user_id).select(ftable.friend_id)
-    table = TABLE(THEAD(TR(TH("Friend name"),
-                           TH("Authentic user"),
-                           TH("Institute friend"),
-                           TH("Other friend"),
-                           TH("Claimable"))),
-                  _class="centered col offset-s3 s6")
+    referrals = db(query).count()
 
-    tbody = TBODY()
-    check = I(_class="fa fa-check",
-              _style="color: #0f0")
-    cross = I(_class="fa fa-close",
-              _style="color: #f00")
-
-    valid_friends = 0
-    for row in rows:
-        claimable = True
-        thisfriend = row.friend_id
-        name = thisfriend.first_name + " " + thisfriend.last_name
-        tr = TR(TD(A(name, _href=URL("user", "profile",
-                                     args=thisfriend.stopstalk_handle))))
-        claimable &= thisfriend.authentic
-        if thisfriend.authentic:
-            tr.append(check)
-        else:
-            tr.append(cross)
-
-        query = (ftable.user_id == thisfriend)
-        friends_of_friends = db(query).select(ftable.friend_id)
-        institute_friends = 0
-        for fof in friends_of_friends:
-            if fof.friend_id.institute == thisfriend.institute and \
-               fof.friend_id.institute != "Other":
-                institute_friends += 1
-        if institute_friends > 1:
-            tr.append(TD(check))
-            tr.append(TD(check))
-        else:
-            if institute_friends == 0:
-                claimable &= False
-                tr.append(cross)
-                if len(friends_of_friends) >= 2:
-                    tr.append(check)
-                else:
-                    tr.append(cross)
-            else:
-                tr.append(check)
-                if len(friends_of_friends) >= 3:
-                    claimable &= True
-                    tr.append(check)
-                else:
-                    claimable &= False
-                    tr.append(cross)
-
-
-        if claimable:
-            valid_friends += 1
-            tr.append(TD(I(_class="fa fa-thumbs-up")))
-        else:
-            tr.append(TD())
-        tbody.append(tr)
-
-    table.append(tbody)
-
-    claimable_stickers = valid_friends/3
-    stickers = [claimable_stickers/3] * 3
-    residue = claimable_stickers - (claimable_stickers/3) * 3
-    i = 0
-    while residue:
-        stickers[i] += 1
-        i += 1
-        residue -= 1
-
-    return dict(table=DIV(table, _class="row"),
-                claimable_stickers=claimable_stickers,
-                stickers=stickers)
+    return dict(referrals=referrals)
 
 # ----------------------------------------------------------------------------
 def log_contest():
@@ -404,7 +335,7 @@ def contests():
     contests = []
     cal = pdt.Calendar()
 
-    table = TABLE(_class="centered striped")
+    table = TABLE(_class="centered striped", _id="contests-table")
     thead = THEAD(TR(TH("Contest Name"),
                      TH("Site"),
                      TH("Start"),
@@ -416,7 +347,7 @@ def contests():
 
     button_class = "btn-floating btn-small accent-4 tooltipped"
     view_link_class = button_class + " green view-contest"
-    reminder_class = button_class + " orange"
+    reminder_class = button_class + " orange set-reminder"
 
     for i in ongoing:
 
@@ -1330,13 +1261,13 @@ def contact_us():
     ctable = db.contact_us
 
     if auth.is_logged_in() and request.post_vars:
-        if request.post_vars.stickers is not None:
+        if request.post_vars.referrals is not None:
             response.flash = "Fill your address!"
             user = session.auth.user
-            stickers = eval(request.post_vars["stickers"])
-            if stickers[0] == 0:
-                session.flash = "No claimable stickers"
-                redirect(URL("default", "my_friends"))
+            referrals = int(request.post_vars.referrals)
+            if referrals < 3:
+                session.flash = "Atleast 3 referrals required!"
+                redirect(URL("default", "diwali_referral"))
             ctable.email.default = user.email
             ctable.name.default = user.first_name + " " + user.last_name
             ctable.subject.default = "Please send me stickers!"
