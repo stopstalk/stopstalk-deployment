@@ -302,15 +302,27 @@ class Profile(object):
         start_year = int(current.INITIAL_DATE.split("-")[0])
         current_year = datetime.datetime.now().year
 
-        # To identify invalid handles
-        total_retrieved = 0
+        domain_url = "https://www.codechef.com/"
+
+        str_init_time = time.strptime(str(current.INITIAL_DATE),
+                                      "%Y-%m-%d %H:%M:%S")
+        # Test for invalid handles
+        if  last_retrieved == str_init_time:
+            response = get_request(domain_url + "users/" + handle)
+            if response in REQUEST_FAILURES:
+                return response
+            if len(response.history) > 0 and \
+               response.history[0].status_code == 302:
+                # If user handle is invalid CodeChef
+                # redirects to https://www.codechef.com
+                return NOT_FOUND
 
         for year in xrange(current_year, start_year - 1, -1):
             # Years processed in the reverse order to break out when
             # last_retrieved time_stamp is matched
             params = dict(PARAMS)
             params["year"] = year
-            url = "https://www.codechef.com/submissions?" + urlencode(params)
+            url = domain_url + "submissions?" + urlencode(params)
             response = get_request(url,
                                    headers={"User-Agent": user_agent})
             if response in REQUEST_FAILURES:
@@ -333,7 +345,6 @@ class Profile(object):
             year_index = "%d_%d" % (year, 0)
             self.submissions[handle][year_index] = {}
             ret = self.process_trs(year, 0, trs)
-            total_retrieved += len(self.submissions[handle][year_index][1])
 
             if ret == "DONE":
                 return self.submissions
@@ -343,12 +354,6 @@ class Profile(object):
                 last_page = pagination.contents[0].split(" of ")[1]
                 self.process_parallely(year, int(last_page))
 
-        if total_retrieved == 0:
-            # User not found
-            # Note: This will include users who haven't made any submission
-            #       at all on CodeChef
-            return NOT_FOUND
-        else:
-            return self.submissions
+        return self.submissions
 
 # =============================================================================
