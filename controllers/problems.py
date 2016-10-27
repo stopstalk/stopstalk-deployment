@@ -67,6 +67,7 @@ def index():
     """
         The main problem page
     """
+    from json import dumps
 
     if request.vars.has_key("pname") is False or \
        request.vars.has_key("plink") is False:
@@ -118,33 +119,18 @@ def index():
         if all_tags:
             all_tags = eval(all_tags["tags"])
         else:
-            all_tags = []
-        if all_tags != [] and all_tags != ['-']:
-            tags = DIV(_class="center")
-            for tag in all_tags:
-                tags.append(DIV(A(tag,
-                                  _href=URL("problems",
-                                            "tag",
-                                            vars={"q": tag, "page": 1}),
-                                  _style="color: white;",
-                                  _target="_blank"),
-                                _class="chip"))
-                tags.append(" ")
-        else:
-            tags = DIV("No tags available")
+            all_tags = ["-"]
     except AttributeError:
-        tags = DIV("No tags available")
+        all_tags = ["-"]
 
     site = utilities.urltosite(problem_link).capitalize()
-    problem_details = TABLE(_style="font-size: 140%;")
+    problem_details = DIV(_class="row")
+    details_table = TABLE(_style="font-size: 140%;", _class="col s7")
     tbody = TBODY()
     tbody.append(TR(TD(),
                     TD(STRONG("Problem Name:")),
                     TD(problem_name,
-                       _id="problem_name"),
-                    TD(_id="chart_div",
-                       _style="width: 50%; height: 30%;",
-                       _rowspan="4")))
+                       _id="problem_name")))
     tbody.append(TR(TD(),
                     TD(STRONG("Site:")),
                     TD(site)))
@@ -153,8 +139,7 @@ def index():
                       _href=problem_link,
                       _style="color: black;",
                       _target="blank"),
-                    _class="chip lime accent-3"),
-                _class="center")
+                    _class="chip lime accent-3"))
 
     row = db(ptable.link == problem_link).select().first()
     if row and row.editorial_link:
@@ -169,8 +154,14 @@ def index():
                     links))
     tbody.append(TR(TD(),
                     TD(STRONG("Tags:")),
-                    TD(tags)))
-    problem_details.append(tbody)
+                    TD(DIV(A(I(_class="fa fa-tag"), " Show Tags",
+                             _id="show-tags",
+                             _class="chip orange darken-1",
+                             data={"tags": dumps(all_tags)}),
+                           _id="tags-div"))))
+    details_table.append(tbody)
+    problem_details.append(details_table)
+    problem_details.append(DIV(_class="col s5", _id="chart_div"))
 
     table = utilities.render_table(submissions, cusfriends)
     switch = DIV(LABEL(H6("Friends' Submissions",
