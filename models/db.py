@@ -540,7 +540,17 @@ db.define_table("problem",
                 Field("tags", default="['-']"),
                 Field("editorial_link", default=None),
                 Field("tags_added_on", "date"),
-                Field("editorial_added_on", "date"))
+                Field("editorial_added_on", "date"),
+                format="%(name)s %(id)s")
+
+db.define_table("tag",
+                Field("value"),
+                format="%(value)s")
+
+db.define_table("suggested_tags",
+                Field("user_id", "reference auth_user"),
+                Field("problem_id", "reference problem"),
+                Field("tag_id", "reference tag"))
 
 db.define_table("contact_us",
                 Field("name", requires=IS_NOT_EMPTY()),

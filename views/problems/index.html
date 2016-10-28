@@ -1,13 +1,50 @@
 {{extend 'layout.html'}}
 <head>
     <title>{{=(site + " | " + problem_name)}}</title>
+    <link rel="stylesheet" href="{{=URL('static','css/materialize-tags.css')}}"/>
+
     <!--Load the AJAX API-->
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript" src="{{=URL('static', 'js/materialize-tags.js')}}"></script>
+    <script type="text/javascript" src="{{=URL('static', 'js/corejs-typeahead.bundle.js')}}"></script>
+    <script type="text/javascript" src="{{=URL('static', 'js/bloodhound.js')}}"></script>
     <script type="text/javascript">
+      var refreshSuggestedTags = function() {
+          $.ajax({
+              method: 'GET',
+              url: '{{=URL("problems", "get_suggested_tags.json")}}',
+              data: {plink: '{{=problem_link}}'}
+          }).done(function(response) {
+              var userTags = response["user_tags"],
+                  tagCounts = response["tag_counts"],
+                  $inputElement = $('#tag-suggests'),
+                  $table = $('<table>', {'class': 'centered striped'}),
+                  $sampletr = $('<tr><td><div class="chip problem-tag"></div><div class=""></div></td></tr>');
+
+              $inputElement.materialtags('removeAll');
+
+              $.each(userTags, function(index, tag) {
+                  $inputElement.materialtags('add', tag);
+              });
+
+              $.each(tagCounts, function(index, row) {
+                  $table.append('<tr><td><div class="chip">' + row[0]['text'] + '</div></td><td>' + row[1] + '</td></tr>')
+              });
+              if (tagCounts.length != 0) {
+                  $('#tags-till-now').html($table);
+              }
+              else {
+                  $('#tags-till-now').html('You are the first to suggest');
+              }
+          });
+      }
+
       $(document).ready(function() {
+
+          $('.tooltipped').tooltip({delay: 50});
           var global_submissions = '{{=global_submissions}}';
           if (global_submissions === 'True') {
-            $('#submission-switch')[0].checked = true;
+              $('#submission-switch')[0].checked = true;
           }
           $('#submission-switch').click(function() {
               var global = this.checked;
@@ -22,9 +59,9 @@
 
           $('#show-tags').click(function() {
               var problemTags = $(this).data('tags');
-              var $tagsDiv = $('<div>');
+              var $tagsSpan = $('<span>');
               if (problemTags.length === 1 && problemTags[0] === '-') {
-                  $tagsDiv.append('No Tags Available');
+                  $tagsSpan.append('No Tags Available');
               }
               else {
                   var $sampleTag = $('<div>', {'class': 'chip'}),
@@ -36,12 +73,35 @@
                       $thisAnchor = $($thisTag.children()[0]);
                       $thisAnchor.html(tag);
                       $thisAnchor.attr('href', '{{=URL("problems", "tag")}}' + '?page=1&q=' + encodeURIComponent(tag));
-                      $tagsDiv.append($thisTag);
-                      $tagsDiv.append(" ");
+                      $tagsSpan.append($thisTag);
+                      $tagsSpan.append(" ");
                   });
               }
-              $('#tags-div').html($tagsDiv);
+              $('#tags-span').html($tagsSpan);
           });
+
+          var isLoggedIn = "{{=auth.is_logged_in()}}";
+
+          if (isLoggedIn == "True") {
+              $('#suggest-trigger').leanModal();
+
+              $('#submit-tags').click(function() {
+                  var submittedTags = $('#tag-suggests').val();
+                  $('#suggest-tags-modal').closeModal();
+                  $.ajax({
+                      method: 'POST',
+                      url: '{{=URL("problems", "add_suggested_tags")}}',
+                      data: {pname: '{{=problem_name}}',
+                             plink: '{{=problem_link}}',
+                             tags: submittedTags}
+                  }).done(function(response) {
+                      $.web2py.flash(response);
+                      refreshSuggestedTags();
+                  });
+              });
+              refreshSuggestedTags();
+          }
+
       });
       // Load the Visualization API and the piechart package.
       google.load('visualization', '1.0', {'packages':['corechart']});
@@ -127,8 +187,64 @@
         }
     </script>
 </head>
+
 <div class="row">
     <h3>{{=problem_name}}</h3>
     {{=problem_details}}
+    <div id="suggest-tags-modal" class="modal">
+        <div class="modal-content">
+            <h4>Suggest tags</h4>
+            <div class="row center">
+                <div class="col s8 offset-s2">
+                    <input id="tag-suggests" class="center" type="text" placeholder="Add tags..." data-role="materialtags"/>
+                    <a class="btn waves-effect waves-light" id="submit-tags">Submit</a><br />
+                    <div>
+                        <h5>Tags till now:</h5>
+                        <div id="tags-till-now"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<script>
+    var tags = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('text'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        prefetch: {
+            url: '/static/temp.json',
+            transform: function(response) {
+                return response['tags'];
+            }
+        }
+    });
+
+    tags.initialize();
+
+    function searchWithDefaults(q, sync) {
+        if (q === '') {
+            sync(tags.index.all());
+        } else {
+            tags.search(q, sync);
+        }
+    }
+
+    $('#tag-suggests').materialtags({
+        itemValue: 'value',
+        itemText: 'text',
+        typeaheadjs: [{
+            highlight: true,
+            minLength: 0
+        },
+        {
+            displayKey: 'text',
+            source: searchWithDefaults,
+            limit: 5
+        }],
+        freeInput: false
+    });
+    $('#tag-suggests').on('itemRemoved', function(event) {
+        $(this).materialtags('focus');
+    });
+</script>
 </div>
 {{=div}}

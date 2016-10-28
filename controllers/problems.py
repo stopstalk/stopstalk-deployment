@@ -63,6 +63,103 @@ def pie_chart_helper():
     return dict(row=row)
 
 # ----------------------------------------------------------------------------
+@auth.requires_login()
+def get_tag_values():
+    ttable = db.tag
+    all_tags = db(ttable).select()
+    tags = []
+    for tag in all_tags:
+        tags.append({"value": tag.id, "text": tag.value})
+    return dict(tags=tags)
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
+def add_suggested_tags():
+
+    sttable = db.suggested_tags
+    ptable = db.problem
+    ttable = db.tag
+
+    plink = request.vars["plink"]
+    pname = request.vars["pname"]
+    tags = request.vars["tags"]
+
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
+    problem = db(ptable.link == plink).select().first()
+    if problem:
+        problem_id = problem.id
+    else:
+        return "Problem not found"
+
+    # Delete previously added tags for the same problem by the user
+    delete_query = (sttable.problem_id == problem_id) & \
+                   (sttable.user_id == session.user_id)
+    db(delete_query).delete()
+
+    possible_tag_ids = db(ttable).select(ttable.id)
+    possible_tag_ids = set([x.id for x in possible_tag_ids])
+
+    if tags == "":
+        return "Tags updated successfully!"
+
+    tag_ids = [int(x) for x in tags.split(",")]
+    for tag_id in tag_ids:
+        if tag_id in possible_tag_ids:
+            sttable.insert(user_id=session.user_id,
+                           problem_id=problem_id,
+                           tag_id=tag_id)
+
+    return "Tags added successfully!"
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
+def get_suggested_tags():
+
+    empty_response = dict(user_tags=[], tag_counts=[])
+    if request.extension != "json":
+        return empty_response
+
+    ptable = db.problem
+    sttable = db.suggested_tags
+    ttable = db.tag
+
+    rows = db(ttable).select()
+    all_tags = {}
+    for row in rows:
+        all_tags[row.id] = row.value
+
+    plink = request.vars["plink"]
+    problem = db(ptable.link == plink).select().first()
+    if problem:
+        problem_id = problem.id
+    else:
+        return empty_response
+    tags_by_user = []
+    query = (sttable.problem_id == problem_id) & \
+            (sttable.user_id == session.user_id)
+    rows = db(query).select(sttable.tag_id)
+
+    def _represent_tag(tag_id):
+        return {"value": tag_id, "text": all_tags[tag_id]}
+    user_tags = []
+    for row in rows:
+        user_tags.append(_represent_tag(row.tag_id))
+
+    cnt = sttable.id.count()
+    query = (sttable.problem_id == problem_id)
+    tags = db(query).select(sttable.tag_id,
+                            cnt,
+                            groupby=sttable.tag_id,
+                            orderby=~cnt)
+    tag_counts = []
+    for row in tags:
+        tag_counts.append([_represent_tag(row.suggested_tags.tag_id),
+                           row["_extra"]["COUNT(suggested_tags.id)"]])
+
+    return dict(user_tags=user_tags,
+                tag_counts=tag_counts)
+
+# ----------------------------------------------------------------------------
 def index():
     """
         The main problem page
@@ -152,13 +249,32 @@ def index():
     tbody.append(TR(TD(),
                     TD(STRONG("Links:")),
                     links))
+
+    suggest_tags_class = "disabled btn chip tooltipped"
+    suggest_tags_data = {"position": "right",
+                         "delay": "50",
+                         "tooltip": "Login to suggest tags"}
+    suggest_tags_id = "disabled-suggest-tags"
+    if auth.is_logged_in():
+        suggest_tags_class = "green chip waves-light waves-effect tooltipped"
+        suggest_tags_data["target"] = "suggest-tags-modal"
+        suggest_tags_data["tooltip"] = "Suggest tags"
+        suggest_tags_id = "suggest-trigger"
+
     tbody.append(TR(TD(),
                     TD(STRONG("Tags:")),
-                    TD(DIV(A(I(_class="fa fa-tag"), " Show Tags",
-                             _id="show-tags",
-                             _class="chip orange darken-1",
-                             data={"tags": dumps(all_tags)}),
-                           _id="tags-div"))))
+                    TD(DIV(SPAN(A(I(_class="fa fa-tag"), " Show Tags",
+                                 _id="show-tags",
+                                 _class="chip orange darken-1",
+                                 data={"tags": dumps(all_tags)}),
+                                _id="tags-span"),
+                           " ",
+                           A(I(_class="fa fa-plus"),
+                             _style="color: white",
+                             _class=suggest_tags_class,
+                             _id=suggest_tags_id,
+                             data=suggest_tags_data)))))
+
     details_table.append(tbody)
     problem_details.append(details_table)
     problem_details.append(DIV(_class="col s5", _id="chart_div"))

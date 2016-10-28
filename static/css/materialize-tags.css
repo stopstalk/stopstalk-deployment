@@ -1,0 +1,140 @@
+.materialize-tags {
+    background: transparent;
+    border-bottom: 1px solid #999;
+    display: inline-block;
+    padding: 0 6px;
+    margin-bottom: 10px;
+    color: #444;
+    vertical-align: middle;
+    width: 100%;
+    max-width: 100%;
+    line-height: 22px;
+    cursor: text;
+    -webkit-transition: all .3s;
+    -moz-transition: all .3s;
+    -ms-transition: all .3s;
+    -o-transition: all .3s;
+    transition: all .3s;
+}
+
+.material-tags-close {
+    cursor: pointer;
+}
+@media screen and (max-width: 600px) {
+    .materialize-tags {
+        margin-top: 8px;
+    }
+}
+
+.materialize-tags.active {
+    border-bottom-color: #536dfe;
+    -webkit-box-shadow: 0 1px 0 0 #26a69a;
+    -moz-box-shadow: 0 1px 0 0 #26a69a;
+    box-shadow: 0 1px 0 0 #26a69a;
+    outline: none;
+}
+
+.materialize-tags input {
+    border: none;
+    box-shadow: none;
+    outline: none;
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+    width: auto !important;
+    max-width: inherit;
+}
+
+.materialize-tags input::-moz-placeholder {
+    color: #777;
+    opacity: 1;
+}
+
+.materialize-tags input:-ms-input-placeholder {
+    color: #777;
+}
+
+.materialize-tags input::-webkit-input-placeholder {
+    color: #777;
+}
+
+
+.materialize-tags .tt-input:read-only {
+    color: rgba(0,0,0,0.26)!important;
+    border-bottom: 1px dotted rgba(0,0,0,0.26)!important;
+    box-shadow: none;
+}
+
+.materialize-tags input:focus {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.materialize-tags .tt-hint {
+    position: relative !important;
+}
+
+.materialize-tags .tt-input {
+    position: absolute !important;
+    left: 0;
+    width: 100% !important;
+    border-bottom: 1px solid #BCBCBC;
+    box-shadow: 0 1px 0 0 #BCBCBC;
+}
+
+.materialize-tags .tt-menu {
+    min-width: 200px;
+    max-width: 100%;
+    padding: 2px 0;
+    background: #ffffff;
+    -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+    -moz-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+}
+
+.materialize-tags .tt-menu .tt-suggestion {
+    line-height: 1rem !important;
+    padding: 5px 10px !important;
+    cursor: pointer;
+}
+
+.materialize-tags .tt-menu .tt-cursor {
+    background: #4078c0;
+    color: #fff;
+    font-weight:inherit;;
+}
+
+.materialize-tags .tt-menu .tt-cursor .tt-highlight{
+    color: #fff;
+    font-weight:inherit;
+}
+
+.tt-highlight{
+    color: #000;
+    font-weight: 800;
+    margin-top: -1px;
+}
+
+.input-field .prefix ~ .materialize-tags {
+    margin-left: 3rem;
+    width: calc(100% - 3rem);
+}
+
+.materialize-tags-max span input[type="text"]{
+    pointer-events: none;
+    outline: none;
+    border: none;
+    box-shadow: 0;
+}
+
+.materialize-tags-max span input[type="text"]:focus{
+    outline: none;
+    border: none;
+    box-shadow: 0;
+}
+
+.materialize-tags-max {
+    border: none !important;
+    box-shadow: 0 1px 0 0 #d5d5d5 !important;
+    outline: none !important;
+}
