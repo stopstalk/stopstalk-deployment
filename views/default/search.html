@@ -20,7 +20,7 @@
                         method: 'POST',
                         url: '{{=URL("default", "mark_friend")}}' + '/' + userID
                     }).done(function(response) {
-                        Materialize.toast(response, 4000);
+                        $.web2py.flash(response, 4000);
                     });
                 }
                 else {
@@ -35,7 +35,7 @@
                         var child = $(thisButton.children()[0]);
                         child.removeClass('fa-user-times');
                         child.addClass('fa-user-plus');
-                        Materialize.toast(response, 4000);
+                        $.web2py.flash(response, 4000);
                     });
                 }
             }

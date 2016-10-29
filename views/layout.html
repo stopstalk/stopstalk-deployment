@@ -486,12 +486,12 @@
                             onModalClose();
                         }
                         else {
-                            Materialize.toast("Please enter a file name", 4000);
+                            $.web2py.flash("Please enter a file name", 4000);
                         }
                     });
                 }
                 else {
-                    Materialize.toast("Unable to Download", 4000);
+                    $.web2py.flash("Unable to Download", 4000);
                 }
             });
 
@@ -533,12 +533,12 @@
                             onModalClose();
                         }
                         else {
-                            Materialize.toast("Please enter a file name", 4000);
+                            $.web2py.flash("Please enter a file name", 4000);
                         }
                     });
                 }
                 else {
-                    Materialize.toast("Unable to Download", 4000);
+                    $.web2py.flash("Unable to Download", 4000);
                 }
             });
         });
