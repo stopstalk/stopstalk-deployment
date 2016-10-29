@@ -141,7 +141,10 @@ def update_details():
                    fields=form_fields,
                    showid=False)
 
-    if form.process().accepted:
+    form.vars.email = record.email
+    form.vars.stopstalk_handle = record.stopstalk_handle
+
+    if form.process(onvalidation=current.sanitize_fields).accepted:
         session.flash = "User details updated"
 
         updated_sites = utilities.handles_updated(record, form)
@@ -210,7 +213,10 @@ def update_friend():
                    fields=form_fields,
                    deletable=True,
                    showid=False)
-    if form.validate():
+
+    form.vars.stopstalk_handle = record.stopstalk_handle
+
+    if form.validate(onvalidation=current.sanitize_fields):
         if form.deleted:
             ## DELETE
             # If delete checkbox is checked => just process it redirect back

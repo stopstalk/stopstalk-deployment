@@ -296,14 +296,15 @@ def sanitize_fields(form):
 
     from re import match
 
-    # 8.
-    stopstalk_handle_error = "Expected alphanumeric (Underscore allowed)"
-    try:
-        group = match("[0-9a-zA-Z_]*", form.vars.stopstalk_handle).group()
-        if group != form.vars.stopstalk_handle:
+    if form.vars.stopstalk_handle:
+        # 8.
+        stopstalk_handle_error = "Expected alphanumeric (Underscore allowed)"
+        try:
+            group = match("[0-9a-zA-Z_]*", form.vars.stopstalk_handle).group()
+            if group != form.vars.stopstalk_handle:
+                form.errors.stopstalk_handle = stopstalk_handle_error
+        except AttributeError:
             form.errors.stopstalk_handle = stopstalk_handle_error
-    except AttributeError:
-        form.errors.stopstalk_handle = stopstalk_handle_error
 
     def _remove_at_symbol(site_name):
         if site_name in current.SITES:
@@ -323,10 +324,11 @@ def sanitize_fields(form):
     # 1. and 6.
     for field in handle_fields:
         field_handle = field + "_handle"
-        if form.vars[field_handle].__contains__(" "):
-            form.errors[field_handle] = "White spaces not allowed"
-        if IS_EMAIL(error_message="check")(form.vars[field_handle])[1] != "check":
-            form.errors[field_handle] = "Email address instead of handle"
+        if form.vars[field_handle]:
+            if form.vars[field_handle].__contains__(" "):
+                form.errors[field_handle] = "White spaces not allowed"
+            if IS_EMAIL(error_message="check")(form.vars[field_handle])[1] != "check":
+                form.errors[field_handle] = "Email address instead of handle"
 
     # 2.
     _remove_at_symbol("HackerEarth")
@@ -340,7 +342,8 @@ def sanitize_fields(form):
     # 3.
     for site in handle_fields:
         site_handle = site + "_handle"
-        if form.vars[site_handle] != form.vars[site_handle].lower():
+        if form.vars[site_handle] and \
+           form.vars[site_handle] != form.vars[site_handle].lower():
             form.errors[site_handle] = "Please enter in lower case"
 
     # 4.
