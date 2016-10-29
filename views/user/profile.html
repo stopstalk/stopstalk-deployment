@@ -214,6 +214,7 @@
                             method: 'POST',
                         }).done(function(response) {
                             $("#activity").html(response["table"]);
+                            $(".tooltipped").tooltip({});
                             goToByScroll("activity");
                         });
                     }
