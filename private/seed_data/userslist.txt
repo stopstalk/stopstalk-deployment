@@ -1,0 +1,9 @@
+``` Importing the dump.sql file will initialise the datbase with these user accounts. ```
+
+1. martin@loop.com
+2. mary@gmail.com
+3. donald@gmail.com
+4. james@yahoo.com
+5. tyler@gmail.com
+
+Password for all these accounts : abcd1234
