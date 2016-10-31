@@ -210,7 +210,7 @@
         datumTokenizer: Bloodhound.tokenizers.obj.whitespace('text'),
         queryTokenizer: Bloodhound.tokenizers.whitespace,
         prefetch: {
-            url: '/static/temp.json',
+            url: '{{=URL("problems", "get_tag_values.json")}}',
             transform: function(response) {
                 return response['tags'];
             }
