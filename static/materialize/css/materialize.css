@@ -6191,6 +6191,13 @@ a.waves-effect .waves-ripple {
     height: 32px;
     width: 32px;
     border-radius: 50%; }
+  .chip span {
+    float: left;
+    margin: 0 8px 0 -12px;
+    height: 32px;
+    width: 32px;
+    border-radius: 50%; }
+
   .chip i.material-icons {
     cursor: pointer;
     float: right;
