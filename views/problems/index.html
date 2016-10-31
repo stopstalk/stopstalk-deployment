@@ -18,8 +18,7 @@
               var userTags = response["user_tags"],
                   tagCounts = response["tag_counts"],
                   $inputElement = $('#tag-suggests'),
-                  $table = $('<table>', {'class': 'centered striped'}),
-                  $sampletr = $('<tr><td><div class="chip problem-tag"></div><div class=""></div></td></tr>');
+                  $table = $('<table>', {'class': 'centered striped'});
 
               $inputElement.materialtags('removeAll');
 
@@ -28,7 +27,7 @@
               });
 
               $.each(tagCounts, function(index, row) {
-                  $table.append('<tr><td><div class="chip">' + row[0]['text'] + '</div></td><td>' + row[1] + '</td></tr>')
+                  $table.append('<tr><td>' + row[0]['text'] + '</td><td>' + row[1] + '</td></tr>')
               });
               if (tagCounts.length != 0) {
                   $('#tags-till-now').html($table);
@@ -231,6 +230,14 @@
     $('#tag-suggests').materialtags({
         itemValue: 'value',
         itemText: 'text',
+        onTagExists: function(item, $tag) {
+            // @ToDo: $tag here does not give the tag for some reason.
+            var $origTag = $('#tag-' + item.value);
+            $origTag.css({'background-color': 'white', 'color': 'black'});
+            setTimeout(function() {
+                $origTag.css({'background-color': 'black', 'color': 'white'});
+            }, 150);
+        },
         typeaheadjs: [{
             highlight: true,
             minLength: 0

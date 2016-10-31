@@ -217,7 +217,7 @@
             self.itemsArray.push(item);
 
             // add a tag element
-            var $tag = $('<span class="' + htmlEncode(tagClass) + (itemTitle !== null ? ('" title="' + itemTitle) : '') + '">' + htmlEncode(itemText) + ' <i class="fa fa-close material-tags-close" data-role="remove"></i></span>');
+            var $tag = $('<span id="tag-' + itemValue + '" class="' + htmlEncode(tagClass) + (itemTitle !== null ? ('" title="' + itemTitle) : '') + '">' + htmlEncode(itemText) + ' <i class="fa fa-close material-tags-close" data-role="remove"></i></span>');
             $tag.data('item', item);
             self.findInputWrapper().before($tag);
             $tag.after(' ');
