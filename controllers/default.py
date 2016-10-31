@@ -268,24 +268,6 @@ def unsubscribe():
     return dict(form=form)
 
 # ----------------------------------------------------------------------------
-@auth.requires_login()
-def diwali_referral():
-    """
-        Diwali referral system
-        3 valid referrals => 3 stickers
-    """
-
-    atable = db.auth_user
-    query = (atable.referrer == session.handle) & \
-            (atable.registration_key == "") & \
-            (atable.stopstalk_handle != session.handle) & \
-            (atable.id > 1609)
-
-    referrals = db(query).count()
-
-    return dict(referrals=referrals)
-
-# ----------------------------------------------------------------------------
 def log_contest():
     """
         Logging contests into DB
@@ -1259,19 +1241,6 @@ def contact_us():
     """
 
     ctable = db.contact_us
-
-    if auth.is_logged_in() and request.post_vars:
-        if request.post_vars.referrals is not None:
-            response.flash = "Fill your address!"
-            user = session.auth.user
-            referrals = int(request.post_vars.referrals)
-            if referrals < 3:
-                session.flash = "Atleast 3 referrals required!"
-                redirect(URL("default", "diwali_referral"))
-            ctable.email.default = user.email
-            ctable.name.default = user.first_name + " " + user.last_name
-            ctable.subject.default = "Please send me stickers!"
-            ctable.text_message.default = "My address is: "
 
     form = SQLFORM(ctable)
 
