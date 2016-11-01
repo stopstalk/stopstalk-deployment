@@ -206,7 +206,7 @@ def new_users():
             query |= (table[site.lower() + "_lr"] == current.INITIAL_DATE)
         return query
 
-    max_limit = 3
+    max_limit = 5
     query = _get_initial_query(atable) & \
             (atable.blacklisted == False) & \
             (atable.registration_key == "") # Unverified email
@@ -226,13 +226,14 @@ def daily_retrieve():
         @return (Tuple): (list of user_ids, list of custom_user_ids)
     """
 
-    N = int(sys.argv[2])
-    query = (atable.id % 10 == N) & \
+    M = int(sys.argv[2])
+    N = int(sys.argv[3])
+    query = (atable.id % M == N) & \
             (atable.blacklisted == False) & \
             (atable.registration_key == "") # Unverified email
     registered_users = db(query).select()
 
-    query = (cftable.id % 10 == N) & (cftable.duplicate_cu == None)
+    query = (cftable.id % M == N) & (cftable.duplicate_cu == None)
     custom_users = db(query).select()
 
     return (registered_users, custom_users)
