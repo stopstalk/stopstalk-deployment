@@ -248,6 +248,8 @@ def unsubscribe():
     utable = db.unsubscriber
     utable.email.default = session.auth.user.email
     utable.email.writable = False
+    utable.time_stamp.readable = False
+    utable.time_stamp.writable = False
 
     form = SQLFORM(utable,
                    submit_button="Update Subscription")
@@ -259,6 +261,7 @@ def unsubscribe():
                        showid=False,
                        submit_button="Update Subscription")
 
+    form.vars.time_stamp = datetime.datetime.now()
     if form.process().accepted:
         response.flash = "Subscription details updated"
         redirect(URL("default", "unsubscribe"))

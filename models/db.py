@@ -594,7 +594,8 @@ db.define_table("unsubscriber",
                 Field("institute_user",
                       "boolean",
                       default=True,
-                      label="Notify when a user from your Institute registers"))
+                      label="Notify when a user from your Institute registers"),
+                Field("time_stamp", "datetime"))
 
 site_fields = []
 for site in current.SITES:

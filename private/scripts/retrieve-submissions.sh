@@ -13,7 +13,9 @@ python_path=`which python`
 
 for i in $(seq 0 $[$total_iterations - 1])
 do
-    `$python_path $web2py_file -S stopstalk -M -R $script_file -A daily_retrieve $total_iterations $i`
+    cmd="$python_path $web2py_file -S stopstalk -M -R $script_file -A daily_retrieve $total_iterations $i"
+    echo $cmd
+    eval $cmd
 
     if [ $i != $[$total_iterations - 1] ]
     then
