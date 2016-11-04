@@ -557,10 +557,10 @@ def leaderboard():
         rank += 1
 
     table.append(tbody)
-    switch = DIV(LABEL(H6("Friends' Submissions",
+    switch = DIV(LABEL(H6("Friends",
                           INPUT(_type="checkbox", _id="submission-switch"),
                           SPAN(_class="lever pink accent-3"),
-                          "Global Submissions")),
+                          "Global")),
                  _class="switch")
     div = TAG[""](switch, table)
     return dict(div=div,
