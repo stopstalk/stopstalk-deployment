@@ -1174,6 +1174,7 @@ def submissions():
     ftable = db.friends
     stable = db.submission
     atable = db.auth_user
+    ptable = db.problem
 
     # Get all the friends/custom friends of the logged-in user
     friends, cusfriends = utilities.get_friends(session.user_id)
@@ -1196,8 +1197,26 @@ def submissions():
         count += 1
 
     if request.extension == "json":
+        from random import sample
+        solved_problem_links = sample(current.solved_problems, 10)
+        query = (ptable.link.belongs(solved_problem_links))
+        rows = db(query).select(ptable.link,
+                                ptable.name,
+                                limitby=(0, 3))
+        solved_problems = DIV(" | ")
+        for row in rows:
+            solved_problems.append(A(row.name,
+                                     _href=URL("problems", "index",
+                                               vars={"plink": row.link,
+                                                     "pname": row.name,
+                                                     "open_modal": True},
+                                               extension=False),
+                                     _target="_blank"))
+            solved_problems.append(" | ")
+
         return dict(count=count,
-                    total_rows=1)
+                    total_rows=1,
+                    solved_problems=solved_problems)
 
     user = session.auth.user
     db.sessions_today.insert(message="%s %s %d %s" % (user.first_name,
@@ -1211,6 +1230,7 @@ def submissions():
                             limitby=(offset, offset + PER_PAGE))
 
     table = utilities.render_table(rows, cusfriends)
+
     return dict(table=table,
                 friends=friends,
                 cusfriends=cusfriends,

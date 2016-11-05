@@ -84,8 +84,10 @@
           });
 
           var isLoggedIn = "{{=auth.is_logged_in()}}";
-
           if (isLoggedIn == "True") {
+              if ('{{=request.vars.open_modal}}' == 'True')
+                  $('#suggest-tags-modal').openModal();
+
               $('#suggest-trigger').leanModal();
 
               $('#submit-tags').click(function() {

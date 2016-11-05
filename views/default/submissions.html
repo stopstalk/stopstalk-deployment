@@ -3,7 +3,8 @@
 {{if total_rows:}}
 <script src="{{=URL('static', 'js/jquery.bootpag.min.js')}}"></script>
 <h1>Recent submissions</h1>
-<h6>You can now suggest tags for a problem :) Try adding now by going to any problem page!</h6>
+<h6>You can now suggest tags for a problem :)</h6>
+<h6>Some of your solved problems: <span id="solved-problems"></span></h6>
 <div id="page-selection" class="center"></div>
 <div id="content"></div>
     <script>
@@ -29,6 +30,8 @@
                 } else {
                     currPage = "1";
                 }
+
+                $('#solved-problems').html(page['solved_problems']);
                 $('#page-selection').bootpag({
                     total: pageCount,
                     page: parseInt(currPage),
@@ -37,6 +40,7 @@
                     window.location.href = '{{=URL("default", "submissions")}}' + "/" + num.toString();
                 });
             });
+
         });
     </script>
 {{=table}}
