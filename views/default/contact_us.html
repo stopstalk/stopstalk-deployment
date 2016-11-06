@@ -1,7 +1,9 @@
 {{extend 'layout.html'}}
-<head><title>Contact Us</title></head>
+<head>
+    <title>Contact Us</title>
+</head>
 <h3>Contact Us</h3>
 {{if request.post_vars.stickers:}}
-<h5 style="color: red;">Important: Make sure that the address and phone number you enter are valid so that we can dispatch the stickers to the exact location.</h5>
+    <h5 style="color: red;">Important: Make sure that the address and phone number you enter are valid so that we can dispatch the stickers to the exact location.</h5>
 {{pass}}
 {{=form}}
