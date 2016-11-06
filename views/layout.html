@@ -48,15 +48,19 @@
             width: 50%;
             text-align:  center;
         }
+
         .pagination li.active{
             background-color: #259b24;
         }
+
         #welcome {
             min-width: 180px;
         }
+
         #welcome > li > a {
             color: #536dfe;
         }
+
         body {
             -webkit-touch-callout: none;
             -webkit-user-select: none;
@@ -66,29 +70,34 @@
             user-select: none;
             cursor: default;
         }
+
         .Site {
             display: flex;
             min-height: 100vh;
             flex-direction: column;
         }
+
         .Site-content {
             flex: 1;
         }
+
         iframe {
             visibility: block;
         }
+
         div.error {
             color: red;
         }
+
         .solved-problem {
             color: green;
             font-weight: bolder;
         }
+
         .unsolved-problem {
             color: #D9071D;
             font-weight: bolder;
         }
-
 
         .prettyprint {
             -webkit-touch-callout: text;
@@ -345,204 +354,7 @@
         </script>
     {{pass}}
     <script src="{{=URL('static', 'js/main.js')}}"></script> <!-- Resource jQuery -->
-
-    <script type="text/javascript">
-    /* Handle the case of single digit in a time stamp */
-    var formatTimeStamp = function(num) {
-        var strnum = num.toString();
-        return strnum.length == 1 ? '0' + strnum : strnum;
-    }
-
-    var transformTimestamps = function() {
-        var clientOffset = new Date().getTimezoneOffset() * 60 * 1000;
-        var ISTOffset = -330 * 60 * 1000;
-        var convertedTimestamp, ISTTimestamp, d;
-        $('.stopstalk-timestamp').each(function(i, td) {
-            ISTTimestamp = new Date(td.textContent.replace(/-/g , '/')).getTime();
-            d = new Date(ISTTimestamp + ISTOffset - clientOffset);
-            convertedTimestamp = [d.getFullYear(),
-                                  d.getMonth() + 1,
-                                  d.getDate()]
-                                  .map(formatTimeStamp)
-                                  .join('-') +
-                                 " " +
-                                 [d.getHours(),
-                                  d.getMinutes(),
-                                  d.getSeconds()]
-                                  .map(formatTimeStamp)
-                                  .join(':');
-            $(this).html(convertedTimestamp);
-        });
-    };
-
-    $(document).ready(function() {
-        var downloadSubmission = function(fileName, text) {
-            var element = document.createElement('a');
-            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-            element.setAttribute('download', fileName);
-            element.style.display = 'none';
-            document.body.appendChild(element);
-            element.click();
-            document.body.removeChild(element);
-        }
-
-        transformTimestamps();
-
-        $('.collapsible').collapsible({
-            accordion : false // A setting that changes the collapsible behavior to expandable instead of the default accordion style
-        });
-
-        $('select').material_select();
-        $('.tooltipped').tooltip({delay: 50});
-        // Remove focus from any focused element
-        if (document.activeElement) {
-            document.activeElement.blur();
-        }
-
-        var copyToClipBoard = function(copyText) {
-            var textField = document.createElement('textarea');
-            textField.innerHTML = copyText;
-            document.body.appendChild(textField);
-            textField.select();
-            document.execCommand("copy");
-            textField.remove();
-        }
-
-        $(document).on('click', '.view-submission-button', function() {
-            var downloadButton = $('#final-view-download-button');
-            var site = $(this).data('site');
-            var viewLink = $(this).data('view-link');
-
-            $('#link-to-site').html('View on ' + site);
-            $('#link-to-site').attr('href', viewLink);
-
-            var onModalClose = function() {
-                /* Callback function on Modal close */
-                downloadButton.addClass('disabled');
-                $('#view_download_file_name').val('');
-                $('#view-submission-preloader').removeClass('hide');
-                $('#view-submission-pre').addClass('hide');
-                $('#view-submission-pre').removeClass('prettyprint');
-                $('#view-submission-pre').removeClass('prettyprinted');
-                $('#view-submission-pre').html('');
-                $('#copy-to-clipboard').addClass('hide');
-                $('#link-to-site').html('');
-                $('#link-to-site').attr('href', '');
-            }
-
-            $('#view-submission-modal').openModal({
-                complete: onModalClose
-            });
-
-            var htmlifySubmission = function(solutionCode) {
-                return solutionCode.replace(/&/g, "&amp;")
-                                   .replace(/>/g, "&gt;")
-                                   .replace(/</g, "&lt;")
-                                   .replace(/"/g, "&quot;")
-                                   .trim(' ');
-            };
-
-            $.ajax({
-                method: 'GET',
-                url: '{{=URL("default", "download_submission")}}',
-                data: {site: site, viewLink: viewLink}
-            }).done(function(response) {
-                $('#view-submission-preloader').addClass('hide');
-                $('#view-submission-pre').removeClass('hide');
-                $('#copy-to-clipboard').removeClass('hide');
-
-                var solutionText;
-                if (response != -1) {
-                    solutionText = htmlifySubmission(response);
-                }
-                else {
-                    solutionText = "// Unable to retrieve submission from " + site + "\n" + "/* Possible reasons :-\n\t * The submission is from an ongoing contest\n\t * There was some error from our side. \n\t   Please write to us (https://www.stopstalk.com/contact_us)\n */";
-                }
-
-                $('#view-submission-pre').html(solutionText);
-                $('#view-submission-modal').one('click', '#copy-to-clipboard', function() {
-                    if (response != -1)
-                        copyToClipBoard(response);
-                    else
-                        copyToClipBoard(solutionText);
-                });
-
-                $('#view-submission-pre').addClass('prettyprint');
-                PR.prettyPrint();
-
-                if (response != -1) {
-                    downloadButton.removeClass('disabled');
-                    $('#view_download_file_name').on('keydown', function() {
-                        if(event.which == 13) {
-                            $('#final-view-download-button').trigger('click');
-                        }
-                    });
-                    $(document).one('click', '#final-view-download-button', function() {
-                        var fileName = $('#view_download_file_name').val();
-                        if (fileName) {
-                            downloadSubmission(fileName, response);
-                            $('#view-submission-modal').closeModal();
-                            onModalClose();
-                        }
-                        else {
-                            $.web2py.flash("Please enter a file name");
-                        }
-                    });
-                }
-                else {
-                    $.web2py.flash("Unable to Download");
-                }
-            });
-
-        });
-
-        $(document).on('click', '.download-submission-button', function() {
-
-            var downloadButton = $('#final-download-button');
-            var site = $(this).data('site');
-            var viewLink = $(this).data('view-link');
-
-            var onModalClose = function() {
-                /* Callback function on Modal close */
-                downloadButton.addClass('disabled');
-                $('#file_name').val('');
-            }
-
-            $('#download-submission-modal').openModal({
-                complete: onModalClose
-            });
-
-            $.ajax({
-                method: 'GET',
-                url: '{{=URL("default", "download_submission")}}',
-                data: {site: site, viewLink: viewLink}
-            }).done(function(response) {
-                if (response != -1) {
-                    downloadButton.removeClass('disabled');
-                    $('#file_name').on('keydown', function() {
-                        if(event.which == 13) {
-                            $('#final-download-button').trigger('click');
-                        }
-                    });
-                    $(document).one('click', '#final-download-button', function() {
-                        var fileName = $('#file_name').val();
-                        if (fileName) {
-                            downloadSubmission(fileName, response);
-                            $('#download-submission-modal').closeModal();
-                            onModalClose();
-                        }
-                        else {
-                            $.web2py.flash("Please enter a file name");
-                        }
-                    });
-                }
-                else {
-                    $.web2py.flash("Unable to Download");
-                }
-            });
-        });
-    });
-    </script>
+    <script type="text/javascript" src="{{=URL('static', 'js/appjs/layout.js')}}">    </script>
     <script type="application/ld+json">
     {
       "@context": "http://schema.org",
