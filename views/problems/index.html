@@ -215,6 +215,7 @@
             </div>
         </div>
     </div>
+{{if auth.is_logged_in():}}
 <script>
     var tags = new Bloodhound({
         datumTokenizer: Bloodhound.tokenizers.obj.whitespace('text'),
@@ -263,5 +264,6 @@
         $(this).materialtags('focus');
     });
 </script>
+{{pass}}
 </div>
 {{=div}}
