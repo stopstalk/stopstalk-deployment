@@ -1,11 +1,7 @@
 {{extend 'layout.html'}}
-<head><title>FAQs</title></head>
-<script>
-    $(document).ready(function(){
-        $('.collapsible').collapsible({
-            accordion : false // A setting that changes the collapsible behavior to expandable instead of the default accordion style
-        });
-    });
-</script>
+<head>
+    <title>FAQs</title>
+</head>
+<script src="{{=URL('static', 'js/appjs/default/faq.js')}}"></script>
 <h3>FAQs</h3>
 {{=div}}
