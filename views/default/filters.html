@@ -1,151 +1,94 @@
 {{extend 'layout.html'}}
-<head><title>Filters</title></head>
-<script src="{{=URL('static', 'js/jquery.bootpag.min.js')}}"></script>
-<script>
-
-    var get_argument = function() {
-        var url = window.location.href;
-        var tempElement = document.createElement("a");
-        tempElement.href = url;
-        var path = tempElement.pathname;
-        var argument = path.split("/").splice(-1);
-        if (argument[0] == "filters" || argument[0] == "") {
-            return "1";
-        }
-        return argument[0];
-    };
-
-    var getVars = function() {
-        var qs = document.location.search;
-        qs = qs.split("+").join(" ");
-        var params = {},
-            tokens,
-            re = /[?&]?([^=]+)=([^&]*)/g;
-
-        while (tokens = re.exec(qs)) {
-            var tmp = decodeURIComponent(tokens[1]);
-            if(params[tmp] === undefined) {
-                params[tmp] = decodeURIComponent(tokens[2]);
-            }
-            else {
-                /* Multiple values for a parameter */
-                if(params[tmp].constructor != Array){
-                    params[tmp] = [params[tmp]];
-                }
-                params[tmp].push(decodeURIComponent(tokens[2]));
-            }
-        }
-        return params;
-    }
-
+<head>
+    <title>
+        Filters
+    </title>
+</head>
+<script type="text/javascript">
     $(document).ready(function() {
-        var global_submissions = '{{=global_submissions}}';
-        if (global_submissions === 'True') {
+        if ('{{=global_submissions}}' === 'True') {
             $('#submission-switch')[0].checked = true;
         }
-        $('#submission-switch').click(function() {
-            var global = this.checked;
-            var redirectURL = null;
-            var params = getVars();
-            var currentURL = window.location.href;
-            if (global) {
-                params['global'] = 'True';
-            } else {
-                params['global'] = 'False';
-            }
-            window.location.href = currentURL.split('?')[0] + '?' + $.param(params);
-        });
-
-        $('.datepicker').pickadate({
-            selectMonths: true, // Creates a dropdown to control month
-            selectYears: 10,
-            format: 'yyyy-mm-dd',
-            min: new Date(2013, 0, 1),
-            max: new Date()
-        });
-        $('select').material_select();
-        var currPage = get_argument();
-        var totalPages = $('#total-pages').html();
-        if (totalPages == "0") {
-            totalPages = "1";
-        }
-        $('#page-selection').bootpag({
-            total: parseInt(totalPages),
-            page: parseInt(currPage),
-            maxVisible: 10
-        }).on("page", function(event, num) {
-            window.location.href = "{{=URL('default', 'filters')}}" + "/" + num.toString() + "?" + window.location.href.split("?").splice(-1);
-        });
     });
-
 </script>
+<script src="{{=URL('static', 'js/jquery.bootpag.min.js')}}"></script>
+<script src="{{=URL('static', 'js/appjs/default/filters.js')}}" type="text/javascript"></script>
 <div class="row">
     <h3>Filters</h3>
 </div>
 <div class="row">
-    <form class="col s12" method="GET" action="{{=URL('default', 'filters', args=[1])}}">
-      <div class="row">
-        <div class="input-field col offset-s1 s5">
-          <input id="name" name="name" type="text">
-          <label for="name">Name</label>
+    <form action="{{=URL('default', 'filters', args=[1])}}" class="col s12" method="GET">
+        <div class="row">
+            <div class="input-field col offset-s1 s5">
+                <input id="name" name="name" type="text">
+                    <label for="name">
+                        Name
+                    </label>
+                </input>
+            </div>
+            <div class="input-field col s5">
+                <input id="problem_name" name="pname" type="text">
+                    <label for="problem_name">
+                        Problem Name
+                    </label>
+                </input>
+            </div>
         </div>
-        <div class="input-field col s5">
-          <input id="problem_name" name="pname" type="text">
-          <label for="problem_name">Problem Name</label>
+        <div class="row">
+            <div class="input-field col offset-s1 s4">
+                <select multiple="" name="status">
+                    <option disabled="" selected="" value="">Submission Status</option>
+                    {{for status in (("AC", "Accepted"),
+                                     ("PS", "Partially Solved"),
+                                     ("WA", "Wrong Answer"),
+                                     ("TLE", "Time Limit Exceeded"),
+                                     ("MLE", "Memory Limit Exceeded"),
+                                     ("RE", "Runtime Error"),
+                                     ("CE", "Compile Error"),
+                                     ("SK", "Skipped"),
+                                     ("HCK", "Hacked"),
+                                     ("OTH", "Others")):}}
+                        <option value="{{=status[0]}}">{{=status[1]}}</option>
+                    {{pass}}
+                </select>
+            </div>
+            <div class="input-field col s2">
+                <select multiple="" name="site">
+                    <option disabled="" selected="" value="">Site</option>
+                    {{for site in current.SITES:}}
+                        <option value="{{=site}}">{{=site}}</option>
+                    {{pass}}
+                </select>
+            </div>
+            <div class="input-field col s4">
+                <select multiple="" name="language">
+                    <option disabled="" selected="" value="">Language</option>
+                    {{for language in languages:}}
+                        <option value="{{=language}}">{{=language}}</option>
+                    {{pass}}
+                </select>
+            </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="input-field col offset-s1 s4">
-          <select name="status" multiple>
-              <option value="" selected disabled>Submission Status</option>
-              {{for status in (("AC", "Accepted"),
-                               ("PS", "Partially Solved"),
-                               ("WA", "Wrong Answer"),
-                               ("TLE", "Time Limit Exceeded"),
-                               ("MLE", "Memory Limit Exceeded"),
-                               ("RE", "Runtime Error"),
-                               ("CE", "Compile Error"),
-                               ("SK", "Skipped"),
-                               ("HCK", "Hacked"),
-                               ("OTH", "Others")):
-                }}
-                <option value="{{=status[0]}}">{{=status[1]}}</option>
-              {{pass}}
-          </select>
+        <div class="row">
+            <div class="col offset-s3 s3">
+                <label class="left" for="start_date">
+                    Start Date
+                </label>
+                <input class="datepicker" data-value="" id="start_date" name="start_date" type="date"/>
+            </div>
+            <div class="col s3">
+                <label class="left" for="end_date">
+                    End Date
+                </label>
+                <input class="datepicker" data-value="" id="end_date" name="end_date" type="date"/>
+            </div>
         </div>
-        <div class="input-field col s2">
-          <select name="site" multiple>
-              <option value="" selected disabled>Site</option>
-              {{for site in current.SITES:}}
-                <option value="{{=site}}">{{=site}}</option>
-              {{pass}}
-          </select>
-        </div>
-        <div class="input-field col s4">
-            <select name="language" multiple>
-                <option value="" selected disabled>Language</option>
-                {{for language in languages:}}
-                    <option value="{{=language}}">{{=language}}</option>
-                {{pass}}
-            </select>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col offset-s3 s3">
-            <label for="start_date" class="left">Start Date</label>
-            <input id="start_date" name="start_date" data-value="" type="date" class="datepicker" />
-        </div>
-        <div class="col s3">
-            <label for="end_date" class="left">End Date</label>
-            <input id="end_date" name="end_date" data-value="" type="date" class="datepicker" />
-        </div>
-      </div>
-      <input type="submit" value="Apply Filters" />
+        <input type="submit" value="Apply Filters"/>
     </form>
-  </div>
+</div>
 {{if request.args != []:}}
-    <h4>Filtered Submissions</h4>
-    <div id="total-pages" style="display: none;">{{=total_pages}}</div>
-    <div id="page-selection" class="center"></div>
+<h4>Filtered Submissions</h4>
+<div id="total-pages" style="display: none;">{{=total_pages}}</div>
+<div class="center" id="page-selection"></div>
 {{pass}}
 {{=div}}
