@@ -178,6 +178,11 @@ def index():
         if request.vars["global"] == "True":
             global_submissions = True
 
+    my_submissions = False
+    if request.vars.has_key("my"):
+        if request.vars["my"] == "True":
+            my_submissions = True
+
     stable = db.submission
     ptable = db.problem
 
@@ -189,18 +194,22 @@ def index():
 
     if global_submissions is False:
         if auth.is_logged_in():
-            friends, cusfriends = utilities.get_friends(session.user_id)
-            # The Original IDs of duplicate custom_friends
-            custom_friends = []
-            for cus_id in cusfriends:
-                if cus_id[1] is None:
-                    custom_friends.append(cus_id[0])
-                else:
-                    custom_friends.append(cus_id[1])
+            if my_submissions is False:
+                friends, cusfriends = utilities.get_friends(session.user_id)
+                # The Original IDs of duplicate custom_friends
+                custom_friends = []
+                for cus_id in cusfriends:
+                    if cus_id[1] is None:
+                        custom_friends.append(cus_id[0])
+                    else:
+                        custom_friends.append(cus_id[1])
 
-            query &= (stable.user_id.belongs(friends)) | \
-                     (stable.custom_user_id.belongs(custom_friends)) | \
-                     (stable.user_id == session.user_id)
+                query &= (stable.user_id.belongs(friends)) | \
+                (stable.custom_user_id.belongs(custom_friends)) | \
+                (stable.user_id == session.user_id)
+            else:
+                print "mysub"
+                query &= (stable.user_id == session.user_id)
         else:
             session.flash = "Login to view Friends' Submissions"
             new_vars = request.vars
@@ -280,19 +289,14 @@ def index():
     problem_details.append(DIV(_class="col s5", _id="chart_div"))
 
     table = utilities.render_table(submissions, cusfriends)
-    switch = DIV(LABEL(H6("Friends' Submissions",
-                          INPUT(_type="checkbox", _id="submission-switch"),
-                          SPAN(_class="lever pink accent-3"),
-                          "Global Submissions")),
-                 _class="switch")
-    div = TAG[""](H4("Recent Submissions"), switch, table)
 
     return dict(site=site,
                 problem_details=problem_details,
                 problem_name=problem_name,
                 problem_link=problem_link,
                 global_submissions=global_submissions,
-                div=div)
+                my_submissions=my_submissions,
+                table=table)
 
 # ----------------------------------------------------------------------------
 def tag():
