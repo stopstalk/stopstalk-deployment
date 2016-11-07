@@ -1,50 +1,14 @@
 {{extend 'layout.html'}}
 <head>
     <title>{{=heading}}</title>
-    <script>
-        var getVars = function() {
-            // @Todo: Better and generalised way to do this?
-            var url = window.location.href;
-            var params = url.split('?');
-            if (params.length == 1) {
-                return {};
-            }
-            params = params.splice(-1)[0];
-            console.log(params);
-            var finalObject = {};
-            var param;
-            params = params.split('&');
-            $.each(params, function(key, value) {
-                param = value.split('=');
-                finalObject[param[0]] = param[1];
-            });
-            return finalObject;
-        };
-
-        $(document).ready(function() {
-            var global_submissions = '{{=global_leaderboard}}';
+<script src="{{=URL('static', 'js/appjs/default/leaderboard.js')}}" type="text/javascript"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        if ('{{=global_leaderboard}}' === 'True') {
             $('#submission-switch')[0].checked = true;
-            if (global_submissions === 'False') {
-                $('#submission-switch')[0].checked = false;
-            }
-            $('#submission-switch').click(function() {
-                var global = this.checked;
-                var redirectURL = null;
-                var params = getVars();
-                var currentURL = window.location.href;
-                if (global) {
-                    params['global'] = 'True';
-                } else {
-                    params['global'] = 'False';
-                }
-                var parameterString = "";
-                $.each(params, function(key, value) {
-                    parameterString += key + '=' + value + '&';
-                });
-                window.location.href = currentURL.split('?')[0] + '?' + parameterString.slice(0, -1);
-            });
-        });
-    </script>
+        }
+    });
+</script>
 </head>
 <h2>{{=heading}}</h2>
 {{=div}}
