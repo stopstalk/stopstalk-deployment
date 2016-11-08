@@ -1,269 +1,218 @@
 {{extend 'layout.html'}}
 <head>
-    <title>{{=(site + " | " + problem_name)}}</title>
-    <link rel="stylesheet" href="{{=URL('static','css/materialize-tags.css')}}"/>
-
+    <title>
+        {{=(site + " | " + problem_name)}}
+    </title>
+    <link href="{{=URL('static','css/materialize-tags.css')}}" rel="stylesheet"/>
     <!--Load the AJAX API-->
-    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-    <script type="text/javascript" src="{{=URL('static', 'js/materialize-tags.js')}}"></script>
-    <script type="text/javascript" src="{{=URL('static', 'js/corejs-typeahead.bundle.js')}}"></script>
-    <script type="text/javascript" src="{{=URL('static', 'js/bloodhound.js')}}"></script>
+    <script src="https://www.google.com/jsapi" type="text/javascript"></script>
+    <script src="{{=URL('static', 'js/materialize-tags.js')}}" type="text/javascript"></script>
+    <script src="{{=URL('static', 'js/corejs-typeahead.bundle.js')}}" type="text/javascript"></script>
+    <script src="{{=URL('static', 'js/bloodhound.js')}}" type="text/javascript"></script>
     <script type="text/javascript">
-      var refreshSuggestedTags = function() {
-          $.ajax({
-              method: 'GET',
-              url: '{{=URL("problems", "get_suggested_tags.json")}}',
-              data: {plink: '{{=problem_link}}'}
-          }).done(function(response) {
-              var userTags = response["user_tags"],
-                  tagCounts = response["tag_counts"],
-                  $inputElement = $('#tag-suggests'),
-                  $div = $('<div>', {'class': 'centered striped'});
-
-              $inputElement.materialtags('removeAll');
-
-              $.each(userTags, function(index, tag) {
-                  $inputElement.materialtags('add', tag);
-              });
-
-              var i = 0;
-              $.each(tagCounts, function(index, row) {
-                  i += 1;
-                  $div.append('<div class="chip grey"><span class="red">' + row[1] + '</span>'+ row[0]['text'] + '</div> ');
-                  if (i % 3 == 0) $div.append('<br/><br/>');
-              });
-
-              if (tagCounts.length != 0) {
-                  $('#tags-till-now').html($div);
-              }
-              else {
-                  $('#tags-till-now').html('You are the first to suggest');
-              }
-          });
-      }
-
-      $(document).ready(function() {
-
-          $('.tooltipped').tooltip({delay: 50});
-          var global_submissions = '{{=global_submissions}}';
-          if (global_submissions === 'True') {
-              $('#submission-switch')[0].checked = true;
-          }
-          $('#submission-switch').click(function() {
-              var global = this.checked;
-              var redirectURL = null;
-              if (global) {
-                  redirectURL = '{{=URL("problems", "index", vars={"pname": problem_name, "plink": problem_link, "global": "True"})}}';
-              } else {
-                  redirectURL = '{{=URL("problems", "index", vars={"pname": problem_name, "plink": problem_link, "global": "False"})}}';
-              }
-              window.location.href = redirectURL;
-          });
-
-          $('#show-tags').click(function() {
-              var problemTags = $(this).data('tags');
-              var $tagsSpan = $('<span>');
-              if (problemTags.length === 1 && problemTags[0] === '-') {
-                  $tagsSpan.append('No Tags Available');
-              }
-              else {
-                  var $sampleTag = $('<div>', {'class': 'chip'}),
-                      $thisTag,
-                      $thisAnchor;
-                  $sampleTag.append('<a href="" style="color: white;" target="_blank"></a>');
-                  $.each(problemTags, function(index, tag) {
-                      $thisTag = $sampleTag.clone();
-                      $thisAnchor = $($thisTag.children()[0]);
-                      $thisAnchor.html(tag);
-                      $thisAnchor.attr('href', '{{=URL("problems", "tag")}}' + '?page=1&q=' + encodeURIComponent(tag));
-                      $tagsSpan.append($thisTag);
-                      $tagsSpan.append(" ");
-                  });
-              }
-              $('#tags-span').html($tagsSpan);
-          });
-
-          var isLoggedIn = "{{=auth.is_logged_in()}}";
-          if (isLoggedIn == "True") {
-              if ('{{=request.vars.open_modal}}' == 'True')
-                  $('#suggest-tags-modal').openModal();
-
-              $('#suggest-trigger').leanModal();
-
-              $('#submit-tags').click(function() {
-                  var submittedTags = $('#tag-suggests').val();
-                  $('#suggest-tags-modal').closeModal();
-                  $.ajax({
-                      method: 'POST',
-                      url: '{{=URL("problems", "add_suggested_tags")}}',
-                      data: {pname: '{{=problem_name}}',
-                             plink: '{{=problem_link}}',
-                             tags: submittedTags}
-                  }).done(function(response) {
-                      $.web2py.flash(response);
-                      refreshSuggestedTags();
-                  });
-              });
-              refreshSuggestedTags();
-          }
-
-      });
-      // Load the Visualization API and the piechart package.
-      google.load('visualization', '1.0', {'packages':['corechart']});
-
-      // Set a callback to run when the Google Visualization API is loaded.
-      google.setOnLoadCallback(drawChart);
-
-
-      // Callback that creates and populates a data table,
-      // instantiates the pie chart, passes in the data and
-      // draws it.
-      function drawChart() {
-
-          var numJSON = {'AC': 0,
-                         'WA': 0,
-                         'TLE': 0,
-                         'MLE': 0,
-                         'CE': 0,
-                         'RE': 0,
-                         'SK': 0,
-                         'PS': 0,
-                         'HCK': 0,
-                         'OTH': 0
-                         };
-
-          var pname = $('#problem_name').html();
-
-          $.ajax({
-              method: 'POST',
-              url: '{{=URL("problems", "pie_chart_helper", extension="json")}}',
-              data: {'plink': '{{=problem_link}}',
-                     'global': '{{=global_submissions}}'}
-          }).done(function(data) {
-
-              var statuses = data['row'],
-                  totalSubmissions = 0;
-              $.each(statuses, function(i) {
-                  statusCount = statuses[i]['_extra']['COUNT(submission.id)'];
-                  numJSON[statuses[i]['submission']['status']] = statusCount;
-                  totalSubmissions += statusCount;
-              });
-
-              if (totalSubmissions) {
-                  // Create the data table.
-                  var data = new google.visualization.DataTable();
-                  data.addColumn('string', 'resultType');
-                  data.addColumn('number', 'numberOfSubmissions');
-                  data.addRows([
-                      ['Accepted', numJSON['AC']],
-                      ['Partially Solved', numJSON['PS']],
-                      ['Wrong Answer', numJSON['WA']],
-                      ['Time Limit Exceeded', numJSON['TLE']],
-                      ['Memory Limit Exceeded', numJSON['MLE']],
-                      ['Runtime Error', numJSON['RE']],
-                      ['Compile Error', numJSON['CE']],
-                      ['Hacked', numJSON['HCK']],
-                      ['Skipped', numJSON['SK']],
-                      ['Others', numJSON['OTH']]
-                  ]);
-
-
-                  // Set chart options
-                  var options = {'title':'Total Submissions',
-                                 'chartArea': {width:'80%',height:'80%'},
-                                 'pieHole': 0.5,
-                                 'slices': {0: {color: '#4CAF50'},
-                                            1: {color: '#8BC34A'},
-                                            2: {color: '#F44336'},
-                                            3: {color: '#3F51B5'},
-                                            4: {color: '#03A9F4'},
-                                            5: {color: '#9C27B0'},
-                                            6: {color: '#FF9800'},
-                                            7: {color: '#795548'},
-                                            8: {color: '#FFEB3B'},
-                                            9: {color: '#9E9E9E'}}
-                                 };
-
-                  // Instantiate and draw our chart, passing in some options.
-                  var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
-                  chart.draw(data, options);
-              }
-          });
-        }
+        var problemName = '{{=problem_name}}';
+        var problemLink = '{{=problem_link}}';
+        var globalSubmissions = '{{=global_submissions}}';
+        var globalSubmissionURL = '{{=URL("problems", "index", vars={"pname": problem_name, "plink": problem_link, "global": "True"})}}';
+        var friendsSubmissionURL = '{{=URL("problems", "index", vars={"pname": problem_name, "plink": problem_link, "global": "False"})}}';
+        var isLoggedIn = '{{=auth.is_logged_in()}}';
+        var openModal = ('{{=request.vars.open_modal}}' === 'True');
     </script>
-</head>
+    <script type="text/javascript">
+        // Callback that creates and populates a data table,
+        // instantiates the pie chart, passes in the data and
+        // draws it.
+        var drawChart = function() {
+            var numJSON = {
+                'AC': 0,
+                'WA': 0,
+                'TLE': 0,
+                'MLE': 0,
+                'CE': 0,
+                'RE': 0,
+                'SK': 0,
+                'PS': 0,
+                'HCK': 0,
+                'OTH': 0
+            };
 
+            var pname = $('#problem_name').html();
+
+            $.ajax({
+                method: 'POST',
+                url: '/problems/pie_chart_helper.json/',
+                data: {
+                    'plink': problemLink,
+                    'global': globalSubmissions
+                }
+            }).done(function(data) {
+
+                var statuses = data['row'],
+                    totalSubmissions = 0,
+                    statusCount;
+
+                $.each(statuses, function(i) {
+                    statusCount = statuses[i]['_extra']['COUNT(submission.id)'];
+                    numJSON[statuses[i]['submission']['status']] = statusCount;
+                    totalSubmissions += statusCount;
+                });
+
+                if (totalSubmissions) {
+                    // Create the data table.
+                    var data = new google.visualization.DataTable();
+                    data.addColumn('string', 'resultType');
+                    data.addColumn('number', 'numberOfSubmissions');
+                    data.addRows([
+                        ['Accepted', numJSON['AC']],
+                        ['Partially Solved', numJSON['PS']],
+                        ['Wrong Answer', numJSON['WA']],
+                        ['Time Limit Exceeded', numJSON['TLE']],
+                        ['Memory Limit Exceeded', numJSON['MLE']],
+                        ['Runtime Error', numJSON['RE']],
+                        ['Compile Error', numJSON['CE']],
+                        ['Hacked', numJSON['HCK']],
+                        ['Skipped', numJSON['SK']],
+                        ['Others', numJSON['OTH']]
+                    ]);
+
+
+                    // Set chart options
+                    var options = {
+                        'title': 'Total Submissions',
+                        'chartArea': {
+                            width: '80%',
+                            height: '80%'
+                        },
+                        'pieHole': 0.5,
+                        'slices': {
+                            0: {
+                                color: '#4CAF50'
+                            },
+                            1: {
+                                color: '#8BC34A'
+                            },
+                            2: {
+                                color: '#F44336'
+                            },
+                            3: {
+                                color: '#3F51B5'
+                            },
+                            4: {
+                                color: '#03A9F4'
+                            },
+                            5: {
+                                color: '#9C27B0'
+                            },
+                            6: {
+                                color: '#FF9800'
+                            },
+                            7: {
+                                color: '#795548'
+                            },
+                            8: {
+                                color: '#FFEB3B'
+                            },
+                            9: {
+                                color: '#9E9E9E'
+                            }
+                        }
+                    };
+
+                    // Instantiate and draw our chart, passing in some options.
+                    var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+                    chart.draw(data, options);
+                }
+            });
+        }
+
+        google.load('visualization', '1.0', {
+            'packages': ['corechart']
+        });
+
+        // Set a callback to run when the Google Visualization API is loaded.
+        google.setOnLoadCallback(drawChart);
+    </script>
+    <script src="{{=URL('static', 'js/appjs/problems/index.js')}}" type="text/javascript"></script>
+</head>
 <div class="row">
     <h3>{{=problem_name}}</h3>
     {{=problem_details}}
-    <div id="suggest-tags-modal" class="modal">
+    <div class="modal" id="suggest-tags-modal">
         <div class="modal-content">
             <h4>Suggest tags</h4>
             <div class="row center">
                 <div class="col s8 offset-s2">
-                    <input id="tag-suggests" class="center" type="text" placeholder="Add tags..." data-role="materialtags"/>
-                    <a class="btn waves-effect waves-light" id="submit-tags">Submit</a><br />
+                    <input class="center" data-role="materialtags" id="tag-suggests" placeholder="Add tags..." type="text"/>
+                    <a class="btn waves-effect waves-light" id="submit-tags">Submit</a>
+                    <br/>
                 </div>
             </div>
             <div class="row center">
                 <div class="col s12">
                     <div>
-                        <h5>Tags till now:</h5>
+                        <h5>
+                            Tags till now:
+                        </h5>
                         <div id="tags-till-now"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-{{if auth.is_logged_in():}}
-<script>
-    var tags = new Bloodhound({
-        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('text'),
-        queryTokenizer: Bloodhound.tokenizers.whitespace,
-        prefetch: {
-            url: '{{=URL("problems", "get_tag_values.json")}}',
-            transform: function(response) {
-                return response['tags'];
+    {{if auth.is_logged_in():}}
+    <script>
+        var tags = new Bloodhound({
+            datumTokenizer: Bloodhound.tokenizers.obj.whitespace('text'),
+            queryTokenizer: Bloodhound.tokenizers.whitespace,
+            prefetch: {
+                url: '/problems/get_tag_values.json/',
+                transform: function(response) {
+                    return response['tags'];
+                }
+            }
+        });
+
+        tags.initialize();
+
+        function searchWithDefaults(q, sync) {
+            if (q === '') {
+                sync(tags.index.all());
+            } else {
+                tags.search(q, sync);
             }
         }
-    });
 
-    tags.initialize();
-
-    function searchWithDefaults(q, sync) {
-        if (q === '') {
-            sync(tags.index.all());
-        } else {
-            tags.search(q, sync);
-        }
-    }
-
-    $('#tag-suggests').materialtags({
-        itemValue: 'value',
-        itemText: 'text',
-        onTagExists: function(item, $tag) {
-            // @ToDo: $tag here does not give the tag for some reason.
-            var $origTag = $('#tag-' + item.value);
-            $origTag.css({'background-color': 'white', 'color': 'black'});
-            setTimeout(function() {
-                $origTag.css({'background-color': 'black', 'color': 'white'});
-            }, 150);
-        },
-        typeaheadjs: [{
-            highlight: true,
-            minLength: 0
-        },
-        {
-            displayKey: 'text',
-            source: searchWithDefaults,
-            limit: 5
-        }],
-        freeInput: false
-    });
-    $('#tag-suggests').on('itemRemoved', function(event) {
-        $(this).materialtags('focus');
-    });
-</script>
-{{pass}}
+        $('#tag-suggests').materialtags({
+            itemValue: 'value',
+            itemText: 'text',
+            onTagExists: function(item, $tag) {
+                // @ToDo: $tag here does not give the tag for some reason.
+                var $origTag = $('#tag-' + item.value);
+                $origTag.css({
+                    'background-color': 'white',
+                    'color': 'black'
+                });
+                setTimeout(function() {
+                    $origTag.css({
+                        'background-color': 'black',
+                        'color': 'white'
+                    });
+                }, 150);
+            },
+            typeaheadjs: [{
+                highlight: true,
+                minLength: 0
+            }, {
+                displayKey: 'text',
+                source: searchWithDefaults,
+                limit: 5
+            }],
+            freeInput: false
+        });
+        $('#tag-suggests').on('itemRemoved', function(event) {
+            $(this).materialtags('focus');
+        });
+    </script>
+    {{pass}}
 </div>
 {{=div}}
