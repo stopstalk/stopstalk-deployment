@@ -1198,7 +1198,9 @@ def submissions():
 
     if request.extension == "json":
         from random import sample
-        solved_problem_links = sample(current.solved_problems, 10)
+        total_solved = len(current.solved_problems)
+        solved_problem_links = sample(current.solved_problems,
+                                      10 if total_solved > 10 else total_solved)
         query = (ptable.link.belongs(solved_problem_links))
         rows = db(query).select(ptable.link,
                                 ptable.name,
