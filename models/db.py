@@ -515,24 +515,11 @@ db.define_table("submission",
 
 db.define_table("friend_requests",
                 Field("from_h", "reference auth_user"),
-                Field("to_h", "reference auth_user"),
-                )
+                Field("to_h", "reference auth_user"))
 
 db.define_table("friends",
                 Field("user_id", "reference auth_user"),
                 Field("friend_id", "reference auth_user"))
-
-db.define_table("problem_tags",
-                Field("problem_link"),
-                Field("problem_name"),
-                Field("tags",
-                      default="['-']"),
-                Field("problem_added_on", "date"))
-
-db.define_table("problem_editorial",
-                Field("problem_link"),
-                Field("editorial_link", default=None),
-                Field("problem_added_on", "date"))
 
 db.define_table("problem",
                 Field("name"),
