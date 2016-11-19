@@ -39,6 +39,15 @@ response.menu = []
 def get_tooltip_data(tooltip):
     return dict(position="bottom", delay="40", tooltip=tooltip)
 
+def get_friend_req_message():
+    requestcount = db(db.friend_requests.to_h == session.user_id).count()
+    if requestcount == 0:
+        return "No New Friend Requests"
+    elif requestcount == 1:
+        return "1 Pending Friend Request"
+    else:
+        return str(requestcount) + "Pending Friend Requests"
+
 if session.user_id:
     response.menu += [
         (I(_class="fa fa-inbox fa-2x tooltipped",
@@ -46,7 +55,7 @@ if session.user_id:
          False,
          URL('default', 'notifications'), []),
         (I(_class="fa fa-users fa-2x tooltipped",
-           data=get_tooltip_data("Friend requests")),
+           data=get_tooltip_data(get_friend_req_message())),
          False,
          URL('user', 'friend_requests'), []),
         (I(_class="fa fa-user-secret fa-2x tooltipped",
