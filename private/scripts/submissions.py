@@ -259,7 +259,7 @@ def re_retrieve():
 
     # Remove all the records after retrieving their submissions
     frtable.truncate()
-    return (users, custom_users)
+    return (list(set(users)), list(set(custom_users)))
 
 # ----------------------------------------------------------------------------
 def specific_user():
