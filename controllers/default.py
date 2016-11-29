@@ -132,8 +132,8 @@ def index():
 @auth.requires_login()
 def notifications():
     """
-        Check if any of the friends(includes CUSTOM) of
-        the logged-in user is on a streak
+        Check if any of the friends (includes CUSTOM) of the logged-in
+        user is on a streak along with list of friend requests
     """
 
     if not auth.is_logged_in():
@@ -216,9 +216,9 @@ def notifications():
     users_on_day_streak.sort(key=lambda k: k[1], reverse=True)
 
     # The table containing users on streak(days)
-    table = TABLE(THEAD(TR(TH(STRONG("User")),
-                           TH(STRONG("Days")))),
-                  _class="col offset-s3 s6 striped centered")
+    streak_table = TABLE(THEAD(TR(TH(STRONG("User")),
+                                  TH(STRONG("Days")))),
+                         _class="col offset-s3 s6 striped centered")
 
     tbody = TBODY()
 
@@ -235,11 +235,44 @@ def notifications():
                    _class="center"))
         tbody.append(tr)
 
-    table.append(tbody)
+    streak_table.append(tbody)
     if len(users_on_day_streak) == 0:
-        table = H6("No friends on day streak", _class="center")
+        streak_table = H6("No friends on day streak", _class="center")
 
-    return dict(table=table)
+    rows = db(db.friend_requests.to_h == session.user_id).select()
+    request_table = TABLE(_class="striped centered")
+    request_table.append(THEAD(TR(TH(T("Name")),
+                                  TH(T("Action")))))
+
+    tbody = TBODY()
+    for row in rows:
+        tr = TR()
+        tr.append(TD(A(row.from_h.first_name + " " + row.from_h.last_name,
+                       _href=URL("user",
+                                 "profile",
+                                 args=[row.from_h.stopstalk_handle]),
+                       _target="_blank")))
+        tr.append(TD(UL(LI(FORM(INPUT(_value="Accept",
+                                      _type="submit",
+                                      _class="btn",
+                                      _style="background-color: green;"),
+                                _action=URL("user", "accept_fr",
+                                            args=[row.from_h, row.id]))),
+                        LI(FORM(INPUT(_value="Reject",
+                                      _type="submit",
+                                      _class="btn",
+                                      _style="background-color: red;"),
+                                _action=URL("user", "reject_fr",
+                                            args=[row.id]))),
+                        _style="display: inline-flex; list-style-type: none;")))
+        tbody.append(tr)
+
+    request_table.append(tbody)
+    if len(rows) == 0:
+        request_table = H6("No pending friend requests.", _class="center")
+
+    return dict(streak_table=streak_table,
+                request_table=request_table)
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
@@ -852,8 +885,8 @@ To stop receiving mails - <a href="%s">Unsubscribe</a></html>
                                          scheme=True,
                                          host=True,
                                          extension=False),
-                                     URL("user",
-                                         "friend_requests",
+                                     URL("default",
+                                         "notifications",
                                          scheme=True,
                                          host=True,
                                          extension=False),

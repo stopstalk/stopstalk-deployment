@@ -44,7 +44,7 @@ To stop receiving mails - <a href="%s">Unsubscribe</a> <br />
 Cheers, <br />
 StopStalk
 </html>
-""" % (URL("user", "friend_requests",
+""" % (URL("default", "notifications",
            scheme="https",
            host="www.stopstalk.com"),
        URL("default", "unsubscribe",

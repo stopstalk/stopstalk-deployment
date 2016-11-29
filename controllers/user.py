@@ -606,37 +606,7 @@ def friend_requests():
         Show friend requests to the logged-in user
     """
 
-    rows = db(db.friend_requests.to_h == session.user_id).select()
-    table = TABLE(_class="striped centered")
-    table.append(THEAD(TR(TH(T("Name")),
-                          TH(T("Institute")),
-                          TH(T("Action")))))
 
-    tbody = TBODY()
-    for row in rows:
-        tr = TR()
-        tr.append(TD(A(row.from_h.first_name + " " + row.from_h.last_name,
-                       _href=URL("user",
-                                 "profile",
-                                 args=[row.from_h.stopstalk_handle]),
-                       _target="_blank")))
-        tr.append(TD(row.from_h.institute))
-        tr.append(TD(UL(LI(FORM(INPUT(_value="Accept",
-                                      _type="submit",
-                                      _class="btn",
-                                      _style="background-color: green;"),
-                                _action=URL("user", "accept_fr",
-                                            args=[row.from_h, row.id]))),
-                        LI(FORM(INPUT(_value="Reject",
-                                      _type="submit",
-                                      _class="btn",
-                                      _style="background-color: red;"),
-                                _action=URL("user", "reject_fr",
-                                            args=[row.id]))),
-                        _style="display: inline-flex; list-style-type: none;")))
-        tbody.append(tr)
-
-    table.append(tbody)
     return dict(table=table)
 
 # -----------------------------------------------------------------------------
@@ -657,7 +627,7 @@ def accept_fr():
     """
 
     if len(request.args) < 2:
-        redirect(URL("user", "friend_requests"))
+        redirect(URL("default", "notifications"))
 
     friend_id = int(request.args[0])
     row_id = int(request.args[1])
@@ -696,7 +666,7 @@ To stop receiving mails - <a href="%s">Unsubscribe</a></html>
                       mail_type="acceptance_rejectance")
 
     session.flash = "Friend added!"
-    redirect(URL("user", "friend_requests"))
+    redirect(URL("default", "notifications"))
 
     return dict()
 
@@ -708,7 +678,7 @@ def reject_fr():
     """
 
     if request.args == []:
-        redirect(URL("user", "friend_requests"))
+        redirect(URL("default", "notifications"))
 
     fr_id = request.args[0]
 
@@ -741,7 +711,7 @@ To stop receiving mails - <a href="%s">Unsubscribe</a></html>
                       mail_type="acceptance_rejectance")
 
     session.flash = "Friend request rejected!"
-    redirect(URL("user", "friend_requests"))
+    redirect(URL("default", "notifications"))
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()

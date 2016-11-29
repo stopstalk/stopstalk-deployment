@@ -41,14 +41,10 @@ def get_tooltip_data(tooltip):
 
 if session.user_id:
     response.menu += [
-        (I(_class="fa fa-inbox fa-2x tooltipped",
+        (I(_class="fa fa-bell-o fa-2x tooltipped",
            data=get_tooltip_data("Notifications")),
          False,
          URL('default', 'notifications'), []),
-        (I(_class="fa fa-users fa-2x tooltipped",
-           data=get_tooltip_data("Friend requests")),
-         False,
-         URL('user', 'friend_requests'), []),
         (I(_class="fa fa-user-secret fa-2x tooltipped",
            data=get_tooltip_data("Custom Friend")),
          False,
