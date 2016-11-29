@@ -153,7 +153,6 @@ def update_details():
             submission_query = (stable.user_id == session.user_id)
             for site in updated_sites:
                 site_lrs[site.lower() + "_lr"] = current.INITIAL_DATE
-                submission_query &= (stable.site == site)
 
             # Reset the user only if any of the profile site handle is updated
             query = (atable.id == session.user_id)
@@ -164,6 +163,7 @@ def update_details():
                              authentic=False,
                              **site_lrs)
 
+            submission_query &= (stable.site.belongs(updated_sites))
             # Only delete the submission of those particular sites
             # whose site handles are updated
             db(submission_query).delete()
@@ -231,7 +231,8 @@ def update_friend():
                 submission_query = (stable.custom_user_id == request.args[0])
                 for site in updated_sites:
                     form.vars[site.lower() + "_lr"] = current.INITIAL_DATE
-                    submission_query &= (stable.site == site)
+
+                submission_query &= (stable.site.belongs(updated_sites))
 
                 form.vars["duplicate_cu"] = None
                 form.vars["rating"] = 0
