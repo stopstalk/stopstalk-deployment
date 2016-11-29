@@ -599,16 +599,6 @@ def submissions():
                 table=table,
                 total_rows=len(all_submissions))
 
-# ------------------------------------------------------------------------------
-@auth.requires_login()
-def friend_requests():
-    """
-        Show friend requests to the logged-in user
-    """
-
-
-    return dict(table=table)
-
 # -----------------------------------------------------------------------------
 @auth.requires_login()
 def add_friend(user_id, friend_id):
