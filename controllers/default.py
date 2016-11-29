@@ -218,7 +218,7 @@ def notifications():
     # The table containing users on streak(days)
     streak_table = TABLE(THEAD(TR(TH(STRONG("User")),
                                   TH(STRONG("Days")))),
-                         _class="col offset-s3 s6 striped centered")
+                         _class="striped centered")
 
     tbody = TBODY()
 
