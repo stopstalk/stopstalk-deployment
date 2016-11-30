@@ -353,7 +353,7 @@ def contests():
     contests = []
     cal = pdt.Calendar()
 
-    table = TABLE(_class="centered striped", _id="contests-table")
+    table = TABLE(_class="centered bordered", _id="contests-table")
     thead = THEAD(TR(TH("Contest Name"),
                      TH("Site"),
                      TH("Start"),
@@ -366,6 +366,7 @@ def contests():
     button_class = "btn-floating btn-small accent-4 tooltipped"
     view_link_class = button_class + " green view-contest"
     reminder_class = button_class + " orange set-reminder"
+    icon_style = "height: 30px; width: 30px;"
 
     for i in ongoing:
 
@@ -388,7 +389,12 @@ def contests():
                             "width:10px; " + \
                             "border-radius: 50%;")
         tr.append(TD(i["Name"], span))
-        tr.append(TD(i["Platform"].capitalize()))
+        tr.append(TD(IMG(_src=URL("static",
+                                  "images/" + \
+                                  str(i["Platform"]).lower() + \
+                                  "_contest.png"),
+                         _style=icon_style)))
+
         tr.append(TD("-"))
         tr.append(TD(str(endtime).replace("-", "/"),
                      _class="contest-end-time"))
@@ -415,7 +421,12 @@ def contests():
                                                 "%a, %d %b %Y %H:%M")
         tr = TR()
         tr.append(TD(i["Name"]))
-        tr.append(TD(i["Platform"].capitalize()))
+        tr.append(TD(IMG(_src=URL("static",
+                                  "images/" + \
+                                  str(i["Platform"]).lower() + \
+                                  "_contest.png"),
+                         _style=icon_style)))
+
         tr.append(TD(str(start_time), _class="stopstalk-timestamp"))
 
         duration = i["Duration"]
