@@ -166,6 +166,7 @@
             datumTokenizer: Bloodhound.tokenizers.obj.whitespace('text'),
             queryTokenizer: Bloodhound.tokenizers.whitespace,
             prefetch: {
+                ttl: 0,
                 url: '/problems/get_tag_values.json/',
                 transform: function(response) {
                     return response['tags'];
