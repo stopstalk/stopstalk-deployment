@@ -133,7 +133,7 @@ class Profile(object):
 
             # Time of submission
             # @Todo: This is ugly
-            time_stamp = row["created_at"][:-5].split("T")
+            time_stamp = row["created_at"][:-10].split("T")
             time_stamp = time.strptime(time_stamp[0] + " " + time_stamp[1],
                                        "%Y-%m-%d %H:%M:%S")
             time_stamp = datetime.datetime(time_stamp.tm_year,
