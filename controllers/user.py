@@ -35,6 +35,14 @@ def index():
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()
+def friend_requests():
+    """
+        Just to avoid too many 404s
+    """
+    redirect(URL("default", "notifications"))
+
+# ------------------------------------------------------------------------------
+@auth.requires_login()
 def add_custom_friend():
     """
         Add an already existing custom user to some other user
