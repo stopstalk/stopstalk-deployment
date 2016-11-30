@@ -31,32 +31,40 @@ def pie_chart_helper():
     """
 
     problem_link = request.post_vars["plink"]
-    global_submissions = False
-    if request.post_vars["global"] == "True":
-        global_submissions = True
+    submission_type = "friends"
+
+    if request.vars.has_key("submission_type"):
+        if request.vars["submission_type"] == "global":
+            submission_type = "global"
+        elif request.vars["submission_type"] == "my":
+            submission_type = "my"
+
+    if auth.is_logged_in() is False:
+        submission_type = "global"
 
     stable = db.submission
     count = stable.id.count()
     query = (stable.problem_link == problem_link)
 
     # Show stats only for friends and logged-in user
-    if global_submissions is False:
-        if session.user_id:
-            friends, cusfriends = utilities.get_friends(session.user_id)
-            # The Original IDs of duplicate custom_friends
-            custom_friends = []
-            for cus_id in cusfriends:
-                if cus_id[1] is None:
-                    custom_friends.append(cus_id[0])
-                else:
-                    custom_friends.append(cus_id[1])
+    if submission_type in ("my", "friends"):
+        if auth.is_logged_in():
+            if submission_type == "friends":
+                friends, cusfriends = utilities.get_friends(session.user_id)
+                # The Original IDs of duplicate custom_friends
+                custom_friends = []
+                for cus_id in cusfriends:
+                    if cus_id[1] is None:
+                        custom_friends.append(cus_id[0])
+                    else:
+                        custom_friends.append(cus_id[1])
 
-            query &= (stable.user_id.belongs(friends)) | \
-                     (stable.custom_user_id.belongs(custom_friends)) | \
-                     (stable.user_id == session.user_id)
+                query &= (stable.user_id.belongs(friends)) | \
+                         (stable.custom_user_id.belongs(custom_friends))
+            else:
+                query &= (stable.user_id == session.user_id)
         else:
-            query &= (1 == 0)
-
+            return dict(row=[])
     row = db(query).select(stable.status,
                            count,
                            groupby=stable.status)
@@ -173,10 +181,16 @@ def index():
         session.flash = "Please click on a Problem Link"
         redirect(URL("default", "index"))
 
-    global_submissions = False
-    if request.vars.has_key("global"):
-        if request.vars["global"] == "True":
-            global_submissions = True
+    submission_type = "friends"
+    if request.vars.has_key("submission_type"):
+        if request.vars["submission_type"] == "global":
+            submission_type = "global"
+        elif request.vars["submission_type"] == "my":
+            submission_type = "my"
+
+    if auth.is_logged_in() is False and submission_type != "global":
+        response.flash = "Login to view your/friends' submissions"
+        submission_type = "global"
 
     stable = db.submission
     ptable = db.problem
@@ -187,26 +201,24 @@ def index():
     query = (stable.problem_link == problem_link)
     cusfriends = []
 
-    if global_submissions is False:
+    if submission_type in ("my", "friends"):
         if auth.is_logged_in():
-            friends, cusfriends = utilities.get_friends(session.user_id)
-            # The Original IDs of duplicate custom_friends
-            custom_friends = []
-            for cus_id in cusfriends:
-                if cus_id[1] is None:
-                    custom_friends.append(cus_id[0])
-                else:
-                    custom_friends.append(cus_id[1])
+            if submission_type == "friends":
+                friends, cusfriends = utilities.get_friends(session.user_id)
+                # The Original IDs of duplicate custom_friends
+                custom_friends = []
+                for cus_id in cusfriends:
+                    if cus_id[1] is None:
+                        custom_friends.append(cus_id[0])
+                    else:
+                        custom_friends.append(cus_id[1])
 
-            query &= (stable.user_id.belongs(friends)) | \
-                     (stable.custom_user_id.belongs(custom_friends)) | \
-                     (stable.user_id == session.user_id)
+                query &= (stable.user_id.belongs(friends)) | \
+                         (stable.custom_user_id.belongs(custom_friends))
+            else:
+                query &= (stable.user_id == session.user_id)
         else:
-            session.flash = "Login to view Friends' Submissions"
-            new_vars = request.vars
-            new_vars["global"] = True
-            redirect(URL("problems", "index",
-                         vars=new_vars))
+            response.flash = "Login to view your/friends' submissions"
 
     submissions = db(query).select(orderby=~stable.time_stamp)
 
@@ -280,19 +292,13 @@ def index():
     problem_details.append(DIV(_class="col s5", _id="chart_div"))
 
     table = utilities.render_table(submissions, cusfriends)
-    switch = DIV(LABEL(H6("Friends' Submissions",
-                          INPUT(_type="checkbox", _id="submission-switch"),
-                          SPAN(_class="lever pink accent-3"),
-                          "Global Submissions")),
-                 _class="switch")
-    div = TAG[""](H4("Recent Submissions"), switch, table)
 
     return dict(site=site,
                 problem_details=problem_details,
                 problem_name=problem_name,
                 problem_link=problem_link,
-                global_submissions=global_submissions,
-                div=div)
+                submission_type=submission_type,
+                table=table)
 
 # ----------------------------------------------------------------------------
 def tag():

@@ -12,9 +12,7 @@
             var userTags = response["user_tags"],
                 tagCounts = response["tag_counts"],
                 $inputElement = $('#tag-suggests'),
-                $div = $('<div>', {
-                    'class': 'centered striped'
-                });
+                $div = $('<div>');
 
             $inputElement.materialtags('removeAll');
 
@@ -35,25 +33,35 @@
                 $('#tags-till-now').html('You are the first to suggest');
             }
         });
-    }
+    };
+
+    var handleSubmissionTabs = function() {
+        var $submissionTabs = $('#submission-tabs');
+
+        $submissionTabs.tabs();
+        $submissionTabs.tabs('select_tab', submissionType);
+
+        $('#submission-tabs li').click(function() {
+            var value = $(this).attr("value"),
+                redirectURL;
+            if (value === "global") {
+                redirectURL = globalSubmissionURL;
+            } else if (value === "my") {
+                redirectURL = mySubmissionURL;
+            } else {
+                redirectURL = friendsSubmissionURL;
+            }
+            window.location.href = redirectURL;
+        });
+    };
 
     $(document).ready(function() {
 
         $('.tooltipped').tooltip({
             delay: 50
         });
-        if (globalSubmissions === 'True') {
-            $('#submission-switch')[0].checked = true;
-        }
-        $('#submission-switch').click(function() {
-            var redirectURL = null;
-            if (globalSubmissions === 'True') {
-                redirectURL = friendsSubmissionURL;
-            } else {
-                redirectURL = globalSubmissionURL;
-            }
-            window.location.href = redirectURL;
-        });
+
+        handleSubmissionTabs();
 
         $('#show-tags').click(function() {
             var problemTags = $(this).data('tags');
@@ -80,7 +88,6 @@
         });
 
         if (isLoggedIn == "True") {
-
             if (openModal)
                 $('#suggest-tags-modal').openModal();
 

@@ -12,9 +12,10 @@
     <script type="text/javascript">
         var problemName = '{{=problem_name}}';
         var problemLink = '{{=problem_link}}';
-        var globalSubmissions = '{{=global_submissions}}';
-        var globalSubmissionURL = '{{=URL("problems", "index", vars={"pname": problem_name, "plink": problem_link, "global": "True"})}}';
-        var friendsSubmissionURL = '{{=URL("problems", "index", vars={"pname": problem_name, "plink": problem_link, "global": "False"})}}';
+        var submissionType = '{{=submission_type}}';
+        var globalSubmissionURL = '{{=URL("problems", "index", vars={"pname": problem_name, "plink": problem_link, "submission_type": "global"})}}';
+        var friendsSubmissionURL = '{{=URL("problems", "index", vars={"pname": problem_name, "plink": problem_link, "submission_type": "friends"})}}';
+        var mySubmissionURL = '{{=URL("problems", "index", vars={"pname": problem_name, "plink": problem_link, "submission_type": "my"})}}';
         var isLoggedIn = '{{=auth.is_logged_in()}}';
         var openModal = ('{{=request.vars.open_modal}}' === 'True');
     </script>
@@ -43,7 +44,7 @@
                 url: '/problems/pie_chart_helper.json/',
                 data: {
                     'plink': problemLink,
-                    'global': globalSubmissions
+                    'submission_type': submissionType
                 }
             }).done(function(data) {
 
@@ -215,4 +216,16 @@
     </script>
     {{pass}}
 </div>
-{{=div}}
+<div class="row">
+    <div class="col s12">
+        <ul class="tabs" id="submission-tabs">
+            <li class="tab col s3" value="my"><a href="#my">My Submissions</a></li>
+            <li class="tab col s3" value="friends"><a href="#friends">Friends' Submissions</a></li>
+            <li class="tab col s3" value="global"><a href="#global">Global Submissions</a></li>
+        </ul>
+    </div>
+    <div id="my" class="col s12"></div>
+    <div id="friend" class="col s12"></div>
+    <div id="global" class="col s12"></div>
+</div>
+{{=table}}
