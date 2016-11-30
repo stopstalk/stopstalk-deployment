@@ -740,7 +740,7 @@ def custom_friend():
     # Custom users already created
     rows = db(db.custom_friend.user_id == session.user_id).select()
 
-    table = TABLE(_class="table striped centered")
+    table = TABLE(_class="bordered centered")
     tr = TR(TH("Name"),
             TH("StopStalk Handle"))
 

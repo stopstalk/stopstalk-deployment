@@ -218,7 +218,7 @@ def notifications():
     # The table containing users on streak(days)
     streak_table = TABLE(THEAD(TR(TH(STRONG("User")),
                                   TH(STRONG("Days")))),
-                         _class="striped centered")
+                         _class="bordered centered")
 
     tbody = TBODY()
 
@@ -240,7 +240,7 @@ def notifications():
         streak_table = H6("No friends on day streak", _class="center")
 
     rows = db(db.friend_requests.to_h == session.user_id).select()
-    request_table = TABLE(_class="striped centered")
+    request_table = TABLE(_class="bordered centered")
     request_table.append(THEAD(TR(TH(T("Name")),
                                   TH(T("Action")))))
 
@@ -537,7 +537,7 @@ def leaderboard():
     # Sort users according to the rating
     users = sorted(users, key=lambda x: x[3], reverse=True)
 
-    table = TABLE(_class="centered striped")
+    table = TABLE(_class="centered bordered")
     table.append(THEAD(TR(TH("Rank"),
                           TH("Name"),
                           TH("StopStalk Handle"),
@@ -970,7 +970,7 @@ def search():
     rows = db(query).select(*columns,
                             orderby=[atable.first_name, atable.last_name])
 
-    table = TABLE(_class="striped centered")
+    table = TABLE(_class="bordered centered")
     tr = TR(TH("Name"))
 
     for site in current.SITES:

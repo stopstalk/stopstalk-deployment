@@ -300,7 +300,7 @@ def tag():
         Tag search page
     """
 
-    table = TABLE(_class="striped centered")
+    table = TABLE(_class="bordered centered")
     thead = THEAD(TR(TH("Problem Name"),
                      TH("Problem URL"),
                      TH("Site"),
@@ -374,7 +374,11 @@ def tag():
         tr.append(TD(A(I(_class="fa fa-link"),
                        _href=problem.link,
                        _target="_blank")))
-        tr.append(TD(utilities.urltosite(problem.link).capitalize()))
+        tr.append(TD(IMG(_src=URL("static",
+                                  "images/" + \
+                                  utilities.urltosite(problem.link) + \
+                                  "_small.png"),
+                         _style="height: 30px; width: 30px;")))
         all_tags = eval(problem.tags)
         td = TD()
         for tag in all_tags:
@@ -398,7 +402,7 @@ def _render_trending(caption, problems, flag):
         Create trending table from the rows
     """
 
-    table = TABLE(_class="striped centered")
+    table = TABLE(_class="bordered centered")
     thead = THEAD(TR(TH("Problem"),
                      TH("Recent Submissions"),
                      TH(flag)))
