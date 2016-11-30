@@ -418,10 +418,9 @@ def render_table(submissions, duplicates=[]):
                    "PS": "Partially Solved",
                    "OTH": "Others"}
 
-    table = TABLE(_class="striped centered")
-    table.append(THEAD(TR(TH("User Name"),
-                          TH("Site"),
-                          TH("Site Handle"),
+    table = TABLE(_class="bordered centered")
+    table.append(THEAD(TR(TH("Name"),
+                          TH("Site Profile"),
                           TH("Time of submission"),
                           TH("Problem"),
                           TH("Language"),
@@ -469,11 +468,15 @@ def render_table(submissions, duplicates=[]):
                                   args=person_id.stopstalk_handle,
                                   extension=False),
                         _target="_blank"))))
-        append(TD(submission.site))
-        append(TD(A(submission.site_handle,
+        append(TD(A(IMG(_src=URL("static",
+                                 "images/" + \
+                                 submission.site.lower() + \
+                                 "_small.png"),
+                        _style="height: 30px; width: 30px;"),
                     _href=get_link(submission.site,
                                    submission.site_handle),
                     _target="_blank")))
+
         append(TD(submission.time_stamp, _class="stopstalk-timestamp"))
 
         link_class = ""
