@@ -25,6 +25,9 @@
     <!-- @Todo: Load only if we have any submissions for the user -->
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
+        var isLoggedIn = "{{=auth.is_logged_in()}}";
+    </script>
+    <script type="text/javascript">
 
       // Load the Visualization API and the piechart package.
       google.load('visualization', '1.0', {'packages':['corechart', 'calendar']});
