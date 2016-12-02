@@ -392,7 +392,7 @@ def contests():
         tr.append(TD(IMG(_src=URL("static",
                                   "images/" + \
                                   str(i["Platform"]).lower() + \
-                                  "_contest.png"),
+                                  "_small.png"),
                          _style=icon_style)))
 
         tr.append(TD("-"))
@@ -424,7 +424,7 @@ def contests():
         tr.append(TD(IMG(_src=URL("static",
                                   "images/" + \
                                   str(i["Platform"]).lower() + \
-                                  "_contest.png"),
+                                  "_small.png"),
                          _style=icon_style)))
 
         tr.append(TD(str(start_time), _class="stopstalk-timestamp"))
