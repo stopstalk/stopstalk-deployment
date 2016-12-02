@@ -847,9 +847,6 @@ def mark_friend():
         Send a friend request
     """
 
-    raise HTTP(504)
-    return
-
     if len(request.args) < 1:
         return "Invalid URL"
 
