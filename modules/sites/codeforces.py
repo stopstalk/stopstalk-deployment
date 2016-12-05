@@ -103,12 +103,21 @@ class Profile(object):
         """
 
         handle = self.handle
-
         url = "http://www.codeforces.com/api/user.status?handle=" + \
-              handle + \
-              "&from=1&count=50000"
+              handle + "&from=1"
+        # Timeout for new user submission retrieval
+        timeout = 40
 
-        tmp = get_request(url, headers={"User-Agent": user_agent})
+        if last_retrieved != current.INITIAL_DATE:
+            # Daily retrieval script to limit submissions to 500
+            # A daily submitter of more than 500 submissions is really
+            # supposed to contact us to prove he/she is a human :p
+            url += "&count=500"
+            timeout = current.TIMEOUT
+
+        tmp = get_request(url,
+                          headers={"User-Agent": user_agent},
+                          timeout=timeout)
 
         if tmp in REQUEST_FAILURES:
             return tmp
