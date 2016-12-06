@@ -39,6 +39,7 @@ NOT_FOUND = "NOT_FOUND"
 OTHER_FAILURE = "OTHER_FAILURE"
 
 INVALID_HANDLES = None
+failed_user_retrievals = []
 
 # -----------------------------------------------------------------------------
 def _debug(stopstalk_handle, site, custom=False):
@@ -130,17 +131,19 @@ def handle_not_found(site, site_handle):
     db.invalid_handle.insert(site=site, handle=site_handle)
 
 # ----------------------------------------------------------------------------
-def retrieve_submissions(record, custom):
+def retrieve_submissions(record, custom, all_sites=current.SITES):
     """
         Retrieve submissions that are not already in the database
     """
 
     global INVALID_HANDLES
+    global failed_user_retrievals
 
     time_conversion = "%Y-%m-%d %H:%M:%S"
     list_of_submissions = []
+    retrieval_failures = []
 
-    for site in current.SITES:
+    for site in all_sites:
 
         site_handle = record[site.lower() + "_handle"]
         site_lr = site.lower() + "_lr"
@@ -158,7 +161,8 @@ def retrieve_submissions(record, custom):
             submissions = site_method(last_retrieved)
             if submissions in (SERVER_FAILURE, OTHER_FAILURE):
                 print "%s %s %s" % (submissions, site, record.stopstalk_handle)
-                return "FAILURE"
+                # Add the failure sites for inserting data into failed_retrieval
+                retrieval_failures.append(site)
             elif submissions == NOT_FOUND:
                 print "New invalid handle %s %s" % (site_handle, site)
                 handle_not_found(site, site_handle)
@@ -189,7 +193,18 @@ def retrieve_submissions(record, custom):
     # To reflect all the updates to record into DB
     record.update_record()
 
-    return "SUCCESS"
+    # @ToDo: Too much main memory usage as strings are stored in a list
+    #        Aim to store only the ints and let typecasting and
+    #        "NULL" insertions happen just when required
+    for site in retrieval_failures:
+        if custom:
+            failed_user_retrievals.append("(%s,%s,'%s')" % ("NULL",
+                                                            str(record.id),
+                                                            site))
+        else:
+            failed_user_retrievals.append("(%s,%s,'%s')" % (str(record.id),
+                                                            "NULL",
+                                                            site))
 
 # ----------------------------------------------------------------------------
 def new_users():
@@ -244,22 +259,30 @@ def re_retrieve():
         Get the user_ids and custom_user_ids whose retrieval was
         failed
 
-        @return (Tuple): (list of user_ids, list of custom_user_ids)
+        @return (Tuple): (Dict - (user_id, list of sites failures),
+                          Dict - (custom_user_id, list of site failures))
     """
 
-    users = []
-    custom_users = []
+    users = {}
+    custom_users = {}
     frtable = db.failed_retrieval
     rows = db(frtable).select()
     for record in rows:
         if record.user_id:
-            users.append(atable(record.user_id))
-        else:
-            custom_users.append(cftable(record.custom_user_id))
+            if users.has_key(record.user_id):
+                users[record.user_id].add(record.site)
+            else:
+                users[record.user_id] = set([record.site])
+        elif record.custom_user_id:
+            if custom_users.has_key(record.custom_user_id):
+                custom_users[record.custom_user_id].add(record.site)
+            else:
+                custom_users[record.custom_user_id] = set([record.site])
 
     # Remove all the records after retrieving their submissions
     frtable.truncate()
-    return (list(set(users)), list(set(custom_users)))
+
+    return (users, custom_users)
 
 # ----------------------------------------------------------------------------
 def specific_user():
@@ -282,6 +305,7 @@ def specific_user():
 if __name__ == "__main__":
 
     retrieval_type = sys.argv[1]
+
     if retrieval_type == "new_users":
         users, custom_users = new_users()
     elif retrieval_type == "daily_retrieve":
@@ -298,17 +322,21 @@ if __name__ == "__main__":
     INVALID_HANDLES = db(db.invalid_handle).select()
     INVALID_HANDLES = set([(x.handle, x.site) for x in INVALID_HANDLES])
 
-    failed_user_ids = []
-    for record in users:
-        result = retrieve_submissions(record, False)
-        if result == "FAILURE":
-            failed_user_ids.append(str(record.id))
-
-    failed_custom_user_ids = []
-    for record in custom_users:
-        result = retrieve_submissions(record, True)
-        if result == "FAILURE":
-            failed_custom_user_ids.append(str(record.id))
+    if retrieval_type == "re_retrieve":
+        # Note: In this case users and custom_users are dicts
+        for user_id in users:
+            retrieve_submissions(atable(user_id),
+                                 False,
+                                 users[user_id])
+        for custom_user_id in custom_users:
+            retrieve_submissions(cftable(custom_user_id),
+                                 True,
+                                 custom_users[custom_user_id])
+    else:
+        for record in users:
+            retrieve_submissions(record, False)
+        for record in custom_users:
+            retrieve_submissions(record, True)
 
     columns = "(`user_id`, `custom_user_id`, `stopstalk_handle`, " + \
               "`site_handle`, `site`, `time_stamp`, `problem_name`," + \
@@ -322,15 +350,9 @@ if __name__ == "__main__":
 
     # Insert user_ids and custom_user_ids into failed_retrieval
     # for which the retrieval failed for further re-retrieval
-    insert_query = "INSERT INTO failed_retrieval (user_id, custom_user_id) VALUES"
-    if len(failed_user_ids):
-        failed_user_ids = ["(" + x + ", NULL)" for x in failed_user_ids]
-        sql_query = "%s %s" % (insert_query, ", ".join(failed_user_ids))
-        db.executesql(sql_query)
-
-    if len(failed_custom_user_ids):
-        failed_custom_user_ids = ["(NULL, " + x + ")" for x in failed_custom_user_ids]
-        sql_query = "%s %s" % (insert_query, ", ".join(failed_custom_user_ids))
+    insert_query = "INSERT INTO failed_retrieval (user_id, custom_user_id, site) VALUES "
+    if len(failed_user_retrievals):
+        sql_query = "%s %s;" % (insert_query, ",".join(failed_user_retrievals))
         db.executesql(sql_query)
 
 # END =========================================================================

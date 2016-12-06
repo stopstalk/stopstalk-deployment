@@ -603,7 +603,8 @@ db.define_table("download_submission_logs",
 
 db.define_table("failed_retrieval",
                 Field("user_id", "reference auth_user"),
-                Field("custom_user_id", "reference custom_friend"))
+                Field("custom_user_id", "reference custom_friend"),
+                Field("site"))
 
 db.define_table("invalid_handle",
                 Field("handle"),
