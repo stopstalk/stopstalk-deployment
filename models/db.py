@@ -521,6 +521,10 @@ db.define_table("friends",
                 Field("user_id", "reference auth_user"),
                 Field("friend_id", "reference auth_user"))
 
+db.define_table("following",
+                Field("user_id", "reference auth_user"),
+                Field("follower_id", "reference auth_user"))
+
 db.define_table("problem",
                 Field("name"),
                 Field("link"),
