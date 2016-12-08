@@ -525,6 +525,11 @@ db.define_table("following",
                 Field("user_id", "reference auth_user"),
                 Field("follower_id", "reference auth_user"))
 
+db.define_table("todays_requests",
+                Field("user_id", "reference auth_user"),
+                Field("follower_id", "reference auth_user"),
+                Field("transaction_type"))
+
 db.define_table("problem",
                 Field("name"),
                 Field("link"),
@@ -586,6 +591,10 @@ db.define_table("unsubscriber",
                       "boolean",
                       default=True,
                       label="Notify when a user from your Institute registers"),
+                Field("friend_unfriend",
+                      "boolean",
+                      default=True,
+                      label="Notify when a user adds/removes me as a friend"),
                 Field("time_stamp", "datetime"))
 
 site_fields = []
