@@ -132,8 +132,7 @@ def index():
 @auth.requires_login()
 def notifications():
     """
-        Check if any of the friends (includes CUSTOM) of the logged-in
-        user is on a streak along with list of friend requests
+        Show friends (includes CUSTOM) of the logged-in user on day streak
     """
 
     if not auth.is_logged_in():

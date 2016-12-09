@@ -513,14 +513,6 @@ db.define_table("submission",
                 Field("view_link",
                       default=""))
 
-db.define_table("friend_requests",
-                Field("from_h", "reference auth_user"),
-                Field("to_h", "reference auth_user"))
-
-db.define_table("friends",
-                Field("user_id", "reference auth_user"),
-                Field("friend_id", "reference auth_user"))
-
 db.define_table("following",
                 Field("user_id", "reference auth_user"),
                 Field("follower_id", "reference auth_user"))
