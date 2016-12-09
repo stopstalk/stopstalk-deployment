@@ -139,17 +139,16 @@ def notifications():
     if not auth.is_logged_in():
         redirect(URL("default", "index"))
 
-    ftable = db.friends
+    ftable = db.following
     atable = db.auth_user
     cftable = db.custom_friend
 
     # Check for streak of friends on stopstalk
-    query = (ftable.user_id == session.user_id)
+    query = (ftable.follower_id == session.user_id)
     rows = db(query).select(atable.first_name,
                             atable.last_name,
                             atable.stopstalk_handle,
-                            join=ftable.on(ftable.friend_id == atable.id))
-
+                            join=ftable.on(ftable.user_id == atable.id))
     # Will contain list of handles of all the friends along
     # with the Custom Users added by the logged-in user
     handles = []
@@ -239,40 +238,7 @@ def notifications():
     if len(users_on_day_streak) == 0:
         streak_table = H6("No friends on day streak", _class="center")
 
-    rows = db(db.friend_requests.to_h == session.user_id).select()
-    request_table = TABLE(_class="bordered centered")
-    request_table.append(THEAD(TR(TH(T("Name")),
-                                  TH(T("Action")))))
-
-    tbody = TBODY()
-    for row in rows:
-        tr = TR()
-        tr.append(TD(A(row.from_h.first_name + " " + row.from_h.last_name,
-                       _href=URL("user",
-                                 "profile",
-                                 args=[row.from_h.stopstalk_handle]),
-                       _target="_blank")))
-        tr.append(TD(UL(LI(FORM(INPUT(_value="Accept",
-                                      _type="submit",
-                                      _class="btn",
-                                      _style="background-color: green;"),
-                                _action=URL("user", "accept_fr",
-                                            args=[row.from_h, row.id]))),
-                        LI(FORM(INPUT(_value="Reject",
-                                      _type="submit",
-                                      _class="btn",
-                                      _style="background-color: red;"),
-                                _action=URL("user", "reject_fr",
-                                            args=[row.id]))),
-                        _style="display: inline-flex; list-style-type: none;")))
-        tbody.append(tr)
-
-    request_table.append(tbody)
-    if len(rows) == 0:
-        request_table = H6("No pending friend requests.", _class="center")
-
-    return dict(streak_table=streak_table,
-                request_table=request_table)
+    return dict(streak_table=streak_table)
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
@@ -449,6 +415,14 @@ def contests():
 
     table.append(tbody)
     return dict(table=table, upcoming=upcoming, retrieved=True)
+
+# ------------------------------------------------------------------------------
+def updates():
+  """
+      Show the updates and feature additions
+  """
+
+  return dict()
 
 # ------------------------------------------------------------------------------
 def leaderboard():
@@ -667,7 +641,7 @@ def filters():
     # Form has been submitted
     cftable = db.custom_friend
     atable = db.auth_user
-    ftable = db.friends
+    ftable = db.following
     duplicates = []
 
     switch = DIV(LABEL(H6("Friends' Submissions",
@@ -731,10 +705,10 @@ def filters():
     friends = possible_users
 
     if global_submissions is False:
-        query = (ftable.user_id == session.user_id) & \
-                (ftable.friend_id.belongs(possible_users))
-        friend_ids = db(query).select(ftable.friend_id)
-        friends = [x["friend_id"] for x in friend_ids]
+        query = (ftable.follower_id == session.user_id) & \
+                (ftable.user_id.belongs(possible_users))
+        friend_ids = db(query).select(ftable.user_id)
+        friends = [x["user_id"] for x in friend_ids]
 
         if session.user_id in possible_users:
             # Show submissions of user also
@@ -844,70 +818,45 @@ def filters():
 @auth.requires_login()
 def mark_friend():
     """
-        Send a friend request
+        Add a friend on StopStalk
     """
 
     if len(request.args) < 1:
+        raise HTTP(400, "Bad request")
         return "Invalid URL"
 
-    frtable = db.friend_requests
-    ftable = db.friends
-    friend_id = long(request.args[0])
-
-    if friend_id != session.user_id:
-        query = (ftable.user_id == session.user_id) & \
-                (ftable.friend_id == friend_id)
-        value = db(query).count()
-        if value == 0:
-            query = ((frtable.from_h == session.user_id) & \
-                     (frtable.to_h == friend_id)) | \
-                    ((frtable.from_h == friend_id) & \
-                     (frtable.to_h == session.user_id))
-
-            value = db(query).count()
-            if value != 0:
-                session.flash = "Friend request pending..."
-                redirect(URL("default", "search"))
-        else:
-            return "Already friends !!"
-    else:
+    ftable = db.following
+    try:
+        friend_id = long(request.args[0])
+    except ValueError:
+        raise HTTP(400, "Bad request")
         return "Invalid user argument!"
 
-    # Insert a tuple of users' id into the friend_requests table
-    db.friend_requests.insert(from_h=session.user_id, to_h=friend_id)
+    if friend_id != session.user_id:
+        query = (ftable.follower_id == session.user_id) & \
+                (ftable.user_id == friend_id)
+        if db(query).count() != 0:
+            raise HTTP(400, "Bad request")
+            return "Already friends !!"
+    else:
+        raise HTTP(400, "Bad request")
+        return "Invalid user argument!"
 
-    # Send the user an email notifying about the request
-    atable = db.auth_user
-    query = (atable.id == friend_id)
-    row = db(query).select(atable.email,
-                           atable.stopstalk_handle).first()
-    current.send_mail(to=row.email,
-                      subject=session.handle + \
-                              " wants to be a friend on StopStalk",
-                      message="""<html>
-%s (%s) wants to connect on StopStalk <br />
-To view all friend requests go here - %s <br />
+    # Insert a tuple of users' id into the following table
+    ftable.insert(user_id=friend_id, follower_id=session.user_id)
 
-To stop receiving mails - <a href="%s">Unsubscribe</a></html>
-                              """ % (session.handle,
-                                     URL("user",
-                                         "profile",
-                                         args=[session.handle],
-                                         scheme=True,
-                                         host=True,
-                                         extension=False),
-                                     URL("default",
-                                         "notifications",
-                                         scheme=True,
-                                         host=True,
-                                         extension=False),
-                                     URL("default", "unsubscribe",
-                                         scheme=True,
-                                         host=True,
-                                         extension=False)),
-                      mail_type="friend_requests")
+    trtable = db.todays_requests
+    query = (trtable.user_id == friend_id) & \
+            (trtable.follower_id == session.user_id)
+    row = db(query).select().first()
+    if row is None or row.transaction_type != "add":
+        db(query).delete()
+        # Use this for sending emails to the users everyday
+        db.todays_requests.insert(user_id=friend_id,
+                                  follower_id=session.user_id,
+                                  transaction_type="add")
 
-    return "Friend Request sent"
+    return "Friend added!"
 
 # ----------------------------------------------------------------------------
 def search():
@@ -928,8 +877,7 @@ def search():
                     table=DIV())
 
     atable = db.auth_user
-    frtable = db.friend_requests
-    ftable = db.friends
+    ftable = db.following
     q = request.get_vars.get("q", None)
     institute = request.get_vars.get("institute", None)
 
@@ -946,11 +894,6 @@ def search():
     if auth.is_logged_in():
         # Don't show the logged in user in the search
         query &= (atable.id != session.user_id)
-        # Don't show users who have sent friend requests
-        # to the logged in user
-        tmprows = db(frtable.to_h == session.user_id).select(frtable.from_h)
-        for row in tmprows:
-            query &= (atable.id != row.from_h)
 
     # Search by institute (if provided)
     if institute:
@@ -977,7 +920,7 @@ def search():
         tr.append(TH(site + " Handle"))
 
     if auth.is_logged_in():
-        tr.append(TH("Friendship Status"))
+        tr.append(TH("Actions"))
 
     thead = THEAD()
     thead.append(tr)
@@ -986,8 +929,8 @@ def search():
     tbody = TBODY()
 
     if auth.is_logged_in():
-        query = (ftable.user_id == session.user_id)
-        join_query = (ftable.friend_id == atable.id)
+        query = (ftable.follower_id == session.user_id)
+        join_query = (ftable.user_id == atable.id)
         friends = db(query).select(atable.id,
                                    join=ftable.on(join_query))
         friends = set([x["id"] for x in friends])
@@ -1016,8 +959,7 @@ def search():
         for site in current.SITES:
             tr.append(TD(user[site.lower() + "_handle"]))
 
-        # If user is not logged in then no need to show the
-        # friend request buttons
+        # If user is not logged-in then don't show the buttons
         if auth.is_logged_in() is False:
             tbody.append(tr)
             continue
@@ -1027,20 +969,11 @@ def search():
 
         # Check if the current user is already a friend or not
         if user.id not in friends:
-            r = db((frtable.from_h == session.user_id) &
-                   (frtable.to_h == user.id)).count()
-            if r == 0:
-                # Not a friend and no friend request pending
-                tooltip_attrs[:2] = "Send friend request", "add-friend"
-                tr.append(TD(BUTTON(I(_class="fa fa-user-plus fa-3x"),
-                                    _class=btn_class + " green",
-                                    data=_get_tooltip_data(*tooltip_attrs))))
-            else:
-                # Not a friend and friend request pending
-                tooltip_attrs[:2] = "Friend request pending", "disabled"
-                tr.append(TD(BUTTON(I(_class="fa fa-user-plus fa-3x"),
-                                    _class=btn_class + " disabled",
-                                    data=_get_tooltip_data(*tooltip_attrs))))
+            # Not a friend
+            tooltip_attrs[:2] = "Add friend", "add-friend"
+            tr.append(TD(BUTTON(I(_class="fa fa-user-plus fa-3x"),
+                                _class=btn_class + " green",
+                                data=_get_tooltip_data(*tooltip_attrs))))
         else:
             # Already friends
             tooltip_attrs[:2] = "Unfriend", "unfriend"
@@ -1156,44 +1089,43 @@ def unfriend():
         Unfriend the user
     """
 
+    def _invalid_url():
+        raise HTTP(400, "Bad request")
+        return "Invalid url arguments"
+
     if len(request.args) != 1:
-        return "Please click on a button!"
+        return _invalid_url()
     else:
-        friend_id = long(request.args[0])
+        try:
+            friend_id = long(request.args[0])
+        except ValueError:
+            return _invalid_url()
+
         user_id = session.user_id
-        ftable = db.friends
+        ftable = db.following
 
         # Delete records in the friends table
-        query = (ftable.user_id == user_id) & (ftable.friend_id == friend_id)
-        value = db(query).count()
-        if value == 0:
-            return "Invalid URL"
+        query = (ftable.user_id == friend_id) & (ftable.follower_id == user_id)
+        if db(query).count() == 0:
+            return _invalid_url()
 
         db(query).delete()
-        query = (ftable.user_id == friend_id) & (ftable.friend_id == user_id)
-        db(query).delete()
 
-        # Send email to the friend notifying about the tragedy ;)
-        atable = db.auth_user
-        row = db(atable.id == friend_id).select(atable.email).first()
-        current.send_mail(to=row.email,
-                          subject="A friend unfriended you on StopStalk",
-                          message="""<html>
-%s (%s) unfriended you on StopStalk <br />
+        trtable = db.todays_requests
+        query = (trtable.user_id == friend_id) & \
+                (trtable.follower_id == session.user_id)
+        row = db(query).select().first()
+        if row is None or row.transaction_type != "unfriend":
+            db(query).delete()
+            if row is None:
+                # This is to avoid the cases when add-friend button is clicked
+                # twice. We don't want the user to get notified if some user
+                # added and then unfriended him/her on the same day
 
-To stop receiving mails - <a href="%s">Unsubscribe</a></html>
-                                  """ % (session.handle,
-                                         URL("user",
-                                             "profile",
-                                             args=[session.handle],
-                                             scheme=True,
-                                             host=True,
-                                             extension=False),
-                                         URL("default", "unsubscribe",
-                                             scheme=True,
-                                             host=True,
-                                             extension=False)),
-                          mail_type="unfriend")
+                # Use this for sending emails to the users everyday
+                db.todays_requests.insert(user_id=friend_id,
+                                          follower_id=session.user_id,
+                                          transaction_type="unfriend")
 
         return "Successfully unfriended"
 
@@ -1215,7 +1147,6 @@ def submissions():
             return
 
     cftable = db.custom_friend
-    ftable = db.friends
     stable = db.submission
     atable = db.auth_user
     ptable = db.problem
@@ -1241,28 +1172,8 @@ def submissions():
         count += 1
 
     if request.extension == "json":
-        from random import sample
-        total_solved = len(current.solved_problems)
-        solved_problem_links = sample(current.solved_problems,
-                                      10 if total_solved > 10 else total_solved)
-        query = (ptable.link.belongs(solved_problem_links))
-        rows = db(query).select(ptable.link,
-                                ptable.name,
-                                limitby=(0, 3))
-        solved_problems = DIV(" | ")
-        for row in rows:
-            solved_problems.append(A(row.name,
-                                     _href=URL("problems", "index",
-                                               vars={"plink": row.link,
-                                                     "pname": row.name,
-                                                     "open_modal": True},
-                                               extension=False),
-                                     _target="_blank"))
-            solved_problems.append(" | ")
-
         return dict(count=count,
-                    total_rows=1,
-                    solved_problems=solved_problems)
+                    total_rows=1)
 
     user = session.auth.user
     db.sessions_today.insert(message="%s %s %d %s" % (user.first_name,

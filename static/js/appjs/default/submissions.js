@@ -16,7 +16,6 @@
                 currPage = "1";
             }
 
-            $('#solved-problems').html(page['solved_problems']);
             $('#page-selection').bootpag({
                 total: pageCount,
                 page: parseInt(currPage),

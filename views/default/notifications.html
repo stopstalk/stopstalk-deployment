@@ -7,17 +7,12 @@
 <h1>
     Notifications
 </h1>
+<h6 class="red-text">All the pending requests are now converted to follower-followed relationship! - {{=A("Know more", _href=URL("default", "updates"), _target="_blank")}}</h6>
 <div class="row">
-    <div class="col s6">
+    <div class="col offset-s2 s8">
         <h4>
             Day streak
         </h4>
         {{=streak_table}}
-    </div>
-    <div class="col s6">
-        <h4>
-            Friend Requests
-        </h4>
-        {{=request_table}}
     </div>
 </div>

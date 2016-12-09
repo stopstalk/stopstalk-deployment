@@ -19,6 +19,9 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
     THE SOFTWARE.
 """
+####################################################################
+#         DEPRECATED AFTER ADDING `following` table
+####################################################################
 
 ftable = db.friends
 atable = db.auth_user

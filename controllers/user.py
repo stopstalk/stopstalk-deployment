@@ -89,9 +89,9 @@ def add_custom_friend():
     if row.referrer and row.referrer != session.handle:
         referrer = db(atable.stopstalk_handle == row.referrer).count()
 
-    # 3 custom friends allowed plus one for each 5 invites
+    # 3 custom friends allowed plus one for each 3 invites
 
-    allowed_custom_friends = total_referrals / 5 + default_allowed + referrer
+    allowed_custom_friends = total_referrals / 3 + default_allowed + referrer
 
     # Custom users already created
     current_count = db(db.custom_friend.user_id == session.user_id).count()
@@ -481,21 +481,10 @@ def profile():
             flag = "my-custom-user"
     else:
         if row.id != session.user_id:
-            ftable = db.friends
-            frtable = db.friend_requests
-            query = (ftable.user_id == session.user_id) & \
-                    (ftable.friend_id == row.id)
-            value = db(query).count()
-            if value == 0:
-                query = ((frtable.from_h == session.user_id) & \
-                         (frtable.to_h == row.id)) | \
-                        ((frtable.from_h == row.id) & \
-                         (frtable.to_h == session.user_id))
-
-                value = db(query).count()
-                if value != 0:
-                    flag = "pending"
-            else:
+            ftable = db.following
+            query = (ftable.follower_id == session.user_id) & \
+                    (ftable.user_id == row.id)
+            if db(query).count():
                 flag = "already-friends"
         else:
             flag = "same-user"
@@ -607,110 +596,6 @@ def submissions():
                 user=user,
                 table=table,
                 total_rows=len(all_submissions))
-
-# -----------------------------------------------------------------------------
-@auth.requires_login()
-def add_friend(user_id, friend_id):
-    """
-        Add a friend into friend-list
-    """
-
-    db.friends.insert(user_id=user_id,
-                      friend_id=friend_id)
-
-# ------------------------------------------------------------------------------
-@auth.requires_login()
-def accept_fr():
-    """
-        Helper function to accept friend request
-    """
-
-    if len(request.args) < 2:
-        redirect(URL("default", "notifications"))
-
-    friend_id = int(request.args[0])
-    row_id = int(request.args[1])
-    user_id = session.user_id
-
-    # Add friend ID to user's friends list
-    add_friend(user_id, friend_id)
-
-    # Add user ID to friend's friends list
-    add_friend(friend_id, user_id)
-
-    # Delete the friend request row
-    db(db.friend_requests.id == row_id).delete()
-
-    atable = db.auth_user
-    row = db(atable.id == friend_id).select(atable.email).first()
-
-    subject = session.handle + " from StopStalk accepted your friend request!"
-    message = """<html>
-%s (%s) accepted your friend request. <br />
-
-To stop receiving mails - <a href="%s">Unsubscribe</a></html>
-              """ % (session.handle,
-                     URL("user", "profile",
-                         args=[session.handle],
-                         scheme=True,
-                         host=True),
-                     URL("default", "unsubscribe",
-                         scheme=True,
-                         host=True))
-
-    # Send acceptance email to the friend
-    current.send_mail(to=row.email,
-                      subject=subject,
-                      message=message,
-                      mail_type="acceptance_rejectance")
-
-    session.flash = "Friend added!"
-    redirect(URL("default", "notifications"))
-
-    return dict()
-
-# ------------------------------------------------------------------------------
-@auth.requires_login()
-def reject_fr():
-    """
-        Helper function to reject friend request
-    """
-
-    if request.args == []:
-        redirect(URL("default", "notifications"))
-
-    fr_id = request.args[0]
-
-    frtable = db.friend_requests
-    atable = db.auth_user
-    join_query = (frtable.from_h == atable.id)
-    row = db(frtable.id == fr_id).select(atable.email,
-                                         join=frtable.on(join_query)).first()
-    # Simply delete the friend request
-    db(db.friend_requests.id == fr_id).delete()
-
-    subject = session.handle + " from StopStalk rejected your friend request!"
-    message = """<html>
-%s (%s) rejected your friend request. <br />
-
-To stop receiving mails - <a href="%s">Unsubscribe</a></html>
-              """ % (session.handle,
-                     URL("user", "profile",
-                         args=[session.handle],
-                         scheme=True,
-                         host=True),
-                     URL("default", "unsubscribe",
-                         scheme=True,
-                         host=True))
-
-    # Send rejection email to the friend
-    current.send_mail(to=row.email,
-                      subject=subject,
-                      message=message,
-                      mail_type="acceptance_rejectance")
-
-    session.flash = "Friend request rejected!"
-    redirect(URL("default", "notifications"))
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()

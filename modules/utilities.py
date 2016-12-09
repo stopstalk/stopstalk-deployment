@@ -85,7 +85,7 @@ def get_friends(user_id):
 
     db = current.db
     cftable = db.custom_friend
-    ftable = db.friends
+    ftable = db.following
 
     cf_to_duplicate = []
     # Retrieve custom friends
@@ -96,9 +96,9 @@ def get_friends(user_id):
                                 custom_friend.duplicate_cu))
 
     # Retrieve friends
-    query = (ftable.user_id == user_id)
-    friends = db(query).select(ftable.friend_id)
-    friends = [x["friend_id"] for x in friends]
+    query = (ftable.follower_id == user_id)
+    friends = db(query).select(ftable.user_id)
+    friends = [x["user_id"] for x in friends]
 
     return friends, cf_to_duplicate
 

@@ -20,6 +20,10 @@
     THE SOFTWARE.
 """
 
+####################################################################
+#         DEPRECATED AFTER ADDING `following` table
+####################################################################
+
 db = current.db
 atable = db.auth_user
 frtable = db.friend_requests
