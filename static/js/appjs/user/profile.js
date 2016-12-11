@@ -5,6 +5,22 @@
 
         $('.modal-trigger').leanModal();
 
+        /* Color the handles accordingly */
+        $.ajax({
+            url: handleDetailsURL,
+            data: {handle: handle}
+        }).done(function(response) {
+            var mapping = {"invalid-handle": "Invalid handle",
+                           "pending-retrieval": "Pending retrieval",
+                           "not-provided": "Not provided"};
+
+            $.each(response, function(key, val) {
+                var $siteChip = $('#' + key + '_chip');
+                $siteChip.addClass(val);
+                $siteChip.parent().attr("data-tooltip", mapping[val]);
+            });
+        });
+
         $('.friends-button').click(function() {
             var thisButton = $(this),
                 userID = thisButton.attr('data-user-id'),

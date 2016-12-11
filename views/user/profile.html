@@ -19,6 +19,18 @@
             margin-top: 20%;
         }
 
+        .invalid-handle {
+            background-color: #FF374B;
+        }
+
+        .not-provided {
+            background-color: #9DE887;
+        }
+
+        .pending-retrieval {
+            background-color: #9B5DD8;
+        }
+
     </style>
 
     <!--Load the AJAX API-->
@@ -26,6 +38,8 @@
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
         var isLoggedIn = "{{=auth.is_logged_in()}}";
+        var handleDetailsURL = "{{=URL('user', 'handle_details', extension='json')}}";
+        var handle = "{{=handle}}";
     </script>
     <script type="text/javascript">
 
@@ -273,7 +287,7 @@
             <h6><strong>Accuracy</strong></h6>
             {{for site in current.SITES:}}
                 <a href="{{=(current.SITES[site] + row[site.lower() + '_handle'])}}" class="tooltipped" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank">
-                    <div class="chip">
+                    <div class="chip" id="{{=site.lower()}}_chip">
                         <img src="{{=URL('static', 'images/' + site.lower() + '_logo.png')}}" alt="{{=site}}"/>
                         {{=efficiency[site]}}
                     </div>

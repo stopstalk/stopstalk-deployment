@@ -407,6 +407,43 @@ def get_activity():
     return dict(table=table)
 
 # ------------------------------------------------------------------------------
+def handle_details():
+    import json
+    atable = db.auth_user
+    cftable = db.custom_friend
+    ihtable = db.invalid_handle
+    handle = request.vars["handle"]
+
+    row = db(atable.stopstalk_handle == handle).select().first()
+    if row is None:
+        row = db(cftable.stopstalk_handle == handle).select().first()
+        if row is None:
+            # Invalid handle in the get params
+            return dict()
+
+    query = False
+    for site in current.SITES:
+        query |= (ihtable.site == site) & \
+                 (ihtable.handle == row[site.lower() + "_handle"])
+    invalid_sites = db(query).select(ihtable.site)
+    invalid_sites = set([x.site for x in invalid_sites])
+
+    response = {}
+    for site in current.SITES:
+        smallsite = site.lower()
+        # 1. Pending submission retrieval
+        if str(row[smallsite + "_lr"]) == current.INITIAL_DATE:
+            response[smallsite] = "pending-retrieval"
+        # 2. Check for invalid handles
+        if site in invalid_sites:
+            response[smallsite] = "invalid-handle"
+        # 3. Check for empty handles
+        if row[smallsite + "_handle"] == "":
+            response[smallsite] = "not-provided"
+
+    return json.dumps(response)
+
+# ------------------------------------------------------------------------------
 def profile():
     """
         Controller to show user profile
