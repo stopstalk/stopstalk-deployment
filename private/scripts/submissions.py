@@ -152,6 +152,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES):
 
         if (site_handle, site) in INVALID_HANDLES:
             print "Not found %s %s" % (site_handle, site)
+            record.update({site_lr: datetime.now()})
             continue
 
         if site_handle:
