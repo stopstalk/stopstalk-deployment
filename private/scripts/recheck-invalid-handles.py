@@ -107,9 +107,11 @@ def hackerrank_invalid(handle):
     return False
 
 if __name__ == "__main__":
+
     ihtable = db.invalid_handle
     atable = db.auth_user
     cftable = db.custom_friend
+    stable = db.submission
     mapping = {}
     handle_to_row = {}
 
@@ -149,6 +151,7 @@ if __name__ == "__main__":
                    "per_day_change": "0.0",
                    "authentic": False}
 
+    final_delete_query = False
     for row in db(ihtable).select():
         print "Processing", row.handle, row.site
         # If not an invalid handle anymore
@@ -158,5 +161,9 @@ if __name__ == "__main__":
                 print "\t\t", row_obj.stopstalk_handle, "updated"
                 update_dict[row.site.lower() + "_lr"] = current.INITIAL_DATE
                 row_obj.update_record(**update_dict)
+                final_delete_query |= ((stable.site == row.site) & \
+                                       (stable.stopstalk_handle == row_obj.stopstalk_handle))
                 del update_dict[row.site.lower() + "_lr"]
             row.delete_record()
+
+    db(final_delete_query).delete()
