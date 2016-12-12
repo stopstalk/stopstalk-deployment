@@ -1,3 +1,11 @@
+#Baiduspider
+User-agent: Baiduspider
+Disallow: /
+
+#Yandex
+User-agent: Yandex
+Disallow: /
+
 User-agent: *
 Crawl-delay: 20
 Disallow: /static/scripts/
