@@ -380,7 +380,7 @@ def notify_institute_users(record):
 Hello %s,<br />
 
 %s from your Institute has just joined StopStalk.<br />
-Send a friend request now %s for better experience on StopStalk<br />
+Send a him/her as your friend now %s for better experience on StopStalk<br />
 
 To stop receiving mails - <a href="%s">Unsubscribe</a> <br />
 
