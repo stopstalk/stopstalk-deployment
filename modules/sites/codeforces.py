@@ -107,12 +107,11 @@ class Profile(object):
               handle + "&from=1"
         # Timeout for new user submission retrieval
         timeout = 40
-
-        if last_retrieved != current.INITIAL_DATE:
-            # Daily retrieval script to limit submissions to 5000
-            # A daily submitter of more than 5000 submissions is really
+        if time.strftime("%Y-%m-%d %H:%M:%S", last_retrieved) != current.INITIAL_DATE:
+            # Daily retrieval script to limit submissions to 500
+            # A daily submitter of more than 500 submissions is really
             # supposed to contact us to prove he/she is a human :p
-            url += "&count=5000"
+            url += "&count=500"
             timeout = current.TIMEOUT
 
         tmp = get_request(url,
