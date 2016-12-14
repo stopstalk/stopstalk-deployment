@@ -38,6 +38,8 @@ if not request.env.web2py_runtime_gae:
              ':' + current.mysql_password + \
              '@' + current.mysql_server + \
              '/' + current.mysql_dbname)
+    uvadb = DAL('mysql://root:admin@localhost/uvajudge')
+
 #    db = DAL(myconf.take('db.uri'), pool_size=myconf.take('db.pool_size', cast=int), check_reserved=['all'])
 else:
     ## connect to Google BigTable (optional 'google:datastore://namespace')
@@ -79,7 +81,7 @@ auth = Auth(db)
 service = Service()
 plugins = PluginManager()
 
-initial_date = datetime.strptime("2013-01-01 00:00:00", "%Y-%m-%d %H:%M:%S")
+initial_date = datetime.strptime(current.INITIAL_DATE, "%Y-%m-%d %H:%M:%S")
 
 db.define_table("institutes",
                 Field("name"))
@@ -605,6 +607,16 @@ db.define_table("contest_logging",
                 Field("stopstalk_handle"),
                 Field("time_stamp", "datetime"))
 
+uvadb.define_table("problem",
+                   Field("problem_id", "integer"),
+                   Field("problem_num", "integer"),
+                   Field("title"),
+                   Field("problem_status", "integer"))
+
+uvadb.define_table("usernametoid",
+                   Field("username"),
+                   Field("uva_id"))
+
 def get_solved_problems(user_id):
     """
         Get the solved and unsolved problems of a user
@@ -641,5 +653,39 @@ else:
     current.unsolved_problems = set([])
 
 current.db = db
+current.uvadb = uvadb
+
+def get_profile_url(site, handle):
+    if handle == "":
+        return "NA"
+
+    if site == "CodeChef":
+        return "http://www.codechef.com/users/" + handle
+    elif site == "CodeForces":
+        return "http://www.codeforces.com/profile/" + handle
+    elif site == "Spoj":
+        return "http://www.codeforces.com/profile/" + handle
+    elif site == "HackerEarth":
+        return "https://www.hackerearth.com/users/" + handle
+    elif site == "HackerRank":
+        return "https://www.hackerrank.com/" + handle
+    elif site == "UVa":
+        import requests
+        utable = uvadb.usernametoid
+        row = uvadb(utable.username == handle).select().first()
+        if row is None:
+            response = requests.get("http://uhunt.felix-halim.net/api/uname2uid/" + handle)
+            if response.status_code == 200 and response.text != "0":
+                print "miss"
+                utable.insert(username=handle, uva_id=response.text.strip())
+                return "http://uhunt.felix-halim.net/id/" + response.text
+            else:
+                return "NA"
+        else:
+            print "hit"
+            return "http://uhunt.felix-halim.net/id/" + row.uva_id
+    return "NA"
+
+current.get_profile_url = get_profile_url
 
 # =============================================================================

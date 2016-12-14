@@ -33,11 +33,12 @@ from collections import OrderedDict
 # Site Name => user profile url
 # OrderedDict is used to maintain the order of insertion
 current.SITES = OrderedDict()
-current.SITES["CodeChef"] = "http://www.codechef.com/users/"
-current.SITES["CodeForces"] = "http://www.codeforces.com/profile/"
-current.SITES["Spoj"] = "http://www.spoj.com/users/"
-current.SITES["HackerEarth"] = "https://www.hackerearth.com/users/"
+current.SITES["CodeChef"] = "https://www.codechef.com/"
+current.SITES["CodeForces"] = "http://www.codeforces.com/"
+current.SITES["Spoj"] = "http://www.spoj.com/"
+current.SITES["HackerEarth"] = "https://www.hackerearth.com/"
 current.SITES["HackerRank"] = "https://www.hackerrank.com/"
+current.SITES["UVa"] = "https://uva.onlinejudge.org/"
 
 # If you are under a PROXY uncomment this and comment the next line
 #current.PROXY = {"http": "http://proxy.iiit.ac.in:8080/",

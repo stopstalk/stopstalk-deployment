@@ -27,19 +27,6 @@ from gluon import current, IMG, DIV, TABLE, THEAD, \
                   TEXTAREA, SELECT, OPTION, URL, BUTTON
 
 # -----------------------------------------------------------------------------
-def get_link(site, handle):
-    """
-        Get the URL of site_handle
-
-        @param site (String): Site name
-        @param handle (String): Site handle
-
-        @return (String): User profile for that site
-    """
-
-    return current.SITES[site] + handle
-
-# -----------------------------------------------------------------------------
 def handles_updated(record, form):
     """
         Check if any of the handles are updated
@@ -473,8 +460,8 @@ def render_table(submissions, duplicates=[]):
                                  submission.site.lower() + \
                                  "_small.png"),
                         _style="height: 30px; width: 30px;"),
-                    _href=get_link(submission.site,
-                                   submission.site_handle),
+                    _href=current.get_profile_url(submission.site,
+                                                  submission.site_handle),
                     _target="_blank")))
 
         append(TD(submission.time_stamp, _class="stopstalk-timestamp"))

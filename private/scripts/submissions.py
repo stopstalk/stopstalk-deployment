@@ -29,7 +29,7 @@ from gevent import monkey
 gevent.monkey.patch_all(thread=False)
 
 # @ToDo: Make this generalised
-from sites import codechef, codeforces, spoj, hackerearth, hackerrank
+from sites import codechef, codeforces, spoj, hackerearth, hackerrank, uva
 rows = []
 atable = db.auth_user
 cftable = db.custom_friend
@@ -97,7 +97,10 @@ def get_submissions(user_id,
                 encoded_row = []
                 for x in row:
                     if isinstance(x, basestring):
-                        tmp = x.encode("utf-8", "ignore")
+                        try:
+                            tmp = x.encode("utf-8", "ignore")
+                        except UnicodeDecodeError:
+                            tmp = str(tmp)
 
                         # @ToDo: Dirty hack! Do something with
                         #        replace and escaping quotes

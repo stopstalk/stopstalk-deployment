@@ -557,6 +557,12 @@ def profile():
 
     output["efficiency"] = efficiency
 
+    profile_urls = {}
+    for site in current.SITES:
+        ret = current.get_profile_url(site, row[site.lower() + '_handle'])
+        profile_urls[site] = ret
+
+    output["profile_urls"] = profile_urls
     return output
 
 # ------------------------------------------------------------------------------
