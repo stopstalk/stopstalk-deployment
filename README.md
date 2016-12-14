@@ -46,6 +46,7 @@ pip install -r requirements.txt
     $ mysql -u root -p        # Enter your mysql root password after this.
 
     mysql> CREATE DATABASE migration;
+    mysql> CREATE DATABASE uvajudge;
     ```
 6. Copy `0firstrun.py` to `models/`
 
@@ -60,6 +61,7 @@ pip install -r requirements.txt
     current.mysql_password = "" # As per your mysql password
     current.mysql_server = "localhost"
     current.mysql_dbname = "migration" # Will remain same as long as you followed 5.
+    current.mysql_uvadbname = "uvajudge" # Will remain same as long as you followed 5.
 
     # Configure mail options
     current.smtp_server = "logging" # Mails will not be sent. Will be logged where the web2py server is running
