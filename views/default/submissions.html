@@ -4,14 +4,14 @@
     <script src="{{=URL('static', 'js/jquery.bootpag.min.js')}}"></script>
     <script src="{{=URL('static', 'js/appjs/default/submissions.js')}}"></script>
     <h1>Recent submissions</h1>
-    <p>Checkout latest feature updates with our new {{=A("Updates", _href=URL("default", "updates"), _target="_blank")}} page</p>
+    <p>Add your UVa Online Judge handle {{=A("now", _href=URL("user", "uva_handle"), _target="_blank")}} to build a strong StopStalk profile</p>
     <div id="page-selection" class="center"></div>
     <div id="content"></div>
     {{=table}}
 {{else:}}
     <br /><br />
     <h4>Welcome to StopStalk!</h4><br />
-    <h6>You can now suggest tags for a problem :) Try adding now by going to any problem page!</h6>
+    <p>Add your UVa Online Judge handle {{=A("now", _href=URL("user", "uva_handle"), _target="_blank")}} to build a strong StopStalk profile</p>
     <h5>You do not have any friends yet!</h5>
     <h5>
         Try adding friends on StopStalk &nbsp;

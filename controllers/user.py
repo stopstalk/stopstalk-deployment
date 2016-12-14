@@ -35,6 +35,41 @@ def index():
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()
+def uva_handle():
+
+    def _is_valid_uva_handle(form):
+        import requests
+        response = requests.get("http://uhunt.felix-halim.net/api/uname2uid/" + \
+                                form.vars.handle)
+        if response.status_code != 200:
+            return
+
+        if response.text.strip() == "0":
+            form.errors.handle = "Invalid UVa handle"
+
+    uhtable = db.uva_handles
+    uhtable.user_id.default = session.user_id
+    record = db(uhtable.user_id == session.user_id).select().first()
+    if record:
+        form = SQLFORM(uhtable, record,
+                       fields=["handle"],
+                       showid=False,
+                       keepvalues=True)
+    else:
+        form = SQLFORM(uhtable, fields=["handle"], keepvalues=True)
+
+    if form.process(onvalidation=_is_valid_uva_handle).accepted:
+        if record:
+            response.flash = "UVa handle updated"
+        else:
+            response.flash = "UVa handle added"
+    elif form.errors:
+        response.flash = "Unable to process your request"
+
+    return dict(form=form)
+
+# ------------------------------------------------------------------------------
+@auth.requires_login()
 def friend_requests():
     """
         Just to avoid too many 404s

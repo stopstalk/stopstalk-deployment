@@ -373,7 +373,9 @@ def notify_institute_users(record):
     query = (atable.institute == record.institute) & \
             (atable.email != record.email) & \
             (atable.institute != "Other") & \
-            (atable.blacklisted == False)
+            (atable.blacklisted == False) & \
+            (atable.registration_key == "")
+
     rows = db(query).select(atable.email, atable.stopstalk_handle)
 
     subject = "New user registered from your Institute"
@@ -541,6 +543,10 @@ db.define_table("suggested_tags",
                 Field("user_id", "reference auth_user"),
                 Field("problem_id", "reference problem"),
                 Field("tag_id", "reference tag"))
+
+db.define_table("uva_handles",
+                Field("user_id", "reference auth_user"),
+                Field("handle", requires=IS_NOT_EMPTY()))
 
 db.define_table("contact_us",
                 Field("name", requires=IS_NOT_EMPTY()),
