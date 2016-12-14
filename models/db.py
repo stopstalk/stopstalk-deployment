@@ -542,6 +542,10 @@ db.define_table("suggested_tags",
                 Field("problem_id", "reference problem"),
                 Field("tag_id", "reference tag"))
 
+db.define_table("uva_handles",
+                Field("user_id", "reference auth_user"),
+                Field("handle", requires=IS_NOT_EMPTY()))
+
 db.define_table("contact_us",
                 Field("name", requires=IS_NOT_EMPTY()),
                 Field("email", requires=[IS_NOT_EMPTY(), IS_EMAIL()]),
