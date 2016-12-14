@@ -371,7 +371,9 @@ def notify_institute_users(record):
     query = (atable.institute == record.institute) & \
             (atable.email != record.email) & \
             (atable.institute != "Other") & \
-            (atable.blacklisted == False)
+            (atable.blacklisted == False) & \
+            (atable.registration_key == "")
+
     rows = db(query).select(atable.email, atable.stopstalk_handle)
 
     subject = "New user registered from your Institute"

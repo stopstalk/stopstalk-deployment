@@ -213,7 +213,8 @@ def new_users():
         Get the user_ids and custom_user_ids whose any of the last_retrieved
         is equal to INITIAL_DATE
 
-        @return (Tuple): (list of user_ids, list of custom_user_ids)
+        @return (Tuple): (Dict - (user_id, list of sites),
+                          Dict - (custom_user_id, list of sites))
     """
 
     def _get_initial_query(table):
@@ -227,11 +228,23 @@ def new_users():
             (atable.blacklisted == False) & \
             (atable.registration_key == "") # Unverified email
     new_users = db(query).select(limitby=(0, max_limit))
+    users = {}
+    for user in new_users:
+        users[user.id] = []
+        for site in current.SITES:
+            if str(user[site.lower() + "_lr"]) == current.INITIAL_DATE:
+                users[user.id].append(site)
 
     query = _get_initial_query(cftable)
     custom_users = db(query).select(limitby=(0, max_limit))
+    cusers = {}
+    for user in custom_users:
+        cusers[user.id] = []
+        for site in current.SITES:
+            if str(user[site.lower() + "_lr"]) == current.INITIAL_DATE:
+                cusers[user.id].append(site)
 
-    return (new_users, custom_users)
+    return (users, cusers)
 
 # ----------------------------------------------------------------------------
 def daily_retrieve():
@@ -323,7 +336,7 @@ if __name__ == "__main__":
     INVALID_HANDLES = db(db.invalid_handle).select()
     INVALID_HANDLES = set([(x.handle, x.site) for x in INVALID_HANDLES])
 
-    if retrieval_type == "re_retrieve":
+    if retrieval_type in ("new_users", "re_retrieve"):
         # Note: In this case users and custom_users are dicts
         for user_id in users:
             retrieve_submissions(atable(user_id),
