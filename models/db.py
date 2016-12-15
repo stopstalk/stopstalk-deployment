@@ -34,11 +34,12 @@ myconf = AppConfig(reload=True)
 
 if not request.env.web2py_runtime_gae:
     ## if NOT running on Google App Engine use SQLite or other DB
-    db = DAL('mysql://' + current.mysql_user + \
-             ':' + current.mysql_password + \
-             '@' + current.mysql_server + \
-             '/' + current.mysql_dbname)
-    uvadb = DAL('mysql://root:admin@localhost/uvajudge')
+    mysql_connection = 'mysql://' + current.mysql_user + \
+                       ':' + current.mysql_password + \
+                       '@' + current.mysql_server
+
+    db = DAL(mysql_connection + '/' + current.mysql_dbname)
+    uvadb = DAL(mysql_connection + '/' + current.mysql_uvadbname)
 
 #    db = DAL(myconf.take('db.uri'), pool_size=myconf.take('db.pool_size', cast=int), check_reserved=['all'])
 else:
@@ -682,13 +683,11 @@ def get_profile_url(site, handle):
         if row is None:
             response = requests.get("http://uhunt.felix-halim.net/api/uname2uid/" + handle)
             if response.status_code == 200 and response.text != "0":
-                print "miss"
                 utable.insert(username=handle, uva_id=response.text.strip())
                 return "http://uhunt.felix-halim.net/id/" + response.text
             else:
                 return "NA"
         else:
-            print "hit"
             return "http://uhunt.felix-halim.net/id/" + row.uva_id
     return "NA"
 

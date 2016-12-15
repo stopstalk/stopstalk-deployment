@@ -594,9 +594,9 @@ def profile():
 
     profile_urls = {}
     for site in current.SITES:
-        ret = current.get_profile_url(site, row[site.lower() + '_handle'])
-        profile_urls[site] = ret
-
+        profile_urls[site] = current.get_profile_url(site,
+                                                     row[site.lower() + \
+                                                         '_handle'])
     output["profile_urls"] = profile_urls
     return output
 

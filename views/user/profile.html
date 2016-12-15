@@ -294,7 +294,7 @@
                         </div>
                     </a>
                 {{else:}}
-                    <a href="{{=current.SITES[site]}}}" class="tooltipped" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank">
+                    <a href="{{=current.SITES[site]}}" class="tooltipped" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank">
                         <div class="chip" id="{{=site.lower()}}_chip">
                             <img src="{{=URL('static', 'images/' + site.lower() + '_logo.png')}}" alt="{{=site}}"/>
                             {{=efficiency[site]}}
