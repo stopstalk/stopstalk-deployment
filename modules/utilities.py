@@ -52,6 +52,8 @@ def urltosite(url):
         @return url (String): Site
     """
 
+    if url.__contains__("uva.onlinejudge.org"):
+        return "uva"
     # Note: try/except is not added because this function is not to
     #       be called for invalid problem urls
     site = re.search(r"www\..*?\.com", url).group()
