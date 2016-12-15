@@ -913,10 +913,7 @@ def search():
                             orderby=[atable.first_name, atable.last_name])
 
     table = TABLE(_class="bordered centered")
-    tr = TR(TH("Name"))
-
-    for site in current.SITES:
-        tr.append(TH(site + " Handle"))
+    tr = TR(TH("Name"), TH("Site handles"))
 
     if auth.is_logged_in():
         tr.append(TH("Actions"))
@@ -955,8 +952,21 @@ def search():
                                  extension=False),
                        _target="_blank")))
 
+        td = TD()
+
         for site in current.SITES:
-            tr.append(TD(user[site.lower() + "_handle"]))
+            if user[site.lower() + "_handle"]:
+              td.append(A(DIV(IMG(_src=URL("static",
+                                           "images/" + \
+                                           site.lower() + \
+                                           "_logo.png")),
+                              user[site.lower() + "_handle"],
+                              _style="background-color: #e4e4e4; color: black;",
+                              _class="chip"),
+                          _href=current.get_profile_url(site,
+                                                        user[site.lower() + "_handle"]),
+                          _target="_blank"))
+        tr.append(td)
 
         # If user is not logged-in then don't show the buttons
         if auth.is_logged_in() is False:
