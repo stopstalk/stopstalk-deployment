@@ -22,49 +22,30 @@
 
 db = current.db
 atable = db.auth_user
-rows = db(atable.id > 0).select(atable.stopstalk_handle,
-                                atable.email)
-
-def get_message(stopstalk_handle):
-
-    message = """
-
-Hello there and Welcome to StopStalk!
-We're all set for the release.
-
-Lets get going - """ + URL("default", "user", args=["login"], scheme=True, host=True) + \
-"""\n\n Checkout your StopStalk profile page here - """ + URL("user",
-                                                              "profile",
-                                                              args=[stopstalk_handle],
-                                                              scheme=True,
-                                                              host=True) + \
-"""
-
-If your friends are not on StopStalk - send them your
-StopStalk handle and ask them to enter it in
-Referrer's StopStalk handle field to get more Custom Users.
-
-You can also add Custom Users if you know their handles
-on the Competitive programming sites.
-
-Checkout the Global Leaderboard - """ + URL("default", "leaderboard", scheme=True, host=True) + \
-"""
-
-Show your love -
-Like us on Facebook - https://www.facebook.com/stopstalkcommunity/
-Follow us on Twitter - https://twitter.com/stop_stalk/
-Star the Repo on Github - https://github.com/stopstalk/stopstalk/
-
-Lets go StopStalking !!
-
-Cheers,
-StopStalk
-"""
-
-    return message
+query = (atable.registration_key == "") & \
+        (atable.blacklisted == False)
+rows = db(query).select(atable.stopstalk_handle, atable.email)
 
 for row in rows:
-    subject = "Welcome to StopStalk " + row.stopstalk_handle
+    subject = "UVa Online Judge added on StopStalk"
+    message = """
+<html>
+Hello %s,<br/><br/>
+
+As many of you have requested us to add UVa to StopStalk - here we are with the announcement
+that we have successfully added <b>UVa Online Judge</b> to StopStalk.
+To update your StopStalk profile with UVa submissions - Add your UVa username / handle <a href="https://www.stopstalk.com/user/update_details">here</a>. <br/>
+For your custom users you can update the handles <a href="https://www.stopstalk.com/user/custom_friend">here</a><br/>
+Climb the StopStalk leaderboard now ;) <br/><br/>
+
+Also, its been a while since we have conducted a survey to understand your use-cases better and incorporate them to improve StopStalk. <br/>
+Please take some minutes to fill out the <a href="https://goo.gl/oeLZHd">Survey Form</a><br/><br/>
+Adjust your email preferences <a href="https://www.stopstalk.com/unsubscribe">here</a><br/><br/>
+Cheers,<br/>
+Team StopStalk
+</html>
+              """ % (row.stopstalk_handle)
     current.send_mail(to=row.email,
                       subject=subject,
-                      message=get_message(row.stopstalk_handle))
+                      message=message,
+                      mail_type="feature_updates")

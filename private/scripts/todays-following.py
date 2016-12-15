@@ -80,6 +80,7 @@ def get_html_content(user_id, add_unfriend_list):
 Adjust your email preferences %s<br/>
 Cheers,<br/>
 Team StopStalk
+</html>
                     """ % (A("here",
                              _href=URL("default",
                                        "unsubscribe",
