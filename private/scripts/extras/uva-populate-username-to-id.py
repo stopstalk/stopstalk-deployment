@@ -20,18 +20,26 @@
     THE SOFTWARE.
 """
 
+u2idtable = uvadb.usernametoid
+atable = db.auth_user
+cftable = db.custom_friend
+
+current_handles = uvadb(u2idtable).select(u2idtable.username)
+current_handles = set([x.username for x in current_handles])
+
+all_uva_handles = set([])
+
+handles = db(atable.uva_handle != "").select(atable.uva_handle)
+all_uva_handles = all_uva_handles.union(set([x.uva_handle for x in handles]))
+
+handles = db(cftable.uva_handle != "").select(cftable.uva_handle)
+all_uva_handles = all_uva_handles.union(set([x.uva_handle for x in handles]))
+
 import requests
 
-ptable = uvadb.problem
-
-problems = uvadb(ptable).select(ptable.problem_id, ptable.problem_num)
-problems = set([(x.problem_id, x.problem_num) for x in problems])
-
-response = requests.get("http://uhunt.felix-halim.net/api/p")
-for problem in response.json():
-    if (problem[0], problem[1]) not in problems:
-        print problem, "added"
-        ptable.insert(problem_id=problem[0],
-                      problem_num=problem[1],
-                      title=problem[2],
-                      problem_status=problem[20])
+for handle in (all_uva_handles - current_handles):
+    response = requests.get("http://uhunt.felix-halim.net/api/uname2uid/" + handle)
+    if response.status_code == 200:
+        print handle, response.text, "added"
+        u2idtable.insert(username=handle,
+                         uva_id=response.text)
