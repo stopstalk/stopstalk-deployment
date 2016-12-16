@@ -94,9 +94,12 @@ def get_editorial(link, today):
     ptable = db.problem
     site = utilities.urltosite(link)
 
-    Site = globals()[site]
-    editorial_func = Site.Profile().get_editorial_link
-    editorial_link = editorial_func(link)
+    try:
+        Site = globals()[site]
+        editorial_func = Site.Profile().get_editorial_link
+        editorial_link = editorial_func(link)
+    except AttributeError:
+        editorial_link = None
 
     row = db(ptable.link == link).select().first()
     if row:

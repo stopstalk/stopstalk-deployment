@@ -67,17 +67,6 @@ class Profile(object):
         return all_tags
 
     # -------------------------------------------------------------------------
-    @staticmethod
-    def get_editorial_link(problem_link):
-        """
-            Get editorial link given a problem link
-
-            @param problem_link (String): Problem URL
-            @return (String/None): Editorial URL
-        """
-        return None
-
-    # -------------------------------------------------------------------------
     def get_submissions(self, last_retrieved):
         """
             Retrieve Spoj submissions after last retrieved timestamp
