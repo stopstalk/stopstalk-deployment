@@ -27,7 +27,7 @@ import datetime
 import utilities
 
 # @ToDo: Make this generalised
-from sites import codechef, codeforces, spoj, hackerearth, hackerrank
+from sites import codechef, codeforces, spoj, hackerearth, hackerrank, uva
 gevent.monkey.patch_all(thread=False)
 
 total_inserted = 0

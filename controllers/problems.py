@@ -30,9 +30,7 @@ def pie_chart_helper():
         submission status of a problem
     """
 
-    import HTMLParser
-
-    problem_link = HTMLParser.HTMLParser().unescape(request.post_vars["plink"])
+    problem_link = request.post_vars["plink"]
     submission_type = "friends"
 
     if request.vars.has_key("submission_type"):
