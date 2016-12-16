@@ -345,6 +345,8 @@ def sanitize_fields(form):
     # 3.
     for site in handle_fields:
         site_handle = site + "_handle"
+        if site == "uva":
+            continue
         if form.vars[site_handle] and \
            form.vars[site_handle] != form.vars[site_handle].lower():
             form.errors[site_handle] = "Please enter in lower case"
@@ -431,11 +433,11 @@ Email: %s
 Institute: %s
 StopStalk handle: %s
 Referrer: %s\n""" % (form.vars.first_name,
-                   form.vars.last_name,
-                   form.vars.email,
-                   form.vars.institute,
-                   form.vars.stopstalk_handle,
-                   form.vars.referrer)
+                     form.vars.last_name,
+                     form.vars.email,
+                     form.vars.institute,
+                     form.vars.stopstalk_handle,
+                     form.vars.referrer)
 
     for site in current.SITES:
         message += "%s handle: %s\n" % (site, form.vars[site.lower() + "_handle"])
