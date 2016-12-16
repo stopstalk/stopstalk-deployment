@@ -24,6 +24,7 @@ import re
 import gevent
 from gevent import monkey
 import datetime
+import utilities
 
 # @ToDo: Make this generalised
 from sites import codechef, codeforces, spoj, hackerearth, hackerrank, uva
@@ -32,21 +33,6 @@ gevent.monkey.patch_all(thread=False)
 total_inserted = 0
 total_updated = 0
 not_updated = 0
-
-# ----------------------------------------------------------------------------
-def urltosite(url):
-    """
-        Helper function to extract site from url
-    """
-
-    # Note: try/except is not added because this function is not to
-    #       be called for invalid problem urls
-    site = re.search("www\..*\.com", url).group()
-
-    # Remove www. and .com from the url to get the site
-    site = site[4:-4]
-
-    return site
 
 # ----------------------------------------------------------------------------
 def refresh_tags():
@@ -118,7 +104,7 @@ def get_tag(link, name, today):
     global not_updated
 
     ptable = db.problem
-    site = urltosite(link)
+    site = utilities.urltosite(link)
 
     try:
         Site = globals()[site]
