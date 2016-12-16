@@ -11,8 +11,12 @@
 
         #user-details {
             float: left;
-            margin-top: 10%;
-            margin-left: 7%;
+            margin-top: 7%;
+            margin-left: 9%;
+        }
+
+        #chart_div {
+            margin-top: 7%;
         }
 
         #no-user {
@@ -97,8 +101,8 @@
 
               // Set chart options
               var options = {'title':'Total Submissions',
-                             'width':800,
-                             'height':600,
+                             'width':600,
+                             'height':500,
                              'pieHole': 0.5,
                              'slices': {0: {color: '#4CAF50'},
                                         1: {color: '#8BC34A'},
@@ -225,111 +229,120 @@
             <h5>Invalid StopStalk handle in the URL.</h5>
         </div>
     {{else:}}
-    <div id="user-details">
-        <div class="row">
-            <table class="centered">
-                <tr>
-                    <th><h5><strong><b>{{=name}}</b></strong></h5></th>
-                    <th>
-                        <a href="{{=URL('default', 'leaderboard', vars={'q': row.institute})}}" class="tooltipped btn-floating btn-large waves-effect waves-light yellow" data-position="bottom" data-delay="50" data-tooltip="{{=row.institute}}">
-                            <i class="fa fa-institution fa-3x"></i>
-                        </a>
-                    </th>
-                    <th>
-                        <a href="{{=URL('user', 'submissions', args=[actual_handle])}}" class="tooltipped btn-floating btn-large waves-effect waves-light red" data-position="bottom" data-delay="50" data-tooltip="View user submissions" target="_blank">
-                            <i class="fa fa-long-arrow-right fa-3x"></i>
-                        </a>
-                    </th>
-                    {{if flag == "not-friends" and custom == False:}}
-                        <th>
-                            <button class="tooltipped btn-floating btn-large waves-effect waves-light friends-button green" data-position="bottom" data-delay="50" data-tooltip="Add friend" data-user-id="{{=row.id}}" data-type="add-friend">
-                                <i class="fa fa-user-plus fa-3x"></i>
-                            </button>
-                        </th>
-                    {{elif flag != "my-custom-user" and custom == True:}}
-                        <th>
-                            <a href="#stopstalk-handle" class="tooltipped btn-floating btn-large waves-effect waves-light modal-trigger purple" data-position="bottom" data-delay="50" data-tooltip="Add to my Custom Friend List">
-                                <i class="fa fa-plus fa-3x"></i>
-                            </a>
-                            <!-- Modal Structure -->
-                            <div id="stopstalk-handle" class="modal center">
-                                <div class="modal-content">
-                                    <h5>Add this Custom User</h5>
-                                    <p>Please enter StopStalk handle for new Custom User</p>
-                                    <p>Note: It will consume one custom user from your allowed custom users</p>
-                                    <form class="col s12 center" action="{{=URL('user', 'add_custom_friend')}}" method="POST">
-                                        <div class="row">
-                                            <div class="input-field col offset-s3 s6">
-                                                <input name="stopstalk_handle" id="stopstalk_handle" type="text" required/>
-                                                <label for="stopstalk_handle">StopStalk handle</label>
-                                                <input name="row" type="hidden" value="{{=row.as_dict()}}" />
-                                                <input type="submit" value="Add custom friend"></input>
+    <table>
+        <tr>
+            <td>
+                <div id="user-details">
+                    <div class="row">
+                        <table class="centered">
+                            <tr>
+                                <th><h5><strong><b>{{=name}}</b></strong></h5></th>
+                                <th>
+                                    <a href="{{=URL('default', 'leaderboard', vars={'q': row.institute})}}" class="tooltipped btn-floating btn-large waves-effect waves-light yellow" data-position="bottom" data-delay="50" data-tooltip="{{=row.institute}}">
+                                        <i class="fa fa-institution fa-3x"></i>
+                                    </a>
+                                </th>
+                                <th>
+                                    <a href="{{=URL('user', 'submissions', args=[actual_handle])}}" class="tooltipped btn-floating btn-large waves-effect waves-light red" data-position="bottom" data-delay="50" data-tooltip="View user submissions" target="_blank">
+                                        <i class="fa fa-long-arrow-right fa-3x"></i>
+                                    </a>
+                                </th>
+                                {{if flag == "not-friends" and custom == False:}}
+                                    <th>
+                                        <button class="tooltipped btn-floating btn-large waves-effect waves-light friends-button green" data-position="bottom" data-delay="50" data-tooltip="Add friend" data-user-id="{{=row.id}}" data-type="add-friend">
+                                            <i class="fa fa-user-plus fa-3x"></i>
+                                        </button>
+                                    </th>
+                                {{elif flag != "my-custom-user" and custom == True:}}
+                                    <th>
+                                        <a href="#stopstalk-handle" class="tooltipped btn-floating btn-large waves-effect waves-light modal-trigger purple" data-position="bottom" data-delay="50" data-tooltip="Add to my Custom Friend List">
+                                            <i class="fa fa-plus fa-3x"></i>
+                                        </a>
+                                        <!-- Modal Structure -->
+                                        <div id="stopstalk-handle" class="modal center">
+                                            <div class="modal-content">
+                                                <h5>Add this Custom User</h5>
+                                                <p>Please enter StopStalk handle for new Custom User</p>
+                                                <p>Note: It will consume one custom user from your allowed custom users</p>
+                                                <form class="col s12 center" action="{{=URL('user', 'add_custom_friend')}}" method="POST">
+                                                    <div class="row">
+                                                        <div class="input-field col offset-s3 s6">
+                                                            <input name="stopstalk_handle" id="stopstalk_handle" type="text" required/>
+                                                            <label for="stopstalk_handle">StopStalk handle</label>
+                                                            <input name="row" type="hidden" value="{{=row.as_dict()}}" />
+                                                            <input type="submit" value="Add custom friend"></input>
+                                                        </div>
+                                                    </div>
+                                                </form>
                                             </div>
                                         </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </th>
-                    {{elif flag == "already-friends":}}
-                        <th>
-                            <button class="tooltipped btn-floating btn-large waves-effect waves-light black friends-button" data-position="bottom" data-delay="50" data-tooltip="Unfriend" data-user-id="{{=row.id}}" data-type="unfriend">
-                                <i class="fa fa-user-times fa-3x"></i>
-                            </button>
-                        </th>
+                                    </th>
+                                {{elif flag == "already-friends":}}
+                                    <th>
+                                        <button class="tooltipped btn-floating btn-large waves-effect waves-light black friends-button" data-position="bottom" data-delay="50" data-tooltip="Unfriend" data-user-id="{{=row.id}}" data-type="unfriend">
+                                            <i class="fa fa-user-times fa-3x"></i>
+                                        </button>
+                                    </th>
+                                {{pass}}
+                            </tr>
+                        </table>
+                    </div>
+                    {{if parent_user:}}
+                        <h6>Custom User of <a href="{{=URL('user', 'profile', args=parent_user[1])}}">{{=parent_user[0]}}</a></h6>
                     {{pass}}
-                </tr>
-            </table>
-        </div>
-        {{if parent_user:}}
-            <h6>Custom User of <a href="{{=URL('user', 'profile', args=parent_user[1])}}">{{=parent_user[0]}}</a></h6>
-        {{pass}}
-        <div class="row center">
-            <h6><strong>Accuracy</strong></h6>
-            {{for site in current.SITES:}}
-                {{if profile_urls[site] != "NA":}}
-                    <a href="{{=profile_urls[site]}}" class="tooltipped" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank">
-                        <div class="chip" id="{{=site.lower()}}_chip">
-                            <img src="{{=URL('static', 'images/' + site.lower() + '_logo.png')}}" alt="{{=site}}"/>
-                            {{=efficiency[site]}}
-                        </div>
-                    </a>
-                {{else:}}
-                    <a href="{{=current.SITES[site]}}" class="tooltipped" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank">
-                        <div class="chip" id="{{=site.lower()}}_chip">
-                            <img src="{{=URL('static', 'images/' + site.lower() + '_logo.png')}}" alt="{{=site}}"/>
-                            {{=efficiency[site]}}
-                        </div>
-                    </a>
-                {{pass}}
-            {{pass}}
-        </div>
-        <table class="striped centered">
-            <caption><h6><strong>Streak<strong></h6></caption>
-            <thead>
-                <tr>
-                    <th colspan="2"><strong>Day Streak</strong></th>
-                    <th colspan="2"><strong>Accepted Solution Streak</strong></th>
-                </tr>
-                <tr>
-                    <th><h6>Current</h6></th>
-                    <th><h6>Maximum</h6></th>
-                    <th><h6>Current</h6></th>
-                    <th><h6>Maximum</h6></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td id="curr-streak"></td>
-                    <td id="max-streak"></td>
-                    <td id="curr-accepted-streak"></td>
-                    <td id="max-accepted-streak"></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    <div id="chart_div" style="margin-left: 45%; padding: 2%; overflow-x: hidden;"></div>
+                    <div class="row center">
+                        <h6><strong>Accuracy</strong></h6>
+                        {{for site in current.SITES:}}
+                            {{if profile_urls[site] != "NA":}}
+                                <a href="{{=profile_urls[site]}}" class="tooltipped" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank">
+                                    <div class="chip" id="{{=site.lower()}}_chip">
+                                        <img src="{{=URL('static', 'images/' + site.lower() + '_logo.png')}}" alt="{{=site}}"/>
+                                        {{=efficiency[site]}}
+                                    </div>
+                                </a>
+                            {{else:}}
+                                <a href="{{=current.SITES[site]}}" class="tooltipped" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank">
+                                    <div class="chip" id="{{=site.lower()}}_chip">
+                                        <img src="{{=URL('static', 'images/' + site.lower() + '_logo.png')}}" alt="{{=site}}"/>
+                                        {{=efficiency[site]}}
+                                    </div>
+                                </a>
+                            {{pass}}
+                        {{pass}}
+                    </div>
+                    <table class="striped centered">
+                        <caption><h6><strong>Streak<strong></h6></caption>
+                        <thead>
+                            <tr>
+                                <th colspan="2"><strong>Day Streak</strong></th>
+                                <th colspan="2"><strong>Accepted Solution Streak</strong></th>
+                            </tr>
+                            <tr>
+                                <th><h6>Current</h6></th>
+                                <th><h6>Maximum</h6></th>
+                                <th><h6>Current</h6></th>
+                                <th><h6>Maximum</h6></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td id="curr-streak"></td>
+                                <td id="max-streak"></td>
+                                <td id="curr-accepted-streak"></td>
+                                <td id="max-accepted-streak"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </td>
+            <td>
+                <div id="chart_div"></div>
+            </td>
+        </tr>
+    </table>
+    <!-- <div id="chart_div" style="margin-left: 45%; padding: 2%; overflow-x: hidden;"></div> -->
     <br/><br/>
-    <div id="calendar_basic" class="center" style="margin-left: 18%; width: 70%;"></div>
+    <div id="calendar_basic" class="center" style="margin-left: 15%; width: 70%;"></div>
     <div id="activity"></div>
     {{pass}}
   </body>
