@@ -419,6 +419,9 @@ def register_callback(form):
         @param form (FORM): Register form
     """
 
+    site_handles = []
+    for site in current.SITES:
+        site_handles.append(site)
     # Send mail to raj454raj@gmail.com
     to = "raj454raj@gmail.com"
     subject = "New user registered"
@@ -427,23 +430,15 @@ Name: %s %s
 Email: %s
 Institute: %s
 StopStalk handle: %s
-Referrer: %s
-Codechef handle: %s
-Codeforces handle: %s
-Spoj handle: %s
-HackerEarth handle: %s
-HackerRank handle: %s
-              """ % (form.vars.first_name,
-                     form.vars.last_name,
-                     form.vars.email,
-                     form.vars.institute,
-                     form.vars.stopstalk_handle,
-                     form.vars.referrer,
-                     form.vars.codechef_handle,
-                     form.vars.codeforces_handle,
-                     form.vars.spoj_handle,
-                     form.vars.hackerearth_handle,
-                     form.vars.hackerrank_handle)
+Referrer: %s\n""" % (form.vars.first_name,
+                   form.vars.last_name,
+                   form.vars.email,
+                   form.vars.institute,
+                   form.vars.stopstalk_handle,
+                   form.vars.referrer)
+
+    for site in current.SITES:
+        message += "%s handle: %s\n" % (site, form.vars[site.lower() + "_handle"])
     send_mail(to=to, subject=subject, message=message, mail_type="admin")
 
 auth.settings.register_onvalidation = [sanitize_fields]
