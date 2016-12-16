@@ -39,7 +39,7 @@ import requests
 
 for handle in (all_uva_handles - current_handles):
     response = requests.get("http://uhunt.felix-halim.net/api/uname2uid/" + handle)
-    if response.status_code == 200:
+    if response.status_code == 200 and response.text.strip() != "0":
         print handle, response.text, "added"
         u2idtable.insert(username=handle,
                          uva_id=response.text)
