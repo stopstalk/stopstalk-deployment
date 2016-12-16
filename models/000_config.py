@@ -57,7 +57,7 @@ current.PER_PAGE = 100
 current.MAX_TRIES_ALLOWED = 5
 
 # Maximum time that a request can take to return a response(in seconds)
-current.TIMEOUT = 10
+current.TIMEOUT = 20
 
 # Number of problems to be shown in Trending page
 current.PROBLEMS_PER_PAGE = 15

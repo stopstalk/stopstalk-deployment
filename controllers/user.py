@@ -432,8 +432,12 @@ def handle_details():
     for site in current.SITES:
         query |= (ihtable.site == site) & \
                  (ihtable.handle == row[site.lower() + "_handle"])
-    invalid_sites = db(query).select(ihtable.site)
-    invalid_sites = set([x.site for x in invalid_sites])
+    ihandles = db(query).select()
+    invalid_sites = set([])
+    for record in ihandles:
+        # For case sensitive check of handles
+        if record.handle == row[record.site.lower() + "_handle"]:
+            invalid_sites.add(record.site)
 
     response = {}
     for site in current.SITES:
