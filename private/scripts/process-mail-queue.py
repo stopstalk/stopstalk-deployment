@@ -24,7 +24,8 @@ atable = db.auth_user
 emails = db(atable.registration_key != "").select(atable.email)
 unverified_emails = set([x.email for x in emails])
 
-rows = db(db.queue.status == "pending").select()
+rows = db(db.queue.status == "pending").select(orderby="<random>",
+                                               limitby=(0, 80))
 
 count = 0
 for row in rows:
