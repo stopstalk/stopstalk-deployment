@@ -30,12 +30,12 @@ from collections import OrderedDict
 # List all the profile sites here
 # To disable any of the profile site
 #   - Just remove that site from the dictionary
-# Site Name => user profile url
+# Site Name => Site website url
 # OrderedDict is used to maintain the order of insertion
 current.SITES = OrderedDict()
-current.SITES["CodeChef"] = "https://www.codechef.com/"
+current.SITES["CodeChef"] = "http://www.codechef.com/"
 current.SITES["CodeForces"] = "http://www.codeforces.com/"
-current.SITES["Spoj"] = "http://www.spoj.com/"
+current.SITES["Spoj"] = "https://www.spoj.com/"
 current.SITES["HackerEarth"] = "https://www.hackerearth.com/"
 current.SITES["HackerRank"] = "https://www.hackerrank.com/"
 current.SITES["UVa"] = "https://uva.onlinejudge.org/"

@@ -2,18 +2,32 @@
 <head><title>Tag Search</title></head>
 
 <script src="{{=URL('static', 'js/jquery.bootpag.min.js')}}"></script>
+<script type="text/javascript">
+    var baseURL = "{{=URL('problems', 'tag', host=True, scheme=True)}}";
+</script>
 <script src="{{=URL('static', 'js/appjs/problems/tag.js')}}"></script>
 <h3>Search problems by tags</h3>
-<div class="row center">
-    <div class="input-field col offset-s4 s4">
-        <form id="tagSearchForm" method="GET" action="">
+<form id="tagSearchForm" method="GET" action="">
+    <div class="row center">
+        <div class="input-field col offset-s2 s4">
             <input id="search" name="q" type="text"/>
             <input id="page" name="page" type="hidden" value="1"/>
             <label for="search">Search Tags...</label>
-            <button type="submit" class="blue btn waves-effect waves-light"><i class="fa fa-search"></i></button>
-        </form>
+        </div>
+        <div class="input-field col s4">
+            <select name="site" multiple>
+                <option value="" disabled selected>Site</option>
+                {{for site in current.SITES:}}
+                    <option value="{{=site}}">{{=site}}</option>
+                {{pass}}
+            </select>
+        </div>
     </div>
-</div>
+    <div class="row">
+        <button type="submit" class="blue btn waves-effect waves-light"><i class="fa fa-search"></i></button>
+    </div>
+</form>
+
 <div id="page-selection" class="center"></div>
 <div class="row" id="output">
     {{=table}}

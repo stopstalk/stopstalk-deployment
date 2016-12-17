@@ -321,6 +321,15 @@ def tag():
 
     q = request.vars["q"]
     try:
+        sites = request.vars.get("site", "")
+        if sites == "":
+            sites = []
+        elif isinstance(sites, str):
+            sites = [sites]
+    except:
+        sites = []
+
+    try:
         curr_page = int(request.vars["page"])
     except:
         curr_page = 1
@@ -339,6 +348,15 @@ def tag():
             query &= ptable.tags.contains(tag)
         else:
             query = ptable.tags.contains(tag)
+
+    site_query = None
+    for site in sites:
+        if site_query is not None:
+            site_query |= ptable.link.contains(current.SITES[site])
+        else:
+            site_query = ptable.link.contains(current.SITES[site])
+    if site_query:
+        query &= site_query
 
     total_problems = db(query).count()
     total_pages = total_problems / PER_PAGE

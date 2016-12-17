@@ -6,30 +6,57 @@
         var vars = curr_url.split("?");
         var params = {
             'q': '',
-            'page': ''
+            'page': '1',
+            'site': ''
+        };
+        var objToURL = function(obj) {
+            var str = Object.keys(obj).map(function(key) {
+                if (obj[key].constructor === Array) {
+                    var res = [];
+                    for (var i = 0; i < obj[key].length; ++i) {
+                        res.push(encodeURIComponent(key) + '=' + encodeURIComponent(obj[key][i]));
+                    }
+                    return res.join('&');
+                } else {
+                    return encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]);
+                }
+            }).join('&');
+            return str;
         };
 
         if (vars.length > 1) {
             vars = vars[1];
-            var allVars = vars.split("&");
-            var firstParam = allVars[0].split("=");
-            params[firstParam[0]] = firstParam[1];
-            var secondParam = allVars[1].split("=");
-            params[secondParam[0]] = secondParam[1];
+            var allVars = vars.split("&"),
+                pair;
+            for (var i = 0; i < allVars.length; i++) {
+                pair = allVars[i].split('=');
+                if (pair[0] === "site") {
+                    if (params[pair[0]].length === 0) {
+                        params[pair[0]] = [pair[1]];
+                    } else {
+                        params[pair[0]].push(pair[1]);
+                    }
+                } else {
+                    params[pair[0]] = pair[1];
+                }
+            }
         }
 
-        $.ajax({
-            url: '/problems/tag.json/?q=' + params['q'] + '&page=1',
-            method: 'GET'
-        }).done(function(response) {
-            $('#page-selection').bootpag({
-                total: response['total_pages'],
-                page: parseInt(params['page']),
-                maxVisible: 10
-            }).on("page", function(event, num) {
-                window.location.href = "/problems/tag/?q=" + params['q'] + "&page=" + num.toString();
+        if (window.location.href != baseURL) {
+            $.ajax({
+                url: '/problems/tag.json/?' + objToURL(params),
+                method: 'GET'
+            }).done(function(response) {
+                $('#page-selection').bootpag({
+                    total: response['total_pages'],
+                    page: parseInt(params['page']),
+                    maxVisible: 10
+                }).on("page", function(event, num) {
+                    var tmpParams = params;
+                    tmpParams["page"] = num.toString();
+                    window.location.href = "/problems/tag/?" + objToURL(tmpParams);
+                });
             });
-        });
+        }
     });
-
 })(jQuery);
