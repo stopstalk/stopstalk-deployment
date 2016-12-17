@@ -79,6 +79,7 @@ class Profile(object):
                      6: "Python"}
         submissions = {handle: {1: {}}}
         all_submissions = response.json()["subs"]
+
         it = 0
         problem_url_prefix = "https://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem="
 
@@ -91,7 +92,7 @@ class Profile(object):
             curr_date_timestamp = str(datetime.datetime.fromtimestamp(row[4]))
             curr = time.strptime(curr_date_timestamp, "%Y-%m-%d %H:%M:%S")
             if curr <= last_retrieved:
-                return submissions
+                continue
 
             # Time of submission
             append(curr_date_timestamp)
