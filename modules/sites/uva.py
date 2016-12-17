@@ -71,7 +71,12 @@ class Profile(object):
                                40: "RE",
                                50: "TLE",
                                60: "MLE"}
-        languages = {1: "ANSI C", 2: "Java", 3: "C++", 4: "Pascal", 5: "C++11"}
+        languages = {1: "ANSI C",
+                     2: "Java",
+                     3: "C++",
+                     4: "Pascal",
+                     5: "C++11",
+                     6: "Python"}
         submissions = {handle: {1: {}}}
         all_submissions = response.json()["subs"]
         it = 0
