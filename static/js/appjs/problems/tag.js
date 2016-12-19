@@ -14,11 +14,11 @@
                 if (obj[key].constructor === Array) {
                     var res = [];
                     for (var i = 0; i < obj[key].length; ++i) {
-                        res.push(encodeURIComponent(key) + '=' + encodeURIComponent(obj[key][i]));
+                        res.push(key + '=' + obj[key][i]);
                     }
                     return res.join('&');
                 } else {
-                    return encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]);
+                    return key + '=' + obj[key];
                 }
             }).join('&');
             return str;
