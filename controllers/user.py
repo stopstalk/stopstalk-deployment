@@ -236,18 +236,37 @@ def update_friend():
             ## DELETE
             # If delete checkbox is checked => just process it redirect back
             session.flash = "Custom User deleted"
-            db(cftable.id == record.id).delete()
+            duplicate_cus = db(cftable.duplicate_cu == record.id).select()
+            if len(duplicate_cus):
+                # The current custom user is a parent of other duplicate custom users
+
+                first_dcu = duplicate_cus.first()
+
+                # Populate stopstalk_handle of first child to submission tabls
+                squery = (stable.stopstalk_handle == record.stopstalk_handle)
+                db(squery).update(stopstalk_handle=first_dcu.stopstalk_handle)
+
+                # Pick the first cu child and copy the stopstalk_handle to the parent
+                record.update_record(user_id=first_dcu.user_id,
+                                     stopstalk_handle=first_dcu.stopstalk_handle,
+                                     institute=first_dcu.institute)
+                # Now delete the first child as the parent is now modified
+                # and the previous siblings remain as child to this parent
+                first_dcu.delete_record()
+            else:
+                record.delete_record()
             redirect(URL("user", "custom_friend"))
         else:
             updated_sites = utilities.handles_updated(record, form)
             ## UPDATE
             if updated_sites != []:
 
-                submission_query = (stable.custom_user_id == request.args[0])
-                for site in updated_sites:
+                submission_query = (stable.custom_user_id == int(request.args[0]))
+                reset_sites = current.SITES if record.duplicate_cu else updated_sites
+                for site in reset_sites:
                     form.vars[site.lower() + "_lr"] = current.INITIAL_DATE
 
-                submission_query &= (stable.site.belongs(updated_sites))
+                submission_query &= (stable.site.belongs(reset_sites))
 
                 form.vars["duplicate_cu"] = None
                 form.vars["rating"] = 0
