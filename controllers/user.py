@@ -527,6 +527,10 @@ def profile():
         row = rows.first()
         output["row"] = row
 
+    last_updated = str(max([row[site.lower() + "_lr"] for site in current.SITES]))
+    if last_updated == current.INITIAL_DATE:
+        last_updated = "Never"
+    output["last_updated"] = last_updated
     output["parent_user"] = parent_user
     output["handle"] = handle
     output["actual_handle"] = actual_handle
