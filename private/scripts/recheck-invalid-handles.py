@@ -106,6 +106,13 @@ def hackerrank_invalid(handle):
         return True
     return False
 
+def uva_invalid(handle):
+    url = "http://uhunt.felix-halim.net/api/uname2uid/" + handle
+    response = get_request(url)
+    if response in (SERVER_FAILURE, OTHER_FAILURE) or response.text.strip() == "0":
+        return True
+    return False
+
 if __name__ == "__main__":
 
     ihtable = db.invalid_handle
@@ -124,7 +131,8 @@ if __name__ == "__main__":
            codeforces_invalid(impossiblehandle) and \
            spoj_invalid(impossiblehandle) and \
            hackerrank_invalid(impossiblehandle) and \
-           hackerrank_invalid(impossiblehandle) == True)
+           hackerearth_invalid(impossiblehandle) and \
+           uva_invalid(impossiblehandle) == True)
 
     def populate_handle_to_row(table):
         for row in db(table).select():

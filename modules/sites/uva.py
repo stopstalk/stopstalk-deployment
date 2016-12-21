@@ -53,7 +53,7 @@ class Profile(object):
 
         if response in (SERVER_FAILURE, OTHER_FAILURE):
             return response
-        if response.text == "0":
+        if response.text.strip() == "0":
             return NOT_FOUND
 
         url = "http://uhunt.felix-halim.net/api/subs-user/" + response.text
