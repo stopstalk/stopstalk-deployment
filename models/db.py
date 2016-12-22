@@ -328,7 +328,7 @@ def sanitize_fields(form):
     for field in handle_fields:
         field_handle = field + "_handle"
         if form.vars[field_handle]:
-            if form.vars[field_handle].__contains__(" "):
+            if field != "uva" and form.vars[field_handle].__contains__(" "):
                 form.errors[field_handle] = "White spaces not allowed"
             if IS_EMAIL(error_message="check")(form.vars[field_handle])[1] != "check":
                 form.errors[field_handle] = "Email address instead of handle"
