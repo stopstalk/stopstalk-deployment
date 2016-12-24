@@ -607,6 +607,11 @@ db.define_table("contest_logging",
                 Field("stopstalk_handle"),
                 Field("time_stamp", "datetime"))
 
+db.define_table("http_errors",
+                Field("status_code", "integer"),
+                Field("content", "text"),
+                Field("user_id", "reference auth_user"))
+
 uvadb.define_table("problem",
                    Field("problem_id", "integer"),
                    Field("problem_num", "integer"),

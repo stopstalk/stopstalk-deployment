@@ -101,16 +101,9 @@ def handle_error():
         message = request_url
         error_message = "Other error"
 
-    if auth.is_logged_in():
-        subject = "%s %s occurred" % (session.auth.user.email, code)
-    else:
-        subject = "%s occurred" % code
-
-    current.send_mail(to="raj454raj@gmail.com",
-                      subject=subject,
-                      message=message,
-                      mail_type="admin",
-                      bulk=True)
+    db.http_errors.insert(status_code=int(code),
+                          content=message,
+                          user_id=session.user_id if auth.is_logged_in() else None)
 
     return dict(error_message=error_message, similar_handles=similar_handles)
 
