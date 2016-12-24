@@ -34,15 +34,9 @@ for error in errors:
     else:
         all_errors[error.status_code] = [(error.user_id, error.content)]
 
-message_body = ""
 for code in all_errors:
-    message_body += str(code) + "\n"
+    print code
     for error in all_errors[code]:
-        message_body += str(error[0]) + " " + error[1] + "\n"
-
-current.send_mail(to="raj454raj@gmail.com",
-                  subject="HTTP errors",
-                  message=message_body,
-                  mail_type="admin")
+        print error[0], error[1]
 
 hetable.truncate()
