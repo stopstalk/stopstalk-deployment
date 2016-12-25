@@ -1,16 +1,25 @@
 {{extend 'layout.html'}}
-<head><title>Find {{if auth.is_logged_in():}} Friends {{else:}} Users {{pass}}</title></head>
+<head>
+    <title>
+        {{=T("Find")}}
+        {{if auth.is_logged_in():}}
+            {{=T("Friends")}}
+        {{else:}}
+            {{=T("Users")}}
+        {{pass}}
+    </title>
+</head>
 <h1>Search for {{if auth.is_logged_in():}} Friends {{else:}} Users {{pass}} on StopStalk</h1>
 <script src="{{=URL('static', 'js/appjs/default/search.js')}}"></script>
 <form class="col s12" action="" method="GET">
     <div class="row center">
         <div class="input-field col offset-s3 s3">
             <input id="searchInput" name="q" type="text" class="center">
-            <label for="searchInput">Search</label>
+            <label for="searchInput">{{=T("Search")}}</label>
         </div>
         <div class="input-field col s3">
             <select id="institute" name="institute" class="center browser-default">
-                <option value="" disabled selected>Institute</option>
+                <option value="" disabled selected>{{=T("Institute")}}</option>
                 {{for institute in all_institutes:}}
                     <option value="{{=institute}}">{{=institute}}</option>
                 {{pass}}
@@ -18,7 +27,7 @@
         </div>
     </div>
     <div class="row center">
-        <input type="submit" value="Search"/>
+        <input type='submit' value='{{=T("Search")}}'/>
     </div>
 </form>
 {{=table}}

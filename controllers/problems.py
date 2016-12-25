@@ -97,7 +97,7 @@ def add_suggested_tags():
     if problem:
         problem_id = problem.id
     else:
-        return "Problem not found"
+        return T("Problem not found")
 
     # Delete previously added tags for the same problem by the user
     delete_query = (sttable.problem_id == problem_id) & \
@@ -108,7 +108,7 @@ def add_suggested_tags():
     possible_tag_ids = set([x.id for x in possible_tag_ids])
 
     if tags == "":
-        return "Tags updated successfully!"
+        return T("Tags updated successfully!")
 
     tag_ids = [int(x) for x in tags.split(",")]
     for tag_id in tag_ids:
@@ -117,7 +117,7 @@ def add_suggested_tags():
                            problem_id=problem_id,
                            tag_id=tag_id)
 
-    return "Tags added successfully!"
+    return T("Tags added successfully!")
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
@@ -178,7 +178,7 @@ def index():
        request.vars.has_key("plink") is False:
 
         # Disables direct entering of a URL
-        session.flash = "Please click on a Problem Link"
+        session.flash = T("Please click on a Problem Link")
         redirect(URL("default", "index"))
 
     submission_type = "friends"
@@ -189,7 +189,7 @@ def index():
             submission_type = "my"
 
     if auth.is_logged_in() is False and submission_type != "global":
-        response.flash = "Login to view your/friends' submissions"
+        response.flash = T("Login to view your/friends' submissions")
         submission_type = "global"
 
     stable = db.submission
@@ -218,7 +218,7 @@ def index():
             else:
                 query &= (stable.user_id == session.user_id)
         else:
-            response.flash = "Login to view your/friends' submissions"
+            response.flash = T("Login to view your/friends' submissions")
 
     submissions = db(query).select(orderby=~stable.time_stamp)
 
@@ -237,14 +237,14 @@ def index():
     details_table = TABLE(_style="font-size: 140%;", _class="col s7")
     tbody = TBODY()
     tbody.append(TR(TD(),
-                    TD(STRONG("Problem Name:")),
+                    TD(STRONG(T("Problem Name") + ":")),
                     TD(problem_name,
                        _id="problem_name")))
     tbody.append(TR(TD(),
-                    TD(STRONG("Site:")),
+                    TD(STRONG(T("Site") + ":")),
                     TD(site)))
 
-    links = DIV(DIV(A(I(_class="fa fa-link"), " Problem",
+    links = DIV(DIV(A(I(_class="fa fa-link"), " " + T("Problem"),
                       _href=problem_link,
                       _style="color: black;",
                       _target="blank"),
@@ -253,28 +253,28 @@ def index():
     row = db(ptable.link == problem_link).select().first()
     if row and row.editorial_link:
         links.append(" ")
-        links.append(DIV(A(I(_class="fa fa-book"), " Editorial",
+        links.append(DIV(A(I(_class="fa fa-book"), " " + T("Editorial"),
                            _href=row.editorial_link,
                            _style="color: white;",
                            _target="_blank"),
                          _class="chip deep-purple darken-1"))
     tbody.append(TR(TD(),
-                    TD(STRONG("Links:")),
+                    TD(STRONG(T("Links") + ":")),
                     links))
 
     suggest_tags_class = "disabled btn chip tooltipped"
     suggest_tags_data = {"position": "right",
                          "delay": "50",
-                         "tooltip": "Login to suggest tags"}
+                         "tooltip": T("Login to suggest tags")}
     suggest_tags_id = "disabled-suggest-tags"
     if auth.is_logged_in():
         suggest_tags_class = "green chip waves-light waves-effect tooltipped"
         suggest_tags_data["target"] = "suggest-tags-modal"
-        suggest_tags_data["tooltip"] = "Suggest tags"
+        suggest_tags_data["tooltip"] = T("Suggest tags")
         suggest_tags_id = "suggest-trigger"
 
     tbody.append(TR(TD(),
-                    TD(STRONG("Tags:")),
+                    TD(STRONG(T("Tags") + ":")),
                     TD(DIV(SPAN(A(I(_class="fa fa-tag"), " Show Tags",
                                  _id="show-tags",
                                  _class="chip orange darken-1",
@@ -307,10 +307,10 @@ def tag():
     """
 
     table = TABLE(_class="bordered centered")
-    thead = THEAD(TR(TH("Problem Name"),
-                     TH("Problem URL"),
-                     TH("Site"),
-                     TH("Tags")))
+    thead = THEAD(TR(TH(T("Problem Name")),
+                     TH(T("Problem URL")),
+                     TH(T("Site")),
+                     TH(T("Tags"))))
     table.append(thead)
 
     # If URL does not have vars containing q
@@ -427,8 +427,8 @@ def _render_trending(caption, problems, flag):
     """
 
     table = TABLE(_class="bordered centered")
-    thead = THEAD(TR(TH("Problem"),
-                     TH("Recent Submissions"),
+    thead = THEAD(TR(TH(T("Problem")),
+                     TH(T("Recent Submissions")),
                      TH(flag)))
     table.append(thead)
     tbody = TBODY()
@@ -573,7 +573,7 @@ def trending():
                              key=custom_compare,
                              reverse=True)
 
-    global_table = _render_trending("Trending Globally",
+    global_table = _render_trending(T("Trending Globally"),
                                     global_trending[:current.PROBLEMS_PER_PAGE],
                                     "Users")
     if auth.is_logged_in():
@@ -581,7 +581,7 @@ def trending():
                                   key=custom_compare,
                                   reverse=True)
 
-        friend_table = _render_trending("Trending among friends",
+        friend_table = _render_trending(T("Trending among friends"),
                                         friends_trending[:current.PROBLEMS_PER_PAGE],
                                         "Friends")
 

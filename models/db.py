@@ -82,10 +82,14 @@ auth = Auth(db)
 service = Service()
 plugins = PluginManager()
 
+# To disable writing of translations
+# http://www.web2py.com/books/default/chapter/29/04#Translating-variables
+T.is_writable = False
+
 initial_date = datetime.strptime(current.INITIAL_DATE, "%Y-%m-%d %H:%M:%S")
 
 db.define_table("institutes",
-                Field("name"))
+                Field("name", label=T("Name")))
 
 itable = db.institutes
 all_institutes = db(itable).select(itable.name,
@@ -93,10 +97,12 @@ all_institutes = db(itable).select(itable.name,
 all_institutes = [x["name"].strip("\"") for x in all_institutes]
 all_institutes.append("Other")
 extra_fields = [Field("institute",
+                      label=T("Institute"),
                       requires=IS_IN_SET(all_institutes,
                                          zero="Institute",
                                          error_message="Institute Required")),
                 Field("stopstalk_handle",
+                      label=T("StopStalk handle"),
                       requires=[IS_NOT_IN_DB(db,
                                              "auth_user.stopstalk_handle",
                                              error_message=T("Handle taken")),
@@ -134,7 +140,8 @@ extra_fields = [Field("institute",
 site_handles = []
 all_last_retrieved = []
 for site in current.SITES:
-    site_handles.append(Field(site.lower() + "_handle"))
+    site_handles.append(Field(site.lower() + "_handle",
+                              label=site + " handle"))
     all_last_retrieved.append(Field(site.lower() + "_lr", "datetime",
                                     default=initial_date,
                                     writable=False))
@@ -198,10 +205,10 @@ auth.settings.reset_password_requires_verification = True
 auth.settings.formstyle = materialize_form
 auth.settings.login_next = URL("default", "index")
 
-auth.messages.email_sent = "Verification Email sent"
-auth.messages.logged_out = "Successfully logged out"
-auth.messages.invalid_login = "Invalid login credentials"
-auth.messages.label_remember_me = "Remember credentials"
+auth.messages.email_sent = T("Verification Email sent")
+auth.messages.logged_out = T("Successfully logged out")
+auth.messages.invalid_login = T("Invalid login credentials")
+auth.messages.label_remember_me = T("Remember credentials")
 auth.settings.long_expiration = 3600 * 24 * 366 # Remember me for a year
 
 # -----------------------------------------------------------------------------
@@ -301,7 +308,7 @@ def sanitize_fields(form):
 
     if form.vars.stopstalk_handle:
         # 8.
-        stopstalk_handle_error = "Expected alphanumeric (Underscore allowed)"
+        stopstalk_handle_error = T("Expected alphanumeric (Underscore allowed)")
         try:
             group = match("[0-9a-zA-Z_]*", form.vars.stopstalk_handle).group()
             if group != form.vars.stopstalk_handle:
@@ -313,7 +320,7 @@ def sanitize_fields(form):
         if site_name in current.SITES:
             field = site_name.lower() + "_handle"
             if form.vars[field] and form.vars[field][0] == "@":
-                form.errors[field] = "@ symbol not required"
+                form.errors[field] = T("@ symbol not required")
 
     def _valid_spoj_handle(handle):
         try:
@@ -329,9 +336,9 @@ def sanitize_fields(form):
         field_handle = field + "_handle"
         if form.vars[field_handle]:
             if field != "uva" and form.vars[field_handle].__contains__(" "):
-                form.errors[field_handle] = "White spaces not allowed"
+                form.errors[field_handle] = T("White spaces not allowed")
             if IS_EMAIL(error_message="check")(form.vars[field_handle])[1] != "check":
-                form.errors[field_handle] = "Email address instead of handle"
+                form.errors[field_handle] = T("Email address instead of handle")
 
     # 2.
     _remove_at_symbol("HackerEarth")
@@ -340,7 +347,7 @@ def sanitize_fields(form):
     if "Spoj" in current.SITES:
         if form.vars["spoj_handle"] and \
            not _valid_spoj_handle(form.vars["spoj_handle"]):
-            form.errors["spoj_handle"] = "Handle should only contain lower case letters 'a'-'z', underscores '_', digits '0'-'9', and must start with a letter!"
+            form.errors["spoj_handle"] = T("Handle should only contain lower case letters 'a'-'z', underscores '_', digits '0'-'9', and must start with a letter!")
 
     # 3.
     for site in handle_fields:
@@ -349,19 +356,19 @@ def sanitize_fields(form):
             continue
         if form.vars[site_handle] and \
            form.vars[site_handle] != form.vars[site_handle].lower():
-            form.errors[site_handle] = "Please enter in lower case"
+            form.errors[site_handle] = T("Please enter in lower case")
 
     # 4.
     if form.vars.institute == "":
-        form.errors.institute = "Please select an institute or Other"
+        form.errors.institute = T("Please select an institute or Other")
 
     # 5.
     if form.vars.email:
         if validate_email(form.vars.email) is False:
-            form.errors.email = "Invalid email address"
+            form.errors.email = T("Invalid email address")
 
     if form.errors:
-        response.flash = "Form has errors!!"
+        response.flash = T("Form has errors")
 
 #-----------------------------------------------------------------------------
 def notify_institute_users(record):
@@ -468,17 +475,24 @@ current.sanitize_fields = sanitize_fields
 #########################################################################
 
 custom_friend_fields = [Field("user_id", "reference auth_user"),
-                        Field("first_name", requires=IS_NOT_EMPTY()),
-                        Field("last_name", requires=IS_NOT_EMPTY()),
+                        Field("first_name",
+                              label=T("First Name"),
+                              requires=IS_NOT_EMPTY()),
+                        Field("last_name",
+                              label=T("Last Name"),
+                              requires=IS_NOT_EMPTY()),
                         Field("institute",
+                              label=T("Institute"),
                               requires=IS_IN_SET(all_institutes,
-                                                 zero="Institute")),
-                        Field("stopstalk_handle", requires = [IS_NOT_IN_DB(db,
-                                                                           "auth_user.stopstalk_handle",
-                                                                           error_message=T("Handle already exists")),
-                                                              IS_NOT_IN_DB(db,
-                                                                           "custom_friend.stopstalk_handle",
-                                                                           error_message=T("Handle already exists"))]),
+                                                 zero=T("Institute"))),
+                        Field("stopstalk_handle",
+                              label=T("StopStalk handle"),
+                              requires=[IS_NOT_IN_DB(db,
+                                                     "auth_user.stopstalk_handle",
+                                                     error_message=T("Handle already exists")),
+                                        IS_NOT_IN_DB(db,
+                                                     "custom_friend.stopstalk_handle",
+                                                     error_message=T("Handle already exists"))]),
                         Field("rating",
                               default=0,
                               writable=False),
@@ -564,15 +578,15 @@ db.define_table("unsubscriber",
                 Field("feature_updates",
                       "boolean",
                       default=True,
-                      label="New feature updates from StopStalk"),
+                      label=T("New feature updates from StopStalk")),
                 Field("institute_user",
                       "boolean",
                       default=True,
-                      label="Notify when a user from your Institute registers"),
+                      label=T("Notify when a user from your Institute registers")),
                 Field("friend_unfriend",
                       "boolean",
                       default=True,
-                      label="Notify when a user adds/removes me as a friend"),
+                      label=T("Notify when a user adds/removes me as a friend")),
                 Field("time_stamp", "datetime"))
 
 site_fields = []

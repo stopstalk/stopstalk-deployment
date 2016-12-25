@@ -21,7 +21,9 @@
 """
 
 atable = db.auth_user
-emails = db(atable.registration_key != "").select(atable.email)
+query = (atable.registration_key != "") & \
+        (atable.blacklisted == False)
+emails = db(query).select(atable.email)
 unverified_emails = set([x.email for x in emails])
 
 rows = db(db.queue.status == "pending").select(orderby="<random>",

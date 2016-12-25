@@ -286,13 +286,13 @@
                                 {{pass}}
                             </tr>
                         </table>
-                        <span class="light grey-text"><i>Last updated: <b>{{=last_updated}}</b></i></span>
+                        <span class="light grey-text"><i>{{=T("Last updated")}}: <b>{{=last_updated}}</b></i></span>
                     </div>
                     {{if parent_user:}}
-                        <h6>Custom User of <a href="{{=URL('user', 'profile', args=parent_user[1])}}">{{=parent_user[0]}}</a></h6>
+                        <h6>{{=T("Custom User of")}} <a href="{{=URL('user', 'profile', args=parent_user[1])}}">{{=parent_user[0]}}</a></h6>
                     {{pass}}
                     <div class="row center">
-                        <h6><strong>Accuracy</strong></h6>
+                        <h6><strong>{{=T("Accuracy")}}</strong></h6>
                         {{for site in current.SITES:}}
                             {{if profile_urls[site] != "NA":}}
                                 <a href="{{=profile_urls[site]}}" class="tooltipped" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank">
@@ -319,10 +319,10 @@
                                 <th colspan="2"><strong>Accepted Solution Streak</strong></th>
                             </tr>
                             <tr>
-                                <th><h6>Current</h6></th>
-                                <th><h6>Maximum</h6></th>
-                                <th><h6>Current</h6></th>
-                                <th><h6>Maximum</h6></th>
+                                <th><h6>{{=T("Current")}}</h6></th>
+                                <th><h6>{{=T("Maximum")}}</h6></th>
+                                <th><h6>{{=T("Current")}}</h6></th>
+                                <th><h6>{{=T("Maximum")}}</h6></th>
                             </tr>
                         </thead>
                         <tbody>

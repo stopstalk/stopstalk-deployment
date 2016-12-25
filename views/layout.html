@@ -153,17 +153,17 @@
     <header>
     <ul id="welcome" class="dropdown-content" style="min-width: 190px; color: #536dfe;">
         {{if session["user_id"]:}}
-            <li><a href="{{=URL('user', 'profile')}}">Profile</a></li>
-            <li><a href="{{=URL('user', 'submissions')}}">My Submissions</a></li>
-            <li><a href="{{=URL('user', 'update_details')}}">Update Details</a></li>
-            <li><a href="{{=URL('default', 'updates')}}">Feature Updates</a></li>
-            <li><a href="{{=URL('default', 'unsubscribe')}}">Unsubscribe</a></li>
+            <li><a href="{{=URL('user', 'profile')}}">{{=T("Profile")}}</a></li>
+            <li><a href="{{=URL('user', 'submissions')}}">{{=T("My Submissions")}}</a></li>
+            <li><a href="{{=URL('user', 'update_details')}}">{{=T("Update Details")}}</a></li>
+            <li><a href="{{=URL('default', 'updates')}}">{{=T("Feature Updates")}}</a></li>
+            <li><a href="{{=URL('default', 'unsubscribe')}}">{{=T("Unsubscribe")}}</a></li>
             <li class="divider"></li>
-            <li><a href="{{=URL('default', 'user', args=['logout'])}}">Logout</a></li>
+            <li><a href="{{=URL('default', 'user', args=['logout'])}}">{{=T("Logout")}}</a></li>
         {{else:}}
-            <li><a href="{{=URL('default', 'user', args=['login'])}}">Login</a></li>
-            <li><a href="{{=URL('default', 'user', args=['register'])}}">Register</a></li>
-            <li><a href="{{=URL('default', 'updates')}}">Feature Updates</a></li>
+            <li><a href="{{=URL('default', 'user', args=['login'])}}">{{=T("Login")}}</a></li>
+            <li><a href="{{=URL('default', 'user', args=['register'])}}">{{=T("Register")}}</a></li>
+            <li><a href="{{=URL('default', 'updates')}}">{{=T("Feature Updates")}}</a></li>
         {{pass}}
     </ul>
     <nav style="background-color: #536dfe">
@@ -222,25 +222,25 @@
     </div>
     <div id="download-submission-modal" class="modal">
         <div class="modal-content">
-            <h4>Download submission</h4>
+            <h4>{{=T("Download submission")}}</h4>
             <p>You are just one click away from downloading the solution. Please enter the filename you want the submission to be downloaded as.</p>
             <div class="row">
                 <div class="input-field col offset-s3 s6">
                     <input id="file_name" type="text">
-                    <label for="file_name">File Name</label>
+                    <label for="file_name">{{=T("File Name")}}</label>
                 </div>
             </div>
             <div class="row">
-                <a class="btn waves-light waves-effect disabled" id="final-download-button">Download</a>
+                <a class="btn waves-light waves-effect disabled" id="final-download-button">{{=T("Download")}}</a>
             </div>
         </div>
     </div>
 
     <div id="view-submission-modal" class="modal">
         <div class="modal-content">
-            <h4>View submission</h4>
+            <h4>{{=T("View submission")}}</h4>
 
-                <button id="copy-to-clipboard" class="btn btn-default waves-light waves-effect green hide">Copy to Clipboard</button>
+                <button id="copy-to-clipboard" class="btn btn-default waves-light waves-effect green hide">{{=T("Copy to Clipboard")}}</button>
                 <div id="view-submission-preloader" class="preloader-wrapper big active">
                   <div class="spinner-layer spinner-blue">
                     <div class="circle-clipper left">
@@ -291,11 +291,11 @@
             <div class="row">
                 <div class="input-field col offset-s3 s6">
                     <input id="view_download_file_name" type="text">
-                    <label for="view_download_file_name">File Name</label>
+                    <label for="view_download_file_name">{{=T("File Name")}}</label>
                 </div>
             </div>
             <div class="row">
-                <a class="btn waves-light waves-effect disabled" id="final-view-download-button">Download</a>
+                <a class="btn waves-light waves-effect disabled" id="final-view-download-button">{{=T("Download")}}</a>
             </div>
         </div>
     </div>
@@ -305,13 +305,13 @@
             <div class="container">
                 <div class="left"> © 2015-2016 StopStalk </div>
                 <div class="right">
-                    <span><a href="{{=URL('default', 'faq')}}" style="color: white;" target="_blank">FAQs</a></span>
+                    <span><a href="{{=URL('default', 'faq')}}" style="color: white;" target="_blank">{{=T("FAQs")}}</a></span>
                     <span> | </span>
-                    <span><a href="{{=URL('default', 'contact_us')}}" style="color: white;" target="_blank">Contact Us</a></span>
+                    <span><a href="{{=URL('default', 'contact_us')}}" style="color: white;" target="_blank">{{=T("Contact Us")}}</a></span>
                     <span> | </span>
                     <span><a href="https://github.com/stopstalk/stopstalk-deployment/blob/master/LICENSE" style="color: white;" target="_blank">MIT License</a></span>
                     <span> | </span>
-                    <span><a href="https://github.com/stopstalk/stopstalk-deployment/graphs/contributors" style="color: white;" target="_blank">Contributors</a></span>
+                    <span><a href="https://github.com/stopstalk/stopstalk-deployment/graphs/contributors" style="color: white;" target="_blank">{{=T("Contributors")}}</a></span>
                     <span> | </span>
                     <span>Carefully crafted by: <a href="http://www.raj454raj.com" style="color: white;" target="_blank">Raj Patel</a></span>
                 </div>

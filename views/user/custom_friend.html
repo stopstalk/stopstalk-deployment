@@ -1,12 +1,12 @@
 {{extend 'layout.html'}}
-<head><title>Custom Friend</title></head>
-<h2>Custom Friend</h2>
+<head><title>{{=T("Custom Friend")}}</title></head>
+<h2>{{=T("Custom Friend")}}</h2>
 <p>Have a friend who is still not on StopStalk ? We got you covered ;) - just enter his/her details and you are all set!</p>
-<h6>Allowed Custom Friends: <b>{{=allowed}}</b></h6>
+<h6>{{=T("Allowed Custom Friends")}}: <b>{{=allowed}}</b></h6>
 <br/>
 <div class="row">
 <div class="col offset-s1 s4 z-depth-2">
-<h5>Add a Custom Friend</h5>
+<h5>{{=T("Add a Custom Friend")}}</h5>
 {{if form:}}
     {{=form}}
 {{else:}}
@@ -15,7 +15,7 @@
 {{pass}}
 </div>
 <div class="col offset-s1 s5 z-depth-2">
-<h5>Update details</h5>
+<h5>{{=T("Update Details")}}</h5>
 {{=table}}
 </div>
 </div>

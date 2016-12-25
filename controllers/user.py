@@ -37,7 +37,7 @@ def index():
 @auth.requires_login()
 def uva_handle():
 
-    session.flash = "Update your UVa handle"
+    session.flash = T("Update your UVa handle")
     redirect(URL("user", "update_details"))
 
 # ------------------------------------------------------------------------------
@@ -75,7 +75,7 @@ def add_custom_friend():
 
     for temp_handle in stopstalk_handles:
         if stopstalk_handle.lower() == temp_handle.lower():
-            session.flash = "Handle already taken"
+            session.flash = T("Handle already taken")
             redirect(URL("user", "profile", args=original_handle))
 
     # The total referrals by the logged-in user
@@ -104,7 +104,7 @@ def add_custom_friend():
     current_count = db(db.custom_friend.user_id == session.user_id).count()
 
     if current_count >= allowed_custom_friends:
-        session.flash = "Sorry!! All custom users used up!"
+        session.flash = T("Sorry!! All custom users used up!")
         redirect(URL("user", "profile", args=original_handle))
 
     # ID of the custom user
@@ -124,7 +124,7 @@ def add_custom_friend():
     # Insert a new Custom friend for the logged-in user
     cftable.insert(**current_row)
 
-    session.flash = "Custom user added!!"
+    session.flash = T("Custom user added!!")
     redirect(URL("user", "profile", args=stopstalk_handle))
 
 # ------------------------------------------------------------------------------
@@ -160,7 +160,7 @@ def update_details():
     form.vars.stopstalk_handle = record.stopstalk_handle
 
     if form.process(onvalidation=current.sanitize_fields).accepted:
-        session.flash = "User details updated"
+        session.flash = T("User details updated")
 
         updated_sites = utilities.handles_updated(record, form)
         if updated_sites != []:
@@ -185,7 +185,7 @@ def update_details():
 
         redirect(URL("default", "submissions", args=[1]))
     elif form.errors:
-        response.flash = "Form has errors"
+        response.flash = T("Form has errors")
 
     return dict(form=form)
 
@@ -197,7 +197,7 @@ def update_friend():
     """
 
     if len(request.args) != 1:
-        session.flash = "Please click one of the buttons"
+        session.flash = T("Please click one of the buttons")
         redirect(URL("user", "custom_friend"))
 
     cftable = db.custom_friend
@@ -207,7 +207,7 @@ def update_friend():
             (cftable.id == request.args[0])
     row = db(query).select(cftable.id)
     if len(row) == 0:
-        session.flash = "Please click one of the buttons"
+        session.flash = T("Please click one of the buttons")
         redirect(URL("user", "custom_friend"))
 
     record = cftable(request.args[0])
@@ -235,7 +235,7 @@ def update_friend():
         if form.deleted:
             ## DELETE
             # If delete checkbox is checked => just process it redirect back
-            session.flash = "Custom User deleted"
+            session.flash = T("Custom User deleted")
             duplicate_cus = db(cftable.duplicate_cu == record.id).select()
             if len(duplicate_cus):
                 # The current custom user is a parent of other duplicate custom users
@@ -280,11 +280,11 @@ def update_friend():
 
             record.update_record(**dict(form.vars))
 
-            session.flash = "User details updated"
+            session.flash = T("User details updated")
             redirect(URL("user", "custom_friend"))
 
     elif form.errors:
-        response.flash = "Form has errors"
+        response.flash = T("Form has errors")
 
     return dict(form=form)
 
@@ -426,9 +426,9 @@ def get_activity():
 
     if len(submissions) > 0:
         table = utilities.render_table(submissions)
-        table = DIV(H3("Activity on " + date), table)
+        table = DIV(H3(T("Activity on") + " " + date), table)
     else:
-        table = H5("No activity on " + date)
+        table = H5(T("No activity on") + " " + date)
 
     return dict(table=table)
 
@@ -711,10 +711,10 @@ def custom_friend():
     rows = db(db.custom_friend.user_id == session.user_id).select()
 
     table = TABLE(_class="bordered centered")
-    tr = TR(TH("Name"),
-            TH("StopStalk Handle"))
+    tr = TR(TH(T("Name")),
+            TH(T("StopStalk Handle")))
 
-    tr.append(TH("Update"))
+    tr.append(TH(T("Update")))
     table.append(THEAD(tr))
 
     tbody = TBODY()
@@ -730,7 +730,7 @@ def custom_friend():
 
         tr.append(TD(FORM(INPUT(_class="btn yellow",
                                 _style="color: black;",
-                                _value="Update",
+                                _value=T("Update"),
                                 _type="submit"),
                           _action=URL("user",
                                       "update_friend",
@@ -758,7 +758,7 @@ def custom_friend():
     form.process(onvalidation=current.sanitize_fields)
 
     if form.accepted:
-        session.flash = "Submissions will be added in some time"
+        session.flash = T("Submissions will be added in some time")
         redirect(URL("default", "submissions", args=[1]))
 
     return dict(form=form, table=table, allowed=allowed_custom_friends)

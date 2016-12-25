@@ -116,7 +116,7 @@ def index():
     """
     # If the user is logged in
     if auth.is_logged_in():
-        session.flash = "Welcome StopStalker!!"
+        session.flash = T("Welcome StopStalker!!")
         redirect(URL("default", "submissions", args=[1]))
 
     return dict()
@@ -207,8 +207,8 @@ def notifications():
     users_on_day_streak.sort(key=lambda k: k[1], reverse=True)
 
     # The table containing users on streak(days)
-    streak_table = TABLE(THEAD(TR(TH(STRONG("User")),
-                                  TH(STRONG("Days")))),
+    streak_table = TABLE(THEAD(TR(TH(STRONG(T("User"))),
+                                  TH(STRONG(T("Days"))))),
                          _class="bordered centered")
 
     tbody = TBODY()
@@ -228,7 +228,7 @@ def notifications():
 
     streak_table.append(tbody)
     if len(users_on_day_streak) == 0:
-        streak_table = H6("No friends on day streak", _class="center")
+        streak_table = H6(T("No friends on day streak"), _class="center")
 
     return dict(streak_table=streak_table)
 
@@ -243,21 +243,21 @@ def unsubscribe():
     utable.time_stamp.writable = False
 
     form = SQLFORM(utable,
-                   submit_button="Update Subscription")
+                   submit_button=T("Update Subscription"))
 
     record = db(utable.email == session.auth.user.email).select().first()
     if record:
         form = SQLFORM(utable,
                        record,
                        showid=False,
-                       submit_button="Update Subscription")
+                       submit_button=T("Update Subscription"))
 
     form.vars.time_stamp = datetime.datetime.now()
     if form.process().accepted:
-        response.flash = "Subscription details updated"
+        response.flash = T("Subscription details updated")
         redirect(URL("default", "unsubscribe"))
     elif form.errors:
-        response.flash = "Form has errors"
+        response.flash = T("Form has errors")
 
     return dict(form=form)
 
@@ -312,12 +312,12 @@ def contests():
     cal = pdt.Calendar()
 
     table = TABLE(_class="centered bordered", _id="contests-table")
-    thead = THEAD(TR(TH("Contest Name"),
-                     TH("Site"),
-                     TH("Start"),
-                     TH("Duration/Ending"),
-                     TH("Link"),
-                     TH("Add Reminder")))
+    thead = THEAD(TR(TH(T("Contest Name")),
+                     TH(T("Site")),
+                     TH(T("Start")),
+                     TH(T("Duration/Ending")),
+                     TH(T("Link")),
+                     TH(T("Add Reminder"))))
     table.append(thead)
     tbody = TBODY()
 
@@ -360,13 +360,13 @@ def contests():
                        _class=view_link_class,
                        _href=i["url"],
                        data={"position": "left",
-                             "tooltip": "Contest Link",
+                             "tooltip": T("Contest Link"),
                              "delay": "50"},
                        _target="_blank")))
         tr.append(TD(BUTTON(I(_class="fa fa-calendar-plus-o"),
                             _class=reminder_class + " disabled",
                             data={"position": "left",
-                                  "tooltip": "Already started!",
+                                  "tooltip": T("Already started!"),
                                   "delay": "50"})))
         tbody.append(tr)
 
@@ -395,13 +395,13 @@ def contests():
                        _class=view_link_class,
                        _href=i["url"],
                        data={"position": "left",
-                             "tooltip": "Contest Link",
+                             "tooltip": T("Contest Link"),
                              "delay": "50"},
                        _target="_blank")))
         tr.append(TD(BUTTON(I(_class="fa fa-calendar-plus-o"),
                             _class=reminder_class,
                             data={"position": "left",
-                                  "tooltip": "Set Reminder to Google Calendar",
+                                  "tooltip": T("Set Reminder to Google Calendar"),
                                   "delay": "50"})))
         tbody.append(tr)
 
@@ -432,13 +432,13 @@ def leaderboard():
             global_leaderboard = True
         else:
             if not auth.is_logged_in():
-                response.flash = "Login to see Friends Leaderboard"
+                response.flash = T("Login to see Friends Leaderboard")
                 global_leaderboard = True
     else:
         if not auth.is_logged_in():
             global_leaderboard = True
 
-    heading = "Global Leaderboard"
+    heading = T("Global Leaderboard")
     afields = ["first_name", "last_name", "stopstalk_handle", "rating",
                "institute", "per_day", "prev_rating", "per_day_change"]
     cfields = afields + ["duplicate_cu"]
@@ -447,7 +447,7 @@ def leaderboard():
     cquery = (cftable.id > 0)
     if global_leaderboard is False:
         if auth.is_logged_in():
-            heading = "Friends Leaderboard"
+            heading = T("Friends Leaderboard")
             friends, cusfriends = utilities.get_friends(session.user_id)
             custom_friends = [x[0] for x in cusfriends]
 
@@ -463,7 +463,7 @@ def leaderboard():
     aquery &= (atable.registration_key == "")
 
     if request.vars.has_key("q"):
-        heading = "Institute Leaderboard"
+        heading = T("Institute Leaderboard")
         institute = request.vars["q"]
 
         if institute != "":
@@ -504,13 +504,13 @@ def leaderboard():
     users = sorted(users, key=lambda x: x[3], reverse=True)
 
     table = TABLE(_class="centered bordered")
-    table.append(THEAD(TR(TH("Rank"),
-                          TH("Name"),
-                          TH("StopStalk Handle"),
-                          TH("Institute"),
-                          TH("StopStalk Rating"),
-                          TH("Rating Changes"),
-                          TH("Per Day Changes"))))
+    table.append(THEAD(TR(TH(T("Rank")),
+                          TH(T("Name")),
+                          TH(T("StopStalk Handle")),
+                          TH(T("Institute")),
+                          TH(T("StopStalk Rating")),
+                          TH(T("Rating Changes")),
+                          TH(T("Per Day Changes")))))
 
     tbody = TBODY()
     rank = 1
@@ -520,7 +520,7 @@ def leaderboard():
             span = SPAN(_class="orange tooltipped",
                         data={"position": "right",
                               "delay": "50",
-                              "tooltip": "Custom User"},
+                              "tooltip": T("Custom User")},
                         _style="cursor: pointer; " + \
                                 "float:right; " + \
                                 "height:10px; " + \
@@ -567,10 +567,10 @@ def leaderboard():
         rank += 1
 
     table.append(tbody)
-    switch = DIV(LABEL(H6("Friends",
+    switch = DIV(LABEL(H6(T("Friends"),
                           INPUT(_type="checkbox", _id="submission-switch"),
                           SPAN(_class="lever pink accent-3"),
-                          "Global")),
+                          T("Global"))),
                  _class="switch")
     div = TAG[""](switch, table)
     return dict(div=div,
@@ -627,7 +627,7 @@ def filters():
     # the URL with empty value
     compulsary_keys = ["pname", "name", "end_date", "start_date"]
     if set(compulsary_keys).issubset(get_vars.keys()) is False:
-        session.flash = "Invalid URL parameters"
+        session.flash = T("Invalid URL parameters")
         redirect(URL("default", "filters"))
 
     # Form has been submitted
@@ -636,16 +636,16 @@ def filters():
     ftable = db.following
     duplicates = []
 
-    switch = DIV(LABEL(H6("Friends' Submissions",
+    switch = DIV(LABEL(H6(T("Friends' Submissions"),
                           INPUT(_type="checkbox", _id="submission-switch"),
                           SPAN(_class="lever pink accent-3"),
-                          "Global Submissions")),
+                          T("Global Submissions"))),
                  _class="switch")
     table = TABLE()
-    div = TAG[""](H4("Recent Submissions"), switch, table)
+    div = TAG[""](H4(T("Recent Submissions")), switch, table)
 
     if global_submissions is False and not auth.is_logged_in():
-        session.flash = "Login to view Friends' submissions"
+        session.flash = T("Login to view Friends' submissions")
         new_vars = request.vars
         new_vars["global"] = True
         redirect(URL("default", "filters",
@@ -742,7 +742,7 @@ def filters():
         query &= (stable.time_stamp >= start_date) & \
                  (stable.time_stamp <= end_date)
     else:
-        session.flash = "Start Date greater than End Date"
+        session.flash = T("Start Date greater than End Date")
         redirect(URL("default", "filters"))
 
     pname = get_vars["pname"]
@@ -794,10 +794,10 @@ def filters():
         total_pages += 1
 
     table = utilities.render_table(filtered, duplicates)
-    switch = DIV(LABEL(H6("Friends' Submissions",
+    switch = DIV(LABEL(H6(T("Friends' Submissions"),
                           INPUT(_type="checkbox", _id="submission-switch"),
                           SPAN(_class="lever pink accent-3"),
-                          "Global Submissions")),
+                          T("Global Submissions"))),
                  _class="switch")
     div = TAG[""](switch, table)
 
@@ -815,24 +815,24 @@ def mark_friend():
 
     if len(request.args) < 1:
         raise HTTP(400, "Bad request")
-        return "Invalid URL"
+        return T("Invalid URL")
 
     ftable = db.following
     try:
         friend_id = long(request.args[0])
     except ValueError:
         raise HTTP(400, "Bad request")
-        return "Invalid user argument!"
+        return T("Invalid user argument!")
 
     if friend_id != session.user_id:
         query = (ftable.follower_id == session.user_id) & \
                 (ftable.user_id == friend_id)
         if db(query).count() != 0:
             raise HTTP(400, "Bad request")
-            return "Already friends !!"
+            return T("Already friends !!")
     else:
         raise HTTP(400, "Bad request")
-        return "Invalid user argument!"
+        return T("Invalid user argument!")
 
     # Insert a tuple of users' id into the following table
     ftable.insert(user_id=friend_id, follower_id=session.user_id)
@@ -848,7 +848,7 @@ def mark_friend():
                                   follower_id=session.user_id,
                                   transaction_type="add")
 
-    return "Friend added!"
+    return T("Friend added!")
 
 # ----------------------------------------------------------------------------
 def search():
@@ -906,10 +906,10 @@ def search():
                             orderby=[atable.first_name, atable.last_name])
 
     table = TABLE(_class="bordered centered")
-    tr = TR(TH("Name"), TH("Site handles"))
+    tr = TR(TH(T("Name")), TH(T("Site handles")))
 
     if auth.is_logged_in():
-        tr.append(TH("Actions"))
+        tr.append(TH(T("Actions")))
 
     thead = THEAD()
     thead.append(tr)
@@ -972,13 +972,13 @@ def search():
         # Check if the current user is already a friend or not
         if user.id not in friends:
             # Not a friend
-            tooltip_attrs[:2] = "Add friend", "add-friend"
+            tooltip_attrs[:2] = T("Add friend"), "add-friend"
             tr.append(TD(BUTTON(I(_class="fa fa-user-plus fa-3x"),
                                 _class=btn_class + " green",
                                 data=_get_tooltip_data(*tooltip_attrs))))
         else:
             # Already friends
-            tooltip_attrs[:2] = "Unfriend", "unfriend"
+            tooltip_attrs[:2] = T("Unfriend"), "unfriend"
             tr.append(TD(BUTTON(I(_class="fa fa-user-times fa-3x"),
                                 _class=btn_class + " black",
                                 data=_get_tooltip_data(*tooltip_attrs))))
@@ -1093,7 +1093,7 @@ def unfriend():
 
     def _invalid_url():
         raise HTTP(400, "Bad request")
-        return "Invalid url arguments"
+        return T("Invalid url arguments")
 
     if len(request.args) != 1:
         return _invalid_url()
@@ -1129,7 +1129,7 @@ def unfriend():
                                           follower_id=session.user_id,
                                           transaction_type="unfriend")
 
-        return "Successfully unfriended"
+        return T("Successfully unfriended")
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
@@ -1231,7 +1231,7 @@ def contact_us():
         ctable.email.default = user.email
 
     if form.process().accepted:
-        session.flash = "We will get back to you!"
+        session.flash = T("We will get back to you!")
         current.send_mail(to="contactstopstalk@gmail.com",
                           subject=form.vars.subject,
                           message="From: %s (%s - %s)\n" % \
@@ -1243,7 +1243,7 @@ def contact_us():
                           mail_type="admin")
         redirect(URL("default", "index"))
     elif form.errors:
-        response.flash = "Please fill all the fields!"
+        response.flash = T("Please fill all the fields!")
 
     return dict(form=form)
 

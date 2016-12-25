@@ -396,6 +396,7 @@ def render_table(submissions, duplicates=[]):
         @return (TABLE):  HTML TABLE containing all the submissions
     """
 
+    T = current.T
     status_dict = {"AC": "Accepted",
                    "WA": "Wrong Answer",
                    "TLE": "Time Limit Exceeded",
@@ -408,14 +409,14 @@ def render_table(submissions, duplicates=[]):
                    "OTH": "Others"}
 
     table = TABLE(_class="bordered centered")
-    table.append(THEAD(TR(TH("Name"),
-                          TH("Site Profile"),
-                          TH("Time of submission"),
-                          TH("Problem"),
-                          TH("Language"),
-                          TH("Status"),
-                          TH("Points"),
-                          TH("View/Download Code"))))
+    table.append(THEAD(TR(TH(T("Name")),
+                          TH(T("Site Profile")),
+                          TH(T("Time of submission")),
+                          TH(T("Problem")),
+                          TH(T("Language")),
+                          TH(T("Status")),
+                          TH(T("Points")),
+                          TH(T("View/Download Code")))))
 
     tbody = TBODY()
     # Dictionary to optimize lookup for solved and unsolved problems
@@ -442,7 +443,7 @@ def render_table(submissions, duplicates=[]):
             span = SPAN(_class="orange tooltipped",
                         data={"position": "right",
                               "delay": "50",
-                              "tooltip": "Custom User"},
+                              "tooltip": T("Custom User")},
                         _style="cursor: pointer; " + \
                                 "float:right; " + \
                                 "height:10px; " + \
@@ -508,37 +509,37 @@ def render_table(submissions, duplicates=[]):
             button_class = "btn waves-light waves-effect"
             if current.auth.is_logged_in():
                 if submission.site != "HackerEarth":
-                    td = TD(BUTTON("View",
+                    td = TD(BUTTON(T("View"),
                                    _class="view-submission-button " + button_class,
                                    _style="background-color: #FF5722",
                                    data=submission_data),
                             " ",
-                            BUTTON("Download",
+                            BUTTON(T("Download"),
                                    _class="download-submission-button " + \
                                           button_class,
                                    _style="background-color: #2196F3",
                                    data=submission_data))
                 else:
-                    td = TD(A("View",
+                    td = TD(A(T("View"),
                               _href=submission.view_link,
                               _class="btn waves-light waves-effect",
                               _style="background-color: #FF5722",
                               _target="_blank"))
                 append(td)
             else:
-                append(TD(BUTTON("View",
+                append(TD(BUTTON(T("View"),
                                  _class="btn tooltipped disabled",
                                  _style="background-color: #FF5722",
                                  data={"position": "bottom",
                                        "delay": "50",
-                                       "tooltip": "Login to View"}),
+                                       "tooltip": T("Login to View")}),
                           " ",
-                          BUTTON("Download",
+                          BUTTON(T("Download"),
                                  _class="btn tooltipped disabled",
                                  _style="background-color: #2196F3",
                                  data={"position": "bottom",
                                        "delay": "50",
-                                       "tooltip": "Login to Download"})))
+                                       "tooltip": T("Login to Download")})))
         else:
             append(TD())
 
