@@ -232,6 +232,7 @@ def notifications():
 
     return dict(streak_table=streak_table)
 
+
 # ----------------------------------------------------------------------------
 @auth.requires_login()
 def unsubscribe():
@@ -843,12 +844,99 @@ def mark_friend():
     row = db(query).select().first()
     if row is None or row.transaction_type != "add":
         db(query).delete()
-        # Use this for sending emails to the users everyday
-        db.todays_requests.insert(user_id=friend_id,
-                                  follower_id=session.user_id,
-                                  transaction_type="add")
+        if row is None:
+            # Use this for sending emails to the users everyday
+            db.todays_requests.insert(user_id=friend_id,
+                                      follower_id=session.user_id,
+                                      transaction_type="add")
 
     return T("Friend added!")
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
+def friends():
+    """
+        List of friends added by the user and who added the user
+    """
+
+    ftable = db.following
+    atable = db.auth_user
+    query = (ftable.user_id == session.user_id) | \
+            (ftable.follower_id == session.user_id)
+    rows = db(query).select(ftable.user_id, ftable.follower_id)
+
+    # User IDs who the current user is following
+    following = set([])
+    # User IDs who are following the current user
+    followed_by = set([])
+    for row in rows:
+        if row.user_id == session.user_id:
+            followed_by.add(row.follower_id)
+        else:
+            following.add(row.user_id)
+
+    def _get_tooltip_data(tooltip, buttontype, user_id):
+        """
+            Function to return data attributes for the tooltipped buttons
+        """
+        return dict(position="left",
+                    delay="50",
+                    tooltip=tooltip,
+                    buttontype=buttontype,
+                    userid=user_id)
+
+    fields = [atable.id,
+              atable.first_name,
+              atable.last_name,
+              atable.stopstalk_handle]
+
+    query = atable.id.belongs(following)
+    following_records = db(query).select(*fields, orderby="<random>")
+
+    thead = THEAD(TR(TH("Name"), TH("Actions")))
+    table1 = TABLE(thead, _class="bordered centered")
+    tbody = TBODY()
+    btn_class = "tooltipped btn-floating btn-large waves-effect waves-light"
+
+    for row in following_records:
+        tooltip_attrs = [T("Unfriend"), "unfriend", str(row.id)]
+        tr = TR(TD(A(row.first_name + " " + row.last_name,
+                     _href=URL("user", "profile",
+                               args=[row.stopstalk_handle],
+                               extension=False),
+                     _target="_blank")),
+                TD(BUTTON(I(_class="fa fa-user-times fa-3x"),
+                                _class=btn_class + " black",
+                                data=_get_tooltip_data(*tooltip_attrs))))
+        tbody.append(tr)
+    table1.append(tbody)
+
+    table2 = TABLE(thead, _class="bordered centered")
+    tbody = TBODY()
+    query = atable.id.belongs(followed_by)
+    followed_by_records = db(query).select(*fields, orderby="<random>")
+    for row in followed_by_records:
+        tr = TR()
+        tr.append(TD(A(row.first_name + " " + row.last_name,
+                     _href=URL("user", "profile",
+                               args=[row.stopstalk_handle],
+                               extension=False),
+                     _target="_blank")))
+
+        tooltip_attrs = [None, None, str(row.id)]
+        if row.id in following:
+            tooltip_attrs[:2] = T("Unfriend"), "unfriend"
+            tr.append(TD(BUTTON(I(_class="fa fa-user-times fa-3x"),
+                                _class=btn_class + " black",
+                                data=_get_tooltip_data(*tooltip_attrs))))
+        else:
+            tooltip_attrs[:2] = T("Add friend"), "add-friend"
+            tr.append(TD(BUTTON(I(_class="fa fa-user-plus fa-3x"),
+                                _class=btn_class + " green",
+                                data=_get_tooltip_data(*tooltip_attrs))))
+        tbody.append(tr)
+    table2.append(tbody)
+    return dict(table1=table1, table2=table2)
 
 # ----------------------------------------------------------------------------
 def search():

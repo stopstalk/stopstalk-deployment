@@ -39,42 +39,42 @@ response.menu = []
 def get_tooltip_data(tooltip):
     return dict(position="bottom", delay="40", tooltip=tooltip)
 
-if session.user_id:
-    response.menu += [
-        (I(_class="fa fa-bell-o fa-2x tooltipped",
-           data=get_tooltip_data(T("Notifications"))),
-         False,
-         URL('default', 'notifications'), []),
-        (I(_class="fa fa-user-secret fa-2x tooltipped",
-           data=get_tooltip_data(T("Custom Friend"))),
-         False,
-         URL('user', 'custom_friend'), []),
-    ]
+def get_menu_tuple(icon_class, tooltip, url):
+    return (I(_class="fa fa-2x tooltipped " + icon_class,
+              data=get_tooltip_data(tooltip)),
+            False,
+            url,
+            [])
 
-response.menu += [(I(_class="fa fa-search fa-2x tooltipped",
-                     data=get_tooltip_data(T("Search friends"))),
-                   False,
-                   URL('default', 'search'), []),
-                  (I(_class="fa fa-calendar-check-o fa-2x tooltipped",
-                     data=get_tooltip_data(T("Upcoming Contests"))),
-                   False,
-                   URL('default', 'contests'), []),
-                  (I(_class="fa fa-bar-chart fa-2x tooltipped",
-                     data=get_tooltip_data(T("Leaderboard"))),
-                   False,
-                   URL('default', 'leaderboard'), []),
-                  (I(_class="fa fa-line-chart fa-2x tooltipped",
-                     data=get_tooltip_data(T("Trending Problems"))),
-                   False,
-                   URL('problems', 'trending'), []),
-                  (I(_class="fa fa-filter fa-2x tooltipped",
-                     data=get_tooltip_data(T("Submission Filters"))),
-                   False,
-                   URL('default', 'filters'), []),
-                  (I(_class="fa fa-tag fa-2x tooltipped",
-                     data=get_tooltip_data(T("Search by tags"))),
-                   False,
-                   URL('problems', 'tag'), [])]
+if session.user_id:
+    response.menu += [get_menu_tuple("fa-bell-o",
+                                     T("Notifications"),
+                                     URL("default", "notifications")),
+                      get_menu_tuple("fa-user-secret",
+                                     T("Custom Friend"),
+                                     URL("user", "custom_friend")),
+                      get_menu_tuple("fa-users",
+                                     T("Your Friends"),
+                                     URL("default", "friends"))]
+
+response.menu += [get_menu_tuple("fa-search",
+                                 T("Search Friends"),
+                                 URL("default", "search")),
+                  get_menu_tuple("fa-calendar-check-o",
+                                 T("Upcoming Contests"),
+                                 URL("default", "contests")),
+                  get_menu_tuple("fa-bar-chart",
+                                 T("Leaderboard"),
+                                 URL("default", "leaderboard")),
+                  get_menu_tuple("fa-line-chart",
+                                 T("Trending Problems"),
+                                 URL("problems", "trending")),
+                  get_menu_tuple("fa-filter",
+                                 T("Submission Filters"),
+                                 URL("default", "filters")),
+                  get_menu_tuple("fa-tag",
+                                 T("Search by tags"),
+                                 URL("problems", "tag"))]
 
 if "auth" in locals(): auth.wikimenu()
 

@@ -1,0 +1,13 @@
+{{extend 'layout.html'}}
+<title>Friends</title>
+<h1>Friends</h1>
+<div class="row">
+    <div class="col s5"><h5>You have added</h5></div>
+    <div class="col offset-s2 s5"><h5>Who added you</h5></div>
+</div>
+<div class="row">
+    <div class="col s5">{{=table1}}</div>
+    <div class="col offset-s2 s5">{{=table2}}</div>
+</div>
+<!-- Note: We don't need any seperate script for this page as the Search page script does what is required -->
+<script src="{{=URL('static', 'js/appjs/default/search.js')}}"></script>
