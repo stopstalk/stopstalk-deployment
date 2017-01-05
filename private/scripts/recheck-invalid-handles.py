@@ -174,4 +174,5 @@ if __name__ == "__main__":
                 del update_dict[row.site.lower() + "_lr"]
             row.delete_record()
 
-    db(final_delete_query).delete()
+    if final_delete_query:
+        db(final_delete_query).delete()
