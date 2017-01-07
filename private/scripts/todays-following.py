@@ -90,8 +90,14 @@ Team StopStalk
 
 for user_id in added_unfriended:
     mail_content = get_html_content(user_id, added_unfriended[user_id])
+    curr_list = added_unfriended[user_id]
     if mail_content != "FAILURE":
-        print user_details[user_id]["name"], added_unfriended[user_id]
+        log_string = user_details[user_id]["name"]
+        if len(curr_list[0]):
+            log_string += " A:" + ",".join(str(x) for x in curr_list[0])
+        if len(curr_list[1]):
+            log_string += " U:" + ",".join(str(x) for x in curr_list[1])
+        print log_string
         current.send_mail(to=user_details[user_id]["email"],
                           subject="Friendship activity from StopStalk",
                           message=mail_content,
