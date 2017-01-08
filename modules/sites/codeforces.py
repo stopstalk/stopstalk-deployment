@@ -106,7 +106,7 @@ class Profile(object):
         url = "http://www.codeforces.com/api/user.status?handle=" + \
               handle + "&from=1"
         # Timeout for new user submission retrieval
-        timeout = 200
+        timeout = 50
         if time.strftime("%Y-%m-%d %H:%M:%S", last_retrieved) != current.INITIAL_DATE:
             # Daily retrieval script to limit submissions to 500
             # A daily submitter of more than 500 submissions is really
@@ -114,7 +114,7 @@ class Profile(object):
             url += "&count=500"
             timeout = current.TIMEOUT
         else:
-            url += "&count=300000"
+            url += "&count=50000"
 
         tmp = get_request(url,
                           headers={"User-Agent": user_agent},
@@ -172,10 +172,11 @@ class Profile(object):
                     ptable(ptable.id == this_value[1]).update(tags=str(tags))
             else:
                 print "Codeforces tag inserted", problem_link, tags
-                ptable.insert(link=problem_link,
-                              name=problem_name,
-                              tags=str(tags),
-                              tags_added_on=today)
+                rid = ptable.insert(link=problem_link,
+                                    name=problem_name,
+                                    tags=str(tags),
+                                    tags_added_on=today)
+                plink_to_id[problem_link] = (str(tags), rid)
 
             # Problem status
             try:
