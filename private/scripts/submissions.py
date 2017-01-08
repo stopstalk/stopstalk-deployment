@@ -53,6 +53,20 @@ def _debug(stopstalk_handle, site, custom=False):
     print debug_string,
 
 # -----------------------------------------------------------------------------
+def insert_this_batch():
+    global rows
+
+    columns = "(`user_id`, `custom_user_id`, `stopstalk_handle`, " + \
+              "`site_handle`, `site`, `time_stamp`, `problem_name`," + \
+              "`problem_link`, `lang`, `status`, `points`, `view_link`)"
+
+    if len(rows) != 0:
+        sql_query = """INSERT INTO `submission` """ + \
+                    columns + """ VALUES """ + \
+                    ",".join(rows) + """;"""
+        db.executesql(sql_query)
+
+# -----------------------------------------------------------------------------
 def get_submissions(user_id,
                     handle,
                     stopstalk_handle,
@@ -114,7 +128,9 @@ def get_submissions(user_id,
                         encoded_row.append(str(x))
 
                 rows.append("(" + ", ".join(encoded_row) + ")")
-
+                if len(rows) > 1000:
+                    insert_this_batch()
+                    rows = []
 
     if count != 0:
         print "%s" % (count)
@@ -145,6 +161,17 @@ def retrieve_submissions(record, custom, all_sites=current.SITES):
     time_conversion = "%Y-%m-%d %H:%M:%S"
     list_of_submissions = []
     retrieval_failures = []
+    plink_to_id = {}
+
+    if "CodeForces" in all_sites:
+        ptable = db.problem
+        query = ptable.link.contains("codeforces")
+        problem_records = db(query).select(ptable.id,
+                                           ptable.link,
+                                           ptable.tags)
+        for problem_record in problem_records:
+            plink_to_id[problem_record.link] = (problem_record.tags,
+                                                problem_record.id)
 
     for site in all_sites:
 
@@ -162,7 +189,10 @@ def retrieve_submissions(record, custom, all_sites=current.SITES):
             Site = globals()[site.lower()]
             P = Site.Profile(site_handle)
             site_method = P.get_submissions
-            submissions = site_method(last_retrieved)
+            if site == "CodeForces":
+                submissions = site_method(last_retrieved, plink_to_id)
+            else:
+                submissions = site_method(last_retrieved)
             if submissions in (SERVER_FAILURE, OTHER_FAILURE):
                 print "%s %s %s" % (submissions, site, record.stopstalk_handle)
                 # Add the failure sites for inserting data into failed_retrieval
@@ -355,15 +385,7 @@ if __name__ == "__main__":
         for record in custom_users:
             retrieve_submissions(record, True)
 
-    columns = "(`user_id`, `custom_user_id`, `stopstalk_handle`, " + \
-              "`site_handle`, `site`, `time_stamp`, `problem_name`," + \
-              "`problem_link`, `lang`, `status`, `points`, `view_link`)"
-
-    if len(rows) != 0:
-        sql_query = """INSERT INTO `submission` """ + \
-                    columns + """ VALUES """ + \
-                    ",".join(rows) + """;"""
-        db.executesql(sql_query)
+    insert_this_batch()
 
     # Insert user_ids and custom_user_ids into failed_retrieval
     # for which the retrieval failed for further re-retrieval

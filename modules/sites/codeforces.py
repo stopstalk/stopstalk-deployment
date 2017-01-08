@@ -93,7 +93,7 @@ class Profile(object):
         return editorial_link
 
     # -------------------------------------------------------------------------
-    def get_submissions(self, last_retrieved):
+    def get_submissions(self, last_retrieved, plink_to_id):
         """
             Retrieve CodeForces submissions after last retrieved timestamp
 
@@ -106,13 +106,15 @@ class Profile(object):
         url = "http://www.codeforces.com/api/user.status?handle=" + \
               handle + "&from=1"
         # Timeout for new user submission retrieval
-        timeout = 40
+        timeout = 200
         if time.strftime("%Y-%m-%d %H:%M:%S", last_retrieved) != current.INITIAL_DATE:
             # Daily retrieval script to limit submissions to 500
             # A daily submitter of more than 500 submissions is really
             # supposed to contact us to prove he/she is a human :p
             url += "&count=500"
             timeout = current.TIMEOUT
+        else:
+            url += "&count=300000"
 
         tmp = get_request(url,
                           headers={"User-Agent": user_agent},
@@ -163,18 +165,17 @@ class Profile(object):
             if tags == []:
                 tags = ["-"]
 
-            record = db(ptable.link == problem_link).select().first()
-
-            if record is None:
+            if plink_to_id.has_key(problem_link):
+                this_value = plink_to_id[problem_link]
+                if tags != ["-"] and this_value[0] == "['-']":
+                    print "Codeforces tag updated", problem_link, tags
+                    ptable(ptable.id == this_value[1]).update(tags=str(tags))
+            else:
                 print "Codeforces tag inserted", problem_link, tags
                 ptable.insert(link=problem_link,
                               name=problem_name,
                               tags=str(tags),
                               tags_added_on=today)
-            else:
-                if tags != ["-"] and record.tags == "['-']":
-                    print "Codeforces tag updated", problem_link, tags
-                    record.update_record(tags=str(tags))
 
             # Problem status
             try:

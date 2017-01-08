@@ -84,7 +84,7 @@ class Profile(object):
         previd = -1
         currid = 0
         page = 0
-        url = "https://www.spoj.com/users/" + handle
+        url = current.SITES[self.site] + "users/" + handle
         tmpreq = get_request(url)
 
         if tmpreq in REQUEST_FAILURES:
@@ -96,7 +96,7 @@ class Profile(object):
 
         while 1:
             flag = 0
-            url = "https://www.spoj.com/status/" + \
+            url = current.SITES[self.site] + "status/" + \
                   handle + \
                   "/all/start=" + \
                   str(start)
