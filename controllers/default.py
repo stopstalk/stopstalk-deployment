@@ -893,7 +893,7 @@ def friends():
     query = atable.id.belongs(following)
     following_records = db(query).select(*fields, orderby="<random>")
 
-    thead = THEAD(TR(TH("Name"), TH("Actions")))
+    thead = THEAD(TR(TH(T("Name")), TH(T("Actions"))))
     table1 = TABLE(thead, _class="bordered centered")
     tbody = TBODY()
     btn_class = "tooltipped btn-floating btn-large waves-effect waves-light"

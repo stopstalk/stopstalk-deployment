@@ -575,7 +575,7 @@ def trending():
 
     global_table = _render_trending(T("Trending Globally"),
                                     global_trending[:current.PROBLEMS_PER_PAGE],
-                                    "Users")
+                                    T("Users"))
     if auth.is_logged_in():
         friends_trending = sorted(friends_problems_dict.items(),
                                   key=custom_compare,
@@ -583,7 +583,7 @@ def trending():
 
         friend_table = _render_trending(T("Trending among friends"),
                                         friends_trending[:current.PROBLEMS_PER_PAGE],
-                                        "Friends")
+                                        T("Friends"))
 
         div = DIV(DIV(friend_table, _class="col s6"),
                   DIV(global_table, _class="col s6"),
