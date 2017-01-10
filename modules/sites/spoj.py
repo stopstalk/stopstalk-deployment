@@ -47,6 +47,8 @@ class Profile(object):
             @return (List): List of tags for that problem
         """
 
+        # Temporary hack - spoj seems to have removed their SSL cert
+        problem_link = problem_link.replace("https", "http")
         response = get_request(problem_link)
         if response in REQUEST_FAILURES:
             return ["-"]
