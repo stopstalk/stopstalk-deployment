@@ -1,5 +1,5 @@
 {{extend 'layout.html'}}
-<head><title>User submissions: {{=handle}}</title></head>
+<head><title>{{=T("User submissions")}}: {{=handle}}</title></head>
 <style>
     #refresh-submissions {
         margin-right: 4%;
@@ -13,16 +13,16 @@
 <script src="{{=URL('static', 'js/appjs/user/submissions.js')}}" type="text/javascript"></script>
 {{if total_rows:}}
     {{if user == "Self":}}
-        <h1>Your submissions</h1>
+        <h1>{{=T("Your submissions")}}</h1>
     {{else:}}
-        <h1>Submissions of {{=user}}</h1>
+        <h1>{{=T("Submissions of")}} {{=user}}</h1>
     {{pass}}
     <div id="page-selection" class="center"></div>
     {{=table}}
 {{else:}}
     <br /><br />
-    <h5>No submissions in the database yet!</h5>
-    <h5>If you have registered today then your submissions will be up in our next round of retrieving submissions!</h5>
-    <h5>Till then, make sure you entered the correct site handles and add your friends.</h5>
+    <h5>{{=T("No submissions in the database yet!")}}</h5>
+    <h5>{{=T("If you have registered today then your submissions will be up in our next round of retrieving submissions!")}}</h5>
+    <h5>{{=T("Till then, make sure you entered the correct site handles and add your friends.")}}</h5>
 {{pass}}
 

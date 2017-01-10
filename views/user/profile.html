@@ -1,7 +1,7 @@
 {{extend 'layout.html'}}
 <html>
   <head>
-    <title>User profile: {{=actual_handle}}</title>
+    <title>{{=T("User profile")}}: {{=actual_handle}}</title>
     <style>
 
         .chip {
@@ -226,7 +226,7 @@
   <body>
     {{if nouser:}}
         <div id="no-user">
-            <h5>Invalid StopStalk handle in the URL.</h5>
+            <h5>{{=T("Invalid StopStalk handle in the URL.")}}</h5>
         </div>
     {{else:}}
     <table>
@@ -243,27 +243,27 @@
                                     </a>
                                 </th>
                                 <th>
-                                    <a href="{{=URL('user', 'submissions', args=[actual_handle])}}" class="tooltipped btn-floating btn-large waves-effect waves-light red" data-position="bottom" data-delay="50" data-tooltip="View user submissions" target="_blank">
+                                    <a href="{{=URL('user', 'submissions', args=[actual_handle])}}" class="tooltipped btn-floating btn-large waves-effect waves-light red" data-position="bottom" data-delay="50" data-tooltip="{{=T('View user submissions')}}" target="_blank">
                                         <i class="fa fa-long-arrow-right fa-3x"></i>
                                     </a>
                                 </th>
                                 {{if flag == "not-friends" and custom == False:}}
                                     <th>
-                                        <button class="tooltipped btn-floating btn-large waves-effect waves-light friends-button green" data-position="bottom" data-delay="50" data-tooltip="Add friend" data-user-id="{{=row.id}}" data-type="add-friend">
+                                        <button class="tooltipped btn-floating btn-large waves-effect waves-light friends-button green" data-position="bottom" data-delay="50" data-tooltip="{{=T('Add friend')}}" data-user-id="{{=row.id}}" data-type="add-friend">
                                             <i class="fa fa-user-plus fa-3x"></i>
                                         </button>
                                     </th>
                                 {{elif flag != "my-custom-user" and custom == True:}}
                                     <th>
-                                        <a href="#stopstalk-handle" class="tooltipped btn-floating btn-large waves-effect waves-light modal-trigger purple" data-position="bottom" data-delay="50" data-tooltip="Add to my Custom Friend List">
+                                        <a href="#stopstalk-handle" class="tooltipped btn-floating btn-large waves-effect waves-light modal-trigger purple" data-position="bottom" data-delay="50" data-tooltip="{{=T('Add to my Custom Friend List')}}">
                                             <i class="fa fa-plus fa-3x"></i>
                                         </a>
                                         <!-- Modal Structure -->
                                         <div id="stopstalk-handle" class="modal center">
                                             <div class="modal-content">
-                                                <h5>Add this Custom User</h5>
-                                                <p>Please enter StopStalk handle for new Custom User</p>
-                                                <p>Note: It will consume one custom user from your allowed custom users</p>
+                                                <h5>{{=T("Add this Custom User")}}</h5>
+                                                <p>{{=T("Please enter StopStalk handle for new Custom User")}}</p>
+                                                <p>{{=T("Note: It will consume one custom user from your allowed custom users")}}</p>
                                                 <form class="col s12 center" action="{{=URL('user', 'add_custom_friend')}}" method="POST">
                                                     <div class="row">
                                                         <div class="input-field col offset-s3 s6">
@@ -279,7 +279,7 @@
                                     </th>
                                 {{elif flag == "already-friends":}}
                                     <th>
-                                        <button class="tooltipped btn-floating btn-large waves-effect waves-light black friends-button" data-position="bottom" data-delay="50" data-tooltip="Unfriend" data-user-id="{{=row.id}}" data-type="unfriend">
+                                        <button class="tooltipped btn-floating btn-large waves-effect waves-light black friends-button" data-position="bottom" data-delay="50" data-tooltip="{{=T('Unfriend')}}" data-user-id="{{=row.id}}" data-type="unfriend">
                                             <i class="fa fa-user-times fa-3x"></i>
                                         </button>
                                     </th>
@@ -312,11 +312,11 @@
                         {{pass}}
                     </div>
                     <table class="striped centered">
-                        <caption><h6><strong>Streak<strong></h6></caption>
+                        <caption><h6><strong>{{=("Streak")}}<strong></h6></caption>
                         <thead>
                             <tr>
-                                <th colspan="2"><strong>Day Streak</strong></th>
-                                <th colspan="2"><strong>Accepted Solution Streak</strong></th>
+                                <th colspan="2"><strong>{{=T("Day Streak")}}</strong></th>
+                                <th colspan="2"><strong>{{=T("Accepted Solution Streak")}}</strong></th>
                             </tr>
                             <tr>
                                 <th><h6>{{=T("Current")}}</h6></th>

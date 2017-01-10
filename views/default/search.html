@@ -9,7 +9,7 @@
         {{pass}}
     </title>
 </head>
-<h1>Search for {{if auth.is_logged_in():}} Friends {{else:}} Users {{pass}} on StopStalk</h1>
+<h1>{{=T("Search for")}} {{if auth.is_logged_in():}} {{=T("Friends")}} {{else:}} {{=T("Users")}} {{pass}} {{=T("on StopStalk")}}</h1>
 <script src="{{=URL('static', 'js/appjs/default/search.js')}}"></script>
 <form class="col s12" action="" method="GET">
     <div class="row center">

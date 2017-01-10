@@ -1,7 +1,7 @@
 {{extend 'layout.html'}}
 <head><title>{{=T("Custom Friend")}}</title></head>
 <h2>{{=T("Custom Friend")}}</h2>
-<p>Have a friend who is still not on StopStalk ? We got you covered ;) - just enter his/her details and you are all set!</p>
+<p>{{=T("Have a friend who is still not on StopStalk ? We got you covered ;) - just enter his/her details and you are all set!")}}</p>
 <h6>{{=T("Allowed Custom Friends")}}: <b>{{=allowed}}</b></h6>
 <br/>
 <div class="row">
@@ -10,8 +10,8 @@
 {{if form:}}
     {{=form}}
 {{else:}}
-    <p>You have reached the limit for creating custom friends</p>
-    <p>Refer 3 more friends to increase your limit</p>
+    <p>{{=T("You have reached the limit for creating custom friends")}}</p>
+    <p>{{=T("Refer 3 more friends to increase your limit")}}</p>
 {{pass}}
 </div>
 <div class="col offset-s1 s5 z-depth-2">
