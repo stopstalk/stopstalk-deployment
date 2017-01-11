@@ -4,10 +4,10 @@
 {{if error_message == "Not found":}}
     <h4> {{=T("Yes you, you are lost ;)")}} </h4>
     <p> {{=T("We have been notified and will be fixing if there is any problem from our side")}} </p>
-    {{if similar_handles != []:}}
+    {{if similar_users != []:}}
         <p> {{=T("You might be looking for")}}: |
-        {{for i in similar_handles:}}
-            <a href="{{=URL('user', 'profile', args=i)}}"> {{=i}} </a> |
+        {{for i in similar_users:}}
+            <a href="{{=URL('user', 'profile', args=i['stopstalk_handle'])}}" title="{{=i['name']}}"> {{=i["stopstalk_handle"]}} </a> |
         {{pass}}
         </p>
     {{pass}}

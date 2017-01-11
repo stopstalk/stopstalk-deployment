@@ -33,7 +33,7 @@ def handle_error():
         Also notifies the admin by an email
     """
 
-    def _get_similar_handles(url):
+    def _get_similar_users(url):
 
         from difflib import SequenceMatcher
         handle = (url.replace("users", "")
@@ -49,31 +49,33 @@ def handle_error():
         prospects = []
         users = db(atable).select(atable.first_name,
                                   atable.last_name,
-                                  atable.stopstalk_handle)
+                                  atable.stopstalk_handle).as_list()
         custom_users = db(cftable).select(cftable.first_name,
                                           cftable.last_name,
-                                          cftable.stopstalk_handle)
+                                          cftable.stopstalk_handle).as_list()
 
-        prospects.extend([(x.first_name,
-                           x.last_name,
-                           x.stopstalk_handle) for x in users])
-        prospects.extend([(x.first_name,
-                           x.last_name,
-                           x.stopstalk_handle) for x in custom_users])
+        prospects.extend([(x["first_name"],
+                           x["last_name"],
+                           x["stopstalk_handle"]) for x in users + \
+                                                           custom_users])
 
-        similar_handles = []
+        similar_users = []
         for prospect in prospects:
             fname, lname, stopstalk_handle = prospect
             diff1 = SequenceMatcher(None, fname.lower(), handle).ratio()
             diff2 = SequenceMatcher(None, lname.lower(), handle).ratio()
-            diff3 = SequenceMatcher(None, stopstalk_handle.lower(), handle).ratio()
+            diff3 = SequenceMatcher(None,
+                                    stopstalk_handle.lower(),
+                                    handle).ratio()
             diff = max(diff1, diff2, diff3)
             if diff >= 0.8:
-                similar_handles.append((stopstalk_handle, diff))
+                similar_users.append(({"stopstalk_handle": stopstalk_handle,
+                                       "name": fname + " " + lname},
+                                      diff))
 
-        similar_handles.sort(key=lambda x: x[1], reverse=True)
+        similar_users.sort(key=lambda x: x[1], reverse=True)
 
-        return [x[0] for x in similar_handles]
+        return [x[0] for x in similar_users]
 
     code = request.vars.code
     request_url = request.vars.request_url
@@ -85,10 +87,12 @@ def handle_error():
         response.status = int(code)
 
     error_message = ""
-    similar_handles = []
+    similar_users = []
     if code == "404":
-        similar_handles = _get_similar_handles(request_url)
-        message = request_url + " " + str(similar_handles)
+        similar_users = _get_similar_users(request_url)
+        message = request_url + \
+                  " " + \
+                  str([x["stopstalk_handle"] for x in similar_users])
         error_message = "Not found"
     elif code == "500":
         # Get ticket URL:
@@ -105,7 +109,7 @@ def handle_error():
                           content=message,
                           user_id=session.user_id if auth.is_logged_in() else None)
 
-    return dict(error_message=error_message, similar_handles=similar_handles)
+    return dict(error_message=error_message, similar_users=similar_users)
 
 # ----------------------------------------------------------------------------
 def index():
