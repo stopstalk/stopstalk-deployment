@@ -86,9 +86,9 @@
         <input type="submit" value="{{=T('Apply Filters')}}"/>
     </form>
 </div>
-{{if request.args != []:}}
-<h4>Filtered Submissions</h4>
-<div id="total-pages" style="display: none;">{{=total_pages}}</div>
-<div class="center" id="page-selection"></div>
+{{if len(request.args):}}
+    <h4>Filtered Submissions</h4>
+    <div id="total-pages" style="display: none;">{{=total_pages}}</div>
+    <div class="center" id="page-selection"></div>
 {{pass}}
 {{=div}}

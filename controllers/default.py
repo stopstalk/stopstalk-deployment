@@ -236,7 +236,6 @@ def notifications():
 
     return dict(streak_table=streak_table)
 
-
 # ----------------------------------------------------------------------------
 @auth.requires_login()
 def unsubscribe():
@@ -274,10 +273,10 @@ def log_contest():
 
     pvars = request.post_vars
 
-    if pvars.contest_name is None or \
-       pvars.site_name is None or \
-       pvars.contest_link is None or \
-       pvars.logging_type is None:
+    if None in (pvars.contest_name,
+                pvars.site_name,
+                pvars.contest_link,
+                pvars.logging_type):
         raise HTTP(400, "Bad Request")
         return
 
@@ -330,9 +329,9 @@ def contests():
     view_link_class = button_class + " green view-contest"
     reminder_class = button_class + " orange set-reminder"
     icon_style = "height: 30px; width: 30px;"
+    left_tooltip_attrs = {"position": "left", "delay": "50"}
 
     for i in ongoing:
-
         if i["Platform"] in ("TOPCODER", "OTHER"):
             continue
 
@@ -341,38 +340,38 @@ def contests():
                                                  "%a, %d %b %Y %H:%M")
         except ValueError:
             continue
+
         tr = TR()
+        append = tr.append
         span = SPAN(_class="green tooltipped",
                     data={"position": "right",
                           "delay": "50",
                           "tooltip": "Live Contest"},
-                    _style="cursor: pointer; " + \
-                            "float:right; " + \
-                            "height:10px; " + \
-                            "width:10px; " + \
-                            "border-radius: 50%;")
-        tr.append(TD(i["Name"], span))
-        tr.append(TD(IMG(_src=URL("static",
-                                  "images/" + \
-                                  str(i["Platform"]).lower() + \
-                                  "_small.png"),
-                         _style=icon_style)))
+                    _style="cursor: pointer;" + \
+                           "float:right;" + \
+                           "height:10px;" + \
+                           "width:10px;" + \
+                           "border-radius:50%;")
+        append(TD(i["Name"], span))
+        append(TD(IMG(_src=URL("static",
+                               "images/" + \
+                               str(i["Platform"]).lower() + \
+                               "_small.png"),
+                      _style=icon_style)))
 
-        tr.append(TD("-"))
-        tr.append(TD(str(endtime).replace("-", "/"),
-                     _class="contest-end-time"))
-        tr.append(TD(A(I(_class="fa fa-external-link-square fa-lg"),
-                       _class=view_link_class,
-                       _href=i["url"],
-                       data={"position": "left",
-                             "tooltip": T("Contest Link"),
-                             "delay": "50"},
-                       _target="_blank")))
-        tr.append(TD(BUTTON(I(_class="fa fa-calendar-plus-o"),
-                            _class=reminder_class + " disabled",
-                            data={"position": "left",
-                                  "tooltip": T("Already started!"),
-                                  "delay": "50"})))
+        append(TD("-"))
+        append(TD(str(endtime).replace("-", "/"),
+                  _class="contest-end-time"))
+        append(TD(A(I(_class="fa fa-external-link-square fa-lg"),
+                    _class=view_link_class,
+                    _href=i["url"],
+                    data=dict(tooltip=T("Contest Link"),
+                              **left_tooltip_attrs),
+                    _target="_blank")))
+        append(TD(BUTTON(I(_class="fa fa-calendar-plus-o"),
+                         _class=reminder_class + " disabled",
+                         data=dict(tooltip=T("Already started!"),
+                                   **left_tooltip_attrs))))
         tbody.append(tr)
 
     for i in upcoming:
@@ -383,31 +382,30 @@ def contests():
         start_time = datetime.datetime.strptime(i["StartTime"],
                                                 "%a, %d %b %Y %H:%M")
         tr = TR()
-        tr.append(TD(i["Name"]))
-        tr.append(TD(IMG(_src=URL("static",
-                                  "images/" + \
-                                  str(i["Platform"]).lower() + \
-                                  "_small.png"),
-                         _style=icon_style)))
+        append = tr.append
+        append(TD(i["Name"]))
+        append(TD(IMG(_src=URL("static",
+                               "images/" + \
+                               str(i["Platform"]).lower() + \
+                               "_small.png"),
+                      _style=icon_style)))
 
-        tr.append(TD(str(start_time), _class="stopstalk-timestamp"))
+        append(TD(str(start_time), _class="stopstalk-timestamp"))
 
         duration = i["Duration"]
         duration = duration.replace(" days", "d")
         duration = duration.replace(" day", "d")
-        tr.append(TD(duration))
-        tr.append(TD(A(I(_class="fa fa-external-link-square fa-lg"),
-                       _class=view_link_class,
-                       _href=i["url"],
-                       data={"position": "left",
-                             "tooltip": T("Contest Link"),
-                             "delay": "50"},
-                       _target="_blank")))
-        tr.append(TD(BUTTON(I(_class="fa fa-calendar-plus-o"),
-                            _class=reminder_class,
-                            data={"position": "left",
-                                  "tooltip": T("Set Reminder to Google Calendar"),
-                                  "delay": "50"})))
+        append(TD(duration))
+        append(TD(A(I(_class="fa fa-external-link-square fa-lg"),
+                    _class=view_link_class,
+                    _href=i["url"],
+                    data=dict(tooltip=T("Contest Link"),
+                              **left_tooltip_attrs),
+                    _target="_blank")))
+        append(TD(BUTTON(I(_class="fa fa-calendar-plus-o"),
+                         _class=reminder_class,
+                         data=dict(tooltip=T("Set Reminder to Google Calendar"),
+                                   **left_tooltip_attrs))))
         tbody.append(tr)
 
     table.append(tbody)
@@ -461,8 +459,8 @@ def leaderboard():
             aquery &= (atable.id.belongs(friends))
             cquery &= (cftable.id.belongs(custom_friends))
         else:
-            aquery &= (1 == 0)
-            cquery &= (1 == 0)
+            aquery = False
+            cquery = False
 
     # Do not display unverified users in the leaderboard
     aquery &= (atable.registration_key == "")
@@ -483,27 +481,24 @@ def leaderboard():
         custom_users = db(cquery).select(*cfields)
 
     users = []
-    for user in reg_users:
-        users.append((user.first_name + " " + user.last_name,
-                      user.stopstalk_handle,
-                      user.institute,
-                      int(user.rating),
-                      float(user.per_day_change),
-                      False,
-                      int(user.rating) - int(user.prev_rating)))
 
-    for user in custom_users:
-        if user.duplicate_cu:
-            record = cftable(user.duplicate_cu)
-        else:
+    def _update_users(user_list, custom):
+
+        for user in user_list:
             record = user
-        users.append((user.first_name + " " + user.last_name,
-                      user.stopstalk_handle,
-                      user.institute,
-                      int(record.rating),
-                      float(record.per_day_change),
-                      True,
-                      int(record.rating) - int(record.prev_rating)))
+            if custom and user.duplicate_cu:
+                record = cftable(user.duplicate_cu)
+
+            users.append((user.first_name + " " + user.last_name,
+                          user.stopstalk_handle,
+                          user.institute,
+                          int(record.rating),
+                          float(record.per_day_change),
+                          custom,
+                          int(record.rating) - int(record.prev_rating)))
+
+    _update_users(reg_users, False)
+    _update_users(custom_users, True)
 
     # Sort users according to the rating
     users = sorted(users, key=lambda x: x[3], reverse=True)
@@ -520,53 +515,52 @@ def leaderboard():
     tbody = TBODY()
     rank = 1
     for i in users:
-
         if i[5]:
             span = SPAN(_class="orange tooltipped",
                         data={"position": "right",
                               "delay": "50",
                               "tooltip": T("Custom User")},
-                        _style="cursor: pointer; " + \
-                                "float:right; " + \
-                                "height:10px; " + \
-                                "width:10px; " + \
+                        _style="cursor: pointer;" + \
+                                "float:right;" + \
+                                "height:10px;" + \
+                                "width:10px;" + \
                                 "border-radius: 50%;")
         else:
             span = SPAN()
 
         tr = TR()
-        tr.append(TD(str(rank) + "."))
-        tr.append(TD(DIV(span, DIV(i[0]))))
-        tr.append(TD(A(i[1],
-                       _href=URL("user", "profile", args=[i[1]]),
-                       _target="_blank")))
-        tr.append(TD(A(i[2],
-                       _href=URL("default",
-                                 "leaderboard",
-                                 vars={"q": i[2],
-                                       "global": global_leaderboard}))))
-        tr.append(TD(i[3]))
+        append = tr.append
+        append(TD(str(rank) + "."))
+        append(TD(DIV(span, DIV(i[0]))))
+        append(TD(A(i[1],
+                    _href=URL("user", "profile", args=[i[1]]),
+                    _target="_blank")))
+        append(TD(A(i[2],
+                    _href=URL("default",
+                              "leaderboard",
+                              vars={"q": i[2],
+                                    "global": global_leaderboard}))))
+        append(TD(i[3]))
         if i[6] > 0:
-            tr.append(TD(B("+%s" % str(i[6])),
-                         _class="green-text text-darken-2"))
+            append(TD(B("+" + str(i[6])), _class="green-text text-darken-2"))
         elif i[6] < 0:
-            tr.append(TD(B(i[6]), _class="red-text text-darken-2"))
+            append(TD(B(i[6]), _class="red-text text-darken-2"))
         else:
-            tr.append(TD(i[6], _class="blue-text text-darken-2"))
+            append(TD(i[6], _class="blue-text text-darken-2"))
 
         diff = "{:1.5f}".format(i[4])
 
         if float(diff) == 0.0:
-            tr.append(TD("+" + diff, " ",
-                         I(_class="fa fa-minus")))
+            append(TD("+" + diff, " ",
+                      I(_class="fa fa-minus")))
         elif i[4] > 0:
-            tr.append(TD("+" + str(diff), " ",
-                         I(_class="fa fa-chevron-circle-up",
-                           _style="color: #0f0;")))
+            append(TD("+" + str(diff), " ",
+                      I(_class="fa fa-chevron-circle-up",
+                        _style="color: #0f0;")))
         elif i[4] < 0:
-            tr.append(TD(diff, " ",
-                         I(_class="fa fa-chevron-circle-down",
-                           _style="color: #f00;")))
+            append(TD(diff, " ",
+                      I(_class="fa fa-chevron-circle-down",
+                        _style="color: #f00;")))
 
         tbody.append(tr)
         rank += 1
@@ -611,15 +605,13 @@ def filters():
         page = int(request.args[0])
         page -= 1
 
-    all_languages = db(stable).select(stable.lang,
-                                      distinct=True)
-    languages = [x["lang"] for x in all_languages]
+    all_languages = db(stable).select(stable.lang, distinct=True)
+    languages = [x.lang for x in all_languages]
 
     table = None
     global_submissions = False
-    if get_vars.has_key("global"):
-        if get_vars["global"] == "True":
-            global_submissions = True
+    if get_vars.has_key("global") and get_vars["global"] == "True":
+        global_submissions = True
 
     # If form is not submitted
     if get_vars == {}:
@@ -666,7 +658,6 @@ def filters():
                       (cftable.last_name.contains(token)) | \
                       (cftable.stopstalk_handle.contains(token)))
 
-
     if global_submissions is False:
         # Retrieve all the custom users created by the logged-in user
         query = (cftable.user_id == session.user_id) & query
@@ -698,14 +689,14 @@ def filters():
 
     # @ToDo: Anyway to use join instead of two such db calls
     possible_users = db(query).select(atable.id)
-    possible_users = [x["id"] for x in possible_users]
+    possible_users = [x.id for x in possible_users]
     friends = possible_users
 
     if global_submissions is False:
         query = (ftable.follower_id == session.user_id) & \
                 (ftable.user_id.belongs(possible_users))
         friend_ids = db(query).select(ftable.user_id)
-        friends = [x["user_id"] for x in friend_ids]
+        friends = [x.user_id for x in friend_ids]
 
         if session.user_id in possible_users:
             # Show submissions of user also
@@ -906,12 +897,12 @@ def friends():
         tooltip_attrs = [T("Unfriend"), "unfriend", str(row.id)]
         tr = TR(TD(A(row.first_name + " " + row.last_name,
                      _href=URL("user", "profile",
-                               args=[row.stopstalk_handle],
+                               args=row.stopstalk_handle,
                                extension=False),
                      _target="_blank")),
                 TD(BUTTON(I(_class="fa fa-user-times fa-3x"),
-                                _class=btn_class + " black",
-                                data=_get_tooltip_data(*tooltip_attrs))))
+                          _class=btn_class + " black",
+                          data=_get_tooltip_data(*tooltip_attrs))))
         tbody.append(tr)
     table1.append(tbody)
 
@@ -952,7 +943,7 @@ def search():
     itable = db.institutes
     all_institutes = db(itable).select(itable.name,
                                        orderby=itable.name)
-    all_institutes = [x["name"].strip("\"") for x in all_institutes]
+    all_institutes = [x.name.strip("\"") for x in all_institutes]
     all_institutes.append("Other")
 
     # Return if form is not submitted
@@ -1294,7 +1285,8 @@ def faq():
     """
 
     div = DIV(_class="row")
-    ul = UL(_class="collapsible col offset-s3 s6", data={"collapsible": "expandable"})
+    ul = UL(_class="collapsible col offset-s3 s6",
+            data={"collapsible": "expandable"})
 
     faqs = db(db.faq).select()
     for i in xrange(len(faqs)):

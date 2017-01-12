@@ -321,8 +321,8 @@ def tag():
 
     q = request.vars["q"]
     try:
-        sites = request.vars.get("site", "")
-        if sites == "":
+        sites = request.vars.get("site", None)
+        if sites is None:
             sites = []
         elif isinstance(sites, str):
             sites = [sites]

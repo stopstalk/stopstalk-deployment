@@ -66,11 +66,11 @@ def add_custom_friend():
 
     stopstalk_handles = []
     rows = db(atable).select(atable.stopstalk_handle)
-    rows = [x["stopstalk_handle"] for x in rows]
+    rows = [x.stopstalk_handle for x in rows]
     stopstalk_handles.extend(rows)
 
     rows = db(cftable).select(cftable.stopstalk_handle)
-    rows = [x["stopstalk_handle"] for x in rows]
+    rows = [x.stopstalk_handle for x in rows]
     stopstalk_handles.extend(rows)
 
     for temp_handle in stopstalk_handles:
