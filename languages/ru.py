@@ -165,7 +165,7 @@
 "Set Reminder to Google Calendar": "Поставить напоминание в Google Calendar",
 "Sign Up": "Зарегистрироваться",
 "Site": "Сайт",
-"Site Profile": "Профиль сайта:",
+"Site Profile": "Профиль сайта",
 "Site:": "Сайт:",
 "Start": "Начало",
 "Start Date": "Дата начала",
