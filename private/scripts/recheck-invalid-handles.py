@@ -82,7 +82,7 @@ def codeforces_invalid(handle):
     return False
 
 def spoj_invalid(handle):
-    response = get_request("https://www.spoj.com/users/" + handle)
+    response = get_request("http://www.spoj.com/users/" + handle)
     if response in REQUEST_FAILURES:
         return True
     # Bad but correct way of checking if the handle exists
