@@ -617,7 +617,8 @@ def filters():
     if get_vars == {}:
         return dict(languages=languages,
                     div=DIV(),
-                    global_submissions=global_submissions)
+                    global_submissions=global_submissions,
+                    total_pages=0)
 
     # If nothing is filled in the form
     # these fields should be passed in
