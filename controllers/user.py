@@ -149,7 +149,10 @@ def update_details():
 
     # Do not allow to modify stopstalk_handle and email
     atable.stopstalk_handle.writable = False
+    atable.stopstalk_handle.comment = T("StopStalk handle cannot be updated")
+
     atable.email.writable = False
+    atable.email.comment = T("Email cannot be updated")
 
     form = SQLFORM(db.auth_user,
                    record,

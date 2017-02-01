@@ -22,7 +22,7 @@
 
 import re
 from datetime import datetime
-from gluon import current, IMG, DIV, TABLE, THEAD, \
+from gluon import current, IMG, DIV, TABLE, THEAD, I, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, \
                   TEXTAREA, SELECT, OPTION, URL, BUTTON
 
@@ -310,8 +310,8 @@ def materialize_form(form, fields):
     form.add_class("form-horizontal center")
     main_div = DIV(_class="center")
 
-    for _, label, controls, _ in fields:
-        curr_div = DIV(_class="row")
+    for _, label, controls, field_tooltip in fields:
+        curr_div = DIV(_class="row valign-wrapper")
         input_field = None
         _controls = controls
 
@@ -378,9 +378,17 @@ def materialize_form(form, fields):
 
         if input_field is None:
             input_field = DIV(_controls, label,
-                              _class="input-field col offset-s3 s6")
-
+                              _class="input-field col offset-s3 s6",
+                              _style="display: inline-flex;")
         curr_div.append(input_field)
+
+        if field_tooltip:
+            curr_div.append(DIV(I(_class="fa fa-info-circle tooltipped",
+                                  data={"position": "top",
+                                        "delay": "30",
+                                        "tooltip": field_tooltip},
+                                  _style="cursor: pointer;"),
+                                _class="col s1 valign"))
         main_div.append(curr_div)
 
     return main_div
