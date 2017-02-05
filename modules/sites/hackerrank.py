@@ -114,61 +114,69 @@ class Profile(object):
         handle = self.handle
         url = "https://www.hackerrank.com/rest/hackers/" + \
               handle + \
-              "/recent_challenges?offset=0&limit=50000"
-
-        tmp = get_request(url)
-        if tmp in REQUEST_FAILURES:
-            return tmp
-
-        all_submissions = tmp.json()["models"]
+              "/recent_challenges"
+        request_params = {"limit": "5", "response_version": "v2"}
 
         submissions = {handle: {1 : {}}}
         it = 0
-        for row in all_submissions:
+        next_cursor = "null"
 
-            submission = submissions[handle][1]
-            submission[it] = []
-            submission = submission[it]
-            append = submission.append
+        while it < 50000:
 
-            # Time of submission
-            # @Todo: This is ugly
-            time_stamp = row["created_at"][:-10].split("T")
-            time_stamp = time.strptime(time_stamp[0] + " " + time_stamp[1],
-                                       "%Y-%m-%d %H:%M:%S")
-            time_stamp = datetime.datetime(time_stamp.tm_year,
-                                           time_stamp.tm_mon,
-                                           time_stamp.tm_mday,
-                                           time_stamp.tm_hour,
-                                           time_stamp.tm_min,
-                                           time_stamp.tm_sec) + \
-                                           datetime.timedelta(minutes=330)
-            curr = time.strptime(str(time_stamp), "%Y-%m-%d %H:%M:%S")
+            request_params["cursor"] = next_cursor
+            response = get_request(url, params=request_params)
 
-            if curr <= last_retrieved:
-                return submissions
-            append(str(time_stamp))
+            if response in REQUEST_FAILURES:
+                return response
+            next_cursor = response.json()["cursor"]
+            for row in response.json()["models"]:
+                submission = submissions[handle][1]
+                submission[it] = []
+                submission = submission[it]
+                append = submission.append
 
-            # Problem link
-            append("https://www.hackerrank.com" + row["url"])
+                # Time of submission
+                # @Todo: This is ugly
+                time_stamp = row["created_at"][:-10].split("T")
+                time_stamp = time.strptime(time_stamp[0] + " " + time_stamp[1],
+                                           "%Y-%m-%d %H:%M:%S")
+                time_stamp = datetime.datetime(time_stamp.tm_year,
+                                               time_stamp.tm_mon,
+                                               time_stamp.tm_mday,
+                                               time_stamp.tm_hour,
+                                               time_stamp.tm_min,
+                                               time_stamp.tm_sec) + \
+                                               datetime.timedelta(minutes=330)
+                curr = time.strptime(str(time_stamp), "%Y-%m-%d %H:%M:%S")
 
-            # Problem name
-            append(row["name"])
+                if curr <= last_retrieved:
+                    return submissions
 
-            # Status
-            # HackerRank only gives the list of solved problems
-            append("AC")
+                append(str(time_stamp))
 
-            # Points
-            append("100")
+                # Problem link
+                append("https://www.hackerrank.com" + row["url"])
 
-            # Language
-            append("-")
+                # Problem name
+                append(row["name"])
 
-            # View code link
-            append("")
+                # Status
+                # HackerRank only gives the list of solved problems
+                append("AC")
 
-            it += 1
+                # Points
+                append("100")
+
+                # Language
+                append("-")
+
+                # View code link
+                append("")
+
+                it += 1
+
+            if response.json()["last_page"] == True:
+                break
 
         return submissions
 

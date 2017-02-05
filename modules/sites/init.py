@@ -38,7 +38,7 @@ OTHER_FAILURE = "OTHER_FAILURE"
 REQUEST_FAILURES = (SERVER_FAILURE, NOT_FOUND, OTHER_FAILURE)
 
 # -----------------------------------------------------------------------------
-def get_request(url, headers={}, timeout=current.TIMEOUT):
+def get_request(url, headers={}, timeout=current.TIMEOUT, params={}):
     """
         Make a HTTP GET request to a url
 
@@ -54,6 +54,7 @@ def get_request(url, headers={}, timeout=current.TIMEOUT):
         try:
             response = requests.get(url,
                                     headers=headers,
+                                    params=params,
                                     proxies=current.PROXY,
                                     timeout=timeout)
         except Exception as e:
