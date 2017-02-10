@@ -1,7 +1,7 @@
 {{extend 'layout.html'}}
 <html>
   <head>
-    <title>{{=T("User profile")}}: {{=actual_handle}}</title>
+    <title>{{=T("User profile")}}: {{=actual_handle}} {{="(" + row.first_name + " " + row.last_name + ")"}}</title>
     <style>
 
         .chip {
