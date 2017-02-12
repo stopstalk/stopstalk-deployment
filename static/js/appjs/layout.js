@@ -49,6 +49,8 @@
         textField.select();
         document.execCommand("copy");
         textField.remove();
+
+        $.web2py.flash("Copied to Clipboard");
     };
 
     /* Escape characters in html to be representable as string */
