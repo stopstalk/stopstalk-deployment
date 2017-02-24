@@ -552,8 +552,8 @@ db.define_table("problem",
                 Field("editorial_added_on", "date"),
                 Field("solved_submissions", "integer", default=0),
                 Field("total_submissions", "integer", default=0),
-                Field("user_ids", "string", length=40000, default=""),
-                Field("custom_user_ids", "string", length=20000, default=""),
+                Field("user_ids", "text", default=""),
+                Field("custom_user_ids", "text", default=""),
                 format="%(name)s %(id)s")
 
 db.define_table("tag",
