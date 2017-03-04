@@ -52,6 +52,13 @@ for problem in result:
         current_value[1] += problem[2]
         final_hash[problem[0]] = current_value
 
+# GROUP_CONCAT default value is 1024 :p (Like who does that!)
+# We need = 9 * 1 + 90 * 2 + 900 * 3 + 9000 * 4 + 90000 * 5 +
+#           (9 + 90 + 900 + 9000 + 90000)
+#         = 488889 + 99999 = 588888
+# Always on safer side ;) = 700000
+db.executesql("SET GLOBAL group_concat_max_len=700000;")
+
 sql_query = """
 SELECT problem_link,
        GROUP_CONCAT(DISTINCT(user_id)) AS user_ids,
