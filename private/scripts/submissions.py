@@ -31,6 +31,8 @@ gevent.monkey.patch_all(thread=False)
 # @ToDo: Make this generalised
 from sites import codechef, codeforces, spoj, hackerearth, hackerrank, uva
 rows = []
+problem_solved_stats = {}
+
 atable = db.auth_user
 cftable = db.custom_friend
 
@@ -65,6 +67,144 @@ def insert_this_batch():
                     columns + """ VALUES """ + \
                     ",".join(rows) + """;"""
         db.executesql(sql_query)
+
+# -----------------------------------------------------------------------------
+def flush_problem_stats():
+
+    global problem_solved_stats
+
+    def _stringify(given_set):
+        return [str(x) for x in given_set]
+
+    if len(problem_solved_stats) == 0:
+        # No processing required
+        return
+
+    # Get the existing user_ids and custom_user_ids for taking union
+    ptable = db.problem
+    query = (ptable.link.belongs(problem_solved_stats.keys()))
+    existing = db(query).select(ptable.link,
+                                ptable.user_ids,
+                                ptable.custom_user_ids)
+
+    existing_ids = {}
+    for row in existing:
+        val = [set([]), set([])]
+        if row.user_ids:
+            val[0] = set([int(x) for x in row.user_ids.split(",")])
+        if row.custom_user_ids:
+            val[1] = set([int(x) for x in row.custom_user_ids.split(",")])
+        existing_ids[row.link] = val
+
+    solved_case = ""
+    total_case = ""
+    user_ids_case = ""
+    custom_user_ids_case = ""
+
+    def _build_when(link, value, column_name=None):
+        res = ""
+        if column_name:
+            res = "WHEN '%s' THEN %s + %d\n" % (link, column_name, value)
+        else:
+            value = ",".join(_stringify(value))
+            res = "WHEN '%s' THEN '%s'\n" % (link, value)
+        return res
+
+    to_be_inserted = []
+    to_be_updated = []
+    for link in problem_solved_stats:
+        val = problem_solved_stats[link]
+        try:
+            # val[2] = user_ids who solved the problem in this retrieval
+            # existing_ids[link][0] = user_ids who have already solved the problem
+            if val[2].issubset(existing_ids[link][0]) is False:
+                user_ids_case += _build_when(link,
+                                             val[2].union(existing_ids[link][0]))
+
+            # val[3] = custom_user_ids who solved the problem in this retrieval
+            # existing_ids[link][1] = custom_user_ids who have already solved the problem
+            if val[3].issubset(existing_ids[link][1]) is False:
+                custom_user_ids_case += _build_when(link,
+                                                    val[3].union(existing_ids[link][1]))
+
+            # Add to the CASE statement only if there is an update
+            if val[0]:
+                solved_case += _build_when(link, val[0], "solved_submissions")
+            total_case += _build_when(link, val[1], "total_submissions")
+            to_be_updated.append(link)
+        except KeyError:
+            # Problem not in `problem` table
+            to_be_inserted.append(link)
+
+    non_empty_components = []
+    def _build_component(column_name, value):
+        if value:
+            non_empty_components.append("""
+%s = CASE link
+%s
+     ELSE %s END""" % (column_name, value, column_name))
+
+    _build_component("solved_submissions", solved_case)
+    _build_component("total_submissions", total_case),
+    _build_component("user_ids", user_ids_case),
+    _build_component("custom_user_ids", custom_user_ids_case)
+
+    sql_query = """
+UPDATE problem
+SET
+%s
+WHERE link in (%s);
+                """ % (",".join(non_empty_components),
+                       ",".join(["'" + x + "'" for x in to_be_updated]))
+
+    print sql_query
+    db.executesql(sql_query)
+
+    if len(to_be_inserted):
+        sql_query = ""
+        today = datetime.now().strftime("%Y-%m-%d")
+        insert_value = ""
+        value_string = "(" + ",".join(["\"%s\""] * 8) + ",%s,%s)"
+        for plink in to_be_inserted:
+            val = problem_solved_stats[plink]
+            insert_value += value_string % (plink,
+                                            val[4],
+                                            "['-']",
+                                            "",
+                                            ",".join(_stringify(val[2])),
+                                            ",".join(_stringify(val[3])),
+                                            today,
+                                            today,
+                                            val[0],
+                                            val[1])
+            insert_value += ","
+
+        insert_value = insert_value[:-1]
+
+        insert_query = """
+INSERT INTO problem (link, name, tags, editorial_link, user_ids, custom_user_ids, tags_added_on, editorial_added_on, solved_submissions, total_submissions)
+VALUES %s
+                       """ % (insert_value)
+        print insert_query
+        db.executesql(insert_query)
+
+    # Flush the actual dict
+    problem_solved_stats = {}
+
+# -----------------------------------------------------------------------------
+def process_solved_counts(problem_link, problem_name, status, user_id, custom):
+    if problem_solved_stats.has_key(problem_link) is False:
+        # [solved_submissions, total_submissions, user_ids, custom_user_ids]
+        problem_solved_stats[problem_link] = [0, 0, set([]), set([]), problem_name]
+
+    value_list = problem_solved_stats[problem_link]
+    value_list[1] += 1
+    if status == "AC":
+        value_list[0] += 1
+        value_list[3].add(user_id) if custom else value_list[2].add(user_id)
+
+    if len(problem_solved_stats) > 100:
+        flush_problem_stats()
 
 # -----------------------------------------------------------------------------
 def get_submissions(user_id,
@@ -108,6 +248,12 @@ def get_submissions(user_id,
                             submission[4],
                             submission[6]])
 
+                process_solved_counts(submission[1],
+                                      submission[2],
+                                      submission[3],
+                                      user_id,
+                                      custom)
+
                 encoded_row = []
                 for x in row:
                     if isinstance(x, basestring):
@@ -133,7 +279,7 @@ def get_submissions(user_id,
                     rows = []
 
     if count != 0:
-        print "%s" % (count)
+        print str(count)
     else:
         print "0"
     return count
@@ -385,7 +531,9 @@ if __name__ == "__main__":
         for record in custom_users:
             retrieve_submissions(record, True)
 
+    # Just in case the last batch has some residue
     insert_this_batch()
+    flush_problem_stats()
 
     # Insert user_ids and custom_user_ids into failed_retrieval
     # for which the retrieval failed for further re-retrieval
