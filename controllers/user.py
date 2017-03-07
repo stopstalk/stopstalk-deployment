@@ -425,7 +425,7 @@ def get_activity():
         query &= (stable.custom_user_id == user_id)
     else:
         query &= (stable.user_id == user_id)
-    submissions = db(query).select()
+    submissions = db(query).select(orderby=~stable.time_stamp)
 
     if len(submissions) > 0:
         table = utilities.render_table(submissions)
