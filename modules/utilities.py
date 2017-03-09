@@ -64,6 +64,28 @@ def urltosite(url):
     return site
 
 # -----------------------------------------------------------------------------
+def problem_widget(name, link, link_class, link_title):
+    """
+        Widget to display a problem in UI tables
+
+        @param name (String): Problem name
+        @param link (String): Problem link
+        @param link_class (String): HTML class to determine solved/unsolved
+        @param link_title (String): Link title corresponding to link_class
+    """
+
+    return A(name,
+             _href=URL("problems",
+                       "index",
+                       vars={"pname": name,
+                             "plink": link},
+                       extension=False),
+             _class=link_class,
+             _title=link_title,
+             _target="_blank",
+             extension=False)
+
+# -----------------------------------------------------------------------------
 def get_friends(user_id):
     """
         Friends of user_id (including custom friends)
@@ -493,15 +515,10 @@ def render_table(submissions, duplicates=[]):
 
         link_title = (" ".join(link_class.split("-"))).capitalize()
 
-        append(TD(A(submission.problem_name,
-                    _href=URL("problems",
-                              "index",
-                              vars={"pname": submission.problem_name,
-                                    "plink": submission.problem_link},
-                              extension=False),
-                    _class=link_class,
-                    _title=link_title,
-                    _target="_blank")))
+        append(TD(problem_widget(submission.problem_name,
+                                 submission.problem_link,
+                                 link_class,
+                                 link_title)))
         append(TD(submission.lang))
         append(TD(IMG(_src=URL("static",
                                "images/" + submission.status + ".jpg",

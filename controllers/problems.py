@@ -377,6 +377,7 @@ def tag():
     for problem in all_problems:
 
         tr = TR()
+        link_class = ""
 
         if problem.link in current.solved_problems:
             link_class = "solved-problem"
@@ -387,14 +388,10 @@ def tag():
 
         link_title = (" ".join(link_class.split("-"))).capitalize()
 
-        tr.append(TD(A(problem.name,
-                       _href=URL("problems",
-                                 "index",
-                                 vars={"pname": problem.name,
-                                       "plink": problem.link}),
-                       _class=link_class,
-                       _title=link_title,
-                       _target="_blank")))
+        tr.append(TD(utilities.problem_widget(problem.name,
+                                              problem.link,
+                                              link_class,
+                                              link_title)))
         tr.append(TD(A(I(_class="fa fa-link"),
                        _href=problem.link,
                        _target="_blank")))
@@ -445,13 +442,10 @@ def _render_trending(caption, problems, flag):
 
         link_title = (" ".join(link_class.split("-"))).capitalize()
 
-        tr.append(TD(A(problem[1]["name"],
-                       _href=URL("problems", "index",
-                                 vars={"pname": problem[1]["name"],
-                                       "plink": problem[0]}),
-                       _class=link_class,
-                       _title=link_title,
-                       _target="_blank")))
+        tr.append(TD(utilities.problem_widget(problem[1]["name"],
+                                              problem[0],
+                                              link_class,
+                                              link_title)))
         tr.append(TD(problem[1]["total_submissions"]))
         tr.append(TD(len(problem[1]["users"]) + \
                      len(problem[1]["custom_users"])))
