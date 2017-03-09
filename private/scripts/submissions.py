@@ -157,7 +157,6 @@ WHERE link in (%s);
                 """ % (",".join(non_empty_components),
                        ",".join(["'" + x + "'" for x in to_be_updated]))
 
-    print sql_query
     db.executesql(sql_query)
 
     if len(to_be_inserted):
@@ -180,12 +179,11 @@ WHERE link in (%s);
             insert_value += ","
 
         insert_value = insert_value[:-1]
-
         insert_query = """
 INSERT INTO problem (link, name, tags, editorial_link, user_ids, custom_user_ids, tags_added_on, editorial_added_on, solved_submissions, total_submissions)
 VALUES %s
                        """ % (insert_value)
-        print insert_query
+
         db.executesql(insert_query)
 
     # Flush the actual dict

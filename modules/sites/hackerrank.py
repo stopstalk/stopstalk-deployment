@@ -62,19 +62,22 @@ class Profile(object):
 
         response = response.json()
 
-        track = response["model"]["track"]
-        primary_contest = response["model"]["primary_contest"]
+        model = response["model"]
+        track = model["track"]
+        primary_contest = model["primary_contest"]
         all_tags = ["-"]
+
         if track:
             # If the problem is a practice problem
             all_tags = [track["name"]]
-        elif primary_contest["track"]:
-            # If the problem is a contest problem with track
-            all_tags = [primary_contest["track"]["name"]]
-        elif primary_contest["name"]:
-            # If the problem is a contest problem without track
-            # Then consider contest name as tag
-            all_tags = [primary_contest["name"]]
+        elif primary_contest:
+            if primary_contest["track"]:
+                # If the problem is a contest problem with track
+                all_tags = [primary_contest["track"]["name"]]
+            elif primary_contest["name"]:
+                # If the problem is a contest problem without track
+                # Then consider contest name as tag
+                all_tags = [primary_contest["name"]]
 
         return all_tags
 
