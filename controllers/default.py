@@ -135,6 +135,7 @@ def todo():
     res = db(tltable.user_id == session.user_id).select(tltable.problem_link)
     table = TABLE(_class="bordered centered")
     table.append(THEAD(TR(TH(T("Problem")),
+                          TH(T("Site")),
                           TH(T("Total submissions")),
                           TH(T("Users solved")),
                           TH(T("Remove")))))
@@ -169,6 +170,11 @@ def todo():
                                                     link_class,
                                                     link_title,
                                                     disable_todo=True)),
+                        TD(IMG(_src=URL("static",
+                                        "images/" + \
+                                        utilities.urltosite(row.link) + \
+                                        "_small.png"),
+                               _style="height: 30px; weight: 30px;")),
                         TD(row.total_submissions),
                         TD(len(uids) + len(cuids)),
                         TD(I(_class="red-text text-accent-4 fa fa-times remove-from-todo",
