@@ -61,6 +61,19 @@
             .replace(/"/g, "&quot;").trim(' ');
     };
 
+    /* Get a url parameter by the key from a string url */
+    var getParameterByName = function (name, url) {
+        if (!url) {
+          url = window.location.href;
+        }
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+
     $(document).ready(function() {
 
         var $viewDownloadButton = $('#final-view-download-button'),
@@ -88,6 +101,37 @@
         if (document.activeElement) {
             document.activeElement.blur();
         }
+
+        $(document).on('mouseenter', 'tr', function() {
+            var todoIcon = $(this).find('.add-to-todo-list');
+            todoIcon.show();
+        });
+
+        $(document).on('mouseleave', 'tr', function() {
+            var todoIcon = $(this).find('.add-to-todo-list');
+            todoIcon.hide();
+        });
+
+        $(document).on('click', '.add-to-todo-list', function() {
+            var stopstalkLink = this.parentElement.firstChild["href"],
+                problemLink = getParameterByName("plink", stopstalkLink),
+                thisElement = this,
+                $thisElement = $(this);
+            $.ajax({
+                url: addTodoURL,
+                method: 'POST',
+                data: {link: problemLink},
+                success: function(response) {
+                    var tooltipID = thisElement.getAttribute("data-tooltip-id");
+                    $thisElement.remove();
+                    $('#' + tooltipID).remove();
+                    $.web2py.flash(response);
+                },
+                error: function(e) {
+                    $.web2py.flash("Some error occurred");
+                }
+            });
+        });
 
         $(document).on('click', '.view-submission-button', function() {
             var site = $(this).data('site');

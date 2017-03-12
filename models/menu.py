@@ -55,7 +55,10 @@ if session.user_id:
                                      URL("user", "custom_friend")),
                       get_menu_tuple("fa-users",
                                      T("Your Friends"),
-                                     URL("default", "friends"))]
+                                     URL("default", "friends")),
+                      get_menu_tuple("fa-list-alt",
+                                     T("Todo List"),
+                                     URL("default", "todo"))]
 
 response.menu += [get_menu_tuple("fa-search",
                                  T("Search Friends"),

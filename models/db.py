@@ -635,6 +635,10 @@ db.define_table("http_errors",
                 Field("content", "text"),
                 Field("user_id", "reference auth_user"))
 
+db.define_table("todo_list",
+                Field("user_id", "reference auth_user"),
+                Field("problem_link"))
+
 uvadb.define_table("problem",
                    Field("problem_id", "integer"),
                    Field("problem_num", "integer"),

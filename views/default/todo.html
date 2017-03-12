@@ -1,0 +1,13 @@
+{{extend 'layout.html'}}
+<title>{{=T("ToDo List")}}</title>
+<style type="text/css">
+    .remove-from-todo:hover {
+        cursor: pointer;
+    }
+</style>
+<script type="text/javascript">
+    var removeTodoURL = "{{=URL('default', 'remove_todo')}}";
+</script>
+<script type="text/javascript" src="{{=URL('static', 'js/appjs/default/todo.js')}}"></script>
+<br/>
+{{=div}}

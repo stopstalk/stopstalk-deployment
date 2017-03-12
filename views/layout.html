@@ -354,6 +354,9 @@
           ga('send', 'pageview');
         </script>
     {{pass}}
+    <script type="text/javascript">
+        var addTodoURL = "{{=URL('problems', 'add_todo_problem')}}";
+    </script>
     <script src="{{=URL('static', 'js/main.js')}}"></script> <!-- Resource jQuery -->
     <script type="text/javascript" src="{{=URL('static', 'js/appjs/layout.js')}}"></script>
     <script type="application/ld+json">

@@ -305,4 +305,10 @@
 "StopStalk handle of a verified user": "StopStalk handle of a verified user",
 "Write to us if your Institute is not listed": "Write to us if your Institute is not listed",
 "StopStalk handle cannot be updated": "StopStalk handle cannot be updated",
-"Email cannot be updated": "Email cannot be updated"}
+"Email cannot be updated": "Email cannot be updated",
+"Problem already in ToDo List": "Problem already in ToDo List",
+"Problem added to ToDo List": "Problem added to ToDo List",
+"ToDo List": "ToDo List",
+"Total Submissions": "Total Submissions",
+"Users solved": "Users solved",
+"Remove": "Remove"}

@@ -82,6 +82,21 @@ def get_tag_values():
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
+def add_todo_problem():
+    link = request.vars["link"]
+    tltable = db.todo_list
+    query = (tltable.problem_link == link) & \
+            (tltable.user_id == session.user_id)
+    row = db(query).select().first()
+    if row:
+        return T("Problem already in ToDo List")
+    else:
+        tltable.insert(problem_link=link, user_id=session.user_id)
+
+    return T("Problem added to ToDo List")
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
 def add_suggested_tags():
 
     sttable = db.suggested_tags
@@ -235,10 +250,25 @@ def index():
     site = utilities.urltosite(problem_link).capitalize()
     problem_details = DIV(_class="row")
     details_table = TABLE(_style="font-size: 140%;", _class="col s7")
+
+    problem_class = ""
+    if problem_link in current.solved_problems:
+        link_class = "solved-problem"
+    elif problem_link in current.unsolved_problems:
+        link_class = "unsolved-problem"
+    else:
+        link_class = "unattempted-problem"
+
+    link_title = (" ".join(link_class.split("-"))).capitalize()
+
     tbody = TBODY()
     tbody.append(TR(TD(),
                     TD(STRONG(T("Problem Name") + ":")),
-                    TD(problem_name,
+                    TD(utilities.problem_widget(problem_name,
+                                                problem_link,
+                                                link_class,
+                                                link_title,
+                                                anchor=False),
                        _id="problem_name")))
     tbody.append(TR(TD(),
                     TD(STRONG(T("Site") + ":")),

@@ -22,8 +22,8 @@
 
 import re
 from datetime import datetime
-from gluon import current, IMG, DIV, TABLE, THEAD, I, \
-                  TBODY, TR, TH, TD, A, SPAN, INPUT, \
+from gluon import current, IMG, DIV, TABLE, THEAD, \
+                  TBODY, TR, TH, TD, A, SPAN, INPUT, I, \
                   TEXTAREA, SELECT, OPTION, URL, BUTTON
 
 # -----------------------------------------------------------------------------
@@ -64,7 +64,12 @@ def urltosite(url):
     return site
 
 # -----------------------------------------------------------------------------
-def problem_widget(name, link, link_class, link_title):
+def problem_widget(name,
+                   link,
+                   link_class,
+                   link_title,
+                   disable_todo=False,
+                   anchor=True):
     """
         Widget to display a problem in UI tables
 
@@ -72,18 +77,36 @@ def problem_widget(name, link, link_class, link_title):
         @param link (String): Problem link
         @param link_class (String): HTML class to determine solved/unsolved
         @param link_title (String): Link title corresponding to link_class
+        @param disable_todo (Boolean): Show / Hide todo button
+
+        @return (DIV)
     """
 
-    return A(name,
-             _href=URL("problems",
-                       "index",
-                       vars={"pname": name,
-                             "plink": link},
-                       extension=False),
-             _class=link_class,
-             _title=link_title,
-             _target="_blank",
-             extension=False)
+    problem_div = DIV()
+    if  anchor:
+        problem_div.append(A(name,
+                             _href=URL("problems",
+                                       "index",
+                                       vars={"pname": name,
+                                             "plink": link},
+                                       extension=False),
+                             _class=link_class,
+                             _title=link_title,
+                             _target="_blank",
+                             extension=False))
+    else:
+        problem_div.append(SPAN(name,
+                                _class=link_class,
+                                _title=link_title))
+
+    if current.auth.is_logged_in() and disable_todo is False:
+        problem_div.append(I(_class="add-to-todo-list fa fa-check-square-o tooltipped",
+                             _style="padding-left: 10px; display: none; cursor: pointer;",
+                             data={"position": "right",
+                                   "delay": "10",
+                                   "tooltip": "Add problem to Todo List"}))
+
+    return problem_div
 
 # -----------------------------------------------------------------------------
 def get_friends(user_id):

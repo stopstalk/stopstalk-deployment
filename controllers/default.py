@@ -127,6 +127,76 @@ def index():
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
+def todo():
+
+    ptable = db.problem
+    tltable = db.todo_list
+
+    res = db(tltable.user_id == session.user_id).select(tltable.problem_link)
+    table = TABLE(_class="bordered centered")
+    table.append(THEAD(TR(TH(T("Problem")),
+                          TH(T("Total submissions")),
+                          TH(T("Users solved")),
+                          TH(T("Remove")))))
+
+    plinks = [x.problem_link for x in res]
+    tbody = TBODY()
+
+    rows = db(ptable.link.belongs(plinks)).select(ptable.name,
+                                                  ptable.link,
+                                                  ptable.total_submissions,
+                                                  ptable.user_ids,
+                                                  ptable.custom_user_ids)
+    link_class = ""
+
+    def _get_ids(ids):
+        ids = ids.split(",")
+        return [] if ids[0] == "" else ids
+
+    for row in rows:
+        if row.link in current.solved_problems:
+            link_class = "solved-problem"
+        elif row.link in current.unsolved_problems:
+            link_class = "unsolved-problem"
+        else:
+            link_class = "unattempted-problem"
+
+        uids, cuids = _get_ids(row.user_ids), _get_ids(row.custom_user_ids)
+
+        link_title = (" ".join(link_class.split("-"))).capitalize()
+        tbody.append(TR(TD(utilities.problem_widget(row.name,
+                                                    row.link,
+                                                    link_class,
+                                                    link_title,
+                                                    disable_todo=True)),
+                        TD(row.total_submissions),
+                        TD(len(uids) + len(cuids)),
+                        TD(I(_class="red-text text-accent-4 fa fa-times remove-from-todo",
+                             data={"link": row.link}))))
+    table.append(tbody)
+    div = DIV(DIV(H2(T("ToDo List")),
+                  HR(),
+                  BR(),
+                  table,
+                  BR(),
+                  _class="col offset-s2 s8 z-depth-2"),
+              _class="row")
+
+    return dict(div=div)
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
+def remove_todo():
+    plink = request.vars["plink"]
+    tltable = db.todo_list
+
+    # Delete from table
+    query = (tltable.problem_link == plink) & \
+            (tltable.user_id == session.user_id)
+    db(query).delete()
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
 def notifications():
     """
         Show friends (includes CUSTOM) of the logged-in user on day streak
