@@ -136,28 +136,29 @@ def flush_problem_stats():
             # Problem not in `problem` table
             to_be_inserted.append(link)
 
-    non_empty_components = []
-    def _build_component(column_name, value):
-        if value:
-            non_empty_components.append("""
+    if len(to_be_updated):
+        non_empty_components = []
+        def _build_component(column_name, value):
+            if value:
+                non_empty_components.append("""
 %s = CASE link
 %s
      ELSE %s END""" % (column_name, value, column_name))
 
-    _build_component("solved_submissions", solved_case)
-    _build_component("total_submissions", total_case),
-    _build_component("user_ids", user_ids_case),
-    _build_component("custom_user_ids", custom_user_ids_case)
+        _build_component("solved_submissions", solved_case)
+        _build_component("total_submissions", total_case),
+        _build_component("user_ids", user_ids_case),
+        _build_component("custom_user_ids", custom_user_ids_case)
 
-    sql_query = """
+        sql_query = """
 UPDATE problem
 SET
 %s
 WHERE link in (%s);
-                """ % (",".join(non_empty_components),
-                       ",".join(["'" + x + "'" for x in to_be_updated]))
+                    """ % (",".join(non_empty_components),
+                           ",".join(["'" + x + "'" for x in to_be_updated]))
 
-    db.executesql(sql_query)
+        db.executesql(sql_query)
 
     if len(to_be_inserted):
         sql_query = ""
@@ -246,12 +247,6 @@ def get_submissions(user_id,
                             submission[4],
                             submission[6]])
 
-                process_solved_counts(submission[1],
-                                      submission[2],
-                                      submission[3],
-                                      user_id,
-                                      custom)
-
                 encoded_row = []
                 for x in row:
                     if isinstance(x, basestring):
@@ -270,6 +265,12 @@ def get_submissions(user_id,
                         encoded_row.append(tmp)
                     else:
                         encoded_row.append(str(x))
+
+                process_solved_counts(encoded_row[7].strip("\""),
+                                      encoded_row[6].strip("\""),
+                                      encoded_row[9].strip("\""),
+                                      user_id,
+                                      custom)
 
                 rows.append("(" + ", ".join(encoded_row) + ")")
                 if len(rows) > 1000:
