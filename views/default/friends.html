@@ -2,12 +2,16 @@
 <title>{{=T("Friends")}}</title>
 <h1>{{=T("Friends")}}</h1>
 <div class="row">
-    <div class="col s5"><h5>{{=T("You have added")}}</h5></div>
-    <div class="col offset-s2 s5"><h5>{{=T("Who added you")}}</h5></div>
-</div>
-<div class="row">
-    <div class="col s5">{{=table1}}</div>
-    <div class="col offset-s2 s5">{{=table2}}</div>
+    <div class="col offset-s1 s4 z-depth-2">
+        <h5>{{=T("You have added")}}</h5>
+        <hr>
+        {{=table1}}
+    </div>
+    <div class="col offset-s2 s4 z-depth-2">
+        <h5>{{=T("Who added you")}}</h5>
+        <hr>
+        {{=table2}}
+    </div>
 </div>
 <!-- Note: We don't need any seperate script for this page as the Search page script does what is required -->
 <script src="{{=URL('static', 'js/appjs/default/search.js')}}"></script>

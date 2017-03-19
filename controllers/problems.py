@@ -482,7 +482,7 @@ def _render_trending(caption, problems, flag):
         tbody.append(tr)
 
     table.append(tbody)
-    table = DIV(H4(caption, _class="center"), table)
+    table = DIV(H5(caption, _class="center"), HR(), table)
 
     return table
 
@@ -601,6 +601,7 @@ def trending():
                                     global_trending[:current.PROBLEMS_PER_PAGE],
                                     T("Users"))
     if auth.is_logged_in():
+        # Show table with trending problems amongst friends
         friends_trending = sorted(friends_problems_dict.items(),
                                   key=custom_compare,
                                   reverse=True)
@@ -609,11 +610,13 @@ def trending():
                                         friends_trending[:current.PROBLEMS_PER_PAGE],
                                         T("Friends"))
 
-        div = DIV(DIV(friend_table, _class="col s6"),
-                  DIV(global_table, _class="col s6"),
+        div = DIV(DIV(friend_table, _class="col offset-s1 s4 z-depth-2"),
+                  DIV(global_table, _class="col offset-s2 s4 z-depth-2"),
                   _class="row col s12")
     else:
-        div = DIV(global_table, _class="center")
+        # Show table with globally trending problems
+        div = DIV(DIV(global_table, _class="col offset-s1 s10 z-depth-2"),
+                  _class="row center")
 
     return dict(div=div)
 
