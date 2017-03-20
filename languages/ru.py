@@ -311,4 +311,7 @@
 "ToDo List": "ToDo List",
 "Total Submissions": "Total Submissions",
 "Users solved": "Users solved",
-"Remove": "Remove"}
+"Remove": "Remove",
+"Problems": "Problems",
+"Solved": "Solved",
+"Total": "Total"}

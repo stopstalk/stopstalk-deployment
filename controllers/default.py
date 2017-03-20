@@ -597,10 +597,10 @@ def leaderboard():
                               "delay": "50",
                               "tooltip": T("Custom User")},
                         _style="cursor: pointer;" + \
-                                "float:right;" + \
-                                "height:10px;" + \
-                                "width:10px;" + \
-                                "border-radius: 50%;")
+                               "float:right;" + \
+                               "height:10px;" + \
+                               "width:10px;" + \
+                               "border-radius: 50%;")
         else:
             span = SPAN()
 

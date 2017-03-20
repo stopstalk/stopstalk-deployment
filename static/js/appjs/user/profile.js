@@ -3,6 +3,21 @@
 
     $(document).ready(function() {
 
+        /* Get the details about the solved/unsolved problems */
+        $.ajax({
+            url: getSolvedCountsURL,
+            method: "GET",
+            data: {user_id: userID,
+                   custom: custom},
+            success: function(response) {
+                $('#solved-problems').html(response['solved_problems']);
+                $('#total-problems').html(response['total_problems']);
+            },
+            error: function(response) {
+                $.web2py.flash('Error getting solved problems');
+            }
+        });
+
         $('.modal-trigger').leanModal();
 
         /* Color the handles accordingly */

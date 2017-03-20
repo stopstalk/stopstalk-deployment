@@ -370,6 +370,31 @@ def get_dates():
                 max_accepted_streak=max_accepted_streak)
 
 # ------------------------------------------------------------------------------
+def get_solved_counts():
+    """
+        Get the number of solved and attempted problems
+    """
+
+    if request.extension != "json" or \
+       request.vars["user_id"] is None or \
+       request.vars["custom"] is None:
+        raise HTTP(400, "Bad request")
+        return
+
+    stable = db.submission
+    if request.vars.custom == "True":
+        query = (stable.custom_user_id == int(request.vars.user_id))
+    elif request.vars.custom == "False":
+        query = (stable.user_id == int(request.vars.user_id))
+    else:
+        return dict(total_problems=0, solved_problems=0)
+
+    total_problems = db(query).count(distinct=stable.problem_link)
+    query &= (stable.status == "AC")
+    solved_problems = db(query).count(distinct=stable.problem_link)
+    return dict(total_problems=total_problems, solved_problems=solved_problems)
+
+# ------------------------------------------------------------------------------
 def get_stats():
     """
         Get statistics of the user
@@ -513,7 +538,7 @@ def profile():
             custom = True
             row = rows.first()
             parent_user = (row.user_id.first_name + " " + \
-                                row.user_id.last_name,
+                           row.user_id.last_name,
                            row.user_id.stopstalk_handle)
             if row.duplicate_cu:
                 flag = "duplicate-custom"
@@ -524,10 +549,14 @@ def profile():
                 original_row["last_name"] = row.last_name
                 original_row["institute"] = row.institute
                 original_row["user_id"] = row.user_id
+                output["user_id"] = row.duplicate_cu
                 row = original_row
+            else:
+                output["user_id"] = row.id
             output["row"] = row
     else:
         row = rows.first()
+        output["user_id"] = row.id
         output["row"] = row
 
     last_updated = str(max([row[site.lower() + "_lr"] for site in current.SITES]))

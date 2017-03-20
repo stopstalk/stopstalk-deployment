@@ -44,6 +44,9 @@
         var isLoggedIn = "{{=auth.is_logged_in()}}";
         var handleDetailsURL = "{{=URL('user', 'handle_details', extension='json')}}";
         var handle = "{{=handle}}";
+        var getSolvedCountsURL = "{{=URL('user', 'get_solved_counts', extension='json')}}";
+        var custom = "{{=custom}}";
+        var userID = "{{=user_id}}";
     </script>
     <script type="text/javascript">
 
@@ -311,18 +314,20 @@
                             {{pass}}
                         {{pass}}
                     </div>
-                    <table class="striped centered">
-                        <caption><h6><strong>{{=("Streak")}}<strong></h6></caption>
+                    <table class="bordered centered">
                         <thead>
                             <tr>
                                 <th colspan="2"><strong>{{=T("Day Streak")}}</strong></th>
                                 <th colspan="2"><strong>{{=T("Accepted Solution Streak")}}</strong></th>
+                                <th colspan="2"><strong>{{=T("Problems")}}</strong></th>
                             </tr>
                             <tr>
                                 <th><h6>{{=T("Current")}}</h6></th>
                                 <th><h6>{{=T("Maximum")}}</h6></th>
                                 <th><h6>{{=T("Current")}}</h6></th>
                                 <th><h6>{{=T("Maximum")}}</h6></th>
+                                <th><h6>{{=T("Solved")}}</h6></th>
+                                <th><h6>{{=T("Total")}}</h6></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -331,6 +336,8 @@
                                 <td id="max-streak"></td>
                                 <td id="curr-accepted-streak"></td>
                                 <td id="max-accepted-streak"></td>
+                                <td id="solved-problems"></td>
+                                <td id="total-problems"></td>
                             </tr>
                         </tbody>
                     </table>
