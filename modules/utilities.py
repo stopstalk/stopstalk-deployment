@@ -548,7 +548,7 @@ def render_table(submissions, duplicates=[]):
                                extension=False),
                       _title=status_dict[submission.status],
                       _alt=status_dict[submission.status],
-                      _style="height: 25px; width: 25px;")))
+                      _class="status-icon")))
         append(TD(submission.points))
 
         if submission.view_link:
