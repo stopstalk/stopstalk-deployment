@@ -458,10 +458,12 @@ def register_callback(form):
 Name: %s %s
 Email: %s
 Institute: %s
+Country: %s
 StopStalk handle: %s
 Referrer: %s\n""" % (form.vars.first_name,
                      form.vars.last_name,
                      form.vars.email,
+                     form.vars.country,
                      form.vars.institute,
                      form.vars.stopstalk_handle,
                      form.vars.referrer)
