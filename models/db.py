@@ -463,8 +463,8 @@ StopStalk handle: %s
 Referrer: %s\n""" % (form.vars.first_name,
                      form.vars.last_name,
                      form.vars.email,
-                     form.vars.country,
                      form.vars.institute,
+                     form.vars.country,
                      form.vars.stopstalk_handle,
                      form.vars.referrer)
 
