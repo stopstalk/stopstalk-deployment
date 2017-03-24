@@ -2,6 +2,8 @@
 <html>
   <head>
     <title>{{=T("User profile")}}: {{=actual_handle}} {{="(" + row.first_name + " " + row.last_name + ")"}}</title>
+    <link rel="stylesheet" href="{{=URL('static','flag-icon/css/flag-icon.min.css')}}"/>
+
     <style>
 
         .chip {
@@ -315,7 +317,12 @@
                     <div class="row">
                         <table class="centered">
                             <tr>
-                                <th><h5><strong><b>{{=name}}</b></strong></h5></th>
+                                <th>
+                                    <h4>
+                                        <span>{{if row.country:}} {{=SPAN(_class="flag-icon flag-icon-" + current.all_countries[row.country].lower(), _title=row.country)}}  &nbsp; {{pass}}</span>
+                                        <strong><b>{{=name}}</b></strong>
+                                    </h4>
+                                </th>
                                 <th>
                                     <a href="{{=URL('default', 'leaderboard', vars={'q': row.institute})}}" class="tooltipped btn-floating btn-large waves-effect waves-light yellow" data-position="bottom" data-delay="50" data-tooltip="{{=row.institute}}">
                                         <i class="fa fa-institution fa-3x"></i>

@@ -1,5 +1,23 @@
 {{extend 'layout.html'}}
-<head><title>{{=T("Recent submissions")}}</title></head>
+<head>
+    <title>{{=T("Recent submissions")}}</title>
+</head>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        if ('{{=country}}' === "not-available") {
+            $('#fill-country-modal').openModal();
+        }
+    });
+</script>
+<div id="fill-country-modal" class="modal">
+    <div class="modal-content">
+        <h4>{{=T("Update your Country")}}</h4>
+        <p>Please update your Country so that we can introduce Country-wise Leaderboard as soon as possible :)</p>
+        {{=country_form}}
+    </div>
+</div>
+
 {{if total_rows:}}
     <script src="{{=URL('static', 'js/jquery.bootpag.min.js')}}"></script>
     <script src="{{=URL('static', 'js/appjs/default/submissions.js')}}"></script>

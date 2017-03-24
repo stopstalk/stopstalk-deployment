@@ -314,4 +314,10 @@
 "Remove": "Remove",
 "Problems": "Problems",
 "Solved": "Solved",
-"Total": "Total"}
+"Total": "Total",
+"Country": "Country",
+"Institute required": "Institute required",
+"Country required": "Country required",
+"Write to us if your Country is not listed": "Write to us if your Country is not listed",
+"Update your Country": "Update your Country",
+"Country updated!": "Country updated!"}

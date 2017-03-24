@@ -518,8 +518,8 @@ def leaderboard():
             global_leaderboard = True
 
     heading = T("Global Leaderboard")
-    afields = ["first_name", "last_name", "stopstalk_handle", "rating",
-               "institute", "per_day", "prev_rating", "per_day_change"]
+    afields = ["first_name", "last_name", "institute", "rating", "per_day",
+               "stopstalk_handle", "prev_rating", "per_day_change", "country"]
     cfields = afields + ["duplicate_cu"]
 
     aquery = (atable.id > 0)
@@ -571,7 +571,8 @@ def leaderboard():
                           int(record.rating),
                           float(record.per_day_change),
                           custom,
-                          int(record.rating) - int(record.prev_rating)))
+                          int(record.rating) - int(record.prev_rating),
+                          record.country))
 
     _update_users(reg_users, False)
     _update_users(custom_users, True)
@@ -581,6 +582,7 @@ def leaderboard():
 
     table = TABLE(_class="centered bordered")
     table.append(THEAD(TR(TH(T("Rank")),
+                          TH(T("Country")),
                           TH(T("Name")),
                           TH(T("StopStalk Handle")),
                           TH(T("Institute")),
@@ -607,6 +609,12 @@ def leaderboard():
         tr = TR()
         append = tr.append
         append(TD(str(rank) + "."))
+        if i[7]:
+            append(TD(SPAN(_class="flag-icon flag-icon-" + \
+                                  current.all_countries[i[7]].lower(),
+                           _title=i[7])))
+        else:
+            append(TD())
         append(TD(DIV(span, DIV(i[0]))))
         append(TD(A(i[1],
                     _href=URL("user", "profile", args=[i[1]]),
@@ -1350,10 +1358,28 @@ def submissions():
 
     table = utilities.render_table(rows, cusfriends)
 
+    country_value = session.auth.user.get("country")
+    country = country_value if country_value else "not-available"
+
+    country_form = None
+    if country == "not-available":
+        country_form = SQLFORM(db.auth_user,
+                               session.auth.user,
+                               fields=["country"],
+                               showid=False)
+        if country_form.process(onvalidation=current.sanitize_fields).accepted:
+            session.auth.user = db.auth_user(session.user_id)
+            session.flash = T("Country updated!")
+            redirect(URL("default", "submissions", args=1))
+        elif country_form.errors:
+            response.flash = T("Form has errors")
+
     return dict(table=table,
                 friends=friends,
                 cusfriends=cusfriends,
-                total_rows=len(rows))
+                total_rows=len(rows),
+                country=country,
+                country_form=country_form)
 
 # ----------------------------------------------------------------------------
 def faq():

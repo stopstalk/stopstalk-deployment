@@ -138,6 +138,7 @@ def update_details():
                    "last_name",
                    "email",
                    "institute",
+                   "country",
                    "stopstalk_handle"]
 
     for site in current.SITES:
@@ -151,6 +152,7 @@ def update_details():
     atable.stopstalk_handle.writable = False
     atable.stopstalk_handle.comment = T("StopStalk handle cannot be updated")
 
+    atable.email.readable = True
     atable.email.writable = False
     atable.email.comment = T("Email cannot be updated")
 
@@ -186,6 +188,7 @@ def update_details():
             # whose site handles are updated
             db(submission_query).delete()
 
+        session.auth.user = db.auth_user(session.user_id)
         redirect(URL("default", "submissions", args=[1]))
     elif form.errors:
         response.flash = T("Form has errors")
@@ -221,6 +224,7 @@ def update_friend():
     form_fields = ["first_name",
                    "last_name",
                    "institute",
+                   "country",
                    "stopstalk_handle"]
 
     for site in current.SITES:
@@ -548,6 +552,7 @@ def profile():
                 original_row["first_name"] = row.first_name
                 original_row["last_name"] = row.last_name
                 original_row["institute"] = row.institute
+                original_row["country"] = row.country
                 original_row["user_id"] = row.user_id
                 output["user_id"] = row.duplicate_cu
                 row = original_row
@@ -776,6 +781,7 @@ def custom_friend():
     list_fields = ["first_name",
                    "last_name",
                    "institute",
+                   "country",
                    "stopstalk_handle"]
 
     for site in current.SITES:

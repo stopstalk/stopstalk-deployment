@@ -356,7 +356,7 @@ def materialize_form(form, fields):
     main_div = DIV(_class="center")
 
     for _, label, controls, field_tooltip in fields:
-        curr_div = DIV(_class="row valign-wrapper")
+        curr_div = DIV(_class="row center valign-wrapper")
         input_field = None
         _controls = controls
 
@@ -423,8 +423,7 @@ def materialize_form(form, fields):
 
         if input_field is None:
             input_field = DIV(_controls, label,
-                              _class="input-field col offset-s3 s6",
-                              _style="display: inline-flex;")
+                              _class="input-field col offset-s3 s6")
         curr_div.append(input_field)
 
         if field_tooltip:

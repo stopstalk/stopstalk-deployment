@@ -82,6 +82,11 @@ auth = Auth(db)
 service = Service()
 plugins = PluginManager()
 
+all_countries = {u'Canada': u'CA', u'Moldova (Republic of)': u'MD', u'Sao Tome and Principe': u'ST', u'Guinea-Bissau': u'GW', u'United States of America': u'US', u'Lithuania': u'LT', u'Cambodia': u'KH', u'Saint Helena, Ascension and Tristan da Cunha': u'SH', u'Switzerland': u'CH', u'Ethiopia': u'ET', u'Aruba': u'AW', u'Saint Martin (French part)': u'MF', u'Solomon Islands': u'SB', u'Argentina': u'AR', u'Cameroon': u'CM', u'Burkina Faso': u'BF', u'Turkmenistan': u'TM', u'Ghana': u'GH', u'Saudi Arabia': u'SA', u'Rwanda': u'RW', u'Togo': u'TG', u'Japan': u'JP', u'American Samoa': u'AS', u'United States Minor Outlying Islands': u'UM', u'Cocos (Keeling) Islands': u'CC', u'Pitcairn': u'PN', u'Guatemala': u'GT', u'Bosnia and Herzegovina': u'BA', u'Kuwait': u'KW', u'Russian Federation': u'RU', u'Jordan': u'JO', u'Bonaire, Sint Eustatius and Saba': u'BQ', u'Dominica': u'DM', u'Liberia': u'LR', u'Maldives': u'MV', u'Jamaica': u'JM', u'Oman': u'OM', u'Martinique': u'MQ', u'Cabo Verde': u'CV', u'Christmas Island': u'CX', u'French Guiana': u'GF', u'Niue': u'NU', u'Monaco': u'MC', u'Wallis and Futuna': u'WF', u'New Zealand': u'NZ', u'Yemen': u'YE', u'Jersey': u'JE', u'Andorra': u'AD', u'Albania': u'AL', u'Samoa': u'WS', u'Norfolk Island': u'NF', u'United Arab Emirates': u'AE', u'Guam': u'GU', u'India': u'IN', u'Azerbaijan': u'AZ', u'Lesotho': u'LS', u'Saint Vincent and the Grenadines': u'VC', u'Kenya': u'KE', u'Macao': u'MO', u'Turkey': u'TR', u'Afghanistan': u'AF', u'Virgin Islands (British)': u'VG', u'Bangladesh': u'BD', u'Mauritania': u'MR', u'Congo (Democratic Republic of the)': u'CD', u'Turks and Caicos Islands': u'TC', u'Saint Lucia': u'LC', u'San Marino': u'SM', u'French Polynesia': u'PF', u'France': u'FR', u'Svalbard and Jan Mayen': u'SJ', u'Syrian Arab Republic': u'SY', u'Bermuda': u'BM', u'Slovakia': u'SK', u'Somalia': u'SO', u'Peru': u'PE', u'Swaziland': u'SZ', u'Nauru': u'NR', u'Seychelles': u'SC', u'Norway': u'NO', u'Malawi': u'MW', u'Cook Islands': u'CK', u'Benin': u'BJ', u'Western Sahara': u'EH', u'Cuba': u'CU', u'Montenegro': u'ME', u'Falkland Islands (Malvinas)': u'FK', u'Mayotte': u'YT', u'Heard Island and McDonald Islands': u'HM', u'China': u'CN', u'Armenia': u'AM', u'Timor-Leste': u'TL', u'Dominican Republic': u'DO', u'Bolivia (Plurinational State of)': u'BO', u'Ukraine': u'UA', u'Bahrain': u'BH', u'Tonga': u'TO', u'Finland': u'FI', u'Libya': u'LY', u'Macedonia (the former Yugoslav Republic of)': u'MK', u'Cayman Islands': u'KY', u'Central African Republic': u'CF', u'New Caledonia': u'NC', u'Mauritius': u'MU', u'Tajikistan': u'TJ', u'Liechtenstein': u'LI', u'Australia': u'AU', u'Mali': u'ML', u'Sweden': u'SE', u'Bulgaria': u'BG', u'Palestine, State of': u'PS', u"Korea (Democratic People's Republic of)": u'KP', u'Romania': u'RO', u'Angola': u'AO', u'French Southern Territories': u'TF', u'Chad': u'TD', u'South Africa': u'ZA', u'Tokelau': u'TK', u'Cyprus': u'CY', u'South Georgia and the South Sandwich Islands': u'GS', u'Brunei Darussalam': u'BN', u'Qatar': u'QA', u'Malaysia': u'MY', u'Austria': u'AT', u'Mozambique': u'MZ', u'Uganda': u'UG', u'Hungary': u'HU', u'Niger': u'NE', u'Isle of Man': u'IM', u'Brazil': u'BR', u'Virgin Islands (U.S.)': u'VI', u'Faroe Islands': u'FO', u'Guinea': u'GN', u'Panama': u'PA', u'Guyana': u'GY', u'Costa Rica': u'CR', u'Luxembourg': u'LU', u'Bahamas': u'BS', u'Gibraltar': u'GI', u'Ireland': u'IE', u'Pakistan': u'PK', u'Palau': u'PW', u'Nigeria': u'NG', u'Ecuador': u'EC', u'Czech Republic': u'CZ', u'Viet Nam': u'VN', u'Belarus': u'BY', u'Vanuatu': u'VU', u'Algeria': u'DZ', u'Slovenia': u'SI', u'El Salvador': u'SV', u'Tuvalu': u'TV', u'Saint Pierre and Miquelon': u'PM', u'Iran (Islamic Republic of)': u'IR', u'Marshall Islands': u'MH', u'Chile': u'CL', u'Puerto Rico': u'PR', u'Belgium': u'BE', u'Kiribati': u'KI', u'Haiti': u'HT', u'Belize': u'BZ', u'Hong Kong': u'HK', u'Sierra Leone': u'SL', u'Georgia': u'GE', u"Lao People's Democratic Republic": u'LA', u'Gambia': u'GM', u'Philippines': u'PH', u'Morocco': u'MA', u'Croatia': u'HR', u'Mongolia': u'MN', u'Guernsey': u'GG', u'Thailand': u'TH', u'Namibia': u'NA', u'Grenada': u'GD', u'Taiwan, Province of China': u'TW', u'Aland Islands': u'AX', u'Venezuela (Bolivarian Republic of)': u'VE', u'Iraq': u'IQ', u'Tanzania, United Republic of': u'TZ', u'Portugal': u'PT', u'Estonia': u'EE', u'Uruguay': u'UY', u'Equatorial Guinea': u'GQ', u'Lebanon': u'LB', u'Korea (Republic of)': u'KR', u'Uzbekistan': u'UZ', u'Tunisia': u'TN', u'Djibouti': u'DJ', u'Greenland': u'GL', u'Antigua and Barbuda': u'AG', u'Spain': u'ES', u'Colombia': u'CO', u'Burundi': u'BI', u'Fiji': u'FJ', u'Barbados': u'BB', u'Madagascar': u'MG', u'Italy': u'IT', u'Bhutan': u'BT', u'Sudan': u'SD', u'Nepal': u'NP', u'Malta': u'MT', u'Netherlands': u'NL', u'Northern Mariana Islands': u'MP', u'Suriname': u'SR', u'United Kingdom of Great Britain and Northern Ireland': u'GB', u'Anguilla': u'AI', u'Republic of Kosovo': u'XK', u'Micronesia (Federated States of)': u'FM', u'Holy See': u'VA', u'Israel': u'IL', u'Reunion': u'RE', u'Indonesia': u'ID', u'Iceland': u'IS', u'Zambia': u'ZM', u'Senegal': u'SN', u'Papua New Guinea': u'PG', u'Saint Kitts and Nevis': u'KN', u'Trinidad and Tobago': u'TT', u'Zimbabwe': u'ZW', u'Germany': u'DE', u'Denmark': u'DK', u'Kazakhstan': u'KZ', u'Poland': u'PL', u'Eritrea': u'ER', u'Kyrgyzstan': u'KG', u'Saint Barthelemy': u'BL', u'British Indian Ocean Territory': u'IO', u'Montserrat': u'MS', u'Mexico': u'MX', u'Sri Lanka': u'LK', u'Latvia': u'LV', u'South Sudan': u'SS', u'Curacao': u'CW', u'Guadeloupe': u'GP', u"Cote d'Ivoire": u'CI', u'Honduras': u'HN', u'Myanmar': u'MM', u'Bouvet Island': u'BV', u'Egypt': u'EG', u'Nicaragua': u'NI', u'Singapore': u'SG', u'Serbia': u'RS', u'Botswana': u'BW', u'Antarctica': u'AQ', u'Congo': u'CG', u'Sint Maarten (Dutch part)': u'SX', u'Greece': u'GR', u'Paraguay': u'PY', u'Gabon': u'GA', u'Comoros': u'KM'}
+current.all_countries = all_countries
+country_name_list = all_countries.keys()
+country_name_list.sort()
+
 # To disable writing of translations
 # http://www.web2py.com/books/default/chapter/29/04#Translating-variables
 T.is_writable = False
@@ -99,9 +104,16 @@ all_institutes.append("Other")
 extra_fields = [Field("institute",
                       label=T("Institute"),
                       requires=IS_IN_SET(all_institutes,
-                                         zero="Institute",
-                                         error_message="Institute Required"),
+                                         zero=T("Institute"),
+                                         error_message=T("Institute required")),
                       comment=T("Write to us if your Institute is not listed")),
+                Field("country",
+                      label=T("Country"),
+                      requires=IS_IN_SET(country_name_list,
+                                         zero=T("country"),
+                                         error_message=T("Country required")),
+                      comment=T("Write to us if your Country is not listed"),
+                      default=""),
                 Field("stopstalk_handle",
                       label=T("StopStalk handle"),
                       requires=[IS_NOT_IN_DB(db,
@@ -303,6 +315,7 @@ def sanitize_fields(form):
         6. Email address instead of handles
         7. Spoj follows a specific convention for handle naming
         8. stopstalk_handle is alphanumeric
+        9. Country field is compulsary
 
         @param form (FORM): Registration / Add Custom friend form
     """
@@ -364,6 +377,10 @@ def sanitize_fields(form):
     # 4.
     if form.vars.institute == "":
         form.errors.institute = T("Please select an institute or Other")
+
+    # 9.
+    if form.vars.country == "":
+        form.errors.country = T("Country required")
 
     # 5.
     if form.vars.email:
@@ -489,6 +506,13 @@ custom_friend_fields = [Field("user_id", "reference auth_user"),
                               requires=IS_IN_SET(all_institutes,
                                                  zero=T("Institute")),
                               comment=T("Write to us if your Institute is not listed")),
+                        Field("country",
+                              label=T("Country"),
+                              requires=IS_IN_SET(country_name_list,
+                                                 zero=T("country"),
+                                                 error_message=T("Country required")),
+                              comment=T("Write to us if your Country is not listed"),
+                              default=""),
                         Field("stopstalk_handle",
                               label=T("StopStalk handle"),
                               requires=[IS_NOT_IN_DB(db,
