@@ -169,7 +169,7 @@ class Profile(object):
                 this_value = plink_to_id[problem_link]
                 if tags != ["-"] and this_value[0] == "['-']":
                     print "Codeforces tag updated", problem_link, tags
-                    ptable(ptable.id == this_value[1]).update(tags=str(tags))
+                    db(ptable.id == this_value[1]).update(tags=str(tags))
             else:
                 print "Codeforces tag inserted", problem_link, tags
                 rid = ptable.insert(link=problem_link,
