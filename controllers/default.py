@@ -217,26 +217,30 @@ def notifications():
 
     # Check for streak of friends on stopstalk
     query = (ftable.follower_id == session.user_id)
-    rows = db(query).select(atable.first_name,
+    rows = db(query).select(atable.id,
+                            atable.first_name,
                             atable.last_name,
                             atable.stopstalk_handle,
                             join=ftable.on(ftable.user_id == atable.id))
+
     # Will contain list of handles of all the friends along
     # with the Custom Users added by the logged-in user
     handles = []
-
     complete_dict = {}
-    friends_stopstalk_handles = []
+    u_ids = []
+    cu_ids = []
+
     for user in rows:
         complete_dict[user.stopstalk_handle] = []
-        friends_stopstalk_handles.append("'" + user.stopstalk_handle + "'")
+        u_ids.append(str(user.id))
         handles.append((user.stopstalk_handle,
                         user.first_name + " " + user.last_name,
                         user.stopstalk_handle))
 
     # Check for streak of custom friends
     query = (cftable.user_id == session.user_id)
-    rows = db(query).select(cftable.first_name,
+    rows = db(query).select(cftable.id,
+                            cftable.first_name,
                             cftable.last_name,
                             cftable.duplicate_cu,
                             cftable.stopstalk_handle)
@@ -244,27 +248,28 @@ def notifications():
     for user in rows:
         name = user.first_name + " " + user.last_name
         actual_handle = user.stopstalk_handle
+        stopstalk_handle = user.stopstalk_handle
+        cid = user.id
 
         if user.duplicate_cu:
+            cid = user.duplicate_cu
             stopstalk_handle = user.duplicate_cu.stopstalk_handle
-        else:
-            stopstalk_handle = user.stopstalk_handle
 
         handles.append((stopstalk_handle, name, actual_handle))
         complete_dict[stopstalk_handle] = []
-        friends_stopstalk_handles.append("'" + stopstalk_handle + "'")
+        cu_ids.append(str(cid))
 
-    if friends_stopstalk_handles == []:
-        friends_stopstalk_handles = ["-1"]
+    u_ids = u_ids if len(u_ids) else ["-1"]
+    cu_ids = cu_ids if len(cu_ids) else ["-1"]
 
     # Build the complex SQL query
     sql_query = """
-                    SELECT stopstalk_handle, DATE(time_stamp), COUNT(*) as cnt
-                    FROM submission
-                    WHERE stopstalk_handle in (%s)
-                    GROUP BY stopstalk_handle, DATE(submission.time_stamp)
-                    ORDER BY time_stamp;
-                """ % (", ".join(friends_stopstalk_handles))
+SELECT stopstalk_handle, DATE(time_stamp), COUNT(*) as cnt
+FROM submission
+WHERE user_id in (%s) OR custom_user_id in (%s)
+GROUP BY stopstalk_handle, DATE(submission.time_stamp)
+ORDER BY time_stamp;
+                """ % (",".join(u_ids), ",".join(cu_ids))
 
     user_rows = db.executesql(sql_query)
     for user in user_rows:
