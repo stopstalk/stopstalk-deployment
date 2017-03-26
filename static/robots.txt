@@ -6,6 +6,9 @@ Disallow: /
 User-agent: Yandex
 Disallow: /
 
+User-agent: AhrefsBot
+Disallow: /
+
 User-agent: *
 Crawl-delay: 20
 Disallow: /static/scripts/
@@ -16,3 +19,4 @@ Disallow: /appadmin
 Disallow: /static/js/*.js
 Disallow: /static/css/*.css
 Disallow: /*.json*
+Disallow: /problems/*
