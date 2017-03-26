@@ -20,3 +20,4 @@ Disallow: /static/js/*.js
 Disallow: /static/css/*.css
 Disallow: /*.json*
 Disallow: /problems/*
+Disallow: /problems?*
