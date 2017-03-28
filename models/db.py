@@ -406,39 +406,9 @@ def notify_institute_users(record):
             (atable.blacklisted == False) & \
             (atable.registration_key == "")
 
-    rows = db(query).select(atable.email, atable.stopstalk_handle)
-
-    subject = "New user registered from your Institute"
+    rows = db(query).select(atable.id)
     for row in rows:
-        message = """<html>
-Hello %s,<br />
-
-%s from your Institute has just joined StopStalk.<br />
-Add him/her as your friend now %s for better experience on StopStalk<br />
-
-To stop receiving mails - <a href="%s">Unsubscribe</a> <br />
-
-Regards,<br />
-StopStalk
-                  </html>""" % (row.stopstalk_handle,
-                         record.first_name + " " + record.last_name,
-                         URL("user",
-                             "profile",
-                             args=record.stopstalk_handle,
-                             scheme=True,
-                             host=True,
-                             extension=False),
-                         URL("default",
-                             "unsubscribe",
-                             scheme=True,
-                             host=True,
-                             extension=False))
-
-        send_mail(to=row.email,
-                  subject=subject,
-                  message=message,
-                  mail_type="institute_user",
-                  bulk=True)
+        db.institute_user.insert(user_registered_id=record.id, send_to_id=row.id)
 
 # -----------------------------------------------------------------------------
 def register_callback(form):
@@ -597,6 +567,10 @@ db.define_table("contact_us",
                 Field("phone_number", requires=IS_NOT_EMPTY()),
                 Field("subject", requires=IS_NOT_EMPTY()),
                 Field("text_message", "text", requires=IS_NOT_EMPTY()))
+
+db.define_table("institute_user",
+                Field("send_to_id", "reference auth_user"),
+                Field("user_registered_id", "reference auth_user"))
 
 db.define_table("faq",
                 Field("question", requires=IS_NOT_EMPTY()),
