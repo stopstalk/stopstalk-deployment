@@ -50,8 +50,8 @@ def send_message(to_record, from_records):
                    _href=URL("user",
                              "profile",
                              args=x.stopstalk_handle,
-                             scheme=True,
-                             host=True,
+                             scheme="https",
+                             host="www.stopstalk.com",
                              extension=False))) for x in from_records]
     if len(from_records) == 1:
         subject = "Someone registered from your Institute"
@@ -79,8 +79,8 @@ Team StopStalk
        address_string,
        URL("default",
            "unsubscribe",
-           scheme=True,
-           host=True,
+           scheme="https",
+           host="www.stopstalk.com",
            extension=False))
 
     current.send_mail(to=to_record.email,
