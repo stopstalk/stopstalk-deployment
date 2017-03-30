@@ -4,7 +4,7 @@
     $(document).ready(function() {
         $.ajax({
             method: 'GET',
-            url: '/default/submissions.json'
+            url: pageURL + '.json'
         }).done(function(page) {
             var pageCount = page['count'],
                 currentUrl = window.location.href.split("/").slice(-1),
@@ -21,7 +21,7 @@
                 page: parseInt(currPage),
                 maxVisible: 10
             }).on("page", function(event, num) {
-                window.location.href = "/default/submissions/" + num.toString();
+                window.location.href = pageURL + '/' + num.toString();
             });
         });
     });

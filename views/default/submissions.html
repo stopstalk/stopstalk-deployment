@@ -4,6 +4,7 @@
 </head>
 
 <script type="text/javascript">
+    var pageURL = '{{=URL("default", "submissions")}}';
     $(document).ready(function() {
         if ('{{=country}}' === "not-available") {
             $('#fill-country-modal').openModal();
