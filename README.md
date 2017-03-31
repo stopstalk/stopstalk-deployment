@@ -91,10 +91,15 @@ pip install -r requirements.txt
 
     `http://localhost:8000/stopstalk/`
 
-  **Note:**
-  * The database will be completely empty after installation
+10. Navigate to private/seed_data and import the sql file in your database
+    ```
+    $ mysql -u root -p migration > dump.sql       # Enter your mysql root password after this.
 
-10. Done. :smile:
+    ```
+    This will initialize the database with seed data to kickstart the development process.
+    A list of usernames and passwords is in private/seed_data/userslist.txt
+
+11. Done. :smile:
 
 ## Project Dependencies
 
