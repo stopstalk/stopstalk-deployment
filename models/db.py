@@ -638,6 +638,11 @@ db.define_table("todo_list",
                 Field("user_id", "reference auth_user"),
                 Field("problem_link"))
 
+db.define_table("access_tokens",
+                Field("value"),
+                Field("time_stamp", "datetime"),
+                Field("type"))
+
 uvadb.define_table("problem",
                    Field("problem_id", "integer"),
                    Field("problem_num", "integer"),
