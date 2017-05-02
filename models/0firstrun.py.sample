@@ -44,7 +44,8 @@ current.analytics_id = ""
 # Client ID for Google Calendar API
 current.calendar_token = ""
 
-# MailboxLayer API access key https://mailboxlayer.com/documentation
-# Make an account here to get access_key for your local env
-current.mailboxlayer_key = ""
+# Neverbounce API username and password https://app.neverbounce.com/settings/api
+current.neverbounce_user = ""
+current.neverbounce_password = ""
+
 # =============================================================================

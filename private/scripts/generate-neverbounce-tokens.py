@@ -42,5 +42,5 @@ for i in xrange(2):
                 break
 
 attable = db.access_tokens
-n = db(attable.time_stamp < datetime.now() - timedelta(days=5)).delete()
+n = db(attable.time_stamp < datetime.now() - timedelta(days=2)).delete()
 print "Deleted", n, "Access Tokens"

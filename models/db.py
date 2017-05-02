@@ -75,7 +75,7 @@ response.form_label_separator = myconf.take('forms.separator')
 #########################################################################
 
 from gluon.tools import Auth, Service, PluginManager
-from datetime import datetime
+from datetime import datetime, timedelta
 from utilities import materialize_form
 
 auth = Auth(db)
@@ -240,67 +240,40 @@ def validate_email(email):
 
     import requests
 
-    domain = email.split("@")[-1]
-    whitelisted_domains = ["yahoo.co.in", "ymail.com"]
-
     def _fallback_email_validation(email):
         """
             Called in the following cases
 
             1. access_key is empty or not mentioned in 0firstrun.py
-            2. Network failure for MailboxLayer API
-            3. API Limit exceeded (or any other unexpected errors)
+            2. Network failure for NeverBounce API
         """
-        if domain in whitelisted_domains:
-            return True
-
+        domain = email.split("@")[-1]
         try:
             response = requests.get("http://" + domain, timeout=3)
             return (response.status_code == 200)
         except:
             return False
 
-    try:
-        access_key = current.mailboxlayer_key
-    except AttributeError:
-        access_key = ""
-
-    if access_key == "":
-        return _fallback_email_validation(email)
-
-    params = {"access_key": access_key,
-              "email": email,
-              "smtp": 1,
-              "format": 1}
-
-    response = requests.get("http://apilayer.net/api/check", params=params)
-    if response.status_code != 200:
-        # In case of Network Failures
-        send_mail(to="raj454raj@gmail.com",
-                  subject="%s %s MailboxLayer" % (str(response.status_code),
-                                                  email),
-                  message="EOM",
-                  mail_type="admin",
-                  bulk=True)
-        return _fallback_email_validation(email)
-
-    result = response.json()
-
-    if result.has_key("success"):
-        # In case of usage limit is exceeded or server failures
-        send_mail(to="raj454raj@gmail.com",
-                  subject="%s %s MailboxLayer" % (str(result["error"]["code"]),
-                                                  email),
-                  message=result["error"]["info"],
-                  mail_type="admin",
-                  bulk=True)
-        return _fallback_email_validation(email)
-
-    if result["format_valid"]:
-        return (result["mx_found"] and result["smtp_check"]) or \
-               (domain in whitelisted_domains)
+    attable = db.access_tokens
+    query = attable.time_stamp > (datetime.datetime.now() - \
+                                  datetime.timedelta(minutes=55))
+    row = db(query).select(orderby="<random>").first()
+    if row:
+        access_token = row.value
     else:
-        return False
+        return _fallback_email_validation(email)
+
+    response = requests.post("https://api.neverbounce.com/v3/single",
+                             data={"access_token": access_token,
+                                   "email": email})
+    if response.status_code == 200:
+        response = response.json()
+        if response["success"]:
+            return (response["result"] not in (1, 4))
+        else:
+            return _fallback_email_validation(email)
+    else:
+        return _fallback_email_validation(email)
 
 # -----------------------------------------------------------------------------
 def sanitize_fields(form):
