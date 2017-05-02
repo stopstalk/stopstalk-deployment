@@ -22,7 +22,7 @@
 
 import requests
 from requests.auth import HTTPBasicAuth
-from datetime import datetime
+from datetime import datetime, timedelta
 
 for i in xrange(2):
     # Only 5 tries to get a particular token
@@ -35,7 +35,12 @@ for i in xrange(2):
         if response.status_code == 200:
             response = response.json()
             if response.has_key("access_token"):
+                print response["access_token"]
                 db.access_tokens.insert(value=response["access_token"],
                                         type="NeverBounce access_token",
                                         time_stamp=datetime.now())
                 break
+
+attable = db.access_tokens
+n = db(attable.time_stamp < datetime.now() - timedelta(days=5)).delete()
+print "Deleted", n, "Access Tokens"
