@@ -142,7 +142,7 @@ The project also depends on a number of other open source packages, some of whic
 
   > Contact Us Page: https://www.stopstalk.com/contact_us
 
-  > Creator Website: http://raj454raj.com
+  > Creator Website: http://raj454raj.xyz
 
 ## Social Links
 
