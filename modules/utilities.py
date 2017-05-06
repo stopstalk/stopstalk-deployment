@@ -109,11 +109,12 @@ def problem_widget(name,
     return problem_div
 
 # -----------------------------------------------------------------------------
-def get_friends(user_id):
+def get_friends(user_id, custom_list=True):
     """
         Friends of user_id (including custom friends)
 
-        @param user_id (Integer): Number
+        @param user_id (Integer): user_id for which friends need to be returned
+        @param custom_list (Boolean): If custom users should be returned
         @return (Tuple): (list of friend_ids, list of custom_friend_ids)
     """
 
@@ -122,12 +123,13 @@ def get_friends(user_id):
     ftable = db.following
 
     cf_to_duplicate = []
-    # Retrieve custom friends
-    query = (cftable.user_id == user_id)
-    custom_friends = db(query).select(cftable.id, cftable.duplicate_cu)
-    for custom_friend in custom_friends:
-        cf_to_duplicate.append((custom_friend.id,
-                                custom_friend.duplicate_cu))
+    if custom_list:
+        # Retrieve custom friends
+        query = (cftable.user_id == user_id)
+        custom_friends = db(query).select(cftable.id, cftable.duplicate_cu)
+        for custom_friend in custom_friends:
+            cf_to_duplicate.append((custom_friend.id,
+                                    custom_friend.duplicate_cu))
 
     # Retrieve friends
     query = (ftable.follower_id == user_id)

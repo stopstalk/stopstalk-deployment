@@ -508,7 +508,6 @@ def leaderboard():
 
     specific_institute = False
     atable = db.auth_user
-    cftable = db.custom_friend
 
     global_leaderboard = False
     if request.vars.has_key("global"):
@@ -525,23 +524,18 @@ def leaderboard():
     heading = T("Global Leaderboard")
     afields = ["first_name", "last_name", "institute", "rating", "per_day",
                "stopstalk_handle", "prev_rating", "per_day_change", "country"]
-    cfields = afields + ["duplicate_cu"]
 
     aquery = (atable.id > 0)
-    cquery = (cftable.id > 0)
     if global_leaderboard is False:
         if auth.is_logged_in():
             heading = T("Friends Leaderboard")
-            friends, cusfriends = utilities.get_friends(session.user_id)
-            custom_friends = [x[0] for x in cusfriends]
+            friends, _ = utilities.get_friends(session.user_id, False)
 
             # Add logged-in user to leaderboard
             friends.append(session.user_id)
             aquery &= (atable.id.belongs(friends))
-            cquery &= (cftable.id.belongs(custom_friends))
         else:
             aquery = False
-            cquery = False
 
     # Do not display unverified users in the leaderboard
     aquery &= (atable.registration_key == "")
@@ -553,34 +547,26 @@ def leaderboard():
         if institute != "":
             specific_institute = True
             aquery &= (atable.institute == institute)
-            cquery &= (cftable.institute == institute)
             reg_users = db(aquery).select(*afields)
-            custom_users = db(cquery).select(*cfields)
 
     if specific_institute is False:
         reg_users = db(aquery).select(*afields)
-        custom_users = db(cquery).select(*cfields)
 
     users = []
 
-    def _update_users(user_list, custom):
+    def _update_users(user_list):
 
         for user in user_list:
             record = user
-            if custom and user.duplicate_cu:
-                record = cftable(user.duplicate_cu)
-
             users.append((user.first_name + " " + user.last_name,
                           user.stopstalk_handle,
                           user.institute,
                           int(record.rating),
                           float(record.per_day_change),
-                          custom,
                           int(record.rating) - int(record.prev_rating),
                           record.country))
 
-    _update_users(reg_users, False)
-    _update_users(custom_users, True)
+    _update_users(reg_users)
 
     # Sort users according to the rating
     users = sorted(users, key=lambda x: x[3], reverse=True)
@@ -597,30 +583,18 @@ def leaderboard():
 
     tbody = TBODY()
     rank = 1
-    for i in users:
-        if i[5]:
-            span = SPAN(_class="orange tooltipped",
-                        data={"position": "right",
-                              "delay": "50",
-                              "tooltip": T("Custom User")},
-                        _style="cursor: pointer;" + \
-                               "float:right;" + \
-                               "height:10px;" + \
-                               "width:10px;" + \
-                               "border-radius: 50%;")
-        else:
-            span = SPAN()
 
+    for i in users:
         tr = TR()
         append = tr.append
         append(TD(str(rank) + "."))
-        if i[7]:
+        if i[6]:
             append(TD(SPAN(_class="flag-icon flag-icon-" + \
-                                  current.all_countries[i[7]].lower(),
-                           _title=i[7])))
+                                  current.all_countries[i[6]].lower(),
+                           _title=i[6])))
         else:
             append(TD())
-        append(TD(DIV(span, DIV(i[0]))))
+        append(TD(DIV(DIV(i[0]))))
         append(TD(A(i[1],
                     _href=URL("user", "profile", args=[i[1]]),
                     _target="_blank")))
@@ -630,12 +604,12 @@ def leaderboard():
                               vars={"q": i[2],
                                     "global": global_leaderboard}))))
         append(TD(i[3]))
-        if i[6] > 0:
-            append(TD(B("+" + str(i[6])), _class="green-text text-darken-2"))
-        elif i[6] < 0:
-            append(TD(B(i[6]), _class="red-text text-darken-2"))
+        if i[5] > 0:
+            append(TD(B("+" + str(i[5])), _class="green-text text-darken-2"))
+        elif i[5] < 0:
+            append(TD(B(i[5]), _class="red-text text-darken-2"))
         else:
-            append(TD(i[6], _class="blue-text text-darken-2"))
+            append(TD(i[5], _class="blue-text text-darken-2"))
 
         diff = "{:1.5f}".format(i[4])
 
