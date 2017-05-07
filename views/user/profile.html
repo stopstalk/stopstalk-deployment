@@ -78,7 +78,9 @@
 
           $.ajax({
               method: 'GET',
-              url: '{{=URL("user", "get_stats", vars={"user_id": row.id, "custom": custom}, extension="json")}}'
+              url: '{{=URL("user", "get_stats", extension="json")}}',
+              data: {user_id: '{{=row.id}}',
+                     custom: '{{=custom}}'}
           }).done(function(data) {
 
               var statuses = data['row'];
