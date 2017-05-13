@@ -776,7 +776,10 @@ def custom_friend():
 
     table.append(tbody)
     if len(rows) >= allowed_custom_friends:
-        return dict(form=None, table=table, allowed=allowed_custom_friends)
+        return dict(form=None,
+                    table=table,
+                    allowed=allowed_custom_friends,
+                    total_referrals=total_referrals)
 
     list_fields = ["first_name",
                    "last_name",
@@ -799,6 +802,9 @@ def custom_friend():
         session.flash = T("Submissions will be added in some time")
         redirect(URL("default", "submissions", args=[1]))
 
-    return dict(form=form, table=table, allowed=allowed_custom_friends)
+    return dict(form=form,
+                table=table,
+                allowed=allowed_custom_friends,
+                total_referrals=total_referrals)
 
 # ==============================================================================
