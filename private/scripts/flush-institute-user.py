@@ -53,20 +53,24 @@ def send_message(to_record, from_records):
                              scheme="https",
                              host="www.stopstalk.com",
                              extension=False))) for x in from_records]
+
+    has_have = ""
     if len(from_records) == 1:
         subject = "Someone registered from your Institute"
         name_string = names[0]
         address_string = "him / her"
+        has_have = "has"
     else:
         subject = "A few people registered from your Institute"
         name_string = ", ".join(names[:-1]) + " and " + names[-1]
         address_string = "them"
+        has_have = "have"
 
     message = """
 <html>
 Hello %s,<br/>
 <br/>
-%s from your Institute has just joined StopStalk.<br/>
+%s from your Institute %s just joined StopStalk.<br/>
 Add %s as your friend now for better experience on StopStalk.<br/>
 <br/>
 Adjust your email preferences <a href="%s">here</a><br/>
@@ -76,6 +80,7 @@ Team StopStalk
 </html>
 """ % (to_record.stopstalk_handle,
        name_string,
+       has_have,
        address_string,
        URL("default",
            "unsubscribe",
