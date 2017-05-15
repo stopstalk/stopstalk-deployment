@@ -134,9 +134,18 @@ class Profile(object):
                     # Time of submission
                     tos = i.contents[3].contents[1].contents[0]
                     curr = time.strptime(str(tos), "%Y-%m-%d %H:%M:%S")
+                    curr = datetime.datetime(curr.tm_year,
+                                             curr.tm_mon,
+                                             curr.tm_mday,
+                                             curr.tm_hour,
+                                             curr.tm_min,
+                                             curr.tm_sec) + \
+                                             datetime.timedelta(minutes=210)
+                    tos = str(curr)
+                    curr = time.strptime(tos, "%Y-%m-%d %H:%M:%S")
                     if curr <= last_retrieved:
                         return submissions
-                    append(str(tos))
+                    append(tos)
 
                     # Problem Name/URL
                     uri = i.contents[5].contents[0]
