@@ -512,6 +512,20 @@ db.define_table("todays_requests",
                 Field("follower_id", "reference auth_user"),
                 Field("transaction_type"))
 
+def _count_users_lambda(row):
+    if row.problem.user_ids in (None, ""):
+        return 0
+    else:
+        return len(row.problem.user_ids) - \
+               len(row.problem.user_ids.replace(",", "")) + 1
+
+def _count_custom_users_lambda(row):
+    if row.problem.custom_user_ids in (None, ""):
+        return 0
+    else:
+        return len(row.problem.custom_user_ids) - \
+               len(row.problem.custom_user_ids.replace(",", "")) + 1
+
 db.define_table("problem",
                 Field("name"),
                 Field("link"),
@@ -523,6 +537,8 @@ db.define_table("problem",
                 Field("total_submissions", "integer", default=0),
                 Field("user_ids", "text", default=""),
                 Field("custom_user_ids", "text", default=""),
+                Field.Virtual("user_count", _count_users_lambda),
+                Field.Virtual("custom_user_count", _count_custom_users_lambda),
                 format="%(name)s %(id)s")
 
 db.define_table("tag",

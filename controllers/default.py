@@ -101,6 +101,10 @@ def handle_error():
                       scheme=True,
                       host=True)
         error_message = "Internal Server error"
+        current.send_mail("raj454raj@gmail.com",
+                          "500 occurred",
+                          (str(session.user_id) if auth.is_logged_in() else "") + " " + message,
+                          mail_type="admin")
     else:
         message = request_url
         error_message = "Other error"

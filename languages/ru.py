@@ -320,4 +320,10 @@
 "Country required": "Country required",
 "Write to us if your Country is not listed": "Write to us if your Country is not listed",
 "Update your Country": "Update your Country",
-"Country updated!": "Country updated!"}
+"Country updated!": "Country updated!",
+"Total verified referrals": "Total verified referrals",
+"Sort By": "Sort By",
+"Accuracy (Ascending)": "Accuracy (Ascending)",
+"Accuracy (Descending)": "Accuracy (Descending)",
+"Solved Count (Ascending)": "Solved Count (Ascending)",
+"Solved Count (Descending)": "Solved Count (Descending)"}

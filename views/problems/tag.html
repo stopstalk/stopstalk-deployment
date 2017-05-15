@@ -9,17 +9,26 @@
 <h3>{{=T("Search problems by tags")}}</h3>
 <form id="tagSearchForm" method="GET" action="">
     <div class="row center">
-        <div class="input-field col offset-s2 s4">
-            <input id="search" name="q" type="text"/>
+        <div class="input-field col offset-s1 s3">
+            <input id="search" name="q" type="text" value="{{=request.vars.get('q', '')}}"/>
             <input id="page" name="page" type="hidden" value="1"/>
             <label for="search">{{=T("Search Tags...")}}</label>
         </div>
         <div class="input-field col s4">
             <select name="site" multiple>
-                <option value="" disabled selected>Site</option>
+                <option value="" disabled selected>{{=T("Site")}}</option>
                 {{for site in current.SITES:}}
                     <option value="{{=site}}">{{=site}}</option>
                 {{pass}}
+            </select>
+        </div>
+        <div class="input-field col s3">
+            <select name="orderby">
+                <option value="" disabled selected>{{=T("Sort By")}}</option>
+                <option value="accuracy-asc">{{=T("Accuracy (Ascending)")}}</option>
+                <option value="accuracy-desc">{{=T("Accuracy (Descending)")}}</option>
+                <option value="solved-count-asc">{{=T("Solved Count (Ascending)")}}</option>
+                <option value="solved-count-desc">{{=T("Solved Count (Descending)")}}</option>
             </select>
         </div>
     </div>
@@ -27,8 +36,10 @@
         <button type="submit" class="blue btn waves-effect waves-light"><i class="fa fa-search"></i></button>
     </div>
 </form>
-
+{{if request.vars.get("orderby", "").__contains__("accuracy"):}}
+    <h6 class="red-text">Note: HackerRank problems are not shown as their accuracy is 100% (Only solved problems are retrieved)</h6>
+{{pass}}
 <div id="page-selection" class="center"></div>
-<div class="row" id="output">
+<div class="row" id="problem-response">
     {{=table}}
 </div>

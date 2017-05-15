@@ -340,6 +340,8 @@ def tag():
     thead = THEAD(TR(TH(T("Problem Name")),
                      TH(T("Problem URL")),
                      TH(T("Site")),
+                     TH(T("Accuracy")),
+                     TH(T("Users solved")),
                      TH(T("Tags"))))
     table.append(thead)
 
@@ -359,6 +361,11 @@ def tag():
     except:
         sites = []
 
+    orderby = request.vars.get("orderby", None)
+    if orderby not in ("accuracy-asc", "accuracy-desc",
+                       "solved-count-asc", "solved-count-desc"):
+        orderby = None
+
     try:
         curr_page = int(request.vars["page"])
     except:
@@ -369,15 +376,14 @@ def tag():
     q = q.split(" ")
     ptable = db.problem
 
-    query = None
+    query = True
     for tag in q:
-        if query is not None:
-            # Decision to make & or |
-            # & => Search for problem containing all these tags
-            # | => Search for problem containing one of the tags
-            query &= ptable.tags.contains(tag)
-        else:
-            query = ptable.tags.contains(tag)
+        if tag == "":
+            continue
+        # Decision to make & or |
+        # & => Search for problem containing all these tags
+        # | => Search for problem containing one of the tags
+        query &= ptable.tags.contains(tag)
 
     site_query = None
     for site in sites:
@@ -388,6 +394,22 @@ def tag():
     if site_query:
         query &= site_query
 
+    accuracy_column = (ptable.solved_submissions * 1.0 / ptable.total_submissions)
+    kwargs = dict(distinct=True,
+                  limitby=((curr_page - 1) * PER_PAGE,
+                           curr_page * PER_PAGE))
+    if orderby and orderby.__contains__("accuracy"):
+        query &= ~(ptable.link.contains("hackerrank.com"))
+        kwargs["orderby"] = ~accuracy_column if orderby == "accuracy-desc" else accuracy_column
+
+    if orderby and orderby.__contains__("solved-count"):
+        kwargs["reverse"] = True if orderby == "solved-count-desc" else False
+
+    query &= (ptable.solved_submissions != None)
+    query &= (ptable.total_submissions != None) & (ptable.total_submissions != 0)
+    query &= (ptable.user_ids != None)
+    query &= (ptable.custom_user_ids != None)
+
     total_problems = db(query).count()
     total_pages = total_problems / PER_PAGE
     if total_problems % PER_PAGE != 0:
@@ -396,42 +418,49 @@ def tag():
     if request.extension == "json":
         return dict(total_pages=total_pages)
 
-    all_problems = db(query).select(ptable.name,
-                                    ptable.link,
-                                    ptable.tags,
-                                    distinct=True,
-                                    limitby=((curr_page - 1) * PER_PAGE,
-                                             curr_page * PER_PAGE))
+    if orderby and orderby.__contains__("solved-count"):
+        all_problems = db(query).select(cache=(cache.ram, 3600),
+                                        cacheable=True).as_list()
+        all_problems.sort(key=lambda x: x["user_count"] + \
+                                        x["custom_user_count"],
+                          reverse=kwargs["reverse"])
+        all_problems = all_problems[kwargs["limitby"][0]:kwargs["limitby"][1]]
+    else:
+        # No need of caching here
+        all_problems = db(query).select(**kwargs)
 
     tbody = TBODY()
     for problem in all_problems:
-
         tr = TR()
         link_class = ""
 
-        if problem.link in current.solved_problems:
+        if problem["link"] in current.solved_problems:
             link_class = "solved-problem"
-        elif problem.link in current.unsolved_problems:
+        elif problem["link"] in current.unsolved_problems:
             link_class = "unsolved-problem"
         else:
             link_class = "unattempted-problem"
 
         link_title = (" ".join(link_class.split("-"))).capitalize()
 
-        tr.append(TD(utilities.problem_widget(problem.name,
-                                              problem.link,
+        tr.append(TD(utilities.problem_widget(problem["name"],
+                                              problem["link"],
                                               link_class,
                                               link_title)))
         tr.append(TD(A(I(_class="fa fa-link"),
-                       _href=problem.link,
+                       _href=problem["link"],
                        _target="_blank")))
         tr.append(TD(IMG(_src=URL("static",
                                   "images/" + \
-                                  utilities.urltosite(problem.link) + \
+                                  utilities.urltosite(problem["link"]) + \
                                   "_small.png"),
                          _style="height: 30px; width: 30px;")))
-        all_tags = eval(problem.tags)
+        tr.append(TD("%.2f" % (problem["solved_submissions"]  * 100.0 / \
+                               problem["total_submissions"])))
+        tr.append(TD(problem["user_count"] + problem["custom_user_count"]))
+
         td = TD()
+        all_tags = eval(problem["tags"])
         for tag in all_tags:
             td.append(DIV(A(tag,
                             _href=URL("problems",
