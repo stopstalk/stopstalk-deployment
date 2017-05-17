@@ -343,9 +343,15 @@
                                     </th>
                                 {{elif flag != "my-custom-user" and custom == True:}}
                                     <th>
-                                        <a href="#stopstalk-handle" class="tooltipped btn-floating btn-large waves-effect waves-light modal-trigger purple" data-position="bottom" data-delay="50" data-tooltip="{{=T('Add to my Custom Friend List')}}">
-                                            <i class="fa fa-plus fa-3x"></i>
-                                        </a>
+                                        {{if auth.is_logged_in():}}
+                                            <a href="#stopstalk-handle" class="tooltipped btn-floating btn-large waves-effect waves-light modal-trigger purple" data-position="bottom" data-delay="50" data-tooltip="{{=T('Add to my Custom Friend List')}}">
+                                                <i class="fa fa-plus fa-3x"></i>
+                                            </a>
+                                        {{else:}}
+                                            <a class="disabled btn-floating btn-large tooltipped" data-position="bottom" data-delay="50" data-tooltip="{{=T('Login to add as Custom Friend')}}">
+                                                <i class="fa fa-plus fa-3x"></i>
+                                            </a>
+                                        {{pass}}
                                         <!-- Modal Structure -->
                                         <div id="stopstalk-handle" class="modal center">
                                             <div class="modal-content">

@@ -326,4 +326,5 @@
 "Accuracy (Ascending)": "Accuracy (Ascending)",
 "Accuracy (Descending)": "Accuracy (Descending)",
 "Solved Count (Ascending)": "Solved Count (Ascending)",
-"Solved Count (Descending)": "Solved Count (Descending)"}
+"Solved Count (Descending)": "Solved Count (Descending)",
+"Login to add as Custom Friend": "Login to add as Custom Friend"}
