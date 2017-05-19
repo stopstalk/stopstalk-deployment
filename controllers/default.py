@@ -1014,15 +1014,20 @@ def search():
     all_institutes = [x.name.strip("\"") for x in all_institutes]
     all_institutes.append("Other")
 
+    country_name_list = current.all_countries.keys()
+    country_name_list.sort()
+
     # Return if form is not submitted
     if len(request.get_vars) == 0:
         return dict(all_institutes=all_institutes,
+                    country_name_list=country_name_list,
                     table=DIV())
 
     atable = db.auth_user
     ftable = db.following
     q = request.get_vars.get("q", None)
     institute = request.get_vars.get("institute", None)
+    country = request.get_vars.get("country", None)
 
     # Build query for searching by first_name, last_name & stopstalk_handle
     query = ((atable.first_name.contains(q)) | \
@@ -1041,6 +1046,10 @@ def search():
     # Search by institute (if provided)
     if institute:
         query &= (atable.institute == institute)
+
+    # Search by country (if provided)
+    if country:
+        query &= (atable.country == country)
 
     query &= (atable.registration_key == "")
 
@@ -1136,7 +1145,10 @@ def search():
         tbody.append(tr)
 
     table.append(tbody)
-    return dict(all_institutes=all_institutes, table=table)
+
+    return dict(all_institutes=all_institutes,
+                country_name_list=country_name_list,
+                table=table)
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
