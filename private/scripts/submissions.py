@@ -295,7 +295,7 @@ def handle_not_found(site, site_handle):
     db.invalid_handle.insert(site=site, handle=site_handle)
 
 # ----------------------------------------------------------------------------
-def retrieve_submissions(record, custom, all_sites=current.SITES):
+def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
     """
         Retrieve submissions that are not already in the database
     """
