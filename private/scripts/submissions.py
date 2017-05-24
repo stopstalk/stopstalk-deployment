@@ -303,9 +303,6 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
     global INVALID_HANDLES
     global failed_user_retrievals
 
-    if "CodeChef" in all_sites:
-        all_sites.remove("CodeChef")
-
     time_conversion = "%Y-%m-%d %H:%M:%S"
     list_of_submissions = []
     retrieval_failures = []
