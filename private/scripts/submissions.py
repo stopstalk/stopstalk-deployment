@@ -472,7 +472,7 @@ def re_retrieve():
                 custom_users[record.custom_user_id] = set([record.site])
 
     # Remove all the records after retrieving their submissions
-    db(frtable.site != "CodeChef").delete()
+    frtable.truncate()
 
     return (users, custom_users)
 
