@@ -121,7 +121,7 @@ def get_tag(link, name, today):
 
     if row:
         prev_tags = row.tags
-        if prev_tags != str(all_tags):
+        if prev_tags != str(all_tags) and prev_tags == "['-']":
             row.update_record(tags=str(all_tags),
                               name=name,
                               tags_added_on=today,
