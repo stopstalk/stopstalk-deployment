@@ -405,7 +405,8 @@ def new_users():
     query = _get_initial_query(atable) & \
             (atable.blacklisted == False) & \
             (atable.registration_key == "") # Unverified email
-    new_users = db(query).select(limitby=(0, max_limit))
+    new_users = db(query).select(limitby=(0, max_limit),
+                                 orderby="<random>")
     users = {}
     for user in new_users:
         users[user.id] = []
@@ -414,7 +415,8 @@ def new_users():
                 users[user.id].append(site)
 
     query = _get_initial_query(cftable)
-    custom_users = db(query).select(limitby=(0, max_limit))
+    custom_users = db(query).select(limitby=(0, max_limit),
+                                    orderby="<random>")
     cusers = {}
     for user in custom_users:
         cusers[user.id] = []
