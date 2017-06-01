@@ -161,7 +161,7 @@ class Profile(object):
             append(problem_name)
 
             # Problem tags
-            tags = [x["name"] for x in row["problem"]["tags"]]
+            tags = row["problem"]["tags"]
             if tags == []:
                 tags = ["-"]
 
