@@ -146,6 +146,6 @@ The project also depends on a number of other open source packages, some of whic
 
 ## Social Links
 
-* [Facebook] (https://www.facebook.com/stopstalkcommunity/)
+* [Facebook](https://www.facebook.com/stopstalkcommunity/)
 * [Twitter](https://twitter.com/stop_stalk)
 * [Google-Plus](https://plus.google.com/110575194069678651985)
