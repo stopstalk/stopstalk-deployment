@@ -77,6 +77,27 @@ def handle_error():
 
         return [x[0] for x in similar_users]
 
+    def _get_failure_message(ticket):
+
+        from os import path
+        from gluon.admin import apath
+        from pickle import load
+
+        failure_message = str(session.user_id) + " " if auth.is_logged_in() else ""
+        ticket_file_path = "applications/stopstalk/errors/" + \
+                           ticket.replace(request.application + "/", "")
+
+        if path.exists(ticket_file_path):
+            failure_message += load(open(ticket_file_path, "rb"))["output"]
+        else:
+            failure_message += "Shouldn't be here"
+
+        return "<html>" + str(A(failure_message,
+                                _href=URL("admin", "default", "ticket",
+                                          args=ticket,
+                                          scheme=True,
+                                          host=True))) + "</html>"
+
     code = request.vars.code
     request_url = request.vars.request_url
     ticket = request.vars.ticket
@@ -96,14 +117,15 @@ def handle_error():
         error_message = "Not found"
     elif code == "500":
         # Get ticket URL:
-        message = URL("admin", "default", "ticket",
-                      args=ticket,
-                      scheme=True,
-                      host=True)
+        ticket_url = URL("admin", "default", "ticket",
+                         args=ticket,
+                         scheme=True,
+                         host=True)
+        message = (str(session.user_id) if auth.is_logged_in() else "") + " " + ticket_url
         error_message = "Internal Server error"
         current.send_mail("raj454raj@gmail.com",
                           "500 occurred",
-                          (str(session.user_id) if auth.is_logged_in() else "") + " " + message,
+                          _get_failure_message(ticket),
                           mail_type="admin")
     else:
         message = request_url
