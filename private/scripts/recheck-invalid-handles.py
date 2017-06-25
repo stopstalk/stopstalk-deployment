@@ -64,14 +64,8 @@ def get_request(url, headers={}, timeout=current.TIMEOUT):
 
 def codechef_invalid(handle):
     response = get_request("https://www.codechef.com/users/" + handle)
-    if (len(response.history) > 0 and \
-        response.history[0].status_code == 302) or \
-       (response in REQUEST_FAILURES): # Any other server failure
-        # If user handle is invalid CodeChef
-        # redirects to https://www.codechef.com
+    if (response in REQUEST_FAILURES) or response.url.__contains__("teams/view"):
         return True
-    elif response in REQUEST_FAILURES:
-        return
     return False
 
 def codeforces_invalid(handle):

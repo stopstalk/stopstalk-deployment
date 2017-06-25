@@ -311,10 +311,7 @@ class Profile(object):
             response = get_request(domain_url + "users/" + handle)
             if response in REQUEST_FAILURES:
                 return response
-            if len(response.history) > 0 and \
-               response.history[0].status_code == 302:
-                # If user handle is invalid CodeChef
-                # redirects to https://www.codechef.com
+            if response.url.__contains__("teams/view"):
                 return NOT_FOUND
 
         for year in xrange(current_year, start_year - 1, -1):
