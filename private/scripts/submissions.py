@@ -460,7 +460,7 @@ def re_retrieve():
     users = {}
     custom_users = {}
     frtable = db.failed_retrieval
-    rows = db(frtable).select()
+    rows = db(frtable).select(limitby=(0, 10))
     for record in rows:
         if record.user_id:
             if users.has_key(record.user_id):
@@ -473,8 +473,7 @@ def re_retrieve():
             else:
                 custom_users[record.custom_user_id] = set([record.site])
 
-    # Remove all the records after retrieving their submissions
-    frtable.truncate()
+        record.delete_record()
 
     return (users, custom_users)
 
