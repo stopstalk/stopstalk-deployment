@@ -566,17 +566,16 @@ def leaderboard():
     # Do not display unverified users in the leaderboard
     aquery &= (atable.registration_key == "")
 
-    if request.vars.has_key("q"):
+    if request.vars.has_key("q") and request.vars["q"]:
         heading = T("Institute Leaderboard")
         institute = request.vars["q"]
+        specific_institute = True
+        aquery &= (atable.institute == institute)
 
-        if institute != "":
-            specific_institute = True
-            aquery &= (atable.institute == institute)
-            reg_users = db(aquery).select(*afields)
-
-    if specific_institute is False:
-        reg_users = db(aquery).select(*afields)
+    if request.vars.has_key("country") and request.vars["country"]:
+        heading = T("Country Leaderboard")
+        aquery &= (atable.country == reverse_country_mapping[request.vars["country"]])
+    reg_users = db(aquery).select(*afields)
 
     users = []
 
@@ -615,9 +614,13 @@ def leaderboard():
         append = tr.append
         append(TD(str(rank) + "."))
         if i[6]:
-            append(TD(SPAN(_class="flag-icon flag-icon-" + \
+            append(TD(A(SPAN(_class="flag-icon flag-icon-" + \
                                   current.all_countries[i[6]].lower(),
-                           _title=i[6])))
+                             _title=i[6]),
+                        _href=URL("default", "leaderboard",
+                                  vars={"global": global_leaderboard,
+                                        "q": institute if specific_institute else "",
+                                        "country": current.all_countries[i[6]]}))))
         else:
             append(TD())
         append(TD(DIV(DIV(i[0]))))
