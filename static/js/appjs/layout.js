@@ -87,6 +87,10 @@
 
         transformTimestamps();
 
+        $("#welcome a").on('touchend', function(){
+            window.location.href = $(this).attr('href');
+        });
+
         $('.collapsible').collapsible({
             accordion: false // A setting that changes the collapsible behavior to expandable instead of the default accordion style
         });
