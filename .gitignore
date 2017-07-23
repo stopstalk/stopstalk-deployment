@@ -4,6 +4,7 @@
 /sessions/*
 /uploads/*
 /databases/*
+/graph_data/*.pickle
 .~lock.*.csv#
 *.log
 *.pyc

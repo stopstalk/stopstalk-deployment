@@ -152,6 +152,10 @@ extra_fields = [Field("institute",
                 Field("authentic", "boolean",
                       default=False,
                       readable=False,
+                      writable=False),
+                Field("graph_data_retrieved", "boolean",
+                      default=False,
+                      readable=False,
                       writable=False)]
 
 site_handles = []
@@ -482,7 +486,11 @@ custom_friend_fields = [Field("user_id", "reference auth_user"),
                               default="0.0",
                               writable=False),
                         Field("duplicate_cu", "reference custom_friend",
-                              default=None)]
+                              default=None),
+                        Field("graph_data_retrieved", "boolean",
+                              default=False,
+                              readable=False,
+                              writable=False)]
 
 custom_friend_fields += site_handles
 custom_friend_fields += all_last_retrieved
