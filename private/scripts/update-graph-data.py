@@ -43,7 +43,7 @@ SERVER_FAILURE = "SERVER_FAILURE"
 NOT_FOUND = "NOT_FOUND"
 OTHER_FAILURE = "OTHER_FAILURE"
 REQUEST_FAILURES = (SERVER_FAILURE, NOT_FOUND, OTHER_FAILURE)
-INVALID_HANDLES = set([(row.handle, row.site) for row in db(db.invalid_handle).select()])
+INVALID_HANDLES = set([(row.handle, row.site.lower()) for row in db(db.invalid_handle).select()])
 
 # -----------------------------------------------------------------------------
 def get_request(url, headers={}, timeout=current.TIMEOUT, params={}):
@@ -84,6 +84,7 @@ class User:
 
     def __init__(self, user_id, handles, user_record, custom=False):
         self.handles = handles
+        self.custom = custom
         if custom:
             self.pickle_file_path = "./applications/stopstalk/graph_data/" + \
                                     str(user_id) + "_custom.pickle"
@@ -101,6 +102,11 @@ class User:
             for site_data in self.previous_graph_data:
                 for contest_data in self.previous_graph_data[site_data]:
                     self.contest_mapping[contest_data["title"]] = contest_data["data"]
+
+    def get_debug_statement(self):
+        return "%s(%s)%s:" % (self.user_record.stopstalk_handle,
+                              self.user_record.id,
+                              " CUS" if self.custom else "")
 
     def codechef_data(self):
         handle = self.handles["codechef_handle"]
@@ -240,7 +246,7 @@ class User:
 
     def write_to_filesystem(self):
         if self.previous_graph_data == self.graph_data:
-            print "No updates in the graph data"
+            print "No update in graph data"
             return
 
         if self.previous_graph_data is not None:
@@ -289,7 +295,6 @@ def get_user_objects(aquery=None, cquery=None, sites=None):
             if user[site_handle] != "" and \
                (user[site_handle], site) not in INVALID_HANDLES:
                 user_dict[site_handle] = user[site_handle]
-        print user
         user_objects.append(User(user.id, user_dict, user, custom))
 
     return user_objects
@@ -321,4 +326,5 @@ if __name__ == "__main__":
         print "Invalid Arguments"
 
     for user_object in user_objects:
+        print user_object.get_debug_statement(),
         user_object.update_graph_data(sites)
