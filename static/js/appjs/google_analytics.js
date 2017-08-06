@@ -14,10 +14,8 @@
         $(document).on('click', selector, function() {
             if (buttonLabel) {
                 sendToGA('button', $(this).data("button-label"));
-                console.log($(this).data("button-label"));
             } else {
                 sendToGA('button', label);
-                console.log(label);
             }
         });
     };
