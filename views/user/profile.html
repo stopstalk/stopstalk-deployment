@@ -76,29 +76,29 @@
                                     </h4>
                                 </th>
                                 <th>
-                                    <a href="{{=URL('default', 'leaderboard', vars={'q': row.institute})}}" class="tooltipped btn-floating btn-large waves-effect waves-light yellow" data-position="bottom" data-delay="50" data-tooltip="{{=row.institute}}">
+                                    <a id="profile-institute-leaderboard" href="{{=URL('default', 'leaderboard', vars={'q': row.institute})}}" class="tooltipped btn-floating btn-large waves-effect waves-light yellow" data-position="bottom" data-delay="50" data-tooltip="{{=row.institute}}">
                                         <i class="fa fa-institution fa-3x"></i>
                                     </a>
                                 </th>
                                 <th>
-                                    <a href="{{=URL('user', 'submissions', args=[actual_handle])}}" class="tooltipped btn-floating btn-large waves-effect waves-light red" data-position="bottom" data-delay="50" data-tooltip="{{=T('View user submissions')}}" target="_blank">
+                                    <a id="profile-user-submissions" href="{{=URL('user', 'submissions', args=[actual_handle])}}" class="tooltipped btn-floating btn-large waves-effect waves-light red" data-position="bottom" data-delay="50" data-tooltip="{{=T('View user submissions')}}" target="_blank">
                                         <i class="fa fa-long-arrow-right fa-3x"></i>
                                     </a>
                                 </th>
                                 {{if flag == "not-friends" and custom == False:}}
                                     <th>
-                                        <button class="tooltipped btn-floating btn-large waves-effect waves-light friends-button green" data-position="bottom" data-delay="50" data-tooltip="{{=T('Add friend')}}" data-user-id="{{=row.id}}" data-type="add-friend">
+                                        <button id="profile-add-friend" class="tooltipped btn-floating btn-large waves-effect waves-light friends-button green" data-position="bottom" data-delay="50" data-tooltip="{{=T('Add friend')}}" data-user-id="{{=row.id}}" data-type="add-friend">
                                             <i class="fa fa-user-plus fa-3x"></i>
                                         </button>
                                     </th>
                                 {{elif flag != "my-custom-user" and custom == True:}}
                                     <th>
                                         {{if auth.is_logged_in():}}
-                                            <a href="#stopstalk-handle" class="tooltipped btn-floating btn-large waves-effect waves-light modal-trigger purple" data-position="bottom" data-delay="50" data-tooltip="{{=T('Add to my Custom Friend List')}}">
+                                            <a id="profile-add-to-my-custom-friend" href="#stopstalk-handle" class="tooltipped btn-floating btn-large waves-effect waves-light modal-trigger purple" data-position="bottom" data-delay="50" data-tooltip="{{=T('Add to my Custom Friend List')}}">
                                                 <i class="fa fa-plus fa-3x"></i>
                                             </a>
                                         {{else:}}
-                                            <a class="disabled btn-floating btn-large tooltipped" data-position="bottom" data-delay="50" data-tooltip="{{=T('Login to add as Custom Friend')}}">
+                                            <a id="profile-add-to-my-custom-friend-logged-out" class="disabled btn-floating btn-large tooltipped" data-position="bottom" data-delay="50" data-tooltip="{{=T('Login to add as Custom Friend')}}">
                                                 <i class="fa fa-plus fa-3x"></i>
                                             </a>
                                         {{pass}}
@@ -123,7 +123,7 @@
                                     </th>
                                 {{elif flag == "already-friends":}}
                                     <th>
-                                        <button class="tooltipped btn-floating btn-large waves-effect waves-light black friends-button" data-position="bottom" data-delay="50" data-tooltip="{{=T('Unfriend')}}" data-user-id="{{=row.id}}" data-type="unfriend">
+                                        <button id="profile-unfriend" class="tooltipped btn-floating btn-large waves-effect waves-light black friends-button" data-position="bottom" data-delay="50" data-tooltip="{{=T('Unfriend')}}" data-user-id="{{=row.id}}" data-type="unfriend">
                                             <i class="fa fa-user-times fa-3x"></i>
                                         </button>
                                     </th>
@@ -133,20 +133,20 @@
                         <span class="light grey-text"><i>{{=T("Last updated")}}: <b>{{=last_updated}}</b></i></span>
                     </div>
                     {{if parent_user:}}
-                        <h6>{{=T("Custom User of")}} <a href="{{=URL('user', 'profile', args=parent_user[1])}}">{{=parent_user[0]}}</a></h6>
+                        <h6>{{=T("Custom User of")}} <a id="profile-custom-user-of" href="{{=URL('user', 'profile', args=parent_user[1])}}">{{=parent_user[0]}}</a></h6>
                     {{pass}}
                     <div class="row center">
                         <h6><strong>{{=T("Accuracy")}}</strong></h6>
                         {{for site in current.SITES:}}
                             {{if profile_urls[site] != "NA":}}
-                                <a href="{{=profile_urls[site]}}" class="tooltipped" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank">
+                                <a id="{{=site.lower()}}-profile-url" href="{{=profile_urls[site]}}" class="tooltipped" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank">
                                     <div class="chip" id="{{=site.lower()}}_chip">
                                         <img src="{{=URL('static', 'images/' + site.lower() + '_logo.png')}}" alt="{{=site}}"/>
                                         {{=efficiency[site]}}
                                     </div>
                                 </a>
                             {{else:}}
-                                <a href="{{=current.SITES[site]}}" class="tooltipped" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank">
+                                <a id="{{=site.lower()}}-profile-url" href="{{=current.SITES[site]}}" class="tooltipped" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank">
                                     <div class="chip" id="{{=site.lower()}}_chip">
                                         <img src="{{=URL('static', 'images/' + site.lower() + '_logo.png')}}" alt="{{=site}}"/>
                                         {{=efficiency[site]}}

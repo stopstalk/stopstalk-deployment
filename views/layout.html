@@ -157,17 +157,17 @@
     <header>
     <ul id="welcome" class="dropdown-content" style="min-width: 190px; color: #536dfe;">
         {{if session["user_id"]:}}
-            <li><a href="{{=URL('user', 'profile')}}">{{=T("Profile")}}</a></li>
-            <li><a href="{{=URL('user', 'submissions')}}">{{=T("My Submissions")}}</a></li>
-            <li><a href="{{=URL('user', 'update_details')}}">{{=T("Update Details")}}</a></li>
-            <li><a href="{{=URL('default', 'updates')}}">{{=T("Feature Updates")}}</a></li>
-            <li><a href="{{=URL('default', 'unsubscribe')}}">{{=T("Unsubscribe")}}</a></li>
+            <li><a href="{{=URL('user', 'profile')}}" data-button-label="Nav User Profile" class="nav-dropdown">{{=T("Profile")}}</a></li>
+            <li><a href="{{=URL('user', 'submissions')}}" data-button-label="Nav My Submissions" class="nav-dropdown">{{=T("My Submissions")}}</a></li>
+            <li><a href="{{=URL('user', 'update_details')}}" data-button-label="Nav Update Details" class="nav-dropdown">{{=T("Update Details")}}</a></li>
+            <li><a href="{{=URL('default', 'updates')}}" data-button-label="Nav Feature Updates" class="nav-dropdown">{{=T("Feature Updates")}}</a></li>
+            <li><a href="{{=URL('default', 'unsubscribe')}}" data-button-label="Nav Unsubscribe" class="nav-dropdown">{{=T("Unsubscribe")}}</a></li>
             <li class="divider"></li>
-            <li><a href="{{=URL('default', 'user', args=['logout'])}}">{{=T("Logout")}}</a></li>
+            <li><a href="{{=URL('default', 'user', args=['logout'])}}" data-button-label="Nav Logout" class="nav-dropdown">{{=T("Logout")}}</a></li>
         {{else:}}
-            <li><a href="{{=URL('default', 'user', args=['login'])}}">{{=T("Login")}}</a></li>
-            <li><a href="{{=URL('default', 'user', args=['register'])}}">{{=T("Register")}}</a></li>
-            <li><a href="{{=URL('default', 'updates')}}">{{=T("Feature Updates")}}</a></li>
+            <li><a href="{{=URL('default', 'user', args=['login'])}}" data-button-label="Nav Login" class="nav-dropdown">{{=T("Login")}}</a></li>
+            <li><a href="{{=URL('default', 'user', args=['register'])}}" data-button-label="Nav Register" class="nav-dropdown">{{=T("Register")}}</a></li>
+            <li><a href="{{=URL('default', 'updates')}}" data-button-label="" class="nav-dropdown">{{=T("Feature Updates")}}</a></li>
         {{pass}}
     </ul>
     <nav style="background-color: #536dfe">
@@ -309,21 +309,21 @@
             <div class="container">
                 <div class="left"> © 2015-2017 StopStalk </div>
                 <div class="right">
-                    <span><a href="{{=URL('default', 'faq')}}" style="color: white;" target="_blank">{{=T("FAQs")}}</a></span>
+                    <span><a id="footer-faqs" href="{{=URL('default', 'faq')}}" style="color: white;" target="_blank">{{=T("FAQs")}}</a></span>
                     <span> | </span>
-                    <span><a href="{{=URL('default', 'contact_us')}}" style="color: white;" target="_blank">{{=T("Contact Us")}}</a></span>
+                    <span><a id="footer-contact-us" href="{{=URL('default', 'contact_us')}}" style="color: white;" target="_blank">{{=T("Contact Us")}}</a></span>
                     <span> | </span>
-                    <span><a href="https://github.com/stopstalk/stopstalk-deployment/blob/master/LICENSE" style="color: white;" target="_blank">MIT License</a></span>
+                    <span><a id="footer-license" href="https://github.com/stopstalk/stopstalk-deployment/blob/master/LICENSE" style="color: white;" target="_blank">MIT License</a></span>
                     <span> | </span>
-                    <span><a href="https://github.com/stopstalk/stopstalk-deployment/graphs/contributors" style="color: white;" target="_blank">{{=T("Contributors")}}</a></span>
+                    <span><a id="footer-contributors" href="https://github.com/stopstalk/stopstalk-deployment/graphs/contributors" style="color: white;" target="_blank">{{=T("Contributors")}}</a></span>
                     <span> | </span>
-                    <span>Carefully crafted by: <a href="http://www.raj454raj.xyz/" style="color: white;" target="_blank">Raj Patel</a></span>
+                    <span>Carefully crafted by: <a id="footer-raj454raj" href="http://www.raj454raj.xyz/" style="color: white;" target="_blank">Raj Patel</a></span>
                 </div>
             </div>
         </div>
     </footer>
     <div class="fixed-action-btn horizontal click-to-toggle" style="bottom: 45px; right: 24px;">
-        <a class="btn-floating btn-large pink accent-3">
+        <a class="btn-floating btn-large pink accent-3" id="heart-button">
             <i class="fa fa-heart"></i>
         </a>
         <ul style="pointer-events: none;">
@@ -357,6 +357,7 @@
           ga('create', '{{=current.analytics_id}}', 'auto');
           ga('send', 'pageview');
         </script>
+        <script src="{{=URL('static', 'js/appjs/google_analytics.js')}}"></script>
     {{pass}}
     <script type="text/javascript">
         var addTodoURL = "{{=URL('problems', 'add_todo_problem')}}";

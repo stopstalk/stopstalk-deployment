@@ -39,9 +39,11 @@ response.menu = []
 def get_tooltip_data(tooltip):
     return dict(position="bottom", delay="40", tooltip=tooltip)
 
-def get_menu_tuple(icon_class, tooltip, url):
-    return (I(_class="fa fa-2x tooltipped " + icon_class,
-              data=get_tooltip_data(tooltip)),
+def get_menu_tuple(icon_class, tooltip, button_label, url):
+    return (SPAN(I(_class="fa fa-2x tooltipped " + icon_class,
+                   data=get_tooltip_data(tooltip)),
+                 _class="stopstalk-nav",
+                 data={"button-label": button_label}),
             False,
             url,
             [])
@@ -49,34 +51,44 @@ def get_menu_tuple(icon_class, tooltip, url):
 if session.user_id:
     response.menu += [get_menu_tuple("fa-bell-o",
                                      T("Notifications"),
+                                     "Nav Notifications",
                                      URL("default", "notifications")),
                       get_menu_tuple("fa-user-secret",
                                      T("Custom Friend"),
+                                     "Nav Custom Friend",
                                      URL("user", "custom_friend")),
                       get_menu_tuple("fa-users",
                                      T("Your Friends"),
+                                     "Nav Friends",
                                      URL("default", "friends")),
                       get_menu_tuple("fa-list-alt",
                                      T("Todo List"),
+                                     "Nav Todo",
                                      URL("default", "todo"))]
 
 response.menu += [get_menu_tuple("fa-search",
                                  T("Search Friends"),
+                                 "Nav Search",
                                  URL("default", "search")),
                   get_menu_tuple("fa-calendar-check-o",
                                  T("Upcoming Contests"),
+                                 "Nav Contests",
                                  URL("default", "contests")),
                   get_menu_tuple("fa-bar-chart",
                                  T("Leaderboard"),
+                                 "Nav Leaderboard",
                                  URL("default", "leaderboard")),
                   get_menu_tuple("fa-line-chart",
                                  T("Trending Problems"),
+                                 "Nav Trending Problems",
                                  URL("problems", "trending")),
                   get_menu_tuple("fa-filter",
                                  T("Submission Filters"),
+                                 "Nav Filters",
                                  URL("default", "filters")),
                   get_menu_tuple("fa-tag",
                                  T("Search by tags"),
+                                 "Nav Tag Search",
                                  URL("problems", "tag"))]
 
 if "auth" in locals(): auth.wikimenu()

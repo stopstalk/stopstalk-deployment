@@ -276,6 +276,7 @@ def index():
 
     links = DIV(DIV(A(I(_class="fa fa-link"), " " + T("Problem"),
                       _href=problem_link,
+                      _class="problem-page-site-link",
                       _style="color: black;",
                       _target="blank"),
                     _class="chip lime accent-3"))
@@ -285,6 +286,7 @@ def index():
         links.append(" ")
         links.append(DIV(A(I(_class="fa fa-book"), " " + T("Editorial"),
                            _href=row.editorial_link,
+                           _class="problem-page-editorial-link",
                            _style="color: white;",
                            _target="_blank"),
                          _class="chip deep-purple darken-1"))
@@ -292,13 +294,13 @@ def index():
                     TD(STRONG(T("Links") + ":")),
                     links))
 
-    suggest_tags_class = "disabled btn chip tooltipped"
+    suggest_tags_class = "disabled btn chip tooltipped suggest-tags-plus-logged-out"
     suggest_tags_data = {"position": "right",
                          "delay": "50",
                          "tooltip": T("Login to suggest tags")}
     suggest_tags_id = "disabled-suggest-tags"
     if auth.is_logged_in():
-        suggest_tags_class = "green chip waves-light waves-effect tooltipped"
+        suggest_tags_class = "green chip waves-light waves-effect tooltipped suggest-tags-plus"
         suggest_tags_data["target"] = "suggest-tags-modal"
         suggest_tags_data["tooltip"] = T("Suggest tags")
         suggest_tags_id = "suggest-trigger"
@@ -449,6 +451,7 @@ def tag():
                                               link_title)))
         tr.append(TD(A(I(_class="fa fa-link"),
                        _href=problem["link"],
+                       _class="tag-problem-link",
                        _target="_blank")))
         tr.append(TD(IMG(_src=URL("static",
                                   "images/" + \
@@ -466,6 +469,7 @@ def tag():
                             _href=URL("problems",
                                       "tag",
                                       vars={"q": tag, "page": 1}),
+                            _class="tags-chip",
                             _style="color: white;",
                             _target="_blank"),
                           _class="chip"))

@@ -23,7 +23,7 @@
 
     $(document).ready(function() {
 
-        $('#submission-switch').click(function() {
+        $('#leaderboard-switch').click(function() {
             var global = this.checked;
             var redirectURL = null;
             var params = getVars();

@@ -74,7 +74,7 @@
                     }),
                     $thisTag,
                     $thisAnchor;
-                $sampleTag.append('<a href="" style="color: white;" target="_blank"></a>');
+                $sampleTag.append('<a class="problem-page-tag" href="" style="color: white;" target="_blank"></a>');
                 $.each(problemTags, function(index, tag) {
                     $thisTag = $sampleTag.clone();
                     $thisAnchor = $($thisTag.children()[0]);

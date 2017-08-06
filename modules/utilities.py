@@ -83,14 +83,14 @@ def problem_widget(name,
     """
 
     problem_div = DIV()
-    if  anchor:
+    if anchor:
         problem_div.append(A(name,
                              _href=URL("problems",
                                        "index",
                                        vars={"pname": name,
                                              "plink": link},
                                        extension=False),
-                             _class=link_class,
+                             _class="problem-listing " + link_class,
                              _title=link_title,
                              _target="_blank",
                              extension=False))
@@ -511,12 +511,14 @@ def render_table(submissions, duplicates=[]):
                         _href=URL("user", "profile",
                                   args=person_id.stopstalk_handle,
                                   extension=False),
+                        _class="submission-user-name",
                         _target="_blank"))))
         append(TD(A(IMG(_src=URL("static",
                                  "images/" + \
                                  submission.site.lower() + \
                                  "_small.png"),
                         _style="height: 30px; width: 30px;"),
+                    _class="submission-site-profile",
                     _href=current.get_profile_url(submission.site,
                                                   submission.site_handle),
                     _target="_blank")))

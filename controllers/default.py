@@ -617,6 +617,7 @@ def leaderboard():
             append(TD(A(SPAN(_class="flag-icon flag-icon-" + \
                                   current.all_countries[i[6]].lower(),
                              _title=i[6]),
+                        _class="leaderboard-country-flag",
                         _href=URL("default", "leaderboard",
                                   vars={"global": global_leaderboard,
                                         "q": institute if specific_institute else "",
@@ -626,8 +627,10 @@ def leaderboard():
         append(TD(DIV(DIV(i[0]))))
         append(TD(A(i[1],
                     _href=URL("user", "profile", args=[i[1]]),
+                    _class="leaderboard-stopstalk-handle",
                     _target="_blank")))
         append(TD(A(i[2],
+                    _class="leaderboard-institute",
                     _href=URL("default",
                               "leaderboard",
                               vars={"q": i[2],
@@ -659,7 +662,7 @@ def leaderboard():
 
     table.append(tbody)
     switch = DIV(LABEL(H6(T("Friends"),
-                          INPUT(_type="checkbox", _id="submission-switch"),
+                          INPUT(_type="checkbox", _id="leaderboard-switch"),
                           SPAN(_class="lever pink accent-3"),
                           T("Global"))),
                  _class="switch")
@@ -992,9 +995,10 @@ def friends():
                      _href=URL("user", "profile",
                                args=row.stopstalk_handle,
                                extension=False),
+                     _class="friends-name",
                      _target="_blank")),
                 TD(BUTTON(I(_class="fa fa-user-times fa-3x"),
-                          _class=btn_class + " black",
+                          _class=btn_class + " black friends-unfriend",
                           data=_get_tooltip_data(*tooltip_attrs))))
         tbody.append(tr)
     table1.append(tbody)
@@ -1009,18 +1013,19 @@ def friends():
                      _href=URL("user", "profile",
                                args=[row.stopstalk_handle],
                                extension=False),
+                     _class="friends-name",
                      _target="_blank")))
 
         tooltip_attrs = [None, None, str(row.id)]
         if row.id in following:
             tooltip_attrs[:2] = T("Unfriend"), "unfriend"
             tr.append(TD(BUTTON(I(_class="fa fa-user-times fa-3x"),
-                                _class=btn_class + " black",
+                                _class=btn_class + " black friends-unfriend",
                                 data=_get_tooltip_data(*tooltip_attrs))))
         else:
             tooltip_attrs[:2] = T("Add friend"), "add-friend"
             tr.append(TD(BUTTON(I(_class="fa fa-user-plus fa-3x"),
-                                _class=btn_class + " green",
+                                _class=btn_class + " green friends-add-friend",
                                 data=_get_tooltip_data(*tooltip_attrs))))
         tbody.append(tr)
     table2.append(tbody)
@@ -1128,6 +1133,7 @@ def search():
                        _href=URL("user", "profile",
                                  args=[user.stopstalk_handle],
                                  extension=False),
+                       _class="search-user-name",
                        _target="_blank")))
 
         td = TD()
@@ -1143,6 +1149,7 @@ def search():
                               _class="chip"),
                           _href=current.get_profile_url(site,
                                                         user[site.lower() + "_handle"]),
+                          _class="search-site-profile",
                           _target="_blank"))
         tr.append(td)
 
@@ -1159,13 +1166,13 @@ def search():
             # Not a friend
             tooltip_attrs[:2] = T("Add friend"), "add-friend"
             tr.append(TD(BUTTON(I(_class="fa fa-user-plus fa-3x"),
-                                _class=btn_class + " green",
+                                _class=btn_class + " green search-add-friend",
                                 data=_get_tooltip_data(*tooltip_attrs))))
         else:
             # Already friends
             tooltip_attrs[:2] = T("Unfriend"), "unfriend"
             tr.append(TD(BUTTON(I(_class="fa fa-user-times fa-3x"),
-                                _class=btn_class + " black",
+                                _class=btn_class + " black search-unfriend",
                                 data=_get_tooltip_data(*tooltip_attrs))))
         tbody.append(tr)
 
