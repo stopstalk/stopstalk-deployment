@@ -10,7 +10,7 @@
     var submissionsJSON = '{{=URL("user", "submissions", args=handle, extension="json")}}';
     var submissionsURL = '{{=URL("user", "submissions", args=handle)}}';
 </script>
-<script src="{{=URL('static', 'js/appjs/user/submissions.js')}}" type="text/javascript"></script>
+<script src="{{=URL('static', 'js/appjs/user/submissions.js', vars={'v': current.REDIS_CLIENT.get('js/appjs/user/submissions.js')})}}" type="text/javascript"></script>
 {{if total_rows:}}
     {{if user == "Self":}}
         <h1>{{=T("Your submissions")}}</h1>

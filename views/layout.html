@@ -342,9 +342,9 @@
             </ul>
     </div>
     <!-- The javascript =============================== -->
-    <script src="{{=URL('static','materialize/js/materialize.js')}}"></script>
+    <script src="{{=URL('static','materialize/js/materialize.js', vars={'v': current.REDIS_CLIENT.get('materialize/js/materialize.js')})}}"></script>
     <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
-    <script src="{{=URL('static','js/web2py-bootstrap3.js')}}"></script>
+    <script src="{{=URL('static','js/web2py-bootstrap3.js', vars={'v': current.REDIS_CLIENT.get('js/web2py-bootstrap3.js')})}}"></script>
     {{block page_js}}{{end page_js}}
     <!-- Analytics ==================================== -->
     {{if current.analytics_id:}}
@@ -357,13 +357,13 @@
           ga('create', '{{=current.analytics_id}}', 'auto');
           ga('send', 'pageview');
         </script>
-        <script src="{{=URL('static', 'js/appjs/google_analytics.js')}}"></script>
+        <script src="{{=URL('static', 'js/appjs/google_analytics.js', vars={'v': current.REDIS_CLIENT.get('js/appjs/google_analytics.js')})}}"></script>
     {{pass}}
     <script type="text/javascript">
         var addTodoURL = "{{=URL('problems', 'add_todo_problem')}}";
     </script>
     <script src="{{=URL('static', 'js/main.js')}}"></script> <!-- Resource jQuery -->
-    <script type="text/javascript" src="{{=URL('static', 'js/appjs/layout.js')}}"></script>
+    <script type="text/javascript" src="{{=URL('static', 'js/appjs/layout.js', vars={'v': current.REDIS_CLIENT.get('js/appjs/layout.js')})}}"></script>
     <script type="application/ld+json">
     {
       "@context": "http://schema.org",

@@ -10,7 +10,7 @@
     </title>
 </head>
 <h1>{{=T("Search for")}} {{if auth.is_logged_in():}} {{=T("Friends")}} {{else:}} {{=T("Users")}} {{pass}} {{=T("on StopStalk")}}</h1>
-<script src="{{=URL('static', 'js/appjs/default/search.js')}}"></script>
+<script src="{{=URL('static', 'js/appjs/default/search.js', vars={'v': current.REDIS_CLIENT.get('js/appjs/default/search.js')})}}"></script>
 <form class="col s12" action="" method="GET">
     <div class="row center">
         <div class="input-field col offset-s1 s3">

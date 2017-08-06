@@ -54,7 +54,7 @@
         var getActivityURL = '{{=URL("user", "get_activity", extension="json")}}';
         var getDatesURL = '{{=URL("user", "get_dates", extension="json")}}';
     </script>
-    <script src="{{=URL('static', 'js/appjs/user/profile.js')}}" type="text/javascript"></script>
+    <script src="{{=URL('static', 'js/appjs/user/profile.js', vars={'v': current.REDIS_CLIENT.get('js/appjs/user/profile.js')})}}" type="text/javascript"></script>
   </head>
   <body>
     {{if nouser:}}

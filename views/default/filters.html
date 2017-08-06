@@ -12,7 +12,7 @@
     });
 </script>
 <script src="{{=URL('static', 'js/jquery.bootpag.min.js')}}"></script>
-<script src="{{=URL('static', 'js/appjs/default/filters.js')}}" type="text/javascript"></script>
+<script src="{{=URL('static', 'js/appjs/default/filters.js', vars={'v': current.REDIS_CLIENT.get('js/appjs/default/filters.js')})}}" type="text/javascript"></script>
 <div class="row">
     <h3>{{=T("Filters")}}</h3>
 </div>

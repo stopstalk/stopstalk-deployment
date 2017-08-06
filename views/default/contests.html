@@ -9,7 +9,7 @@
     // Used in contests.js
     var CLIENT_ID = '{{=current.calendar_token}}';
 </script>
-<script type="text/javascript" src="{{=URL('static', 'js/appjs/default/contests.js')}}"></script>
+<script type="text/javascript" src="{{=URL('static', 'js/appjs/default/contests.js', vars={'v': current.REDIS_CLIENT.get('js/appjs/default/contests.js')})}}"></script>
 <body>
     {{if retrieved:}}
         {{=table}}

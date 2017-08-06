@@ -6,9 +6,9 @@
     <link href="{{=URL('static','css/materialize-tags.css')}}" rel="stylesheet"/>
     <!--Load the AJAX API-->
     <script src="https://www.google.com/jsapi" type="text/javascript"></script>
-    <script src="{{=URL('static', 'js/materialize-tags.js')}}" type="text/javascript"></script>
+    <script src="{{=URL('static', 'js/materialize-tags.js', vars={'v': current.REDIS_CLIENT.get('js/materialize-tags.js')})}}" type="text/javascript"></script>
     <script src="{{=URL('static', 'js/corejs-typeahead.bundle.js')}}" type="text/javascript"></script>
-    <script src="{{=URL('static', 'js/bloodhound.js')}}" type="text/javascript"></script>
+    <script src="{{=URL('static', 'js/bloodhound.js', vars={'v': current.REDIS_CLIENT.get('js/bloodhound.js')})}}" type="text/javascript"></script>
     <script type="text/javascript">
         var problemName = '{{=problem_name}}';
         var problemLink = '{{=problem_link}}'.replace(/&amp;/g, '&');
@@ -133,7 +133,7 @@
         // Set a callback to run when the Google Visualization API is loaded.
         google.setOnLoadCallback(drawChart);
     </script>
-    <script src="{{=URL('static', 'js/appjs/problems/index.js')}}" type="text/javascript"></script>
+    <script src="{{=URL('static', 'js/appjs/problems/index.js', vars={'v': current.REDIS_CLIENT.get('js/appjs/problems/index.js')})}}" type="text/javascript"></script>
 </head>
 <div class="row">
     <h3>{{=problem_name}}</h3>

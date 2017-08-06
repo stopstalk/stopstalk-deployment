@@ -8,6 +8,6 @@
 <script type="text/javascript">
     var removeTodoURL = "{{=URL('default', 'remove_todo')}}";
 </script>
-<script type="text/javascript" src="{{=URL('static', 'js/appjs/default/todo.js')}}"></script>
+<script type="text/javascript" src="{{=URL('static', 'js/appjs/default/todo.js', vars={'v': current.REDIS_CLIENT.get('js/appjs/default/todo.js')})}}"></script>
 <br/>
 {{=div}}
