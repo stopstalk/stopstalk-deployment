@@ -468,7 +468,7 @@ def tag():
             td.append(DIV(A(tag,
                             _href=URL("problems",
                                       "tag",
-                                      vars={"q": tag, "page": 1}),
+                                      vars={"q": tag.encode("utf8"), "page": 1}),
                             _class="tags-chip",
                             _style="color: white;",
                             _target="_blank"),
