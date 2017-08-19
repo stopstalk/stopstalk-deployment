@@ -2,10 +2,135 @@
     "use strict";
 
     // Load the Visualization API and the piechart package.
-    google.load('visualization', '1.1', {'packages': ['corechart', 'calendar']});
-    // Set a callback to run when the Google Visualization API is loaded.
-    google.setOnLoadCallback(drawChart);
-    google.setOnLoadCallback(drawCalendar);
+    google.load('visualization', '1.1', {'packages': ['corechart', 'calendar'],
+                                         'callback': drawCharts});
+
+    function drawCharts() {
+        // Set a callback to run when the Google Visualization API is loaded.
+        drawPieChart();
+        drawCalendar();
+        if (linechartAvailable === 'True') {
+            drawLineChart();
+        }
+    }
+
+    function drawLineChart() {
+
+        function zeropad(num) {
+            return num < 10 ? "0" + num : num.toString();
+        }
+
+        function urlToSite(url) {
+            if (url.search("codechef.com") !== -1) {
+                return "codechef";
+            } else if (url.search("codeforces.com") !== -1) {
+                return "codeforces";
+            } else if (url.search("hackerrank.com") !== -1) {
+                return "hackerrank";
+            } else {
+                $.web2py.flash("Some error occurred");
+                return "";
+            }
+        }
+
+        $.ajax({
+            method: 'GET',
+            url: getGraphDataURL,
+            data: {user_id: userRowID, custom: custom}
+        }).done(function(response) {
+            var graph_data = response["graphs"];
+            if (graph_data == 0) {
+                $("#contest_graphs").html("<p>No graph data available at the moment !</p>")
+                return;
+            }
+            var data = new google.visualization.DataTable();
+            data.addColumn("date", "Day");
+            var reformed_data = {}
+            var noOfGraphs = Object.keys(graph_data).length;
+            $.each(graph_data, function(k, v) {
+                data.addColumn("number", v["title"]);
+                $.each(v["data"], function(dateStr, contestData) {
+                    dateStr = dateStr.split(" ")[0];
+                    if (reformed_data.hasOwnProperty(dateStr)) {
+                        reformed_data[dateStr][k] = [parseFloat(contestData["rating"]), contestData];
+                    }
+                    else {
+                        var tmparray = [];
+                        for(var i = 0 ; i < noOfGraphs ; i++) {
+                            tmparray.push(null);
+                        }
+                        tmparray[k] = [parseFloat(contestData["rating"]), contestData];
+                        reformed_data[dateStr] = tmparray;
+                    }
+                });
+            });
+            var completeGraphData = [];
+            contestGraphData = jQuery.extend(true, {}, reformed_data);
+            $.each(reformed_data, function(k, v) {
+                $.each(v, function(i, contestDetails) {
+                    if (contestDetails) {
+                        v[i] = v[i][0];
+                    }
+                });
+                v.unshift(new Date(k));
+                completeGraphData.push(v);
+            });
+            completeGraphData.sort(function(a, b) {
+                return a[0].getTime() - b[0].getTime();
+            });
+            data.addRows(completeGraphData);
+            var options = {
+              curveType: 'function',
+              width: 900,
+              height: 500,
+              interpolateNulls: true,
+              aggregationTarget: 'multiple',
+              focusTarget: 'datum',
+              tooltip: {
+                  trigger: 'selection',
+                  isHtml: true
+              },
+              pointSize: 4,
+              explorer: {
+                  keepInBounds: true,
+                  maxZoomOut: 1.45,
+                  maxZoomIn: 0.45,
+              }
+            };
+            var chart = new google.visualization.LineChart(document.getElementById('cumulative_graph'));
+            chart.draw(data, options);
+            function lineChartSelectHandler(e) {
+                if (typeof ga !== 'undefined') {
+                    ga('send', {
+                        hitType: 'event',
+                        eventCategory: 'button',
+                        eventAction: 'click',
+                        eventLabel: 'Contest Graph data point'
+                    });
+                }
+                var selection = chart.getSelection();
+                if(selection.length === 0 || selection[0].row === null) return;
+                var timeStamp = data.getValue(selection[0].row, 0);
+                var dateStr = [timeStamp.getFullYear(),
+                               zeropad(timeStamp.getMonth() + 1),
+                               zeropad(timeStamp.getDate())].join("-");
+                $("#contest-activity-date").html(dateStr);
+                var tbodyHTML = "";
+                $.each(contestGraphData[dateStr], function(ind, val) {
+                    if (val) {
+                        tbodyHTML += "<tr><td>" + val[1]["name"] + "</td><td><img src='/stopstalk/static/images/" + urlToSite(val[1]["url"]) + "_small.png' style=\"height: 30px; width: 30px;\"></img></td><td><a class='popup-contest-page btn-floating btn-small accent-4 green' href='" + val[1]["url"]+ "' target='_blank'><i class='fa fa-external-link-square fa-lg'></i></a></td><td>" + val[0] + "</td><td>" + val[1]["rank"] + "</td></tr>";
+                    }
+                });
+                $("#participated-contests").html(tbodyHTML);
+                $('#contest-activity-modal').openModal({
+                    complete: function() {
+                        $("#participated-contests").html("");
+                    }
+                });
+            }
+            google.visualization.events.addListener(chart, 'select', lineChartSelectHandler);
+        });
+    }
 
     // ---------------------------------------------------------------------------------
     function goToByScroll(id) {
@@ -175,7 +300,7 @@
     // draws it.
 
     // ---------------------------------------------------------------------------------
-    function drawChart() {
+    function drawPieChart() {
         var numJSON = {'AC': 0,
                        'WA': 0,
                        'TLE': 0,
@@ -255,7 +380,6 @@
         });
 
         $('.modal-trigger').leanModal();
-
         /* Color the handles accordingly */
         $.ajax({
             url: handleDetailsURL,

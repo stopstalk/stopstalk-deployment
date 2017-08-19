@@ -128,6 +128,33 @@ def add_custom_friend():
     redirect(URL("user", "profile", args=stopstalk_handle))
 
 # ------------------------------------------------------------------------------
+def get_graph_data():
+    import os, pickle
+    user_id = request.get_vars.get("user_id", None)
+    custom = request.get_vars.get("custom", None)
+    empty_dict = dict(graphs=[])
+    if request.extension != "json":
+        return empty_dict
+
+    if user_id is None or custom is None:
+        return empty_dict
+
+    file_path = "./applications/%s/graph_data/%s" % (request.application,
+                                                     user_id)
+    if custom == "True":
+        file_path += "_custom.pickle"
+    else:
+        file_path += ".pickle"
+    if not os.path.exists(file_path):
+        return empty_dict
+
+    graph_data = pickle.load(open(file_path, "rb"))
+    graphs = sum([graph_data[site.lower() + "_data"] for site in current.SITES], [])
+    graphs = filter(lambda x: x["data"] != {}, graphs)
+
+    return dict(graphs=graphs)
+
+# ------------------------------------------------------------------------------
 @auth.requires_login()
 def update_details():
     """

@@ -328,4 +328,5 @@
 "Solved Count (Ascending)": "Solved Count (Ascending)",
 "Solved Count (Descending)": "Solved Count (Descending)",
 "Login to add as Custom Friend": "Login to add as Custom Friend",
-"Country Leaderboard": "Country Leaderboard"}
+"Country Leaderboard": "Country Leaderboard",
+"Contest Activity on": "Contest Activity on"}

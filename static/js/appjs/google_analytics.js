@@ -54,6 +54,7 @@
         addEventListener('#spoj-profile-url', 'Spoj profile URL');
         addEventListener('#uva-profile-url', 'UVa profile URL');
         addEventListener('#toggle-submission-graph', 'Toggle Submission Graph');
+        addEventListener('.popup-contest-page', 'Contest Page button on User Profile');
     };
 
     var addMiscellaneousToGA = function() {

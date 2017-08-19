@@ -53,6 +53,9 @@
         var userRowID = '{{=row.id}}';
         var getActivityURL = '{{=URL("user", "get_activity", extension="json")}}';
         var getDatesURL = '{{=URL("user", "get_dates", extension="json")}}';
+        var getGraphDataURL = '{{=URL("user", "get_graph_data", extension="json")}}';
+        var contestGraphData = null;
+        var linechartAvailable = '{{=row.graph_data_retrieved}}';
     </script>
     <script src="{{=URL('static', 'js/appjs/user/profile.js', vars={'v': current.REDIS_CLIENT.get('js/appjs/user/profile.js')})}}" type="text/javascript"></script>
   </head>
@@ -189,7 +192,17 @@
             </td>
         </tr>
     </table>
-    <br/><br/>
+    <br/><br/><br/>
+    <h5>Contest Ratings</h5>
+    {{if row.graph_data_retrieved:}}
+    <div id="contest_graphs">
+        <p>Normal scrolling / pinching works for zooming in and out the graph. Right click to reset the zoom.</p>
+        <div id="cumulative_graph" style="margin-left: 17%;"></div>
+    </div>
+    {{else:}}
+        <p>No graph data available at the moment !</p>
+    {{pass}}
+    <br/><br/><br/>
     <div class="switch">
         <label>
             Acceptance Graph
@@ -198,9 +211,22 @@
             Submission Graph
         </label>
     </div>
-    <br/>
     <div id="calendar_submission" class="center" style="margin-left: 15%; width: 70%;"></div>
     <div id="activity"></div>
+    <div id="contest-activity-modal" class="modal">
+        <div class="modal-content">
+            <h4>{{=T("Contest Activity on")}} <span id="contest-activity-date"></span></h4>
+            <div class="row">
+                <table class="centered">
+                  <thead>
+                    <tr><th>Contest Name</th><th>Site</th><th>Contest Page</th><th>Rating</th><th>Rank</th></tr>
+                  </thead>
+                  <tbody id="participated-contests">
+                  </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
     {{pass}}
   </body>
 </html>
