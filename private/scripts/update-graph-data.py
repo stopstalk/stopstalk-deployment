@@ -38,6 +38,9 @@ gevent.monkey.patch_all(thread=False)
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 
+atable = db.auth_user
+cftable = db.custom_friend
+
 # Constants to be used in case of request failures
 SERVER_FAILURE = "SERVER_FAILURE"
 NOT_FOUND = "NOT_FOUND"
@@ -187,7 +190,13 @@ class User:
         for tr in tbody.find_all("tr"):
             all_tds = tr.find_all("td")
             contest_id = int(all_tds[1].find("a")["href"].split("/")[-1])
-            rank = int(all_tds[2].find("a").contents[0].strip())
+            if all_tds[2].find("a"):
+                # For some users there is no rank for some contests
+                # Example http://codeforces.com/contests/with/cjoa (Contest number 3)
+                rank = int(all_tds[2].find("a").contents[0].strip())
+            else:
+                # @Todo: Will this create any issues as rank is assumed to be an int
+                rank = ""
             solved_count = int(all_tds[3].find("a").contents[0].strip())
             rating_change = int(all_tds[4].find("span").contents[0].strip())
             new_rating = int(all_tds[5].contents[0].strip())
@@ -277,6 +286,7 @@ def get_user_objects(aquery=None, cquery=None, sites=None):
     user_objects = []
     users = []
     if aquery:
+        aquery &= (atable.registration_key == "")
         users += db(aquery).select().records
     if cquery:
         users += db(cquery).select().records
@@ -301,8 +311,6 @@ def get_user_objects(aquery=None, cquery=None, sites=None):
 
 if __name__ == "__main__":
     sites = sys.argv[1].strip().split(",")
-    atable = db.auth_user
-    cftable = db.custom_friend
     user_objects = []
 
     if sys.argv[2] == "batch":
