@@ -87,15 +87,15 @@
             $('#tags-span').html($tagsSpan);
         });
 
+        $('.modal').modal();
+
         if (isLoggedIn == "True") {
             if (openModal)
-                $('#suggest-tags-modal').openModal();
-
-            $('#suggest-trigger').leanModal();
+                $('#suggest-tags-modal').modal('open');
 
             $('#submit-tags').click(function() {
                 var submittedTags = $('#tag-suggests').val();
-                $('#suggest-tags-modal').closeModal();
+                $('#suggest-tags-modal').modal('close');
                 $.ajax({
                     method: 'POST',
                     url: '/problems/add_suggested_tags/',

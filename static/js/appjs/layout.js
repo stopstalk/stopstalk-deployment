@@ -157,9 +157,11 @@
             $linkToSite.html('View on ' + site);
             $linkToSite.attr('href', viewLink);
 
-            $viewModal.openModal({
+            $viewModal.modal({
                 complete: onViewModalClose
             });
+
+            $viewModal.modal('open');
 
             $.ajax({
                 method: 'GET',
@@ -227,9 +229,11 @@
                 $('#file_name').val('');
             };
 
-            $downloadModal.openModal({
+            $downloadModal.modal({
                 complete: onDownloadModalClose
             });
+
+            $downloadModal.modal('open');
 
             $.ajax({
                 method: 'GET',
