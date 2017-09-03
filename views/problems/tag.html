@@ -9,12 +9,25 @@
 <h3>{{=T("Search problems by tags")}}</h3>
 <form id="tagSearchForm" method="GET" action="">
     <div class="row center">
-        <div class="input-field col offset-s1 s3">
+        <div class="input-field col offset-s1 s4">
             <input id="search" name="q" type="text" value="{{=request.vars.get('q', '')}}"/>
             <input id="page" name="page" type="hidden" value="1"/>
-            <label for="search">{{=T("Search Tags...")}}</label>
+            <label for="search">{{=T("Search Site Tags...")}}</label>
+        </div>
+        <div class="col s2" style="margin-top: 2.5%;">
+            <span><i class="fa fa-long-arrow-left"></i> &nbsp;&nbsp;&nbsp; OR &nbsp;&nbsp;&nbsp; <i class="fa fa-long-arrow-right"></i></span>
         </div>
         <div class="input-field col s4">
+            <select id="generalized-tag-search" name="generalized_tags" multiple>
+                <option value="" disabled selected>{{=T("Generalized StopStalk tags")}}</option>
+                {{for tag in generalized_tags:}}
+                    <option value="{{=tag}}">{{=tag}}</option>
+                {{pass}}
+            </select>
+        </div>
+
+    <div class="row">
+        <div class="input-field col offset-s2 s4">
             <select name="site" multiple>
                 <option value="" disabled selected>{{=T("Site")}}</option>
                 {{for site in current.SITES:}}
@@ -22,7 +35,7 @@
                 {{pass}}
             </select>
         </div>
-        <div class="input-field col s3">
+        <div class="input-field col s4">
             <select name="orderby">
                 <option value="" disabled selected>{{=T("Sort By")}}</option>
                 <option value="accuracy-asc">{{=T("Accuracy (Ascending)")}}</option>

@@ -1,6 +1,30 @@
 (function($) {
     "use strict";
 
+    var changeTagInputListeners = function() {
+        var $search = $('#search'),
+            $generalizedTagSearch = $('#generalized-tag-search');
+
+        $search.on('input', function() {
+            var value = $(this).val();
+            if (value === "") {
+                $generalizedTagSearch.removeAttr('disabled');
+            } else {
+                $generalizedTagSearch.attr('disabled', 'disabled');
+            }
+            $generalizedTagSearch.material_select();
+        });
+
+        $generalizedTagSearch.on('change', function() {
+            var value = $(this).val();
+            if (value === '') {
+                $search.removeAttr('disabled');
+            } else {
+                $search.attr('disabled', 'disabled');
+            }
+        })
+    };
+
     $(document).ready(function() {
         var curr_url = window.location.href;
         var vars = curr_url.split("?");
@@ -24,6 +48,8 @@
             }).join('&');
             return str;
         };
+
+        changeTagInputListeners();
 
         if (vars.length > 1) {
             vars = vars[1];

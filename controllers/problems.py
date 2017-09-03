@@ -347,11 +347,15 @@ def tag():
                      TH(T("Tags"))))
     table.append(thead)
 
+    ttable = db.tag
+    generalized_tags = db(ttable).select(ttable.value, orderby=ttable.value)
+    generalized_tags = [x.value for x in generalized_tags]
+
     # If URL does not have vars containing q
     # then remain at the search page and return
     # an empty table
     if request.vars.has_key("q") is False:
-        return dict(table=table)
+        return dict(table=table, generalized_tags=generalized_tags)
 
     q = request.vars["q"]
     try:
@@ -478,7 +482,8 @@ def tag():
         tbody.append(tr)
 
     table.append(tbody)
-    return dict(table=table)
+
+    return dict(table=table, generalized_tags=generalized_tags)
 
 # ----------------------------------------------------------------------------
 def _render_trending(caption, problems, flag):
