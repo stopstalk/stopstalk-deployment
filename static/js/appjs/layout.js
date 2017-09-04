@@ -157,9 +157,11 @@
             $linkToSite.html('View on ' + site);
             $linkToSite.attr('href', viewLink);
 
-            $viewModal.openModal({
+            $viewModal.modal({
                 complete: onViewModalClose
             });
+
+            $viewModal.modal('open');
 
             $.ajax({
                 method: 'GET',
@@ -205,7 +207,7 @@
                         var fileName = $viewFileName.val();
                         if (fileName) {
                             downloadSubmission(fileName, response);
-                            $viewModal.closeModal();
+                            $viewModal.modal('close');
                             onViewModalClose();
                         } else {
                             $.web2py.flash("Please enter a file name");
@@ -227,9 +229,11 @@
                 $('#file_name').val('');
             };
 
-            $downloadModal.openModal({
+            $downloadModal.modal({
                 complete: onDownloadModalClose
             });
+
+            $downloadModal.modal('open');
 
             $.ajax({
                 method: 'GET',
@@ -251,7 +255,7 @@
                         var fileName = $('#file_name').val();
                         if (fileName) {
                             downloadSubmission(fileName, response);
-                            $downloadModal.closeModal();
+                            $downloadModal.modal('close');
                             onDownloadModalClose();
                         } else {
                             $.web2py.flash("Please enter a file name");

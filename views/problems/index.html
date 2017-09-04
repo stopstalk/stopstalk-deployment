@@ -41,7 +41,7 @@
 
             $.ajax({
                 method: 'POST',
-                url: '/problems/pie_chart_helper.json/',
+                url: '/problems/pie_chart_helper.json',
                 data: {
                     'plink': problemLink,
                     'submission_type': submissionType
@@ -81,7 +81,7 @@
                     var options = {
                         'title': 'Total Submissions',
                         'chartArea': {
-                            width: '80%',
+                            width: '90%',
                             height: '80%'
                         },
                         'pieHole': 0.5,
@@ -138,91 +138,91 @@
 <div class="row">
     <h3>{{=problem_name}}</h3>
     {{=problem_details}}
-    <div class="modal" id="suggest-tags-modal">
-        <div class="modal-content">
-            <h4>{{=T("Suggest tags")}}</h4>
-            <div class="row center">
-                <div class="col s8 offset-s2">
-                    <input class="center" data-role="materialtags" id="tag-suggests" placeholder="Add tags..." type="text"/>
-                    <a class="btn waves-effect waves-light" id="submit-tags">{{=T("Submit")}}</a>
-                    <br/>
+    {{if auth.is_logged_in():}}
+        <div class="modal" id="suggest-tags-modal">
+            <div class="modal-content">
+                <h4>{{=T("Suggest tags")}}</h4>
+                <div class="row center">
+                    <div class="col s8 offset-s2">
+                        <input class="center" data-role="materialtags" id="tag-suggests" placeholder="Add tags..." type="text"/>
+                        <a class="btn waves-effect waves-light" id="submit-tags">{{=T("Submit")}}</a>
+                        <br/>
+                    </div>
                 </div>
-            </div>
-            <div class="row center">
-                <div class="col s12">
-                    <div>
-                        <h5>
-                            {{=T("Tags till now")}}:
-                        </h5>
-                        <div id="tags-till-now"></div>
+                <div class="row center">
+                    <div class="col s12">
+                        <div>
+                            <h5>
+                                {{=T("Tags till now")}}:
+                            </h5>
+                            <div id="tags-till-now"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    {{if auth.is_logged_in():}}
-    <script>
-        var tags = new Bloodhound({
-            datumTokenizer: Bloodhound.tokenizers.obj.whitespace('text'),
-            queryTokenizer: Bloodhound.tokenizers.whitespace,
-            prefetch: {
-                ttl: 0,
-                url: '/problems/get_tag_values.json/',
-                transform: function(response) {
-                    return response['tags'];
+        <script>
+            var tags = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('text'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                prefetch: {
+                    ttl: 0,
+                    url: '/problems/get_tag_values.json/',
+                    transform: function(response) {
+                        return response['tags'];
+                    }
+                }
+            });
+
+            tags.initialize();
+
+            function searchWithDefaults(q, sync) {
+                if (q === '') {
+                    sync(tags.index.all());
+                } else {
+                    tags.search(q, sync);
                 }
             }
-        });
 
-        tags.initialize();
-
-        function searchWithDefaults(q, sync) {
-            if (q === '') {
-                sync(tags.index.all());
-            } else {
-                tags.search(q, sync);
-            }
-        }
-
-        $('#tag-suggests').materialtags({
-            itemValue: 'value',
-            itemText: 'text',
-            onTagExists: function(item, $tag) {
-                // @ToDo: $tag here does not give the tag for some reason.
-                var $origTag = $('#tag-' + item.value);
-                $origTag.css({
-                    'background-color': 'white',
-                    'color': 'black'
-                });
-                setTimeout(function() {
+            $('#tag-suggests').materialtags({
+                itemValue: 'value',
+                itemText: 'text',
+                onTagExists: function(item, $tag) {
+                    // @ToDo: $tag here does not give the tag for some reason.
+                    var $origTag = $('#tag-' + item.value);
                     $origTag.css({
-                        'background-color': 'black',
-                        'color': 'white'
+                        'background-color': 'white',
+                        'color': 'black'
                     });
-                }, 150);
-            },
-            typeaheadjs: [{
-                highlight: true,
-                minLength: 0
-            }, {
-                displayKey: 'text',
-                source: searchWithDefaults,
-                limit: 5
-            }],
-            freeInput: false
-        });
-        $('#tag-suggests').on('itemRemoved', function(event) {
-            $(this).materialtags('focus');
-        });
-    </script>
+                    setTimeout(function() {
+                        $origTag.css({
+                            'background-color': 'black',
+                            'color': 'white'
+                        });
+                    }, 150);
+                },
+                typeaheadjs: [{
+                    highlight: true,
+                    minLength: 0
+                }, {
+                    displayKey: 'text',
+                    source: searchWithDefaults,
+                    limit: 5
+                }],
+                freeInput: false
+            });
+            $('#tag-suggests').on('itemRemoved', function(event) {
+                $(this).materialtags('focus');
+            });
+        </script>
     {{pass}}
 </div>
 <div class="row">
     <div class="col s12">
         <ul class="tabs" id="submission-tabs">
-            <li class="tab col s3" value="my"><a id="my-submissions-tab" href="#my">{{=T("My Submissions")}}</a></li>
-            <li class="tab col s3" value="friends"><a id="friends-submissions-tab" href="#friends">{{=T("Friends' Submissions")}}</a></li>
-            <li class="tab col s3" value="global"><a id="global-submissions-tab" href="#global">{{=T("Global Submissions")}}</a></li>
+            <li class="tab col s4" value="my"><a id="my-submissions-tab" href="#my">{{=T("My Submissions")}}</a></li>
+            <li class="tab col s4" value="friends"><a id="friends-submissions-tab" href="#friends">{{=T("Friends' Submissions")}}</a></li>
+            <li class="tab col s4" value="global"><a id="global-submissions-tab" href="#global">{{=T("Global Submissions")}}</a></li>
         </ul>
     </div>
     <div id="my" class="col s12"></div>

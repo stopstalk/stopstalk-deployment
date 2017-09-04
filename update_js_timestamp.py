@@ -24,8 +24,7 @@
 import sys, redis
 import datetime
 
-all_js_files = ["materialize/js/materialize.js",
-                "js/web2py-bootstrap3.js",
+all_js_files = ["js/web2py-bootstrap3.js",
                 "js/appjs/google_analytics.js",
                 "js/main.js",
                 "js/appjs/layout.js",

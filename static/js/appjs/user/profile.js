@@ -121,12 +121,13 @@
                         tbodyHTML += "<tr><td>" + val[1]["name"] + "</td><td><img src='/stopstalk/static/images/" + urlToSite(val[1]["url"]) + "_small.png' style=\"height: 30px; width: 30px;\"></img></td><td><a class='popup-contest-page btn-floating btn-small accent-4 green' href='" + val[1]["url"]+ "' target='_blank'><i class='fa fa-external-link-square fa-lg'></i></a></td><td>" + val[0] + "</td><td>" + val[1]["rank"] + "</td></tr>";
                     }
                 });
-                $("#participated-contests").html(tbodyHTML);
-                $('#contest-activity-modal').openModal({
+                $('#participated-contests').html(tbodyHTML);
+                $('#contest-activity-modal').modal({
                     complete: function() {
-                        $("#participated-contests").html("");
+                        $('#participated-contests').html('');
                     }
                 });
+                $('#contest-activity-modal').modal('open');
             }
             google.visualization.events.addListener(chart, 'select', lineChartSelectHandler);
         });
@@ -379,7 +380,7 @@
             }
         });
 
-        $('.modal-trigger').leanModal();
+        $('.modal-trigger').modal();
         /* Color the handles accordingly */
         $.ajax({
             url: handleDetailsURL,

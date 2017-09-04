@@ -74,7 +74,7 @@ def pie_chart_helper():
 @auth.requires_login()
 def get_tag_values():
     ttable = db.tag
-    all_tags = db(ttable).select()
+    all_tags = db(ttable).select(orderby=ttable.value)
     tags = []
     for tag in all_tags:
         tags.append({"value": tag.id, "text": tag.value})
@@ -249,7 +249,7 @@ def index():
 
     site = utilities.urltosite(problem_link).capitalize()
     problem_details = DIV(_class="row")
-    details_table = TABLE(_style="font-size: 140%;", _class="col s7")
+    details_table = TABLE(_style="font-size: 140%; float: left; width: 50%;")
 
     problem_class = ""
     if problem_link in current.solved_problems:
@@ -300,7 +300,7 @@ def index():
                          "tooltip": T("Login to suggest tags")}
     suggest_tags_id = "disabled-suggest-tags"
     if auth.is_logged_in():
-        suggest_tags_class = "green chip waves-light waves-effect tooltipped suggest-tags-plus"
+        suggest_tags_class = "green chip waves-light waves-effect tooltipped suggest-tags-plus modal-trigger"
         suggest_tags_data["target"] = "suggest-tags-modal"
         suggest_tags_data["tooltip"] = T("Suggest tags")
         suggest_tags_id = "suggest-trigger"
@@ -313,15 +313,17 @@ def index():
                                  data={"tags": dumps(all_tags)}),
                                 _id="tags-span"),
                            " ",
-                           A(I(_class="fa fa-plus"),
-                             _style="color: white",
-                             _class=suggest_tags_class,
-                             _id=suggest_tags_id,
-                             data=suggest_tags_data)))))
+                           BUTTON(I(_class="fa fa-plus"),
+                                  _style="color: white; margin-top: 7px;",
+                                  _class=suggest_tags_class,
+                                  _id=suggest_tags_id,
+                                  data=suggest_tags_data)))))
 
     details_table.append(tbody)
     problem_details.append(details_table)
-    problem_details.append(DIV(_class="col s5", _id="chart_div"))
+    problem_details.append(DIV(_style="width: 50%; margin-top: 3%",
+                               _id="chart_div",
+                               _class="right"))
 
     table = utilities.render_table(submissions, cusfriends)
 
