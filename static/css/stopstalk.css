@@ -1,4 +1,6 @@
-
+.remove-from-todo:hover {
+    cursor: pointer;
+}
 
 a {
     outline: 0;
@@ -85,11 +87,11 @@ input[type=tel]:focus:not([readonly]) + label,
 input[type=number]:focus:not([readonly]) + label,
 input[type=search]:focus:not([readonly]) + label,
 textarea.materialize-textarea:focus:not([readonly]) + label {
-    color: #536dfe !important;;
+    color: #536dfe !important;
 }
 
 .input-field .prefix.active {
-    color: #536dfe !important;;
+    color: #536dfe !important;
 }
 
 [type="radio"]:checked + label:after {
@@ -215,4 +217,8 @@ input[type=range] + .thumb {
 .picker__day--selected:hover,
 .picker--focused .picker__day--selected {
     border-radius: 0px;
+}
+
+nav ul a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
 }
