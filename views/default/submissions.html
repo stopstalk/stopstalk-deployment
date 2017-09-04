@@ -6,15 +6,16 @@
 <script type="text/javascript">
     var pageURL = '{{=URL("default", "submissions")}}';
     $(document).ready(function() {
-        if ('{{=country}}' === "not-available") {
-            $('#fill-country-modal').openModal();
+        if ('{{=country}}' === 'not-available') {
+            $('#fill-country-modal').modal();
+            $('#fill-country-modal').modal('open');
         }
     });
 </script>
 <div id="fill-country-modal" class="modal">
     <div class="modal-content">
         <h4>{{=T("Update your Country")}}</h4>
-        <p>Please update your Country so that we can introduce Country-wise Leaderboard as soon as possible :)</p>
+        <p>Please update your Country, we have added Country-wise Leaderboards :)</p>
         {{=country_form}}
     </div>
 </div>

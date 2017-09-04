@@ -207,7 +207,7 @@
                         var fileName = $viewFileName.val();
                         if (fileName) {
                             downloadSubmission(fileName, response);
-                            $viewModal.closeModal();
+                            $viewModal.modal('close');
                             onViewModalClose();
                         } else {
                             $.web2py.flash("Please enter a file name");
@@ -255,7 +255,7 @@
                         var fileName = $('#file_name').val();
                         if (fileName) {
                             downloadSubmission(fileName, response);
-                            $downloadModal.closeModal();
+                            $downloadModal.modal('close');
                             onDownloadModalClose();
                         } else {
                             $.web2py.flash("Please enter a file name");
