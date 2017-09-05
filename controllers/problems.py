@@ -356,10 +356,13 @@ def tag():
     # If URL does not have vars containing q
     # then remain at the search page and return
     # an empty table
-    if request.vars.has_key("q") is False:
+    q = request.vars.get("q", None)
+    clubbed_tags = request.vars.get("generalized_tags", None)
+    clubbed_tags = None if clubbed_tags == "" else clubbed_tags
+
+    if q is None and not clubbed_tags:
         return dict(table=table, generalized_tags=generalized_tags)
 
-    q = request.vars["q"]
     try:
         sites = request.vars.get("site", "")
         if sites == "":
@@ -380,18 +383,32 @@ def tag():
         curr_page = 1
     PER_PAGE = current.PER_PAGE
 
-    # Enables multiple space seperated tag search
-    q = q.split(" ")
     ptable = db.problem
-
     query = True
-    for tag in q:
-        if tag == "":
-            continue
-        # Decision to make & or |
-        # & => Search for problem containing all these tags
-        # | => Search for problem containing one of the tags
-        query &= ptable.tags.contains(tag)
+
+    if q:
+        # Enables multiple space seperated tag search
+        q = q.split(" ")
+        for tag in q:
+            if tag == "":
+                continue
+            # Decision to make & or |
+            # & => Search for problem containing all these tags
+            # | => Search for problem containing one of the tags
+            query &= ptable.tags.contains(tag)
+    else:
+        clubbed_tags = [clubbed_tags] if isinstance(clubbed_tags, str) else clubbed_tags
+        ttable = db.tag
+        sttable = db.suggested_tags
+
+        tag_ids = db(ttable.value.belongs(clubbed_tags)).select(ttable.id)
+        tag_ids = [x.id for x in tag_ids]
+
+        problem_ids = db(sttable.tag_id.belongs(tag_ids)).select(sttable.problem_id)
+        problem_ids = [x.problem_id for x in problem_ids]
+
+        query &= ptable.id.belongs(problem_ids)
+
 
     site_query = None
     for site in sites:

@@ -28,7 +28,7 @@
 
     <div class="row">
         <div class="input-field col offset-s2 s4">
-            <select name="site" multiple>
+            <select id="profile-site" name="site" multiple>
                 <option value="" disabled selected>{{=T("Site")}}</option>
                 {{for site in current.SITES:}}
                     <option value="{{=site}}">{{=site}}</option>
@@ -36,7 +36,7 @@
             </select>
         </div>
         <div class="input-field col s4">
-            <select name="orderby">
+            <select id="orderby-problems" name="orderby">
                 <option value="" disabled selected>{{=T("Sort By")}}</option>
                 <option value="accuracy-asc">{{=T("Accuracy (Ascending)")}}</option>
                 <option value="accuracy-desc">{{=T("Accuracy (Descending)")}}</option>

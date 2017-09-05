@@ -7,7 +7,7 @@
 
         $search.on('input', function() {
             var value = $(this).val();
-            if (value === "") {
+            if (value === '') {
                 $generalizedTagSearch.removeAttr('disabled');
             } else {
                 $generalizedTagSearch.attr('disabled', 'disabled');
@@ -17,7 +17,7 @@
 
         $generalizedTagSearch.on('change', function() {
             var value = $(this).val();
-            if (value === '') {
+            if (value.length === 0) {
                 $search.removeAttr('disabled');
             } else {
                 $search.attr('disabled', 'disabled');
@@ -31,7 +31,9 @@
         var params = {
             'q': '',
             'page': '1',
-            'site': ''
+            'site': '',
+            'generalized_tags': '',
+            'orderby': ''
         };
 
         var objToURL = function(obj) {
@@ -57,7 +59,8 @@
                 pair;
             for (var i = 0; i < allVars.length; i++) {
                 pair = allVars[i].split('=');
-                if (pair[0] === "site") {
+                pair[1] = pair[1].replace(/\+/g,' ');;
+                if (pair[0] === "site" || pair[0] === "generalized_tags") {
                     if (params[pair[0]].length === 0) {
                         params[pair[0]] = [pair[1]];
                     } else {
@@ -67,6 +70,19 @@
                     params[pair[0]] = pair[1];
                 }
             }
+
+            $("#search").val(params["q"]);
+            $("#generalized-tag-search").val(params["generalized_tags"]);
+            $("#profile-site").val(params["site"]);
+            $("#orderby-problems").val(params["orderby"]);
+            $("select").material_select();
+
+            if (pair[0] === "site") {
+
+                } else if (pair[0] === "generalized_tags") {
+                } else if (pair[0] === "q") {
+                    $("#search").val(pair[1]);
+                }
         }
 
         if (window.location.href != baseURL) {
