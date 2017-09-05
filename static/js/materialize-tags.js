@@ -79,7 +79,8 @@
         this.inputSize      = Math.max(1, this.placeholderText.length);
 
         this.$container = $('<div class="materialize-tags"></div>');
-        this.$input    = $('<input type="text" class="n-tag"  placeholder="' + this.placeholderText + '"/>').appendTo(this.$container);
+        // @ToDo: DIRTY ADDITION OF 'border: none' here. Shift somewhere else
+        this.$input    = $('<input type="text" class="n-tag" style="border: none;" placeholder="' + this.placeholderText + '"/>').appendTo(this.$container);
         this.$label    = this.$element.parent().find('label');
 
         this.$element.before(this.$container);

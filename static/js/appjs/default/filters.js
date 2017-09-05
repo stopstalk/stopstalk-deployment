@@ -54,7 +54,8 @@
             selectYears: 10,
             format: 'yyyy-mm-dd',
             min: new Date(2013, 0, 1),
-            max: new Date()
+            max: new Date(),
+            closeOnSelect: true
         });
 
         $('select').material_select();

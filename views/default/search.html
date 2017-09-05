@@ -17,16 +17,16 @@
             <input id="searchInput" name="q" type="text" class="center">
             <label for="searchInput">{{=T("Search")}}</label>
         </div>
-        <div class="input-field col s4">
-            <select id="institute" name="institute" class="center browser-default">
+        <div class="col s4">
+            <select id="institute" name="institute" class="center browser-default" style="margin-top: 4%;">
                 <option value="" disabled selected>{{=T("Institute")}}</option>
                 {{for institute in all_institutes:}}
                     <option value="{{=institute}}">{{=institute}}</option>
                 {{pass}}
             </select>
         </div>
-        <div class="input-field col s3">
-            <select id="country" name="country" class="center browser-default">
+        <div class="col s3">
+            <select id="country" name="country" class="center browser-default" style="margin-top: 5%;">
                 <option value="" disabled selected>{{=T("Country")}}</option>
                 {{for country in country_name_list:}}
                     <option value="{{=country}}">{{=country}}</option>

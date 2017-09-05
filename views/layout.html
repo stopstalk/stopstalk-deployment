@@ -18,7 +18,8 @@
          http://google.com/webmasters -->
     <meta name="google-site-verification" content="">
     <!-- include stylesheets -->
-    <link rel="stylesheet" href="{{=URL('static','materialize/css/materialize.css')}}"/>
+    <link rel="stylesheet" href="{{=URL('static','materialize/css/materialize.min.css')}}"/>
+    <link rel="stylesheet" href="{{=URL('static', 'css/stopstalk.css')}}"/>
     <link rel="stylesheet" href="{{=URL('static','fa/css/font-awesome.min.css')}}"/>
     <link rel="shortcut icon" href="{{=URL('static','images/favicon.ico')}}" type="image/x-icon">
     <link rel="apple-touch-icon" href="{{=URL('static','images/favicon.png')}}">
@@ -185,7 +186,7 @@
                 {{pass}}
             </span>
             <ul class="right" style="float: left;">
-                <li><a class="dropdown-button left" href="" data-activates="welcome"><i class="fa fa-sort-down"></i></a></li>
+                <li><a class="dropdown-button left" href="" data-activates="welcome"><i class="fa fa-sort-down fa-2x"></i></a></li>
             <!-- Dropdown Trigger -->
             </ul>
         </div>
@@ -322,7 +323,7 @@
             </div>
         </div>
     </footer>
-    <div class="fixed-action-btn horizontal click-to-toggle" style="bottom: 45px; right: 24px;">
+    <div class="fixed-action-btn click-to-toggle vertical" style="bottom: 45px; right: 24px;">
         <a class="btn-floating btn-large pink accent-3" id="heart-button">
             <i class="fa fa-heart"></i>
         </a>
@@ -342,7 +343,7 @@
             </ul>
     </div>
     <!-- The javascript =============================== -->
-    <script src="{{=URL('static','materialize/js/materialize.js', vars={'v': current.REDIS_CLIENT.get('materialize/js/materialize.js')})}}"></script>
+    <script src="{{=URL('static','materialize/js/materialize.min.js')}}"></script>
     <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
     <script src="{{=URL('static','js/web2py-bootstrap3.js', vars={'v': current.REDIS_CLIENT.get('js/web2py-bootstrap3.js')})}}"></script>
     {{block page_js}}{{end page_js}}

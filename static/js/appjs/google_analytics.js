@@ -66,6 +66,7 @@
         addEventListener('#footer-raj454raj', 'Footer raj454raj');
         addEventListener('#first-friend-search', 'First friend search');
         addEventListener('#first-custom-friend', 'First custom friend');
+        addEventListener('.remove-from-todo', 'Remove from todo');
     };
 
     var addProblemPageButtonsToGA = function() {
