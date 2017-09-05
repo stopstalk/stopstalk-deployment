@@ -178,13 +178,10 @@ input[type=range] + .thumb {
     border: none;
 }
 
-/*
-@ToDo: Make this work to allow scrolling of tags
-.twitter-typeahead {
-    height: 200px !important;
-    overflow-y: auto !important;
+.materialize-tags .tt-menu {
+    max-height: 150px;
+    overflow: auto;
 }
-*/
 
 .materialize-tags .tt-menu .tt-cursor {
     background-color: #536dfe !important;
