@@ -1,9 +1,30 @@
 (function($) {
     "use strict";
 
+    var initializeInputFields = function($search, $generalizedTagSearch) {
+        var value = $search.val();
+        if (value === '') {
+            $generalizedTagSearch.removeAttr('disabled');
+        } else {
+            $generalizedTagSearch.attr('disabled', 'disabled');
+            $generalizedTagSearch.val('');
+        }
+        $generalizedTagSearch.material_select();
+
+        value = $generalizedTagSearch.val();
+        if (value.length === 0) {
+            $search.removeAttr('disabled');
+        } else {
+            $search.val('');
+            $search.attr('disabled', 'disabled');
+        }
+    };
+
     var changeTagInputListeners = function() {
         var $search = $('#search'),
             $generalizedTagSearch = $('#generalized-tag-search');
+
+        initializeInputFields($search, $generalizedTagSearch);
 
         $search.on('input', function() {
             var value = $(this).val();
@@ -11,15 +32,18 @@
                 $generalizedTagSearch.removeAttr('disabled');
             } else {
                 $generalizedTagSearch.attr('disabled', 'disabled');
+                $generalizedTagSearch.val('');
             }
             $generalizedTagSearch.material_select();
         });
 
         $generalizedTagSearch.on('change', function() {
             var value = $(this).val();
-            if (value.length === 0) {
+            if (value === null || value.length === 0) {
                 $search.removeAttr('disabled');
             } else {
+                $search.val('');
+                Materialize.updateTextFields();
                 $search.attr('disabled', 'disabled');
             }
         })
@@ -50,8 +74,6 @@
             }).join('&');
             return str;
         };
-
-        changeTagInputListeners();
 
         if (vars.length > 1) {
             vars = vars[1];
@@ -84,6 +106,8 @@
                     $("#search").val(pair[1]);
                 }
         }
+
+        changeTagInputListeners();
 
         if (window.location.href != baseURL) {
             $.ajax({

@@ -359,7 +359,6 @@ def tag():
     q = request.vars.get("q", None)
     clubbed_tags = request.vars.get("generalized_tags", None)
     clubbed_tags = None if clubbed_tags == "" else clubbed_tags
-
     if q is None and not clubbed_tags:
         return dict(table=table, generalized_tags=generalized_tags)
 
@@ -386,7 +385,7 @@ def tag():
     ptable = db.problem
     query = True
 
-    if q:
+    if q is not None and not clubbed_tags:
         # Enables multiple space seperated tag search
         q = q.split(" ")
         for tag in q:
