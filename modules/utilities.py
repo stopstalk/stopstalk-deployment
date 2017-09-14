@@ -518,10 +518,9 @@ def render_table(submissions, duplicates=[]):
                                   extension=False),
                         _class="submission-user-name",
                         _target="_blank"))))
-        append(TD(A(IMG(_src=URL("static",
-                                 "images/" + \
-                                 submission.site.lower() + \
-                                 "_small.png"),
+        append(TD(A(IMG(_src=current.get_static_url("images/" + \
+                                            submission.site.lower() + \
+                                            "_small.png"),
                         _style="height: 30px; width: 30px;"),
                     _class="submission-site-profile",
                     _href=current.get_profile_url(submission.site,
@@ -551,9 +550,7 @@ def render_table(submissions, duplicates=[]):
                                  link_class,
                                  link_title)))
         append(TD(submission.lang))
-        append(TD(IMG(_src=URL("static",
-                               "images/" + submission.status + ".jpg",
-                               extension=False),
+        append(TD(IMG(_src=current.get_static_url("images/" + submission.status + ".jpg"),
                       _title=status_dict[submission.status],
                       _alt=status_dict[submission.status],
                       _class="status-icon")))
