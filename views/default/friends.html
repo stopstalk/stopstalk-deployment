@@ -14,4 +14,4 @@
     </div>
 </div>
 <!-- Note: We don't need any seperate script for this page as the Search page script does what is required -->
-<script src="{{=URL('static', 'js/appjs/default/search.js', vars={'v': current.REDIS_CLIENT.get('js/appjs/default/search.js')})}}"></script>
+<script src="{{=get_static_url('js/appjs/default/search.js')}}"></script>

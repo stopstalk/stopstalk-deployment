@@ -196,10 +196,9 @@ def todo():
                                                     link_class,
                                                     link_title,
                                                     disable_todo=True)),
-                        TD(IMG(_src=URL("static",
-                                        "images/" + \
-                                        utilities.urltosite(row.link) + \
-                                        "_small.png"),
+                        TD(IMG(_src=get_static_url("images/" + \
+                                                   utilities.urltosite(row.link) + \
+                                                   "_small.png"),
                                _style="height: 30px; weight: 30px;")),
                         TD(row.total_submissions),
                         TD(len(uids) + len(cuids)),
@@ -460,10 +459,9 @@ def contests():
                            "width:10px;" + \
                            "border-radius:50%;")
         append(TD(i["Name"], span))
-        append(TD(IMG(_src=URL("static",
-                               "images/" + \
-                               str(i["Platform"]).lower() + \
-                               "_small.png"),
+        append(TD(IMG(_src=get_static_url("images/" + \
+                                          str(i["Platform"]).lower() + \
+                                          "_small.png"),
                       _style=icon_style)))
 
         append(TD("-"))
@@ -491,10 +489,9 @@ def contests():
         tr = TR()
         append = tr.append
         append(TD(i["Name"]))
-        append(TD(IMG(_src=URL("static",
-                               "images/" + \
-                               str(i["Platform"]).lower() + \
-                               "_small.png"),
+        append(TD(IMG(_src=get_static_url("images/" + \
+                                          str(i["Platform"]).lower() + \
+                                          "_small.png"),
                       _style=icon_style)))
 
         append(TD(str(start_time), _class="stopstalk-timestamp"))
@@ -1140,10 +1137,9 @@ def search():
 
         for site in current.SITES:
             if user[site.lower() + "_handle"]:
-              td.append(A(DIV(IMG(_src=URL("static",
-                                           "images/" + \
-                                           site.lower() + \
-                                           "_logo.png")),
+              td.append(A(DIV(IMG(_src=get_static_url("images/" + \
+                                                      site.lower() + \
+                                                      "_logo.png")),
                               user[site.lower() + "_handle"],
                               _style="background-color: #e4e4e4; color: black;",
                               _class="chip"),

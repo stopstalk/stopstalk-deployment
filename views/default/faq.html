@@ -2,6 +2,6 @@
 <head>
     <title>{{=T("FAQs")}}</title>
 </head>
-<script src="{{=URL('static', 'js/appjs/default/faq.js', vars={'v': current.REDIS_CLIENT.get('js/appjs/default/faq.js')})}}"></script>
+<script src="{{=get_static_url('js/appjs/default/faq.js')}}"></script>
 <h3>{{=T("FAQs")}}</h3>
 {{=div}}

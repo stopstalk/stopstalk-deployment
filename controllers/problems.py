@@ -475,10 +475,9 @@ def tag():
                        _href=problem["link"],
                        _class="tag-problem-link",
                        _target="_blank")))
-        tr.append(TD(IMG(_src=URL("static",
-                                  "images/" + \
-                                  utilities.urltosite(problem["link"]) + \
-                                  "_small.png"),
+        tr.append(TD(IMG(_src=get_static_url("images/" + \
+                                             utilities.urltosite(problem["link"]) + \
+                                             "_small.png"),
                          _style="height: 30px; width: 30px;")))
         tr.append(TD("%.2f" % (problem["solved_submissions"]  * 100.0 / \
                                problem["total_submissions"])))

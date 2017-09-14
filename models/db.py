@@ -725,4 +725,9 @@ def get_profile_url(site, handle):
 
 current.get_profile_url = get_profile_url
 
+def get_static_url(file_path):
+  return URL("static",
+             file_path,
+             vars={'_rev': current.REDIS_CLIENT.get(file_path)})
+
 # =============================================================================
