@@ -59,7 +59,7 @@ def get_request(url, headers={}, timeout=current.TIMEOUT, params={}):
                                     params=params,
                                     proxies=current.PROXY,
                                     timeout=timeout)
-            print url, prev str(datetime.datetime.now())
+            print url, prev, str(datetime.datetime.now())
         except Exception as e:
             print e, url
             return SERVER_FAILURE
