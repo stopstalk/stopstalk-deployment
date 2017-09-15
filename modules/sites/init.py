@@ -50,16 +50,13 @@ def get_request(url, headers={}, timeout=current.TIMEOUT, params={}):
     """
 
     i = 0
-    prev = None
     while i < current.MAX_TRIES_ALLOWED:
         try:
-            prev = str(datetime.datetime.now())
             response = requests.get(url,
                                     headers=headers,
                                     params=params,
                                     proxies=current.PROXY,
                                     timeout=timeout)
-            print url, prev, str(datetime.datetime.now())
         except Exception as e:
             print e, url
             return SERVER_FAILURE
