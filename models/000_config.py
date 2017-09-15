@@ -54,10 +54,10 @@ current.INITIAL_DATE = "2013-01-01 00:00:00"
 current.PER_PAGE = 100
 
 # Maximum number of requests to make if a website is not responding
-current.MAX_TRIES_ALLOWED = 5
+current.MAX_TRIES_ALLOWED = 2
 
 # Maximum time that a request can take to return a response(in seconds)
-current.TIMEOUT = 20
+current.TIMEOUT = 5
 
 # Number of problems to be shown in Trending page
 current.PROBLEMS_PER_PAGE = 15
