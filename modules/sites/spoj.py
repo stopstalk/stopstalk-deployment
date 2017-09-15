@@ -86,15 +86,20 @@ class Profile(object):
         previd = -1
         currid = 0
         page = 0
-        url = current.SITES[self.site] + "users/" + handle
-        tmpreq = get_request(url)
 
-        if tmpreq in REQUEST_FAILURES:
-            return tmpreq
+        str_init_time = time.strptime(str(current.INITIAL_DATE),
+                                      "%Y-%m-%d %H:%M:%S")
+        # Test for invalid handles
+        if  last_retrieved == str_init_time:
+            url = current.SITES[self.site] + "users/" + handle
+            tmpreq = get_request(url)
 
-        # Bad but correct way of checking if the handle exists
-        if tmpreq.text.find("History of submissions") == -1:
-            return NOT_FOUND
+            if tmpreq in REQUEST_FAILURES:
+                return tmpreq
+
+            # Bad but correct way of checking if the handle exists
+            if tmpreq.text.find("History of submissions") == -1:
+                return NOT_FOUND
 
         while 1:
             flag = 0
