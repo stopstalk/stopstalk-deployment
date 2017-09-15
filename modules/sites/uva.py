@@ -48,15 +48,22 @@ class Profile(object):
         """
 
         handle = self.handle
-        url = "http://uhunt.felix-halim.net/api/uname2uid/" + handle
-        response = get_request(url)
+        uvadb = current.uvadb
+        uitable = uvadb.usernametoid
+        row = uvadb(uitable.username == handle).select(uitable.uva_id).first()
+        if row:
+            uva_id = str(row.uva_id)
+        else:
+            url = "http://uhunt.felix-halim.net/api/uname2uid/" + handle
+            response = get_request(url)
 
-        if response in (SERVER_FAILURE, OTHER_FAILURE):
-            return response
-        if response.text.strip() == "0":
-            return NOT_FOUND
+            if response in (SERVER_FAILURE, OTHER_FAILURE):
+                return response
+            if response.text.strip() == "0":
+                return NOT_FOUND
+            uva_id = response.text
 
-        url = "http://uhunt.felix-halim.net/api/subs-user/" + response.text
+        url = "http://uhunt.felix-halim.net/api/subs-user/" + uva_id
         response = get_request(url)
         if response in REQUEST_FAILURES:
             return response
