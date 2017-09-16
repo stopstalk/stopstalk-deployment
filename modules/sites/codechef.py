@@ -321,7 +321,8 @@ class Profile(object):
             params["year"] = year
             url = domain_url + "submissions?" + urlencode(params)
             response = get_request(url,
-                                   headers={"User-Agent": user_agent})
+                                   headers={"User-Agent": user_agent},
+                                   timeout=10)
             if response in REQUEST_FAILURES:
                 return response
 
