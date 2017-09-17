@@ -170,6 +170,7 @@ for site in current.SITES:
 extra_fields += site_handles
 extra_fields += all_last_retrieved
 auth.settings.extra_fields["auth_user"] = extra_fields
+auth.settings.logging_enabled = False
 
 auth.define_tables(username=False, signature=False)
 
