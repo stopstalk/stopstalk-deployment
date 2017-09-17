@@ -120,11 +120,10 @@ class Profile(object):
               "/recent_challenges"
         request_params = {"limit": "5", "response_version": "v2"}
 
-        submissions = {handle: {1 : {}}}
-        it = 0
+        submissions = []
         next_cursor = "null"
 
-        while it < 50000:
+        for i in xrange(1000):
 
             request_params["cursor"] = next_cursor
             response = get_request(url, params=request_params)
@@ -133,11 +132,6 @@ class Profile(object):
                 return response
             next_cursor = response.json()["cursor"]
             for row in response.json()["models"]:
-                submission = submissions[handle][1]
-                submission[it] = []
-                submission = submission[it]
-                append = submission.append
-
                 # Time of submission
                 # @Todo: This is ugly
                 time_stamp = row["created_at"][:-10].split("T")
@@ -155,28 +149,13 @@ class Profile(object):
                 if curr <= last_retrieved:
                     return submissions
 
-                append(str(time_stamp))
-
-                # Problem link
-                append("https://www.hackerrank.com" + row["url"])
-
-                # Problem name
-                append(row["name"])
-
-                # Status
-                # HackerRank only gives the list of solved problems
-                append("AC")
-
-                # Points
-                append("100")
-
-                # Language
-                append("-")
-
-                # View code link
-                append("")
-
-                it += 1
+                submissions.append((str(time_stamp),
+                                    "https://www.hackerrank.com" + row["url"],
+                                    row["name"],
+                                    "AC",
+                                    "100",
+                                    "-",
+                                    ""))
 
             if response.json()["last_page"] == True:
                 break

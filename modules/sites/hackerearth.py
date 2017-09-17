@@ -112,10 +112,8 @@ class Profile(object):
                    "Cache-Control": "no-cache",
                    "Cookie": tmp_string}
 
-        it = 1
-        submissions = {handle: {}}
+        submissions = []
         for page_number in xrange(1, 1000):
-            submissions[handle][page_number] = {}
             url = "https://www.hackerearth.com/AJAX/feed/newsfeed/submission/user/" + handle + "/?page=" + str(page_number)
 
             tmp = get_request(url, headers=headers)
@@ -132,10 +130,6 @@ class Profile(object):
 
             trs = soup.find("tbody").find_all("tr")
             for tr in trs:
-
-                submissions[handle][page_number][it] = []
-                submission = submissions[handle][page_number][it]
-                append = submission.append
 
                 all_tds = tr.find_all("td")
                 all_as = tr.find_all("a")
@@ -154,13 +148,10 @@ class Profile(object):
 
                 if curr <= last_retrieved:
                     return submissions
-                append(str(time_stamp))
 
                 # Problem Name/URL
                 problem_link = "https://www.hackerearth.com" + all_as[1]["href"]
-                append(problem_link)
                 problem_name = all_as[1].contents[0]
-                append(problem_name)
 
                 # Status
                 try:
@@ -184,24 +175,22 @@ class Profile(object):
                     status = "TLE"
                 else:
                     status = "OTH"
-                append(status)
 
-                # Points
                 if status == "AC":
                     points = "100"
                 else:
                     points = "0"
-                append(points)
 
-                # Language
                 language = all_tds[5].contents[0]
-                append(language)
 
-                # View Link
-                append("https://www.hackerearth.com/submission/" + \
-                       tr["id"].split("-")[-1])
-
-                it += 1
+                submissions.append((str(time_stamp),
+                                    problem_link,
+                                    problem_name,
+                                    status,
+                                    points,
+                                    language,
+                                    "https://www.hackerearth.com/submission/" + \
+                                    tr["id"].split("-")[-1]))
 
         return submissions
 

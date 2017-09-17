@@ -84,31 +84,16 @@ class Profile(object):
                      4: "Pascal",
                      5: "C++11",
                      6: "Python"}
-        submissions = {handle: {1: {}}}
+        submissions = []
         all_submissions = response.json()["subs"]
 
-        it = 0
         problem_url_prefix = "https://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem="
 
         for row in all_submissions:
-            submissions[handle][1][it] = []
-            submission = submissions[handle][1][it]
-            append = submission.append
-
-            it += 1
             curr_date_timestamp = str(datetime.datetime.fromtimestamp(row[4]))
             curr = time.strptime(curr_date_timestamp, "%Y-%m-%d %H:%M:%S")
             if curr <= last_retrieved:
                 continue
-
-            # Time of submission
-            append(curr_date_timestamp)
-
-            # Problem URL
-            append(problem_url_prefix + str(row[1]))
-
-            # Problem Name
-            append(uvaproblems[row[1]])
 
             # Problem status
             status = row[2]
@@ -116,21 +101,20 @@ class Profile(object):
                 submission_status = submission_statuses[status]
             else:
                 submission_status = "OTH"
-            append(submission_status)
 
             # Points
             if submission_status == "AC":
                 points = "100"
             else:
                 points = "0"
-            append(points)
 
-            # Language
-            append(languages[row[5]])
-
-            append("")
-
-            it += 1
+            submissions.append((curr_date_timestamp,
+                                problem_url_prefix + str(row[1]),
+                                uvaproblems[row[1]],
+                                submission_status,
+                                points,
+                                languages[row[5]],
+                                ""))
 
         return submissions
 

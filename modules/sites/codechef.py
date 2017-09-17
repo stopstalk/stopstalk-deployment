@@ -22,6 +22,7 @@
 
 from .init import *
 from urllib import urlencode
+from gevent.coros import BoundedSemaphore
 
 PARAMS = {"page": 0,
           "sort_by": "All",
@@ -46,11 +47,12 @@ class Profile(object):
 
         self.site = "CodeChef"
         self.handle = handle
-        self.submissions = {handle: {}}
+        self.submissions = []
         self.retrieve_failed = False
         # Used to store the error message in case
         # of failed requests (40x/50x)
         self.retrieve_status = None
+        self.semaphore = None
 
     # -------------------------------------------------------------------------
     @staticmethod
@@ -148,14 +150,9 @@ class Profile(object):
             @param trs (List): List of trs from the corresponding page
         """
 
-        it = 1
+        page_submissions = []
         handle = self.handle
         for tr in trs:
-            self.submissions[handle]["%d_%d" % (year, page)][it] = []
-            submission = self.submissions[handle]["%d_%d" % (year, page)][it]
-            it += 1
-            append = submission.append
-
             all_tds = tr.find_all("td")
             if len(all_tds) == 1:
                 # No recent activity
@@ -172,26 +169,14 @@ class Profile(object):
             if curr <= self.last_retrieved:
                 return "DONE"
 
-            # Do not retrieve any further because this leads to ambiguity
-            # If 2 hours ago => 2 hours 20 mins or 2 hours 14 mins ...
-            # Let the user come back later when the datetime is exact
-            # This prevents from redundant addition into database
-            # @ToDo: For now we are allowing redundant submissions
-            #        for codechef :/ . Find a way to change it.
-            #if str(time_stamp).__contains__("hours"):
-            #   continue
-            append(str(time_stamp))
-
             # Problem name/URL
             problem_link = "https://www.codechef.com" + \
                             all_tds[3].contents[0]["href"]
-            append(problem_link)
             try:
                 problem_name = all_tds[3].contents[0].contents[0]
             except:
                 print all_tds
                 continue
-            append(problem_name)
 
             # Submission status
             status_span = all_tds[5].find("span")
@@ -221,18 +206,30 @@ class Profile(object):
                 submission_status = "TLE"
             else:
                 submission_status = "OTH"
-            append(submission_status)
 
-            # Submission points
-            append(points)
+            # Do not retrieve any further because this leads to ambiguity
+            # If 2 hours ago => 2 hours 20 mins or 2 hours 14 mins ...
+            # Let the user come back later when the datetime is exact
+            # This prevents from redundant addition into database
+            # @ToDo: For now we are allowing redundant submissions
+            #        for codechef :/ . Find a way to change it.
+            #if str(time_stamp).__contains__("hours"):
+            #   continue
+            page_submissions.append((str(time_stamp),
+                                     problem_link,
+                                     problem_name,
+                                     submission_status,
+                                     points,
+                                     all_tds[8].contents[0],
+                                     "https://www.codechef.com/viewsolution/" + \
+                                     all_tds[0].contents[0]))
 
-            # Submission language
-            language = all_tds[8].contents[0]
-            append(language)
-
-            # View link
-            view_link = "https://www.codechef.com/viewsolution/" + all_tds[0].contents[0]
-            append(view_link)
+        if self.semaphore is not None:
+            self.semaphore.acquire(timeout=5)
+            self.submissions.extend(page_submissions)
+            self.semaphore.release()
+        else:
+            self.submissions.extend(page_submissions)
 
     # -------------------------------------------------------------------------
     def process_page(self, year, page, url):
@@ -280,10 +277,10 @@ class Profile(object):
         params["year"] = year
         for page in xrange(1, last_page):
             params["page"] = page
-            self.submissions[self.handle]["%d_%d" % (year, page)] = {}
             url = "https://www.codechef.com/submissions?" + urlencode(params)
             threads.append(gevent.spawn(self.process_page, year, page, url))
 
+        self.semaphore = BoundedSemaphore(len(threads))
         gevent.joinall(threads)
 
     # -------------------------------------------------------------------------
@@ -314,6 +311,8 @@ class Profile(object):
             if response.url.__contains__("teams/view"):
                 return NOT_FOUND
 
+        self.submissions = []
+
         for year in xrange(current_year, start_year - 1, -1):
             # Years processed in the reverse order to break out when
             # last_retrieved time_stamp is matched
@@ -341,7 +340,6 @@ class Profile(object):
                 return SERVER_FAILURE
 
             year_index = "%d_%d" % (year, 0)
-            self.submissions[handle][year_index] = {}
             ret = self.process_trs(year, 0, trs)
 
             if ret == "DONE":

@@ -128,24 +128,17 @@ class Profile(object):
         ptable = db.problem
         today = datetime.datetime.now().strftime("%Y-%m-%d")
 
-        submissions = {handle: {1: {}}}
+        submissions = []
         all_submissions = tmp.json()
         if all_submissions["status"] != "OK":
             return submissions
         all_submissions = all_submissions["result"]
-        it = 0
-        for row in all_submissions:
 
-            submissions[handle][1][it] = []
-            submission = submissions[handle][1][it]
-            append = submission.append
+        for row in all_submissions:
 
             curr = time.gmtime(row["creationTimeSeconds"] + 330 * 60)
             if curr <= last_retrieved:
                 return submissions
-
-            # Time of submission
-            append(str(time.strftime("%Y-%m-%d %H:%M:%S", curr)))
 
             arg = "problem/"
             if len(str(row["contestId"])) > 3:
@@ -156,9 +149,7 @@ class Profile(object):
                            str(row["contestId"]) + "/" + \
                            row["problem"]["index"]
 
-            append(problem_link)
             problem_name = row["problem"]["name"]
-            append(problem_name)
 
             # Problem tags
             tags = row["problem"]["tags"]
@@ -202,7 +193,6 @@ class Profile(object):
                 submission_status = "MLE"
             else:
                 submission_status = "OTH"
-            append(submission_status)
 
             # Points
             if submission_status == "AC":
@@ -211,10 +201,6 @@ class Profile(object):
                 points = "-50"
             else:
                 points = "0"
-            append(points)
-
-            # Language
-            append(row["programmingLanguage"])
 
             # View code link
             if problem_link.__contains__("gymProblem"):
@@ -224,9 +210,14 @@ class Profile(object):
                             str(row["contestId"]) + \
                             "/submission/" + \
                             str(row["id"])
-            append(view_link)
 
-            it += 1
+            submissions.append((str(time.strftime("%Y-%m-%d %H:%M:%S", curr)),
+                                problem_link,
+                                problem_name,
+                                submission_status,
+                                points,
+                                row["programmingLanguage"],
+                                view_link))
 
         return submissions
 
