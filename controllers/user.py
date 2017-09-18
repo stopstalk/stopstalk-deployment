@@ -201,12 +201,6 @@ def update_details():
             for site in updated_sites:
                 site_lrs[site.lower() + "_lr"] = current.INITIAL_DATE
 
-            pickle_file_path = "./applications/stopstalk/graph_data/" + \
-                               str(session.user_id) + ".pickle"
-            import os
-            if os.path.exists(pickle_file_path):
-                os.remove(pickle_file_path)
-
             # Reset the user only if any of the profile site handle is updated
             query = (atable.id == session.user_id)
             db(query).update(rating=0,
@@ -214,7 +208,6 @@ def update_details():
                              per_day=0.0,
                              per_day_change="0.0",
                              authentic=False,
-                             graph_data_retrieved=False,
                              **site_lrs)
 
             submission_query &= (stable.site.belongs(updated_sites))
@@ -245,10 +238,12 @@ def update_friend():
 
     query = (cftable.user_id == session.user_id) & \
             (cftable.id == request.args[0])
-    record = db(query).select().first()
-    if record is None:
+    row = db(query).select(cftable.id)
+    if len(row) == 0:
         session.flash = T("Please click one of the buttons")
         redirect(URL("user", "custom_friend"))
+
+    record = cftable(request.args[0])
 
     # Do not allow to modify stopstalk_handle
     cftable.stopstalk_handle.writable = False
@@ -271,17 +266,11 @@ def update_friend():
     form.vars.stopstalk_handle = record.stopstalk_handle
 
     if form.validate(onvalidation=current.sanitize_fields):
-        pickle_file_path = "./applications/stopstalk/graph_data/" + \
-                           str(record.id) + "_custom.pickle"
-        import os
-
         if form.deleted:
             ## DELETE
             # If delete checkbox is checked => just process it redirect back
             session.flash = T("Custom User deleted")
             duplicate_cus = db(cftable.duplicate_cu == record.id).select()
-            if os.path.exists(pickle_file_path):
-                os.remove(pickle_file_path)
             if len(duplicate_cus):
                 # The current custom user is a parent of other duplicate custom users
 
@@ -305,8 +294,7 @@ def update_friend():
             updated_sites = utilities.handles_updated(record, form)
             ## UPDATE
             if updated_sites != []:
-                if os.path.exists(pickle_file_path):
-                    os.remove(pickle_file_path)
+
                 submission_query = (stable.custom_user_id == int(request.args[0]))
                 reset_sites = current.SITES if record.duplicate_cu else updated_sites
                 for site in reset_sites:
@@ -319,7 +307,6 @@ def update_friend():
                 form.vars["prev_rating"] = 0
                 form.vars["per_day"] = 0.0
                 form.vars["per_day_change"] = "0.0"
-                form.vars["graph_data_retrieved"] = False
 
                 # Only delete the submission of those particular sites
                 # whose site handles are updated
