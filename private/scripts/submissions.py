@@ -225,57 +225,54 @@ def get_submissions(user_id,
 
     global rows
 
-    for i in sorted(submissions[handle].iterkeys()):
-        for j in sorted(submissions[handle][i].iterkeys()):
-            submission = submissions[handle][i][j]
-            if len(submission) == 7:
-                count += 1
-                row = []
-                if custom:
-                    row.extend(["--", user_id])
+    for submission in submissions:
+        count += 1
+        row = []
+        if custom:
+            row.extend(["--", user_id])
+        else:
+            row.extend([user_id, "--"])
+
+        row.extend([stopstalk_handle,
+                    handle,
+                    site,
+                    submission[0],
+                    submission[2],
+                    submission[1],
+                    submission[5],
+                    submission[3],
+                    submission[4],
+                    submission[6]])
+
+        encoded_row = []
+        for x in row:
+            if isinstance(x, basestring):
+                try:
+                    tmp = x.encode("utf-8", "ignore")
+                except UnicodeDecodeError:
+                    tmp = str(tmp)
+
+                # @ToDo: Dirty hack! Do something with
+                #        replace and escaping quotes
+                tmp = tmp.replace("\"", "").replace("'", "")
+                if tmp == "--":
+                    tmp = "NULL"
                 else:
-                    row.extend([user_id, "--"])
+                    tmp = "\"" + tmp + "\""
+                encoded_row.append(tmp)
+            else:
+                encoded_row.append(str(x))
 
-                row.extend([stopstalk_handle,
-                            handle,
-                            site,
-                            submission[0],
-                            submission[2],
-                            submission[1],
-                            submission[5],
-                            submission[3],
-                            submission[4],
-                            submission[6]])
+        process_solved_counts(encoded_row[7].strip("\""),
+                              encoded_row[6].strip("\""),
+                              encoded_row[9].strip("\""),
+                              user_id,
+                              custom)
 
-                encoded_row = []
-                for x in row:
-                    if isinstance(x, basestring):
-                        try:
-                            tmp = x.encode("utf-8", "ignore")
-                        except UnicodeDecodeError:
-                            tmp = str(tmp)
-
-                        # @ToDo: Dirty hack! Do something with
-                        #        replace and escaping quotes
-                        tmp = tmp.replace("\"", "").replace("'", "")
-                        if tmp == "--":
-                            tmp = "NULL"
-                        else:
-                            tmp = "\"" + tmp + "\""
-                        encoded_row.append(tmp)
-                    else:
-                        encoded_row.append(str(x))
-
-                process_solved_counts(encoded_row[7].strip("\""),
-                                      encoded_row[6].strip("\""),
-                                      encoded_row[9].strip("\""),
-                                      user_id,
-                                      custom)
-
-                rows.append("(" + ", ".join(encoded_row) + ")")
-                if len(rows) > 1000:
-                    insert_this_batch()
-                    rows = []
+        rows.append("(" + ", ".join(encoded_row) + ")")
+        if len(rows) > 1000:
+            insert_this_batch()
+            rows = []
 
     if count != 0:
         print str(count)

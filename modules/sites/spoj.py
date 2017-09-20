@@ -79,13 +79,11 @@ class Profile(object):
         """
 
         handle = self.handle
-        submissions = {handle: {}}
+        submissions = []
         start = 0
-        it = 1
 
         previd = -1
         currid = 0
-        page = 0
 
         str_init_time = time.strptime(str(current.INITIAL_DATE),
                                       "%Y-%m-%d %H:%M:%S")
@@ -101,7 +99,7 @@ class Profile(object):
             if tmpreq.text.find("History of submissions") == -1:
                 return NOT_FOUND
 
-        while 1:
+        for i in xrange(1000):
             flag = 0
             url = current.SITES[self.site] + "status/" + \
                   handle + \
@@ -121,12 +119,7 @@ class Profile(object):
                 return submissions
 
             row = 0
-            submissions[handle][page] = {}
             for i in table_body:
-                submissions[handle][page][it] = []
-                submission = submissions[handle][page][it]
-                append = submission.append
-
                 if isinstance(i, bs4.element.Tag):
                     if row == 0:
                         currid = i.contents[1].contents[0]
@@ -150,14 +143,11 @@ class Profile(object):
                     curr = time.strptime(tos, "%Y-%m-%d %H:%M:%S")
                     if curr <= last_retrieved:
                         return submissions
-                    append(tos)
 
                     # Problem Name/URL
                     uri = i.contents[5].contents[0]
                     uri["href"] = "https://www.spoj.com" + uri["href"]
                     problem_link = eval(repr(uri["href"]).replace("\\", ""))
-                    append(problem_link)
-                    append(uri.contents[0].strip())
 
                     # Problem Status
                     status = str(i.contents[6])
@@ -174,25 +164,19 @@ class Profile(object):
                     else:
                         submission_status = "OTH"
 
-                    append(submission_status)
-
                     # Question Points
                     if submission_status == "AC":
                         points = "100"
                     else:
                         points = "0"
-                    append(points)
 
-                    # Language
-                    append(i.contents[12].contents[1].contents[0])
-
-                    # View code Link
-                    view_link = ""
-                    append(view_link)
-
-                    it += 1
-
-            page += 1
+                    submissions.append((tos,
+                                        problem_link,
+                                        uri.contents[0].strip(),
+                                        submission_status,
+                                        points,
+                                        i.contents[12].contents[1].contents[0],
+                                        ""))
 
             if flag == 1:
                 break
