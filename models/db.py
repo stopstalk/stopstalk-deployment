@@ -391,8 +391,8 @@ def notify_institute_users(record):
             (atable.registration_key == "")
 
     rows = db(query).select(atable.id)
-    for row in rows:
-        db.institute_user.insert(user_registered_id=record.id, send_to_id=row.id)
+    query_values = ",".join([str((int(x.id), int(record.id))) for x in rows]).replace(" ", "")
+    db.executesql("INSERT INTO institute_user(send_to_id,user_registered_id) VALUES %s;" % query_values)
 
 # -----------------------------------------------------------------------------
 def register_callback(form):
