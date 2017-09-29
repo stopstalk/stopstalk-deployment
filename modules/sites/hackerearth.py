@@ -116,7 +116,7 @@ class Profile(object):
         for page_number in xrange(1, 1000):
             url = "https://www.hackerearth.com/AJAX/feed/newsfeed/submission/user/" + handle + "/?page=" + str(page_number)
 
-            tmp = get_request(url, headers=headers)
+            tmp = get_request(url, headers=headers, timeout=10)
 
             if tmp in REQUEST_FAILURES:
                 return tmp
