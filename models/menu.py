@@ -89,7 +89,11 @@ response.menu += [get_menu_tuple("fa-search",
                   get_menu_tuple("fa-tag",
                                  T("Search by tags"),
                                  "Nav Tag Search",
-                                 URL("problems", "tag"))]
+                                 URL("problems", "tag")),
+                  get_menu_tuple("fa-heart",
+                                 T("Testimonials"),
+                                 "Nav Testimonials",
+                                 URL("testimonials", "index"))]
 
 if "auth" in locals(): auth.wikimenu()
 

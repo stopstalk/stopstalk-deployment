@@ -36,6 +36,10 @@ a {
     background-color: #536dfe;
 }
 
+.btn:focus, .btn-large:focus {
+    background-color: #536dfe;
+}
+
 .btn-floating {
     background-color: #536dfe;
 }
@@ -216,6 +220,9 @@ input[type=range] + .thumb {
     border-radius: 0px;
 }
 
+blockquote {
+    border-left: 5px solid #e040fb;
+}
 nav ul a:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }

@@ -213,7 +213,7 @@ def send_mail(to, subject, message, mail_type, bulk=False):
 
     row = db(query).select().first()
 
-    if row is None:
+    if row is None or mail_type == "admin":
         if bulk:
             db.queue.insert(status="pending",
                             email=to,
@@ -647,6 +647,13 @@ db.define_table("access_tokens",
                 Field("value"),
                 Field("time_stamp", "datetime"),
                 Field("type"))
+
+db.define_table("testimonials",
+                Field("user_id", "reference auth_user"),
+                Field("content", "text"),
+                Field("stars"),
+                Field("verification", default="pending"),
+                Field("created_at", "datetime"))
 
 uvadb.define_table("problem",
                    Field("problem_id", "integer"),
