@@ -167,6 +167,12 @@ class Profile(object):
             curr = time.strptime(str(time_stamp), "%Y-%m-%d %H:%M:%S")
             # So cool optimization!
             if curr <= self.last_retrieved:
+                if self.semaphore is not None:
+                    self.semaphore.acquire(timeout=5)
+                    self.submissions.extend(page_submissions)
+                    self.semaphore.release()
+                else:
+                    self.submissions.extend(page_submissions)
                 return "DONE"
 
             # Problem name/URL
