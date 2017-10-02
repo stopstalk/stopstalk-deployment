@@ -128,7 +128,7 @@ def handle_error():
                           _get_failure_message(ticket),
                           mail_type="admin")
     else:
-        message = request_url
+        message = request.vars.requested_uri if request.vars.requested_uri else request_url
         error_message = "Other error"
 
     db.http_errors.insert(status_code=int(code),
@@ -822,6 +822,15 @@ def filters():
     else:
         # Else append the ending time for that day
         end_date += " 23:59:59"
+
+    datetime_validator = IS_DATETIME(format=T("%Y-%m-%d %H:%M:%S"),
+                                     error_message="error")
+
+    # Prevent a spam user | Facepalm :/
+    if datetime_validator(start_date)[1] == "error" or \
+       datetime_validator(end_date)[1] == "error":
+       raise HTTP(400, "Spam user block")
+       return
 
     start_time = time.strptime(start_date, "%Y-%m-%d %H:%M:%S")
     end_time = time.strptime(end_date, "%Y-%m-%d %H:%M:%S")
