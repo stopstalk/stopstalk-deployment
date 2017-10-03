@@ -67,6 +67,7 @@
         addEventListener('#first-friend-search', 'First friend search');
         addEventListener('#first-custom-friend', 'First custom friend');
         addEventListener('.remove-from-todo', 'Remove from todo');
+        addEventListener('#testimonials-page', 'Write a Testimonial');
     };
 
     var addProblemPageButtonsToGA = function() {

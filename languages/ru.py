@@ -330,4 +330,5 @@
 "Login to add as Custom Friend": "Login to add as Custom Friend",
 "Country Leaderboard": "Country Leaderboard",
 "Contest Activity on": "Contest Activity on",
-"Search Site Tags...": "Search Site Tags..."}
+"Search Site Tags...": "Search Site Tags...",
+"Testimonials": "Testimonials"}
