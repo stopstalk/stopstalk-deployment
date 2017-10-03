@@ -33,7 +33,6 @@ def index():
                                            user_id=session.user_id,
                                            stars="",
                                            created_at=str(datetime.datetime.now())[:-7])
-            response.flash = "Submitted for Admin Approval"
             current.send_mail(to="raj454raj@gmail.com",
                               subject="New testimonial by " + session.handle,
                               message="""<html>
@@ -53,6 +52,8 @@ def index():
                                                            host=True)),
                               mail_type="admin",
                               bulk=True)
+            session.flash = "Submitted for Admin Approval"
+            redirect(URL("testimonials", "index"))
 
 
     testimonials = db(ttable.verification == "approved").select(orderby=~ttable.id)

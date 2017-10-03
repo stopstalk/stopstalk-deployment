@@ -9,7 +9,7 @@
             var fieldLength = $("#testimonial-content").val().trim().length;
             if (fieldLength < 20) {
                 $.web2py.flash("Please fill atleast 20 characters");
-            } else if (fieldLength <= 300) {
+            } else if (fieldLength <= 400) {
                 $("#testimonial-form").submit();
             } else {
                 $.web2py.flash("Character Limit reached");
