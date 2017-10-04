@@ -105,6 +105,7 @@ This is to inform you that we have approved your Testimonial and published it on
 Check it out on the <a href="%s">Testimonials Page</a>.<br/><br/>
 Cheers,<br/>
 Team StopStalk
+</html>
 """ % (user.stopstalk_handle,
        URL("testimonials", "index", host=True, scheme=True)),
                                   mail_type="feature_updates",
