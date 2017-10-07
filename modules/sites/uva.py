@@ -90,6 +90,11 @@ class Profile(object):
         problem_url_prefix = "https://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem="
 
         for row in all_submissions:
+            try:
+                problem_name = uvaproblems[row[1]]
+            except KeyError:
+                print "Problem name not found in uva problem list"
+                continue
             curr_date_timestamp = str(datetime.datetime.fromtimestamp(row[4]))
             curr = time.strptime(curr_date_timestamp, "%Y-%m-%d %H:%M:%S")
             if curr <= last_retrieved:
@@ -110,7 +115,7 @@ class Profile(object):
 
             submissions.append((curr_date_timestamp,
                                 problem_url_prefix + str(row[1]),
-                                uvaproblems[row[1]],
+                                problem_name,
                                 submission_status,
                                 points,
                                 languages[row[5]],
