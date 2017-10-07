@@ -604,6 +604,8 @@ def trending():
             else:
                 custom_friends.append(cus_id[1])
 
+        friends, custom_friends = set(friends), set(custom_friends)
+
     problems_dict = {}
     friends_problems_dict = {}
     for submission in last_submissions:
@@ -612,35 +614,34 @@ def trending():
         uid = submission.user_id
         cid = submission.custom_user_id
 
-        # @ToDo: Improve this code
-        if problems_dict.has_key(plink):
-            problems_dict[plink]["total_submissions"] += 1
-        else:
+        if plink not in problems_dict:
             problems_dict[plink] = {"name": pname,
-                                    "total_submissions": 1,
+                                    "total_submissions": 0,
                                     "users": set([]),
                                     "custom_users": set([])}
+
+        pdict = problems_dict[plink]
+        pdict["total_submissions"] += 1
+        if uid:
+            pdict["users"].add(uid)
+        else:
+            pdict["custom_users"].add(cid)
 
         if auth.is_logged_in() and \
            ((uid and uid in friends) or \
             (cid and cid in custom_friends)):
 
-            if friends_problems_dict.has_key(plink):
-                friends_problems_dict[plink]["total_submissions"] += 1
-            else:
+            if plink not in friends_problems_dict:
                 friends_problems_dict[plink] = {"name": pname,
-                                                "total_submissions": 1,
+                                                "total_submissions": 0,
                                                 "users": set([]),
                                                 "custom_users": set([])}
+            fproblems_dict = friends_problems_dict[plink]
+            fproblems_dict["total_submissions"] += 1
             if uid:
-                friends_problems_dict[plink]["users"].add(uid)
+                fproblems_dict["users"].add(uid)
             else:
-                friends_problems_dict[plink]["custom_users"].add(cid)
-
-        if uid:
-            problems_dict[plink]["users"].add(uid)
-        else:
-            problems_dict[plink]["custom_users"].add(cid)
+                fproblems_dict["custom_users"].add(cid)
 
     # Sort the rows according to the number of users
     # who solved the problem in last PAST_DAYS
