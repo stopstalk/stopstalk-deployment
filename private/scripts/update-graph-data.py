@@ -32,6 +32,8 @@
 # python web2py.py -S stopstalk -M -R applications/stopstalk/private/scripts/update-graph-data.py -A codechef,codeforces,hackerrank batch 5 100
 
 import requests, re, os, sys, json, gevent, pickle
+from getpass import getuser
+from pwd import getpwnam
 from gevent import monkey
 gevent.monkey.patch_all(thread=False)
 
@@ -47,6 +49,7 @@ NOT_FOUND = "NOT_FOUND"
 OTHER_FAILURE = "OTHER_FAILURE"
 REQUEST_FAILURES = (SERVER_FAILURE, NOT_FOUND, OTHER_FAILURE)
 INVALID_HANDLES = set([(row.handle, row.site.lower()) for row in db(db.invalid_handle).select()])
+DIR_PATH = "./applications/stopstalk/graph_data/"
 
 # -----------------------------------------------------------------------------
 def get_request(url, headers={}, timeout=current.TIMEOUT, params={}):
@@ -88,12 +91,10 @@ class User:
     def __init__(self, user_id, handles, user_record, custom=False):
         self.handles = handles
         self.custom = custom
+        self.pickle_file_path = DIR_PATH + str(user_id) + ".pickle"
         if custom:
-            self.pickle_file_path = "./applications/stopstalk/graph_data/" + \
-                                    str(user_id) + "_custom.pickle"
-        else:
-            self.pickle_file_path = "./applications/stopstalk/graph_data/" + \
-                                    str(user_id) + ".pickle"
+            self.pickle_file_path.replace(".pickle", "_custom.pickle")
+
         self.contest_mapping = {}
         self.previous_graph_data = None
         self.graph_data = dict([(x.lower() + "_data", []) for x in current.SITES])
@@ -269,6 +270,13 @@ class User:
                     if len(contest_data["data"]) < len(previous_value):
                         contest_data = previous_value
         pickle.dump(self.graph_data, open(self.pickle_file_path, "wb"))
+
+        if getuser() == "root":
+            # For production machine as nginx runs with www-data
+            # and it can't delete these files else
+            www_data = getpwnam("www-data")
+            os.chown(self.pickle_file_path, www_data.pw_uid, www_data.pw_gid)
+
         print "Writing to filesystem done"
 
     def update_graph_data(self, sites):
@@ -336,3 +344,11 @@ if __name__ == "__main__":
     for user_object in user_objects:
         print user_object.get_debug_statement(),
         user_object.update_graph_data(sites)
+
+    if getuser() == "root":
+        dir_stats = os.stat(DIR_PATH)
+        www_data = getpwnam("www-data")
+        if dir_stats.st_uid != www_data.pw_uid or \
+           dir_stats.st_gid != www_data.pw_gid:
+            print "Changing user and group for", DIR_PATH
+            os.chown(DIR_PATH, www_data.pw_uid, www_data.pw_gid)
