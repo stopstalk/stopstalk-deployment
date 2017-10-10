@@ -380,7 +380,11 @@
             }
         });
 
-        $('.modal-trigger').modal();
+        $('#stopstalk-handle').modal();
+        $('#profile-add-to-my-custom-friend').click(function() {
+            $('#stopstalk-handle').modal('open');
+        });
+
         /* Color the handles accordingly */
         $.ajax({
             url: handleDetailsURL,

@@ -372,6 +372,47 @@ def unsubscribe():
     return dict(form=form)
 
 # ----------------------------------------------------------------------------
+def get_custom_users():
+    stopstalk_handle = request.vars["stopstalk_handle"]
+    atable = db.auth_user
+    cftable = db.custom_friend
+
+    row = db(atable.stopstalk_handle == stopstalk_handle).select().first()
+    if row:
+        custom_users = db(cftable.user_id == row.id).select()
+        table = TABLE(THEAD(TR(TH(T("Name")),
+                               TH(T("Site Handles")))),
+                      _class="centered")
+        tbody = TBODY()
+        for user in custom_users:
+            tr = TR(TD(A(user.first_name + " " + user.last_name,
+                         _href=URL("user", "profile",
+                                   args=[user.stopstalk_handle],
+                                   extension=False),
+                         _class="custom-user-list-name",
+                         _target="_blank")))
+            td = TD()
+            for site in current.SITES:
+                if user[site.lower() + "_handle"]:
+                    td.append(A(DIV(IMG(_src=get_static_url("images/" + \
+                                                            site.lower() + \
+                                                            "_logo.png")),
+                                    user[site.lower() + "_handle"],
+                                    _style="background-color: #e4e4e4; color: black;",
+                                    _class="chip"),
+                                _href=current.get_profile_url(site,
+                                                              user[site.lower() + "_handle"]),
+                                _class="custom-user-modal-site-profile",
+                                _target="_blank"))
+            tr.append(td)
+            tbody.append(tr)
+
+        table.append(tbody)
+        return dict(content=table)
+    else:
+        return dict(content="Something went wrong")
+
+# ----------------------------------------------------------------------------
 def log_contest():
     """
         Logging contests into DB
@@ -531,6 +572,7 @@ def leaderboard():
 
     specific_institute = False
     atable = db.auth_user
+    cftable = db.custom_friend
 
     global_leaderboard = False
     if request.vars.has_key("global"):
@@ -545,7 +587,7 @@ def leaderboard():
             global_leaderboard = True
 
     heading = T("Global Leaderboard")
-    afields = ["first_name", "last_name", "institute", "rating", "per_day",
+    afields = ["id", "first_name", "last_name", "institute", "rating", "per_day",
                "stopstalk_handle", "prev_rating", "per_day_change", "country"]
 
     aquery = (atable.id > 0)
@@ -573,35 +615,48 @@ def leaderboard():
         heading = T("Country Leaderboard")
         aquery &= (atable.country == reverse_country_mapping[request.vars["country"]])
     reg_users = db(aquery).select(*afields)
-
+    reg_user_ids = [x.id for x in reg_users]
     users = []
+
+    cnt_star = cftable.id.count()
+    group_query = cftable.user_id.belongs(reg_users)
+    custom_friends_count = db(group_query).select(cftable.user_id,
+                                                  cnt_star,
+                                                  groupby=cftable.user_id)
+    custom_friends_count = dict([(x["custom_friend"]["user_id"],
+                                  x["_extra"]["COUNT(custom_friend.id)"]) for x in custom_friends_count])
 
     def _update_users(user_list):
 
         for user in user_list:
             record = user
+            try:
+              cf_count = custom_friends_count[user.id]
+            except KeyError:
+              cf_count = 0
             users.append((user.first_name + " " + user.last_name,
                           user.stopstalk_handle,
                           user.institute,
                           int(record.rating),
                           float(record.per_day_change),
                           int(record.rating) - int(record.prev_rating),
-                          record.country))
+                          record.country,
+                          cf_count))
 
     _update_users(reg_users)
 
     # Sort users according to the rating
     users = sorted(users, key=lambda x: x[3], reverse=True)
 
-    table = TABLE(_class="centered bordered")
-    table.append(THEAD(TR(TH(T("Rank")),
-                          TH(T("Country")),
+    table = TABLE(_class="bordered")
+    table.append(THEAD(TR(TH(T("Rank"), _class="center-align"),
+                          TH(T("Country"), _class="center-align"),
                           TH(T("Name")),
                           TH(T("StopStalk Handle")),
                           TH(T("Institute")),
-                          TH(T("StopStalk Rating")),
-                          TH(T("Rating Changes")),
-                          TH(T("Per Day Changes")))))
+                          TH(T("StopStalk Rating"), _class="center-align"),
+                          TH(T("Rating Changes"), _class="center-align"),
+                          TH(T("Per Day Changes"), _class="center-align"))))
 
     tbody = TBODY()
     rank = 1
@@ -609,7 +664,7 @@ def leaderboard():
     for i in users:
         tr = TR()
         append = tr.append
-        append(TD(str(rank) + "."))
+        append(TD(str(rank) + ".", _class="center-align"))
         if i[6]:
             append(TD(A(SPAN(_class="flag-icon flag-icon-" + \
                                   current.all_countries[i[6]].lower(),
@@ -618,10 +673,21 @@ def leaderboard():
                         _href=URL("default", "leaderboard",
                                   vars={"global": global_leaderboard,
                                         "q": institute if specific_institute else "",
-                                        "country": current.all_countries[i[6]]}))))
+                                        "country": current.all_countries[i[6]]})),
+                      _class="center-align"))
         else:
-            append(TD())
-        append(TD(DIV(DIV(i[0]))))
+            append(TD(_class="center-align"))
+
+        if i[7]:
+            append(TD(DIV(i[0], _class="left"),
+                      DIV(BUTTON(i[7], _class="custom-user-count btn-floating btn-very-small tooltipped",
+                                 data={"position": "right",
+                                       "delay": "50",
+                                       "tooltip": T("Number of custom users"),
+                                       "stopstalk-handle": i[1]}),
+                          _class="right")))
+        else:
+            append(TD(DIV(i[0], _class="left")))
         append(TD(A(i[1],
                     _href=URL("user", "profile", args=[i[1]]),
                     _class="leaderboard-stopstalk-handle",
@@ -632,27 +698,31 @@ def leaderboard():
                               "leaderboard",
                               vars={"q": i[2],
                                     "global": global_leaderboard}))))
-        append(TD(i[3]))
+        append(TD(i[3], _class="center-align"))
         if i[5] > 0:
-            append(TD(B("+" + str(i[5])), _class="green-text text-darken-2"))
+            append(TD(B("+" + str(i[5])),
+                      _class="green-text text-darken-2 center-align"))
         elif i[5] < 0:
-            append(TD(B(i[5]), _class="red-text text-darken-2"))
+            append(TD(B(i[5]), _class="red-text text-darken-2 center-align"))
         else:
-            append(TD(i[5], _class="blue-text text-darken-2"))
+            append(TD(i[5], _class="blue-text text-darken-2 center-align"))
 
         diff = "{:1.5f}".format(i[4])
 
         if float(diff) == 0.0:
             append(TD("+" + diff, " ",
-                      I(_class="fa fa-minus")))
+                      I(_class="fa fa-minus"),
+                      _class="center-align"))
         elif i[4] > 0:
             append(TD("+" + str(diff), " ",
                       I(_class="fa fa-chevron-circle-up",
-                        _style="color: #0f0;")))
+                        _style="color: #0f0;"),
+                      _class="center-align"))
         elif i[4] < 0:
             append(TD(diff, " ",
                       I(_class="fa fa-chevron-circle-down",
-                        _style="color: #f00;")))
+                        _style="color: #f00;"),
+                      _class="center-align"))
 
         tbody.append(tr)
         rank += 1

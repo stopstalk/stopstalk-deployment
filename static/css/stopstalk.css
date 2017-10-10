@@ -44,6 +44,23 @@ a {
     background-color: #536dfe;
 }
 
+.btn-very-small {
+    background-color: darkcyan;
+    height: 20px;
+    width: 20px;
+    line-height: 14px;
+}
+
+.btn-very-small:hover, .btn-very-small:focus {
+    opacity: 0.8;
+    background-color: darkcyan;
+}
+
+.btn-very-small:visited {
+    background-color: darkcyan;
+    opacity: 1;
+}
+
 .dropdown-content li > a, .dropdown-content li > span {
     color: #536dfe;
 }
