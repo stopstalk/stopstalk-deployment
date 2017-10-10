@@ -97,7 +97,7 @@
                                 {{elif flag != "my-custom-user" and custom == True:}}
                                     <th>
                                         {{if auth.is_logged_in():}}
-                                            <a id="profile-add-to-my-custom-friend" href="#stopstalk-handle" class="tooltipped btn-floating btn-large waves-effect waves-light modal-trigger purple" data-position="bottom" data-delay="50" data-tooltip="{{=T('Add to my Custom Friend List')}}">
+                                            <a id="profile-add-to-my-custom-friend" class="tooltipped btn-floating btn-large waves-effect waves-light purple" data-position="bottom" data-delay="50" data-tooltip="{{=T('Add to my Custom Friend List')}}">
                                                 <i class="fa fa-plus fa-3x"></i>
                                             </a>
                                         {{else:}}

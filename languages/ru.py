@@ -331,4 +331,7 @@
 "Country Leaderboard": "Country Leaderboard",
 "Contest Activity on": "Contest Activity on",
 "Search Site Tags...": "Search Site Tags...",
-"Testimonials": "Testimonials"}
+"Testimonials": "Testimonials",
+"Number of custom users": "Number of custom users",
+"List of custom users created by ": "List of custom users created by ",
+"Site Handles": "Site Handles"}

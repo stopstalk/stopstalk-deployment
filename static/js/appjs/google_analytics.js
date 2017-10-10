@@ -106,6 +106,9 @@
         addEventListener('.leaderboard-country-flag', 'Leaderboard Country');
         addEventListener('.leaderboard-stopstalk-handle', 'Leaderboard StopStalk handle');
         addEventListener('#leaderboard-switch', 'Leaderboard Switch');
+        addEventListener('.custom-user-count', 'Open custom user list');
+        addEventListener('.custom-user-list-name', 'Custom user name in Modal');
+        addEventListener('.custom-user-modal-site-profile', 'Custom user Site Profile in Modal');
     };
 
     var addTagsPageButtonsToGA = function() {
