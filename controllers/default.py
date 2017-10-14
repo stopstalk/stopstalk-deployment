@@ -450,6 +450,10 @@ def contests():
 
     start_date = today.date()
     end_date = start_date + datetime.timedelta(90)
+    site_mapping = {"CODECHEF": "CodeChef",
+                    "CODEFORCES": "Codeforces",
+                    "HACKERRANK": "HackerRank",
+                    "HACKEREARTH": "HackerEarth"}
     url = "https://contesttrackerapi.herokuapp.com/"
     response = requests.get(url)
     if response.status_code == 200:
@@ -479,7 +483,7 @@ def contests():
     left_tooltip_attrs = {"position": "left", "delay": "50"}
 
     for i in ongoing:
-        if i["Platform"] in ("TOPCODER", "OTHER"):
+        if i["Platform"] not in site_mapping:
             continue
 
         try:
@@ -503,6 +507,7 @@ def contests():
         append(TD(IMG(_src=get_static_url("images/" + \
                                           str(i["Platform"]).lower() + \
                                           "_small.png"),
+                      _title=site_mapping[i["Platform"]],
                       _style=icon_style)))
 
         append(TD("-"))
@@ -522,7 +527,7 @@ def contests():
 
     for i in upcoming:
 
-        if i["Platform"] in ("TOPCODER", "OTHER"):
+        if i["Platform"] not in site_mapping:
             continue
 
         start_time = datetime.datetime.strptime(i["StartTime"],
@@ -533,6 +538,7 @@ def contests():
         append(TD(IMG(_src=get_static_url("images/" + \
                                           str(i["Platform"]).lower() + \
                                           "_small.png"),
+                      _title=site_mapping[i["Platform"]],
                       _style=icon_style)))
 
         append(TD(str(start_time), _class="stopstalk-timestamp"))

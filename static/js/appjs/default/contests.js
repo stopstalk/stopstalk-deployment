@@ -170,7 +170,7 @@
             .each(function() {
 
                 var contestName = this.children[0].textContent;
-                var siteName = this.children[1].children[0].src.match(/images\/(.*)small.png/)[1].slice(0, -1);
+                var siteName = this.children[1].children[0].title;
                 var startTime = this.children[2].textContent;
                 // Note this will always be duration and not endtime
                 var duration = this.children[3].textContent;
@@ -273,7 +273,7 @@
         $(document).on('click', '.set-reminder:not(.disabled)', function() {
             var children = this.parentElement.parentElement.children,
                 contestName = children[0].textContent,
-                siteName = children[1].children[0].src.match(/images\/(.*)small.png/)[1].slice(0, -1),
+                siteName = children[1].children[0].title,
                 startTime = children[2].textContent,
                 duration = children[3].textContent, // Note this will always be duration and not endtime
                 contestLink = children[4].firstChild.href;
@@ -285,7 +285,7 @@
         $('.view-contest').click(function() {
             var children = this.parentElement.parentElement.children,
                 contestName = children[0].textContent,
-                siteName = children[1].children[0].src.match(/images\/(.*)small.png/)[1].slice(0, -1),
+                siteName = children[1].children[0].title,
                 contestLink = children[4].firstChild.href;
 
             logContest(contestName, siteName, contestLink, "View");
