@@ -84,7 +84,7 @@
                                         <span>{{if row.country:}} {{=SPAN(_class="flag-icon flag-icon-" + current.all_countries[row.country].lower(), _title=row.country)}}  &nbsp; {{pass}}</span>
                                         <strong><b>{{=name}}</b></strong>
                                         {{if cf_count:}}
-                                            <button class="custom-user-count btn-floating cuser-count-button tooltipped" data-position="right" data-delay="50" data-tooltip="{{=T('Number of custom users')}}" data-stopstalk-handle="{{=row.stopstalk_handle}}">{{=cf_count}}</button>
+                                            <button class="custom-user-count-profile-page btn-floating cuser-count-button tooltipped" data-position="right" data-delay="50" data-tooltip="{{=T('Number of custom users')}}" data-stopstalk-handle="{{=row.stopstalk_handle}}">{{=cf_count}}</button>
                                         {{pass}}
                                     </h4>
                                 </th>
