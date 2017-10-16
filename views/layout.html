@@ -58,7 +58,7 @@
         }
 
         #welcome > li > a {
-            color: #536dfe;
+            color: #424242;
         }
 
         body {
@@ -158,32 +158,39 @@
     <header>
     <ul id="welcome" class="dropdown-content" style="min-width: 190px; color: #536dfe;">
         {{if session["user_id"]:}}
-            <li><a href="{{=URL('user', 'profile')}}" data-button-label="Nav User Profile" class="nav-dropdown">{{=T("Profile")}}</a></li>
-            <li><a href="{{=URL('user', 'submissions')}}" data-button-label="Nav My Submissions" class="nav-dropdown">{{=T("My Submissions")}}</a></li>
-            <li><a href="{{=URL('user', 'update_details')}}" data-button-label="Nav Update Details" class="nav-dropdown">{{=T("Update Details")}}</a></li>
-            <li><a href="{{=URL('default', 'updates')}}" data-button-label="Nav Feature Updates" class="nav-dropdown">{{=T("Feature Updates")}}</a></li>
-            <li><a href="{{=URL('default', 'unsubscribe')}}" data-button-label="Nav Unsubscribe" class="nav-dropdown">{{=T("Unsubscribe")}}</a></li>
+            <li><a href="{{=URL('user', 'profile')}}" data-analytics-label="Nav User Profile" class="nav-dropdown">{{=T("Profile")}}</a></li>
+            <li><a href="{{=URL('user', 'submissions')}}" data-analytics-label="Nav My Submissions" class="nav-dropdown">{{=T("My Submissions")}}</a></li>
+            <li><a href="{{=URL('user', 'update_details')}}" data-analytics-label="Nav Update Details" class="nav-dropdown">{{=T("Update Details")}}</a></li>
+            <li><a href="{{=URL('default', 'unsubscribe')}}" data-analytics-label="Nav Unsubscribe" class="nav-dropdown">{{=T("Unsubscribe")}}</a></li>
             <li class="divider"></li>
-            <li><a href="{{=URL('default', 'user', args=['logout'])}}" data-button-label="Nav Logout" class="nav-dropdown">{{=T("Logout")}}</a></li>
+            <li><a href="{{=URL('default', 'user', args=['logout'])}}" data-analytics-label="Nav Logout" class="nav-dropdown">{{=T("Logout")}}</a></li>
         {{else:}}
-            <li><a href="{{=URL('default', 'user', args=['login'])}}" data-button-label="Nav Login" class="nav-dropdown">{{=T("Login")}}</a></li>
-            <li><a href="{{=URL('default', 'user', args=['register'])}}" data-button-label="Nav Register" class="nav-dropdown">{{=T("Register")}}</a></li>
-            <li><a href="{{=URL('default', 'updates')}}" data-button-label="" class="nav-dropdown">{{=T("Feature Updates")}}</a></li>
+            <li><a href="{{=URL('default', 'user', args=['login'])}}" data-analytics-label="Nav Login" class="nav-dropdown">{{=T("Login")}}</a></li>
+            <li><a href="{{=URL('default', 'user', args=['register'])}}" data-analytics-label="Nav Register" class="nav-dropdown">{{=T("Register")}}</a></li>
+            <li><a href="{{=URL('default', 'updates')}}" data-analytics-label="" class="nav-dropdown">{{=T("Feature Updates")}}</a></li>
+        {{pass}}
+    </ul>
+    <ul id="slide-out" class="side-nav">
+        {{if response.menu:}}
+            <table id="side-nav-table">
+                {{for nav_item in response.menu:}}
+                    <tr class="side-nav-item" data-url="{{=nav_item[3]}}" data-analytics-label="{{=nav_item[2]}}">
+                        <td></td>
+                        <td>{{=nav_item[0]}}</td>
+                        <td>{{=nav_item[1]}}{{=nav_item[4]}}</td>
+                    </tr>
+                {{pass}}
+            </table>
         {{pass}}
     </ul>
     <nav style="background-color: #536dfe">
     <div class="nav-wrapper">
-        <a href="{{=URL('default', 'index')}}">
-            <img src="{{=get_static_url('images/StopStalk.png')}}" style="position: absolute; left: 0px; height: 60px; width: 200px; padding: 5px;"/>
+        <a id="open-side-nav" data-activates="slide-out" class="left"><i class="fa fa-bars fa-2x"></i></a>
+        <a href="{{=URL('default', 'index')}}" class="left" style="height: 100%; margin-left: 5px;">
+            <img src="{{=get_static_url('images/StopStalk.png')}}" style="margin-top: 2px; height: 60px; width: 200px; padding: 7px;"/>
         </a>
         <div class="right">
             <span class="left">
-                {{if response.menu:}}
-                    {{=MENU(response.menu,
-                            _class='nav navbar-nav',
-                            li_class='dropdown',
-                            ul_class='dropdown-menu')}}
-                {{pass}}
             </span>
             <ul class="right" style="float: left;">
                 <li><a class="dropdown-button left" href="" data-activates="welcome"><i class="fa fa-sort-down fa-2x"></i></a></li>

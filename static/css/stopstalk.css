@@ -261,3 +261,28 @@ blockquote {
 nav ul a:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
+
+#open-side-nav {
+    padding-left: 14px;
+    cursor: pointer;
+}
+
+#side-nav-table tr:hover {
+    background-color: rgba(0,0,0,0.05);
+    border-radius: 0px;
+    cursor: pointer;
+}
+
+#side-nav-table td:hover {
+    border-radius: 0px;
+}
+
+#side-nav-table td {
+    border-radius: 0px;
+    color: #424242;
+}
+
+.side-nav span.badge {
+    margin-top: 0px;
+    background-color: mediumvioletred;
+}

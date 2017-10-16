@@ -36,17 +36,15 @@ response.google_analytics_id = None
 
 response.menu = []
 
-def get_tooltip_data(tooltip):
-    return dict(position="bottom", delay="40", tooltip=tooltip)
-
-def get_menu_tuple(icon_class, tooltip, button_label, url):
-    return (SPAN(I(_class="fa fa-2x tooltipped " + icon_class,
-                   data=get_tooltip_data(tooltip)),
-                 _class="stopstalk-nav",
-                 data={"button-label": button_label}),
-            False,
-            url,
-            [])
+def get_menu_tuple(icon_class, tooltip, button_label, url, new_item=False):
+    item_tuple = [I(_class="fa fa-2x " + icon_class),
+                  tooltip,
+                  button_label,
+                  url,
+                  ""]
+    if new_item:
+        item_tuple[4] = SPAN(_class="new badge")
+    return item_tuple
 
 if session.user_id:
     response.menu += [get_menu_tuple("fa-bell-o",
@@ -93,7 +91,13 @@ response.menu += [get_menu_tuple("fa-search",
                   get_menu_tuple("fa-heart",
                                  T("Testimonials"),
                                  "Nav Testimonials",
-                                 URL("testimonials", "index"))]
+                                 URL("testimonials", "index"),
+                                 True),
+                  get_menu_tuple("fa-bullhorn",
+                                 T("Feature Updates"),
+                                 "Nav Feature Updates",
+                                 URL("default", "updates"),
+                                 True)]
 
 if "auth" in locals(): auth.wikimenu()
 
