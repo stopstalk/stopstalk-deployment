@@ -387,7 +387,7 @@
 
         $('#custom-users-modal').modal();
 
-        $('.custom-user-count').click(function() {
+        $('.custom-user-count-profile-page').click(function() {
             var $this = $(this);
             $('#custom-users-modal').modal('open');
 
