@@ -101,6 +101,17 @@
             delay: 50
         });
 
+        $('#open-side-nav').click(function() {
+            if (typeof ga !== 'undefined') {
+                ga('send', {
+                    hitType: 'event',
+                    eventCategory: 'button',
+                    eventAction: 'click',
+                    eventLabel: 'Open Side Navbar'
+                });
+            }
+        });
+
         $('#open-side-nav').sideNav();
 
         // Remove focus from any focused element
