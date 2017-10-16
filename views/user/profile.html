@@ -56,10 +56,17 @@
         var getGraphDataURL = '{{=URL("user", "get_graph_data", extension="json")}}';
         var contestGraphData = null;
         var linechartAvailable = '{{=row.graph_data_retrieved}}';
+        var getCustomUserURL = "{{=URL('default', 'get_custom_users', extension='json')}}";
     </script>
     <script src="{{=get_static_url('js/appjs/user/profile.js')}}" type="text/javascript"></script>
   </head>
   <body>
+    <div id="custom-users-modal" class="modal center">
+        <div class="modal-content">
+            <h5 id="custom-users-modal-header">{{=T("List of custom users created by ")}}{{=row.stopstalk_handle}}</h5>
+            <div id="custom-users-list"></div>
+        </div>
+    </div>
     {{if nouser:}}
         <div id="no-user">
             <h5>{{=T("Invalid StopStalk handle in the URL.")}}</h5>
@@ -76,6 +83,9 @@
                                     <h4>
                                         <span>{{if row.country:}} {{=SPAN(_class="flag-icon flag-icon-" + current.all_countries[row.country].lower(), _title=row.country)}}  &nbsp; {{pass}}</span>
                                         <strong><b>{{=name}}</b></strong>
+                                        {{if cf_count:}}
+                                            <button class="custom-user-count btn-floating cuser-count-button tooltipped" data-position="right" data-delay="50" data-tooltip="{{=T('Number of custom users')}}" data-stopstalk-handle="{{=row.stopstalk_handle}}">{{=cf_count}}</button>
+                                        {{pass}}
                                     </h4>
                                 </th>
                                 <th>

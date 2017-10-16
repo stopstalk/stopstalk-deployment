@@ -61,6 +61,24 @@ a {
     opacity: 1;
 }
 
+.cuser-count-button {
+    background-color: darkcyan;
+    height: 30px;
+    width: 30px;
+    line-height: 20px;
+    bottom: 3px;
+}
+
+.cuser-count-button:hover, .cuser-count-button:focus {
+    opacity: 0.8;
+    background-color: darkcyan;
+}
+
+.cuser-count-button:visited {
+    background-color: darkcyan;
+    opacity: 1;
+}
+
 .dropdown-content li > a, .dropdown-content li > span {
     color: #536dfe;
 }

@@ -567,11 +567,13 @@ def profile():
     custom = False
     actual_handle = handle
     parent_user = None
+    cf_count = 0
+    cftable = db.custom_friend
     output = {}
     output["nouser"] = False
 
     if len(rows) == 0:
-        query = (db.custom_friend.stopstalk_handle == handle)
+        query = (cftable.stopstalk_handle == handle)
         rows = db(query).select()
         if len(rows) == 0:
             # No such user exists
@@ -586,7 +588,7 @@ def profile():
                            row.user_id.stopstalk_handle)
             if row.duplicate_cu:
                 flag = "duplicate-custom"
-                original_row = db.custom_friend(row.duplicate_cu)
+                original_row = cftable(row.duplicate_cu)
                 actual_handle = row.stopstalk_handle
                 handle = original_row.stopstalk_handle
                 original_row["first_name"] = row.first_name
@@ -674,6 +676,11 @@ def profile():
                                                      row[site.lower() + \
                                                          '_handle'])
     output["profile_urls"] = profile_urls
+    if custom is False:
+        cf_count = db(cftable.user_id == row.id).count()
+
+    output["cf_count"] = cf_count
+
     return output
 
 # ------------------------------------------------------------------------------

@@ -115,4 +115,5 @@ if __name__ == "__main__":
     if files != []:
         current_timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         for filename in files:
+            print "Updating timestamp for", filename
             REDIS_CLIENT.set(filename, current_timestamp)

@@ -385,6 +385,28 @@
             $('#stopstalk-handle').modal('open');
         });
 
+        $('#custom-users-modal').modal();
+
+        $('.custom-user-count').click(function() {
+            var $this = $(this);
+            $('#custom-users-modal').modal('open');
+
+            if ($('#custom-users-list').html() === '') {
+                // Just one time AJAX call to populate the modal table
+                $.ajax({
+                    url: getCustomUserURL,
+                    method: 'GET',
+                    data: {'stopstalk_handle': $this.data('stopstalk-handle')},
+                    success: function(response) {
+                        $('#custom-users-list').html(response["content"]);
+                    },
+                    error: function(err) {
+                        $.web2py.flash("Something went wrong");
+                    }
+                })
+            }
+        });
+
         /* Color the handles accordingly */
         $.ajax({
             url: handleDetailsURL,
