@@ -13,7 +13,7 @@
     var addEventListener = function(selector, label, buttonLabel) {
         $(document).on('click', selector, function() {
             if (buttonLabel) {
-                sendToGA('button', $(this).data("button-label"));
+                sendToGA('button', $(this).data("analytics-label"));
             } else {
                 sendToGA('button', label);
             }
@@ -21,7 +21,7 @@
     };
 
     var addNavItemsToGA = function() {
-        addEventListener('.stopstalk-nav', '', true);
+        addEventListener('.side-nav-item', '', true);
         addEventListener('.nav-dropdown', '', true);
     };
 
@@ -72,6 +72,7 @@
         addEventListener('.custom-user-count', 'Open custom user list');
         addEventListener('.custom-user-list-name', 'Custom user name in Modal');
         addEventListener('.custom-user-modal-site-profile', 'Custom user Site Profile in Modal');
+        addEventListener('#open-side-nav', 'Open Side Navbar');
     };
 
     var addProblemPageButtonsToGA = function() {

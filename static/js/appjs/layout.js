@@ -101,10 +101,16 @@
             delay: 50
         });
 
+        $('#open-side-nav').sideNav();
+
         // Remove focus from any focused element
         if (document.activeElement) {
             document.activeElement.blur();
         }
+
+        $(document).on('click', '.side-nav-item', function() {
+            window.open($(this).data('url'), '_blank');
+        });
 
         $(document).on('mouseenter', 'tr', function() {
             var todoIcon = $(this).find('.add-to-todo-list');
