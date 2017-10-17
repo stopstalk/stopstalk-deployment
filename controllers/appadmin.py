@@ -79,12 +79,12 @@ else:
 
 ignore_rw = True
 response.view = 'appadmin.html'
-if menu:
-    response.menu = [[T('design'), False, URL('admin', 'default', 'design',
-                 args=[request.application])], [T('db'), False,
-                 URL('index')], [T('state'), False,
-                 URL('state')], [T('cache'), False,
-                 URL('ccache')]]
+# if menu:
+#     response.menu = [[T('design'), False, URL('admin', 'default', 'design',
+#                  args=[request.application])], [T('db'), False,
+#                  URL('index')], [T('state'), False,
+#                  URL('state')], [T('cache'), False,
+#                  URL('ccache')]]
 
 # ##########################################################
 # ## auxiliary functions
