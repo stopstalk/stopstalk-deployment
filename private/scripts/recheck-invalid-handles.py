@@ -147,8 +147,8 @@ if __name__ == "__main__":
 #            for row in handle_to_row[site][site_handle]:
 #                print "\t\t", row.first_name, row.last_name, row.stopstalk_handle
 
-    update_dict = {"rating": 0,
-                   "prev_rating": 0,
+    update_dict = {"stopstalk_rating": 0,
+                   "stopstalk_prev_rating": 0,
                    "per_day": 0.0,
                    "per_day_change": "0.0",
                    "authentic": False}

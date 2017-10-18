@@ -209,8 +209,8 @@ def update_details():
 
             # Reset the user only if any of the profile site handle is updated
             query = (atable.id == session.user_id)
-            db(query).update(rating=0,
-                             prev_rating=0,
+            db(query).update(stopstalk_rating=0,
+                             stopstalk_prev_rating=0,
                              per_day=0.0,
                              per_day_change="0.0",
                              authentic=False,
@@ -315,8 +315,8 @@ def update_friend():
                 submission_query &= (stable.site.belongs(reset_sites))
 
                 form.vars["duplicate_cu"] = None
-                form.vars["rating"] = 0
-                form.vars["prev_rating"] = 0
+                form.vars["stopstalk_rating"] = 0
+                form.vars["stopstalk_prev_rating"] = 0
                 form.vars["per_day"] = 0.0
                 form.vars["per_day_change"] = "0.0"
                 form.vars["graph_data_retrieved"] = False

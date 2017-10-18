@@ -573,7 +573,7 @@ def updates():
 # ------------------------------------------------------------------------------
 def leaderboard():
     """
-        Get a table with users sorted by rating
+        Get a table with users sorted by StopStalk rating
     """
 
     specific_institute = False
@@ -593,8 +593,8 @@ def leaderboard():
             global_leaderboard = True
 
     heading = T("Global Leaderboard")
-    afields = ["id", "first_name", "last_name", "institute", "rating", "per_day",
-               "stopstalk_handle", "prev_rating", "per_day_change", "country"]
+    afields = ["id", "first_name", "last_name", "institute", "stopstalk_rating", "per_day",
+               "stopstalk_handle", "stopstalk_prev_rating", "per_day_change", "country"]
 
     aquery = (atable.id > 0)
     if global_leaderboard is False:
@@ -643,9 +643,9 @@ def leaderboard():
             users.append((user.first_name + " " + user.last_name,
                           user.stopstalk_handle,
                           user.institute,
-                          int(record.rating),
+                          record.stopstalk_rating,
                           float(record.per_day_change),
-                          int(record.rating) - int(record.prev_rating),
+                          record.stopstalk_rating - record.stopstalk_prev_rating,
                           record.country,
                           cf_count))
 

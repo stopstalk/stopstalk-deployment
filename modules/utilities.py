@@ -322,15 +322,15 @@ def compute_row(record,
     rating = int(rating)
 
     if update_flag:
-        record.update_record(prev_rating=record.rating)
-    if record.rating != rating:
-        rating_diff = rating - int(record.rating)
+        record.update_record(stopstalk_prev_rating=record.stopstalk_rating)
+    if record.stopstalk_rating != rating:
+        rating_diff = rating - record.stopstalk_rating
         table = db.custom_friend if custom else db.auth_user
         # Update the rating ONLY when the function
         # is called by update-leaderboard.py
         query = (table.stopstalk_handle == record.stopstalk_handle)
         db(query).update(per_day=per_day,
-                         rating=rating,
+                         stopstalk_rating=rating,
                          per_day_change=str(diff))
     else:
         rating_diff = 0
