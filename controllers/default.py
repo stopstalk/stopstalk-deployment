@@ -620,39 +620,31 @@ def leaderboard():
     if request.vars.has_key("country") and request.vars["country"]:
         heading = T("Country Leaderboard")
         aquery &= (atable.country == reverse_country_mapping[request.vars["country"]])
-    reg_users = db(aquery).select(*afields)
+    reg_users = db(aquery).select(*afields, orderby=~atable.stopstalk_rating)
+
     reg_user_ids = [x.id for x in reg_users]
-    users = []
 
     cnt_star = cftable.id.count()
-    group_query = cftable.user_id.belongs(reg_users)
+    group_query = cftable.user_id.belongs(reg_user_ids)
     custom_friends_count = db(group_query).select(cftable.user_id,
                                                   cnt_star,
                                                   groupby=cftable.user_id)
     custom_friends_count = dict([(x["custom_friend"]["user_id"],
                                   x["_extra"]["COUNT(custom_friend.id)"]) for x in custom_friends_count])
 
-    def _update_users(user_list):
-
-        for user in user_list:
-            record = user
-            try:
-              cf_count = custom_friends_count[user.id]
-            except KeyError:
-              cf_count = 0
-            users.append((user.first_name + " " + user.last_name,
-                          user.stopstalk_handle,
-                          user.institute,
-                          record.stopstalk_rating,
-                          float(record.per_day_change),
-                          record.stopstalk_rating - record.stopstalk_prev_rating,
-                          record.country,
-                          cf_count))
-
-    _update_users(reg_users)
-
-    # Sort users according to the rating
-    users = sorted(users, key=lambda x: x[3], reverse=True)
+    users = []
+    for user in reg_users:
+        cf_count = 0
+        if user.id in custom_friends_count:
+            cf_count = custom_friends_count[user.id]
+        users.append((user.first_name + " " + user.last_name,
+                      user.stopstalk_handle,
+                      user.institute,
+                      user.stopstalk_rating,
+                      float(user.per_day_change),
+                      user.stopstalk_rating - user.stopstalk_prev_rating,
+                      user.country,
+                      cf_count))
 
     table = TABLE(_class="bordered")
     table.append(THEAD(TR(TH(T("Rank"), _class="center-align"),
@@ -666,7 +658,6 @@ def leaderboard():
 
     tbody = TBODY()
     rank = 1
-
     for i in users:
         tr = TR()
         append = tr.append
@@ -740,6 +731,7 @@ def leaderboard():
                           T("Global"))),
                  _class="switch")
     div = TAG[""](switch, table)
+
     return dict(div=div,
                 heading=heading,
                 global_leaderboard=global_leaderboard)
