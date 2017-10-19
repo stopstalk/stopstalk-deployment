@@ -180,10 +180,6 @@ input[type=range] + .thumb {
     background-color: #536dfe;
 }
 
-.spinner-layer {
-    border-color: #536dfe;
-}
-
 .picker__date-display {
     background-color: #FFC107;
 }
@@ -285,4 +281,12 @@ nav ul a:hover {
 .side-nav span.badge {
     margin-top: 0px;
     background-color: mediumvioletred;
+}
+
+.per-day-increase {
+    color: #0f0;
+}
+
+.per-day-decrease {
+    color: #f00;
 }

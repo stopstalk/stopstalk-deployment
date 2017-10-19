@@ -620,6 +620,11 @@ def leaderboard():
     if request.vars.has_key("country") and request.vars["country"]:
         heading = T("Country Leaderboard")
         aquery &= (atable.country == reverse_country_mapping[request.vars["country"]])
+
+    if request.extension == "html":
+        return dict(heading=heading,
+                    global_leaderboard=global_leaderboard)
+
     reg_users = db(aquery).select(*afields, orderby=~atable.stopstalk_rating)
 
     reg_user_ids = [x.id for x in reg_users]
@@ -637,104 +642,21 @@ def leaderboard():
         cf_count = 0
         if user.id in custom_friends_count:
             cf_count = custom_friends_count[user.id]
+
+        country_details = None
+        if user.country in current.all_countries:
+            country_details = [current.all_countries[user.country], user.country]
+
         users.append((user.first_name + " " + user.last_name,
                       user.stopstalk_handle,
                       user.institute,
                       user.stopstalk_rating,
                       float(user.per_day_change),
                       user.stopstalk_rating - user.stopstalk_prev_rating,
-                      user.country,
+                      country_details,
                       cf_count))
 
-    table = TABLE(_class="bordered")
-    table.append(THEAD(TR(TH(T("Rank"), _class="center-align"),
-                          TH(T("Country"), _class="center-align"),
-                          TH(T("Name")),
-                          TH(T("StopStalk Handle")),
-                          TH(T("Institute")),
-                          TH(T("StopStalk Rating"), _class="center-align"),
-                          TH(T("Rating Changes"), _class="center-align"),
-                          TH(T("Per Day Changes"), _class="center-align"))))
-
-    tbody = TBODY()
-    rank = 1
-    for i in users:
-        tr = TR()
-        append = tr.append
-        append(TD(str(rank) + ".", _class="center-align"))
-        if i[6]:
-            append(TD(A(SPAN(_class="flag-icon flag-icon-" + \
-                                  current.all_countries[i[6]].lower(),
-                             _title=i[6]),
-                        _class="leaderboard-country-flag",
-                        _href=URL("default", "leaderboard",
-                                  vars={"global": global_leaderboard,
-                                        "q": institute if specific_institute else "",
-                                        "country": current.all_countries[i[6]]})),
-                      _class="center-align"))
-        else:
-            append(TD(_class="center-align"))
-
-        if i[7]:
-            append(TD(DIV(i[0], _class="left"),
-                      DIV(BUTTON(i[7], _class="custom-user-count btn-floating btn-very-small tooltipped",
-                                 data={"position": "right",
-                                       "delay": "50",
-                                       "tooltip": T("Number of custom users"),
-                                       "stopstalk-handle": i[1]}),
-                          _class="right")))
-        else:
-            append(TD(DIV(i[0], _class="left")))
-        append(TD(A(i[1],
-                    _href=URL("user", "profile", args=[i[1]]),
-                    _class="leaderboard-stopstalk-handle",
-                    _target="_blank")))
-        append(TD(A(i[2],
-                    _class="leaderboard-institute",
-                    _href=URL("default",
-                              "leaderboard",
-                              vars={"q": i[2],
-                                    "global": global_leaderboard}))))
-        append(TD(i[3], _class="center-align"))
-        if i[5] > 0:
-            append(TD(B("+" + str(i[5])),
-                      _class="green-text text-darken-2 center-align"))
-        elif i[5] < 0:
-            append(TD(B(i[5]), _class="red-text text-darken-2 center-align"))
-        else:
-            append(TD(i[5], _class="blue-text text-darken-2 center-align"))
-
-        diff = "{:1.5f}".format(i[4])
-
-        if float(diff) == 0.0:
-            append(TD("+" + diff, " ",
-                      I(_class="fa fa-minus"),
-                      _class="center-align"))
-        elif i[4] > 0:
-            append(TD("+" + str(diff), " ",
-                      I(_class="fa fa-chevron-circle-up",
-                        _style="color: #0f0;"),
-                      _class="center-align"))
-        elif i[4] < 0:
-            append(TD(diff, " ",
-                      I(_class="fa fa-chevron-circle-down",
-                        _style="color: #f00;"),
-                      _class="center-align"))
-
-        tbody.append(tr)
-        rank += 1
-
-    table.append(tbody)
-    switch = DIV(LABEL(H6(T("Friends"),
-                          INPUT(_type="checkbox", _id="leaderboard-switch"),
-                          SPAN(_class="lever pink accent-3"),
-                          T("Global"))),
-                 _class="switch")
-    div = TAG[""](switch, table)
-
-    return dict(div=div,
-                heading=heading,
-                global_leaderboard=global_leaderboard)
+    return dict(users=users)
 
 # ----------------------------------------------------------------------------
 def user():
