@@ -290,3 +290,7 @@ nav ul a:hover {
 .per-day-decrease {
     color: #f00;
 }
+
+.side-nav, #sidenav-overlay, .drag-target {
+    top: 64px;
+}
