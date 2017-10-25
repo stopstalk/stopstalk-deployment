@@ -112,7 +112,7 @@ class Profile(object):
             # A daily submitter of more than 500 submissions is really
             # supposed to contact us to prove he/she is a human :p
             url += "&count=500"
-            timeout = current.TIMEOUT
+            timeout = 10
         else:
             url += "&count=50000"
 
