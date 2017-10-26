@@ -120,7 +120,7 @@
         }
 
         $(document).on('click', '.side-nav-item', function() {
-            window.open($(this).data('url'), '_blank');
+            window.location.href = $(this).data('url');
         });
 
         $(document).on('mouseenter', 'tr', function() {
