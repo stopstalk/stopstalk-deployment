@@ -93,7 +93,7 @@ class User:
         self.custom = custom
         self.pickle_file_path = DIR_PATH + str(user_id) + ".pickle"
         if custom:
-            self.pickle_file_path.replace(".pickle", "_custom.pickle")
+            self.pickle_file_path = self.pickle_file_path.replace(".pickle", "_custom.pickle")
 
         self.contest_mapping = {}
         self.previous_graph_data = None
@@ -300,20 +300,21 @@ def get_user_objects(aquery=None, cquery=None, sites=None):
         users += db(cquery).select().records
 
     for user in users:
+        this_user = None
         if "custom_friend" in user:
             custom = True
-            user = user["custom_friend"]
+            this_user = user["custom_friend"]
         else:
             custom = False
-            user = user["auth_user"]
+            this_user = user["auth_user"]
 
         user_dict = {}
         for site in sites:
             site_handle = site + "_handle"
-            if user[site_handle] != "" and \
-               (user[site_handle], site) not in INVALID_HANDLES:
-                user_dict[site_handle] = user[site_handle]
-        user_objects.append(User(user.id, user_dict, user, custom))
+            if this_user[site_handle] != "" and \
+               (this_user[site_handle], site) not in INVALID_HANDLES:
+                user_dict[site_handle] = this_user[site_handle]
+        user_objects.append(User(this_user.id, user_dict, this_user, custom))
 
     return user_objects
 
@@ -324,9 +325,9 @@ if __name__ == "__main__":
     if sys.argv[2] == "batch":
         index = int(sys.argv[3])
         N = int(sys.argv[4])
-        user_objects = get_user_objects((atable.id % N == index),
-                                        (cftable.id % N == index),
-                                        sites)
+        user_objects = get_user_objects(aquery=(atable.id % N == index),
+                                        cquery=(cftable.id % N == index),
+                                        sites=sites)
     elif sys.argv[2] == "specific_user":
         if sys.argv[3] == "normal":
             user_objects = get_user_objects(aquery=(atable.id == int(sys.argv[4])),
@@ -335,8 +336,8 @@ if __name__ == "__main__":
             user_objects = get_user_objects(cquery=(cftable.id == int(sys.argv[4])),
                                             sites=sites)
     elif sys.argv[2] == "new_user":
-        user_objects = get_user_objects((atable.graph_data_retrieved != True),
-                                        (cftable.graph_data_retrieved != True),
+        user_objects = get_user_objects(aquery=(atable.graph_data_retrieved != True),
+                                        cquery=(cftable.graph_data_retrieved != True),
                                         sites=sites)
     else:
         print "Invalid Arguments"
