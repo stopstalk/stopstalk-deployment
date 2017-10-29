@@ -1033,21 +1033,19 @@ def search():
         Show the list of registered users
     """
 
-    # Get all the list of institutes for the dropdown
-    itable = db.institutes
-    all_institutes = db(itable).select(itable.name,
-                                       orderby=itable.name)
-    all_institutes = [x.name.strip("\"") for x in all_institutes]
-    all_institutes.append("Other")
+    if request.extension == "html":
+        # Get all the list of institutes for the dropdown
+        itable = db.institutes
+        all_institutes = db(itable).select(itable.name,
+                                           orderby=itable.name)
+        all_institutes = [x.name.strip("\"") for x in all_institutes]
+        all_institutes.append("Other")
 
-    country_name_list = current.all_countries.keys()
-    country_name_list.sort()
+        country_name_list = current.all_countries.keys()
+        country_name_list.sort()
 
-    # Return if form is not submitted
-    if len(request.get_vars) == 0:
         return dict(all_institutes=all_institutes,
-                    country_name_list=country_name_list,
-                    table=DIV())
+                    country_name_list=country_name_list)
 
     atable = db.auth_user
     ftable = db.following
@@ -1090,7 +1088,6 @@ def search():
 
     rows = db(query).select(*columns,
                             orderby=[atable.first_name, atable.last_name])
-
     table = TABLE(_class="bordered centered")
     tr = TR(TH(T("Name")), TH(T("Site handles")))
 
@@ -1172,10 +1169,7 @@ def search():
         tbody.append(tr)
 
     table.append(tbody)
-
-    return dict(all_institutes=all_institutes,
-                country_name_list=country_name_list,
-                table=table)
+    return dict(table=table)
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()

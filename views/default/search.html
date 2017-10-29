@@ -10,16 +10,22 @@
     </title>
 </head>
 <h1>{{=T("Search for")}} {{if auth.is_logged_in():}} {{=T("Friends")}} {{else:}} {{=T("Users")}} {{pass}} {{=T("on StopStalk")}}</h1>
+<script type="text/javascript">
+    var searchURL = "{{=URL('default', 'search', extension='json')}}";
+    var country = "{{=request.vars.get('country', '')}}";
+    var institute = "{{=request.vars.get('institute', '')}}";
+    var searchQuery = "{{=request.vars.get('q', '')}}";
+</script>
 <script src="{{=get_static_url('js/appjs/default/search.js')}}"></script>
-<form class="col s12" action="" method="GET">
+<form id="searchUserForm" class="col s12" action="" method="GET">
     <div class="row center">
         <div class="input-field col offset-s1 s3">
-            <input id="searchInput" name="q" value="{{=request.vars.get('q', '')}}" type="text" class="center">
+            <input id="searchInput" name="q" value="{{=request.vars.get('q', '')}}" type="text">
             <label for="searchInput">{{=T("Search")}}</label>
         </div>
         <div class="col s4">
             <select id="institute" name="institute" class="center browser-default" style="margin-top: 4%;">
-                <option value="" disabled selected>{{=T("Institute")}}</option>
+                <option value="" selected>{{=T("Institute")}}</option>
                 {{for institute in all_institutes:}}
                     <option value="{{=institute}}" {{='selected' if request.vars.get('institute', '') == institute else ''}}>{{=institute}}</option>
                 {{pass}}
@@ -27,7 +33,7 @@
         </div>
         <div class="col s3">
             <select id="country" name="country" class="center browser-default" style="margin-top: 5%;">
-                <option value="" disabled selected>{{=T("Country")}}</option>
+                <option value="" selected>{{=T("Country")}}</option>
                 {{for country in country_name_list:}}
                     <option value="{{=country}}" {{='selected' if request.vars.get('country', '') == country else ''}}>{{=country}}</option>
                 {{pass}}
@@ -38,4 +44,4 @@
         <input type='submit' value='{{=T("Search")}}'/>
     </div>
 </form>
-{{=table}}
+<div id="user-list"></div>
