@@ -11,7 +11,7 @@ Primary style
 
 body {
   font-size: 100%;
-  background-color: #e9f0f5;
+  background-color: white;
 }
 
 a {
@@ -213,7 +213,7 @@ Main components
   background: white;
   border-radius: 0.25em;
   padding: 1em;
-  box-shadow: 0 3px 0 #d7e4ed;
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);
 }
 .cd-timeline-content:after {
   content: "";
@@ -278,7 +278,7 @@ Main components
     top: 24px;
     left: 100%;
     border-color: transparent;
-    border-left-color: white;
+    border-left-color: rgba(83,108,254, 0.6);
   }
   .cd-timeline-content .cd-read-more {
     float: left;
@@ -299,7 +299,7 @@ Main components
     left: auto;
     right: 100%;
     border-color: transparent;
-    border-right-color: white;
+    border-right-color: rgba(83,108,254, 0.6);
   }
   .cd-timeline-block:nth-child(even) .cd-timeline-content .cd-read-more {
     float: right;
