@@ -174,9 +174,9 @@
             <table id="side-nav-table">
                 {{for nav_item in response.menu:}}
                     <tr class="side-nav-item" data-url="{{=nav_item[3]}}" data-analytics-label="{{=nav_item[2]}}">
-                        <td></td>
-                        <td>{{=nav_item[0]}}</td>
-                        <td>{{=nav_item[1]}}{{=nav_item[4]}}</td>
+                        <td><a href="{{=nav_item[3]}}" class="side-nav-links"/></td>
+                        <td><a href="{{=nav_item[3]}}" class="side-nav-links">{{=nav_item[0]}}</a></td>
+                        <td><a href="{{=nav_item[3]}}" class="side-nav-links">{{=nav_item[1]}}{{=nav_item[4]}}</a></td>
                     </tr>
                 {{pass}}
             </table>

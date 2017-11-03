@@ -276,6 +276,22 @@ nav ul a:hover {
 #side-nav-table td {
     border-radius: 0px;
     color: #424242;
+    padding: 0 5px;
+}
+
+#side-nav-table .fa {
+    line-height: 100%;
+    vertical-align: middle;
+}
+
+#side-nav-table .side-nav-links {
+    text-decoration: none;
+    color: inherit;
+    height: 62px;
+    display: inline-block;
+    line-height: 62px;
+    width: 100%;
+    vertical-align: middle;
 }
 
 .side-nav span.badge {
