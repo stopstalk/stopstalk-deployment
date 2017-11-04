@@ -401,6 +401,18 @@ def notify_institute_users(record):
         query_values = ",".join([str((int(x.id), int(record.id))) for x in rows]).replace(" ", "")
         db.executesql("INSERT INTO institute_user(send_to_id,user_registered_id) VALUES %s;" % query_values)
 
+def create_next_retrieval_record(record, custom=False):
+    """
+        Create a record corresponding to the new user
+
+        @param record (Row): Record with the new user details
+        @param custom (Boolean): If the user is a custom user
+    """
+    if custom:
+        db.next_retrieval.insert(custom_user_id=record.id)
+    else:
+        db.next_retrieval.insert(user_id=record.id)
+
 # -----------------------------------------------------------------------------
 def register_callback(form):
     """
@@ -435,10 +447,13 @@ Referrer: %s\n""" % (form.vars.first_name,
 
 auth.settings.register_onvalidation = [sanitize_fields]
 auth.settings.register_onaccept.append(register_callback)
+auth.settings.verify_email_onaccept.extend([notify_institute_users,
+                                            create_next_retrieval_record])
 auth.settings.verify_email_onaccept.append(notify_institute_users)
 current.auth = auth
 current.response.formstyle = materialize_form
 current.sanitize_fields = sanitize_fields
+current.create_next_retrieval_record = create_next_retrieval_record
 
 #########################################################################
 ## Define your tables below (or better in another model file) for example
@@ -613,6 +628,14 @@ db.define_table("unsubscriber",
                       default=True,
                       label=T("Notify when a user adds/removes me as a friend")),
                 Field("time_stamp", "datetime"))
+
+nr_fields = [Field("user_id", "reference auth_user"),
+             Field("custom_user_id", "reference custom_friend")]
+
+for site in current.SITES:
+    nr_fields.append(Field(site.lower() + "_delay", "integer", default=1))
+
+db.define_table("next_retrieval", *nr_fields)
 
 site_fields = []
 for site in current.SITES:

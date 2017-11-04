@@ -847,6 +847,7 @@ def custom_friend():
 
     if form.accepted:
         session.flash = T("Submissions will be added in some time")
+        current.create_next_retrieval_record(form.vars, custom=True)
         redirect(URL("default", "submissions", args=[1]))
 
     return dict(form=form,
