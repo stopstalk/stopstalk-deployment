@@ -154,8 +154,19 @@ def query_by_table_type(tablename, db, request=request):
 # ## list all databases and tables
 # ###########################################################
 def index():
-    return dict(databases=databases)
+    return dict(databases=databases,
+                disabled_sites=current.REDIS_CLIENT.smembers("disabled_retrieval"))
 
+def disable_site():
+    sitename = request.vars.get("sitename", None)
+    if request.vars.get("addremove", None) == "on":
+        session.flash = "Retrieval enabled for " + sitename
+        current.REDIS_CLIENT.srem("disabled_retrieval", sitename)
+    else:
+        session.flash = "Retrieval disabled for " + sitename
+        current.REDIS_CLIENT.sadd("disabled_retrieval", sitename)
+    redirect(URL("appadmin", "index"))
+    return dict()
 
 # ##########################################################
 # ## insert a new record

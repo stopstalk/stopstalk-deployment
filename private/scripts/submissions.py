@@ -305,6 +305,11 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
     retrieval_failures = []
     plink_to_id = {}
 
+    disabled_sites = current.REDIS_CLIENT.smembers("disabled_retrieval")
+    for site in disabled_sites:
+        if site in all_sites:
+            all_sites.remove(site)
+
     if "CodeForces" in all_sites:
         ptable = db.problem
         query = ptable.link.contains("codeforces")
@@ -330,6 +335,8 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
         if site_handle:
             Site = globals()[site.lower()]
             P = Site.Profile(site_handle)
+
+            # Retrieve submissions from the profile site
             site_method = P.get_submissions
             if site == "CodeForces":
                 submissions = site_method(last_retrieved, plink_to_id)

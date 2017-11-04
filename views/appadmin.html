@@ -53,6 +53,32 @@
       {{=LOAD('appadmin', 'hooks', ajax=True)}}
       </div>
   </div>
+  <!-- Disable site retrieval in case of any downtime-->
+  {{if len(disabled_sites):}}
+    <p class="red-text">Submission retrieval disabled for: {{=",".join(disabled_sites)}}</p>
+  {{else:}}
+    <p class="green-text">Submission retrieval enabled for all sites</p>
+  {{pass}}
+  <div class="row center">
+    <form class="col s12" action="{{=URL('appadmin', 'disable_site')}}" method="POST">
+      <div class="row">
+      <div class="input-field col offset-s3 s6">
+        <input name="sitename" placeholder="Disable site submission retrieval" />
+      </div>
+      </div>
+      <div class="row">
+      <div>
+        <input id="add-remove" type="checkbox" name="addremove"/>
+        <label for="add-remove">Remove from Disabled sites</label>
+      </div>
+      </div>
+      <div class="row">
+      <div class="input-field">
+        <input type="submit" value="Disable"/>
+      </div>
+      </div>
+    </form>
+  </div>
 {{elif request.function=='select':}}
   <h2>{{=XML(str(T("Database %s select"))%A(request.args[0],_href=URL('index'))) }}
   </h2>
