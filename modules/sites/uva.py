@@ -93,7 +93,7 @@ class Profile(object):
             try:
                 problem_name = uvaproblems[row[1]]
             except KeyError:
-                print "Problem name not found in uva problem list"
+                print "Problem name not found in uva problem list: " + str(row[1])
                 continue
             curr_date_timestamp = str(datetime.datetime.fromtimestamp(row[4]))
             curr = time.strptime(curr_date_timestamp, "%Y-%m-%d %H:%M:%S")
