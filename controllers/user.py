@@ -571,6 +571,8 @@ def profile():
     cftable = db.custom_friend
     output = {}
     output["nouser"] = False
+    output["show_refresh_now"] = False
+    output["can_update"] = False
 
     if len(rows) == 0:
         query = (cftable.stopstalk_handle == handle)
@@ -589,6 +591,9 @@ def profile():
             if row.duplicate_cu:
                 flag = "duplicate-custom"
                 original_row = cftable(row.duplicate_cu)
+                if auth.is_logged_in():
+                    output["show_refresh_now"] = (row.user_id == session.user_id)
+                output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).days > 0
                 actual_handle = row.stopstalk_handle
                 handle = original_row.stopstalk_handle
                 original_row["first_name"] = row.first_name
@@ -599,12 +604,18 @@ def profile():
                 output["user_id"] = row.duplicate_cu
                 row = original_row
             else:
+                output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).days > 0
+                if auth.is_logged_in():
+                    output["show_refresh_now"] = (row.user_id == session.user_id)
                 output["user_id"] = row.id
             output["row"] = row
     else:
         row = rows.first()
         output["user_id"] = row.id
+        output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).days > 0
         output["row"] = row
+        if auth.is_logged_in():
+            output["show_refresh_now"] = (row.id == session.user_id)
 
     last_updated = str(max([row[site.lower() + "_lr"] for site in current.SITES]))
     if last_updated == current.INITIAL_DATE:
@@ -680,8 +691,21 @@ def profile():
         cf_count = db(cftable.user_id == row.id).count()
 
     output["cf_count"] = cf_count
-
+    print output["can_update"]
     return output
+
+# ------------------------------------------------------------------------------
+@auth.requires_login()
+def add_to_refresh_now():
+    print session.user_id
+    print request.vars
+    custom = request.vars.get("custom", None)
+    stopstalk_handle = request.vars.get("stopstalk_handle", None)
+    if None in (custom, stopstalk_handle):
+        raise HTTP(400, "Bad request")
+        return
+
+    return "Successfully submitted request"
 
 # ------------------------------------------------------------------------------
 def submissions():
