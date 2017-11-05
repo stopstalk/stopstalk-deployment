@@ -44,6 +44,20 @@ def handles_updated(record, form):
     return updated_sites
 
 # -----------------------------------------------------------------------------
+def pretty_string(all_items):
+    """
+        Helper function to get a valid English statement for a list
+
+        @param all_items (Set): Set of items to be joined into English string
+        @return (String): Pretty string
+    """
+    all_items = list(all_items)
+    if len(all_items) == 1:
+        return all_items[0]
+    else:
+        return ", ".join(all_items[:-1]) + " and " + all_items[-1]
+
+# -----------------------------------------------------------------------------
 def urltosite(url):
     """
         Helper function to extract site from url

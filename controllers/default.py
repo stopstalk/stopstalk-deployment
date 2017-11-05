@@ -1395,7 +1395,8 @@ def submissions():
                 cusfriends=cusfriends,
                 total_rows=len(rows),
                 country=country,
-                country_form=country_form)
+                country_form=country_form,
+                utilities=utilities)
 
 # ----------------------------------------------------------------------------
 def faq():
