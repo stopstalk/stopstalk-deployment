@@ -24,7 +24,7 @@ import time
 import traceback
 import gevent
 import sys
-from datetime import datetime
+import datetime
 from gevent import monkey
 gevent.monkey.patch_all(thread=False)
 
@@ -162,7 +162,7 @@ WHERE link in (%s);
 
     if len(to_be_inserted):
         sql_query = ""
-        today = datetime.now().strftime("%Y-%m-%d")
+        today = datetime.datetime.now().strftime("%Y-%m-%d")
         insert_value = ""
         value_string = "(" + ",".join(["\"%s\""] * 8) + ",%s,%s)"
         for plink in to_be_inserted:
@@ -304,6 +304,8 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
     list_of_submissions = []
     retrieval_failures = []
     plink_to_id = {}
+    nrtable = db.next_retrieval
+    nrtable_record = db(nrtable["custom_user_id" if custom else "user_id"] == record.id).select().first()
 
     disabled_sites = current.REDIS_CLIENT.smembers("disabled_retrieval")
     for site in disabled_sites:
@@ -324,12 +326,18 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
 
         site_handle = record[site.lower() + "_handle"]
         site_lr = site.lower() + "_lr"
+        site_delay = site.lower() + "_delay"
         last_retrieved = record[site_lr]
         last_retrieved = time.strptime(str(last_retrieved), time_conversion)
 
+        # Rocked it totally ! ;)
+        if datetime.timedelta(days=nrtable_record[site_delay]) + \
+           last_retrieved.date() > datetime.datetime.today().date():
+           continue
+
         if (site_handle, site) in INVALID_HANDLES:
             print "Not found %s %s" % (site_handle, site)
-            record.update({site_lr: datetime.now()})
+            record.update({site_lr: datetime.datetime.now()})
             continue
 
         if site_handle:
@@ -351,16 +359,16 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
                 handle_not_found(site, site_handle)
                 # Update the last retrieved of an invalid handle as we don't
                 # want new_user script to pick this user again and again
-                record.update({site_lr: datetime.now()})
+                record.update({site_lr: datetime.datetime.now()})
             else:
                 list_of_submissions.append((site, submissions))
                 # Immediately update the last_retrieved of the record
                 # Note: Only the record object is updated & not reflected in DB
-                record.update({site_lr: datetime.now()})
+                record.update({site_lr: datetime.datetime.now()})
         else:
             # Update this time so that this user is not picked
             # up again and again by new_user cron
-            record.update({site_lr: datetime.now()})
+            record.update({site_lr: datetime.datetime.now()})
 
     for submissions in list_of_submissions:
         site = submissions[0]
