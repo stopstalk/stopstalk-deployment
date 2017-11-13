@@ -372,12 +372,16 @@
                 method: 'POST',
                 data: {stopstalk_handle: stopstalkHandle, custom: custom},
                 success: function(response) {
+                    if (response === "FAILURE") {
+                        $.web2py.flash("Something went wrong");
+                        return;
+                    }
                     canUpdate = false;
                     $button.addClass("disabled");
-                    Materialize.toast("Your submissions will be updated in 5 minutes", 10000);
+                    Materialize.toast("Your submissions will be updated in 5 minutes", 8000);
                 },
                 error: function(err) {
-                    $.web2py.flash("Error submitting your request");
+                    $.web2py.flash("Something went wrong");
                     console.log(err);
                 }
             });

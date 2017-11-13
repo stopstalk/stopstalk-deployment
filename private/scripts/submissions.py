@@ -499,6 +499,28 @@ def specific_user():
         users.append(atable(user_id))
     return (users, custom_users)
 
+# ----------------------------------------------------------------------------
+def refreshed_users():
+    """
+        Get the user_ids and custom_user_ids who requested for updates
+
+        @return (Tuple): (list of user_ids, list of custom_user_ids)
+    """
+
+    rusers = current.REDIS_CLIENT.smembers("next_retrieve_user")
+    current.REDIS_CLIENT.srem("next_retrieve_user", *rusers)
+
+    rcustom_users = current.REDIS_CLIENT.smembers("next_retrieve_custom_user")
+    current.REDIS_CLIENT.srem("next_retrieve_custom_user", *rcustom_users)
+
+    users = []
+    custom_users = []
+    for user_id in rusers:
+        users.append(atable(int(user_id)))
+    for user_id in rcustom_users:
+        custom_users.append(cftable(int(user_id)))
+    return (users, custom_users)
+
 if __name__ == "__main__":
 
     retrieval_type = sys.argv[1]
@@ -511,6 +533,8 @@ if __name__ == "__main__":
         users, custom_users = re_retrieve()
     elif retrieval_type == "specific_user":
         users, custom_users = specific_user()
+    elif retrieval_type == "refreshed_users":
+        users, custom_users = refreshed_users()
     else:
         print "Invalid arguments"
         sys.exit()

@@ -691,20 +691,41 @@ def profile():
         cf_count = db(cftable.user_id == row.id).count()
 
     output["cf_count"] = cf_count
-    print output["can_update"]
+
     return output
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()
 def add_to_refresh_now():
-    print session.user_id
-    print request.vars
     custom = request.vars.get("custom", None)
     stopstalk_handle = request.vars.get("stopstalk_handle", None)
     if None in (custom, stopstalk_handle):
-        raise HTTP(400, "Bad request")
-        return
+        return "FAILURE"
 
+    db_table = db.custom_friend if custom == "True" else db.auth_user
+    row = db(db_table.stopstalk_handle == stopstalk_handle).select().first()
+    if row is None:
+        return "FAILURE"
+
+    authorized = False
+    user_id = row.id
+    if custom == "True":
+        authorized |= row.user_id == session.user_id
+        user_id = row.duplicate_cu if row.duplicate_cu else row.id
+    else:
+        authorized |= row.id == session.user_id
+
+    authorized &= (datetime.datetime.now() - row.refreshed_timestamp).days > 0
+
+    if not authorized:
+        return "FAILURE"
+    else:
+        if custom == "True":
+            current.REDIS_CLIENT.sadd("next_retrieve_custom_user", user_id)
+        else:
+            current.REDIS_CLIENT.sadd("next_retrieve_user", user_id)
+
+    row.update_record(refreshed_timestamp=datetime.datetime.now())
     return "Successfully submitted request"
 
 # ------------------------------------------------------------------------------
