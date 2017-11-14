@@ -721,9 +721,9 @@ def add_to_refresh_now():
         return "FAILURE"
     else:
         if custom == "True":
-            current.REDIS_CLIENT.sadd("next_retrieve_custom_user", user_id)
+            current.REDIS_CLIENT.rpush("next_retrieve_custom_user", user_id)
         else:
-            current.REDIS_CLIENT.sadd("next_retrieve_user", user_id)
+            current.REDIS_CLIENT.rpush("next_retrieve_user", user_id)
 
     row.update_record(refreshed_timestamp=datetime.datetime.now())
     return "Successfully submitted request"

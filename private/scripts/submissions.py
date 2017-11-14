@@ -507,18 +507,22 @@ def refreshed_users():
         @return (Tuple): (list of user_ids, list of custom_user_ids)
     """
 
-    rusers = current.REDIS_CLIENT.smembers("next_retrieve_user")
-    current.REDIS_CLIENT.srem("next_retrieve_user", *rusers)
+    custom = (sys.argv[2] == "custom")
+    users = set([])
+    custom_users = set([])
 
-    rcustom_users = current.REDIS_CLIENT.smembers("next_retrieve_custom_user")
-    current.REDIS_CLIENT.srem("next_retrieve_custom_user", *rcustom_users)
+    if custom:
+        while current.REDIS_CLIENT.llen("next_retrieve_custom_user") and \
+              len(custom_users) < 10:
+            custom_users.add(int(current.REDIS_CLIENT.lpop("next_retrieve_custom_user")))
+    else:
+        while current.REDIS_CLIENT.llen("next_retrieve_user") and \
+              len(users) < 10:
+            users.add(int(current.REDIS_CLIENT.lpop("next_retrieve_user")))
 
-    users = []
-    custom_users = []
-    for user_id in rusers:
-        users.append(atable(int(user_id)))
-    for user_id in rcustom_users:
-        custom_users.append(cftable(int(user_id)))
+    users = [atable(user_id) for user_id in users]
+    custom_users = [cftable(user_id) for user_id in custom_users]
+
     return (users, custom_users)
 
 if __name__ == "__main__":

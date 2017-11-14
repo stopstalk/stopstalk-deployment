@@ -378,7 +378,11 @@
                     }
                     canUpdate = false;
                     $button.addClass("disabled");
-                    Materialize.toast("Your submissions will be updated in 5 minutes", 8000);
+                    if (custom === 'True') {
+                        Materialize.toast("Custom user submissions will be updated in 20 minutes", 8000);
+                    } else {
+                        Materialize.toast("Your submissions will be updated in 5 minutes", 8000);
+                    }
                 },
                 error: function(err) {
                     $.web2py.flash("Something went wrong");
