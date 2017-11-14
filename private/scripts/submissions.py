@@ -35,6 +35,7 @@ problem_solved_stats = {}
 
 atable = db.auth_user
 cftable = db.custom_friend
+nrtable = db.next_retrieval
 
 SERVER_FAILURE = "SERVER_FAILURE"
 NOT_FOUND = "NOT_FOUND"
@@ -522,6 +523,15 @@ def refreshed_users():
 
     users = [atable(user_id) for user_id in users]
     custom_users = [cftable(user_id) for user_id in custom_users]
+
+    update_fields = dict([(site.lower() + "_delay", 1) for site in current.SITES])
+    for user in users:
+        record = db(nrtable.user_id == user.id).select().first()
+        record.update_record(**update_fields)
+
+    for custom_user in custom_users:
+        record = db(nrtable.custom_user_id == custom_user.id).select().first()
+        record.update_record(**update_fields)
 
     return (users, custom_users)
 
