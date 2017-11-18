@@ -113,6 +113,10 @@ class Profile(object):
             else:
                 points = "0"
 
+            if row[5] not in languages:
+                print "****************** Language: " + str(row[5]) + " not found ******************"
+                continue
+
             submissions.append((curr_date_timestamp,
                                 problem_url_prefix + str(row[1]),
                                 problem_name,

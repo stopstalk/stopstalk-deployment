@@ -453,7 +453,6 @@ auth.settings.register_onvalidation = [sanitize_fields]
 auth.settings.register_onaccept.append(register_callback)
 auth.settings.verify_email_onaccept.extend([notify_institute_users,
                                             create_next_retrieval_record])
-auth.settings.verify_email_onaccept.append(notify_institute_users)
 current.auth = auth
 current.response.formstyle = materialize_form
 current.sanitize_fields = sanitize_fields
