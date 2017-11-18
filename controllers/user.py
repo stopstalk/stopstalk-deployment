@@ -556,7 +556,7 @@ def profile():
         if auth.is_logged_in():
             handle = str(session.handle)
         else:
-            redirect(URL("default", "index"))
+            redirect(URL("default", "user", "login"))
     else:
         handle = str(request.args[0])
 
