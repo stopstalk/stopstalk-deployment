@@ -162,6 +162,10 @@ extra_fields = [Field("institute",
                 Field("graph_data_retrieved", "boolean",
                       default=False,
                       readable=False,
+                      writable=False),
+                Field("refreshed_timestamp",
+                      "datetime",
+                      default=initial_date,
                       writable=False)]
 
 site_handles = []
@@ -522,6 +526,10 @@ custom_friend_fields = [Field("user_id", "reference auth_user"),
                         Field("graph_data_retrieved", "boolean",
                               default=False,
                               readable=False,
+                              writable=False),
+                        Field("refreshed_timestamp",
+                              "datetime",
+                              default=initial_date,
                               writable=False)]
 
 custom_friend_fields += site_handles

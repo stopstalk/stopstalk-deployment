@@ -363,6 +363,35 @@
         });
     }
 
+    var handleRefreshNow = function() {
+        if (!canUpdate) return;
+        $(document).on('click', '#update-my-submissions', function() {
+            var $button = $(this);
+            $.ajax({
+                url: refreshNowURL,
+                method: 'POST',
+                data: {stopstalk_handle: stopstalkHandle, custom: custom},
+                success: function(response) {
+                    if (response === "FAILURE") {
+                        $.web2py.flash("Something went wrong");
+                        return;
+                    }
+                    canUpdate = false;
+                    $button.addClass("disabled");
+                    if (custom === 'True') {
+                        Materialize.toast("Custom user submissions will be updated in 20 minutes", 8000);
+                    } else {
+                        Materialize.toast("Your submissions will be updated in 5 minutes", 8000);
+                    }
+                },
+                error: function(err) {
+                    $.web2py.flash("Something went wrong");
+                    console.log(err);
+                }
+            });
+        });
+    };
+
     $(document).ready(function() {
 
         /* Get the details about the solved/unsolved problems */
@@ -422,6 +451,8 @@
                 $siteChip.parent().attr("data-tooltip", mapping[val]);
             });
         });
+
+        handleRefreshNow();
 
         $('.friends-button').click(function() {
             var thisButton = $(this),
