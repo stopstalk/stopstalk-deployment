@@ -61,6 +61,8 @@
         addEventListener('#toggle-submission-graph', 'Toggle Submission Graph');
         addEventListener('.popup-contest-page', 'Contest Page button on User Profile');
         addEventListener('.custom-user-count-profile-page', 'Custom user count on User Profile');
+        addEventListener('#update-my-submissions', 'Refresh my submissions');
+        addEventListener('#disabled-update-my-submissions', 'Disabled refresh my submissions');
     };
 
     var addMiscellaneousToGA = function() {
