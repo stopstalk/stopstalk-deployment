@@ -91,12 +91,12 @@
         var $tbody = $($("#leaderboard-table tbody")[0]);
         $.each(userList, function(_, row) {
             $tbody.append("<tr><td class='center-align'>" + rank.toString() +
-                          ".</td><td class='center-align'>" + getCountryTD(row[6]) +
-                          "</td><td>" + getNameTD(row[0], row[1], row[7]) +
+                          ".</td><td class='center-align'>" + getCountryTD(row[5]) +
+                          "</td><td>" + getNameTD(row[0], row[1], row[6]) +
                           "</td><td>" + getStopStalkHandleTD(row[1]) +
                           "</td><td>" + getInstituteTD(row[2]) +
                           "</td><td class='center-align'>" + row[3] +
-                          "</td><td class='center-align'>" + getRatingChangesTD(row[5]) +
+                          // "</td><td class='center-align'>" + getRatingChangesTD(row[5]) +
                           "</td><td class='center-align'>" + getPerDayChangesTD(row[4]) +
                           "</td></tr>");
             ++rank;

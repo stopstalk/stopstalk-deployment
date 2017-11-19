@@ -28,15 +28,8 @@ db = current.db
 atable = db.auth_user
 cftable = db.custom_friend
 
-users = db(atable).select()
-registered_users = []
-for user in users:
-    registered_users.append(user)
-
+registered_users = db(atable).select()
 custom_users = db(cftable).select()
-custom_friends = []
-for custom_user in custom_users:
-    custom_friends.append(custom_user)
 
 # Find the total solved problems(Lesser than total accepted)
 solved_count = {}
@@ -51,35 +44,28 @@ for user in tmplist:
     solved_count[user[0]] = user[1]
 
 complete_dict = {}
-# Prepare a list of stopstalk_handles of the
-# users relevant to the requested leaderboard
-friends_stopstalk_handles = []
 for x in registered_users:
-    friends_stopstalk_handles.append("'" + x.stopstalk_handle + "'")
     complete_dict[x.stopstalk_handle] = []
 
 for custom_user in custom_users:
     stopstalk_handle = custom_user.stopstalk_handle
     if custom_user.duplicate_cu:
         stopstalk_handle = cftable(custom_user.duplicate_cu).stopstalk_handle
-    friends_stopstalk_handles.append("'" + stopstalk_handle + "'")
     complete_dict[stopstalk_handle] = []
-
-if friends_stopstalk_handles == []:
-    friends_stopstalk_handles = ["-1"]
 
 # Build the complex SQL query
 sql_query = """
                 SELECT stopstalk_handle, DATE(time_stamp), COUNT(*) as cnt
                 FROM submission
-                WHERE stopstalk_handle in (%s)
                 GROUP BY stopstalk_handle, DATE(submission.time_stamp)
                 ORDER BY time_stamp;
-            """ % (", ".join(friends_stopstalk_handles))
+            """
 
 user_rows = db.executesql(sql_query)
 
 for user in user_rows:
+    if user[0] not in complete_dict:
+        complete_dict[user[0]] = []
     if complete_dict[user[0]] != []:
         complete_dict[user[0]].append((user[1], user[2]))
     else:
@@ -103,7 +89,7 @@ tmplist = db.executesql(sql)
 for user in tmplist:
     solved_count[user[0]] = user[1]
 
-for user in custom_friends:
+for user in custom_users:
     try:
         if user.duplicate_cu:
             orig_user = cftable(user.duplicate_cu)
