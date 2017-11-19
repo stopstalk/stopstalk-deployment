@@ -652,7 +652,7 @@ def leaderboard():
                       user.institute,
                       user.stopstalk_rating,
                       float(user.per_day_change),
-                      user.stopstalk_rating - user.stopstalk_prev_rating,
+                      # user.stopstalk_rating - user.stopstalk_prev_rating,
                       country_details,
                       cf_count))
 
