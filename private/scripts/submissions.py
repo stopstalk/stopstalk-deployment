@@ -43,6 +43,7 @@ OTHER_FAILURE = "OTHER_FAILURE"
 
 INVALID_HANDLES = None
 failed_user_retrievals = []
+retrieval_type = None
 
 # -----------------------------------------------------------------------------
 def _debug(stopstalk_handle, site, custom=False):
@@ -377,18 +378,22 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
     # To reflect all the updates to record into DB
     record.update_record()
 
-    # @ToDo: Too much main memory usage as strings are stored in a list
-    #        Aim to store only the ints and let typecasting and
-    #        "NULL" insertions happen just when required
-    for site in retrieval_failures:
-        if custom:
-            failed_user_retrievals.append("(%s,%s,'%s')" % ("NULL",
-                                                            str(record.id),
-                                                            site))
-        else:
-            failed_user_retrievals.append("(%s,%s,'%s')" % (str(record.id),
-                                                            "NULL",
-                                                            site))
+    if retrieval_type == "refreshed_users" and len(retrieval_failures):
+        current.REDIS_CLIENT.rpush("next_retrieve_custom_user" if custom else "next_retrieve_user",
+                                   record.id)
+    else:
+        # @ToDo: Too much main memory usage as strings are stored in a list
+        #        Aim to store only the ints and let typecasting and
+        #        "NULL" insertions happen just when required
+        for site in retrieval_failures:
+            if custom:
+                failed_user_retrievals.append("(%s,%s,'%s')" % ("NULL",
+                                                                str(record.id),
+                                                                site))
+            else:
+                failed_user_retrievals.append("(%s,%s,'%s')" % (str(record.id),
+                                                                "NULL",
+                                                                site))
 
 # ----------------------------------------------------------------------------
 def new_users():
