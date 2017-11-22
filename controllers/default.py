@@ -1259,8 +1259,6 @@ Response text: %s
 
     site = request.get_vars["site"]
     view_link = request.get_vars["viewLink"]
-    db.download_submission_logs.insert(user_id=session.user_id,
-                                       url=view_link)
     if site == "CodeChef":
         return _retrieve_codechef_submission(view_link)
     elif site == "CodeForces":
