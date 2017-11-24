@@ -57,6 +57,7 @@
         var contestGraphData = null;
         var linechartAvailable = '{{=row.graph_data_retrieved}}';
         var getCustomUserURL = "{{=URL('default', 'get_custom_users', extension='json')}}";
+        var getSolvedUnsolvedURL = "{{=URL('user', 'get_solved_unsolved', extension='json')}}";
         var stopstalkHandle = "{{=actual_handle}}";
         var refreshNowURL = "{{=URL('user', 'add_to_refresh_now')}}";
         var canUpdate = ("{{=can_update}}" === "True");
@@ -227,6 +228,10 @@
         <p>No graph data available at the moment !</p>
     {{pass}}
     <br/><br/><br/>
+    <h3>Solved Problems</h3>
+    <div id="solved-problems-list"></div>
+    <h3>Unsolved Problems</h3>
+    <div id="unsolved-problems-list"></div>
     <div class="switch">
         <label>
             Acceptance Graph
