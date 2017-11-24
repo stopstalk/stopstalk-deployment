@@ -392,6 +392,22 @@
         });
     };
 
+    var getSolvedUnsolvedProblems = function() {
+        $.ajax({
+            url: getSolvedUnsolvedURL,
+            method: "GET",
+            data: {user_id: userID, custom: custom},
+            success: function(response) {
+                $("#solved-problems-list").html(response["solved_html"]);
+                $("#unsolved-problems-list").html(response["unsolved_html"]);
+            },
+            error: function(err) {
+                console.log(err);
+                $.web2py.flash("Something went wrong");
+            }
+        });
+    };
+
     $(document).ready(function() {
 
         /* Get the details about the solved/unsolved problems */
@@ -435,6 +451,8 @@
                 })
             }
         });
+
+        getSolvedUnsolvedProblems();
 
         /* Color the handles accordingly */
         $.ajax({

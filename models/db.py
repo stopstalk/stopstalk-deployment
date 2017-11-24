@@ -707,41 +707,47 @@ uvadb.define_table("usernametoid",
                    Field("username"),
                    Field("uva_id"))
 
-def get_solved_problems(user_id):
+def get_solved_problems(user_id, custom=False, update_current=False):
     """
         Get the solved and unsolved problems of a user
 
-        @param user_id(Integer): user_id of the logged in user
+        @param user_id(Integer): user_id of the user
+        @param custom(Boolean): If the user_id is of a custom_user
+        @param update_current(Boolean): If update the current global object
     """
-    try:
-        # Session variables already set
-        current.solved_problems
-        current.unsolved_problems
-        return
-    except AttributeError:
-        pass
+    if update_current:
+        try:
+            # Session variables already set
+            return (list(current.solved_problems), list(current.unsolved_problems))
+        except AttributeError:
+            pass
 
     stable = db.submission
-    query = (stable.user_id == user_id) & (stable.status == "AC")
+    column_name = "custom_user_id" if custom else "user_id"
+    query = (stable[column_name] == user_id) & (stable.status == "AC")
     problems = db(query).select(stable.problem_link, distinct=True)
     solved_problems = set([x.problem_link for x in problems])
 
-    query = (stable.user_id == user_id)
+    query = (stable[column_name] == user_id)
     problems = db(query).select(stable.problem_link, distinct=True)
     all_problems = set([x.problem_link for x in problems])
     unsolved_problems = all_problems - solved_problems
 
-    current.solved_problems = solved_problems
-    current.unsolved_problems = unsolved_problems
+    if update_current:
+        current.solved_problems = solved_problems
+        current.unsolved_problems = unsolved_problems
+
+    return (list(solved_problems), list(unsolved_problems))
 
 if session["auth"]:
     session["handle"] = session["auth"]["user"]["stopstalk_handle"]
     session["user_id"] = session["auth"]["user"]["id"]
-    get_solved_problems(session["user_id"])
+    get_solved_problems(session["user_id"], False, True)
 else:
     current.solved_problems = set([])
     current.unsolved_problems = set([])
 
+current.get_solved_problems = get_solved_problems
 current.db = db
 current.uvadb = uvadb
 

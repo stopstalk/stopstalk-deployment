@@ -546,6 +546,47 @@ def handle_details():
     return json.dumps(response)
 
 # ------------------------------------------------------------------------------
+def get_solved_unsolved():
+    if request.extension != "json":
+        return dict()
+
+    user_id = request.vars.get("user_id", None)
+    custom = request.vars.get("custom", None)
+    if user_id is None and custom is None:
+        return dict(error="Something went wrong")
+
+    custom = (custom == "True")
+    print datetime.datetime.now()
+    solved_problems, unsolved_problems = current.get_solved_problems(user_id, custom)
+    print datetime.datetime.now()
+
+    ptable = db.problem
+    query = ptable.link.belongs(solved_problems + unsolved_problems)
+    problem_details = db(query).select(ptable.link, ptable.name)
+    problem_details = dict([(x.link, x.name) for x in problem_details])
+
+    def _get_html(problems):
+        final_div = DIV()
+        for plink in problems:
+            final_div.append(" | ")
+            if auth.is_logged_in():
+                if plink in current.solved_problems:
+                    link_class = "solved-problem"
+                elif plink in current.unsolved_problems:
+                    link_class = "unsolved-problem"
+                else:
+                    link_class = "unattempted-problem"
+                link_title = (" ".join(link_class.split("-"))).capitalize()
+                final_div.append(utilities.problem_widget(problem_details[plink], plink, link_class, link_title))
+            else:
+                final_div.append(utilities.problem_widget(problem_details[plink], plink, "unattempted-problem", "Unattempted problem"))
+        final_div.append(" | ")
+        return final_div
+
+    return dict(solved_html=_get_html(solved_problems),
+                unsolved_html=_get_html(unsolved_problems))
+
+# ------------------------------------------------------------------------------
 def profile():
     """
         Controller to show user profile

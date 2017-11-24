@@ -96,7 +96,7 @@ def problem_widget(name,
         @return (DIV)
     """
 
-    problem_div = DIV()
+    problem_div = SPAN()
     if anchor:
         problem_div.append(A(name,
                              _href=URL("problems",
