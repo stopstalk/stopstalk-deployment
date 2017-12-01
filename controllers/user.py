@@ -556,9 +556,7 @@ def get_solved_unsolved():
         return dict(error="Something went wrong")
 
     custom = (custom == "True")
-    print datetime.datetime.now()
     solved_problems, unsolved_problems = current.get_solved_problems(user_id, custom)
-    print datetime.datetime.now()
 
     ptable = db.problem
     query = ptable.link.belongs(solved_problems + unsolved_problems)
