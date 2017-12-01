@@ -310,3 +310,7 @@ nav ul a:hover {
 .side-nav, #sidenav-overlay, .drag-target {
     top: 64px;
 }
+
+#profile-page-carousel {
+    height: 100%;
+}
