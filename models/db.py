@@ -200,7 +200,7 @@ bulkmail.settings.login = current.bulk_sender_mail + ":" + current.bulk_sender_p
 
 from redis import Redis
 # REDIS CLIENT
-current.REDIS_CLIENT = Redis(host='localhost', port=6379, db=0)
+current.REDIS_CLIENT = Redis(host=current.redis_server, port=current.redis_port, db=0)
 
 # -----------------------------------------------------------------------------
 def send_mail(to, subject, message, mail_type, bulk=False):
