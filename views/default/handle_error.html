@@ -1,9 +1,33 @@
 {{extend 'layout.html'}}
 <title>{{=T("Error Page")}}</title>
-<br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+<link rel="stylesheet" href="{{=get_static_url('css/owlie.css')}}"/>
+
+<br /><br />
 {{if error_message == "Not found":}}
-    <h4> {{=T("Yes you, you are lost ;)")}} </h4>
-    <p> {{=T("We have been notified and will be fixing if there is any problem from our side")}} </p>
+    <h2> {{=T("Yes you, you are lost ;)")}} </h2>
+    <div id="my-owlie">
+        <div class="owl">
+          <div class="body">
+            <div class="wing"></div>
+            <div class="wing"></div>
+            <div class="feet"></div>
+            <div class="feet right"></div>
+            <div class="feather"></div>
+          </div>
+          <div class="head">
+            <div class="eyes">
+              <div class="beak"></div>
+              <div class="eye">
+                <div class="pupil"></div>
+              </div>
+              <div class="eye">
+                <div class="pupil"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+    <h5>But since Owlie does give a HOOT about you</h5>
     {{if similar_users != []:}}
         <p> {{=T("You might be looking for")}}: |
         {{for i in similar_users:}}
@@ -13,6 +37,8 @@
     {{pass}}
     <p> If you are trying to find a user and getting this, then try adding a <a href="{{=URL('user', 'custom_friend')}}">{{=T("Custom Friend")}}</a> and track his/her progress ! </p>
 {{else:}}
+    <br /><br /><br /><br /><br /><br /><br /><br />
     <h4> {{=T("Oops! There is indeed some problem here")}} </h4>
-    <p> {{=T("We have been notified and will be fixing it as soon as possible. You might get some goodies if you have found a bug in our code!")}} </p>
+    <p> {{=T("Please try again after some time")}} </p>
+    <p> {{=T("We have been notified and will be fixing it as soon as possible. You might get some goodies if you have found a bug in our code - please write to us if it persists !")}} </p>
 {{pass}}
