@@ -28,6 +28,10 @@ current.mysql_server = "localhost"
 current.mysql_dbname = "migration"
 current.mysql_uvadbname = "uvajudge"
 
+# Configure redis server
+current.redis_server = "localhost"
+current.redis_port = 6379
+
 # Configure mail options
 current.smtp_server = "logging"
 current.sender_mail = ""

@@ -119,10 +119,6 @@
             document.activeElement.blur();
         }
 
-        $(document).on('click', '.side-nav-item', function() {
-            window.location.href = $(this).data('url');
-        });
-
         $(document).on('mouseenter', 'tr', function() {
             var todoIcon = $(this).find('.add-to-todo-list');
             todoIcon.show();

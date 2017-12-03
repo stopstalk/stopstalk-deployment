@@ -57,6 +57,9 @@
         var contestGraphData = null;
         var linechartAvailable = '{{=row.graph_data_retrieved}}';
         var getCustomUserURL = "{{=URL('default', 'get_custom_users', extension='json')}}";
+        var stopstalkHandle = "{{=actual_handle}}";
+        var refreshNowURL = "{{=URL('user', 'add_to_refresh_now')}}";
+        var canUpdate = ("{{=can_update}}" === "True");
     </script>
     <script src="{{=get_static_url('js/appjs/user/profile.js')}}" type="text/javascript"></script>
   </head>
@@ -98,6 +101,17 @@
                                         <i class="fa fa-long-arrow-right fa-3x"></i>
                                     </a>
                                 </th>
+                                {{if show_refresh_now:}}
+                                    <th>
+                                        {{if can_update:}}
+                                        <button id="update-my-submissions" class="tooltipped btn-floating btn-large waves-effect waves-light" data-delay="50" data-tooltip="Retrieve my submissions" style="background-color: deepskyblue;"><i class="fa fa-refresh fa-3x" style="white-text"></i></button>
+                                        {{else:}}
+                                        <div class="tooltipped" data-delay="50" data-tooltip="Can only update once in 24 hours">
+                                            <button id="disabled-update-my-submissions" class="tooltipped btn-floating btn-large waves-effect waves-light disabled" style="background-color: deepskyblue;"><i class="fa fa-refresh fa-3x" style="white-text"></i></button>
+                                        </div>
+                                        {{pass}}
+                                    </th>
+                                {{pass}}
                                 {{if flag == "not-friends" and custom == False:}}
                                     <th>
                                         <button id="profile-add-friend" class="tooltipped btn-floating btn-large waves-effect waves-light friends-button green" data-position="bottom" data-delay="50" data-tooltip="{{=T('Add friend')}}" data-user-id="{{=row.id}}" data-type="add-friend">

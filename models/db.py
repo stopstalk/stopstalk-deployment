@@ -162,6 +162,10 @@ extra_fields = [Field("institute",
                 Field("graph_data_retrieved", "boolean",
                       default=False,
                       readable=False,
+                      writable=False),
+                Field("refreshed_timestamp",
+                      "datetime",
+                      default=initial_date,
                       writable=False)]
 
 site_handles = []
@@ -196,7 +200,7 @@ bulkmail.settings.login = current.bulk_sender_mail + ":" + current.bulk_sender_p
 
 from redis import Redis
 # REDIS CLIENT
-current.REDIS_CLIENT = Redis(host='localhost', port=6379, db=0)
+current.REDIS_CLIENT = Redis(host=current.redis_server, port=current.redis_port, db=0)
 
 # -----------------------------------------------------------------------------
 def send_mail(to, subject, message, mail_type, bulk=False):
@@ -449,7 +453,6 @@ auth.settings.register_onvalidation = [sanitize_fields]
 auth.settings.register_onaccept.append(register_callback)
 auth.settings.verify_email_onaccept.extend([notify_institute_users,
                                             create_next_retrieval_record])
-auth.settings.verify_email_onaccept.append(notify_institute_users)
 current.auth = auth
 current.response.formstyle = materialize_form
 current.sanitize_fields = sanitize_fields
@@ -523,6 +526,10 @@ custom_friend_fields = [Field("user_id", "reference auth_user"),
                         Field("graph_data_retrieved", "boolean",
                               default=False,
                               readable=False,
+                              writable=False),
+                        Field("refreshed_timestamp",
+                              "datetime",
+                              default=initial_date,
                               writable=False)]
 
 custom_friend_fields += site_handles

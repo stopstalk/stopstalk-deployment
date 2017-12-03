@@ -652,7 +652,7 @@ def leaderboard():
                       user.institute,
                       user.stopstalk_rating,
                       float(user.per_day_change),
-                      user.stopstalk_rating - user.stopstalk_prev_rating,
+                      # user.stopstalk_rating - user.stopstalk_prev_rating,
                       country_details,
                       cf_count))
 
@@ -1259,8 +1259,6 @@ Response text: %s
 
     site = request.get_vars["site"]
     view_link = request.get_vars["viewLink"]
-    db.download_submission_logs.insert(user_id=session.user_id,
-                                       url=view_link)
     if site == "CodeChef":
         return _retrieve_codechef_submission(view_link)
     elif site == "CodeForces":
