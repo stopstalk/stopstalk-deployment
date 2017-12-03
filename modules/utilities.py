@@ -327,12 +327,11 @@ def compute_row(record,
     else:
         # Unique rating formula
         # @ToDo: Improvement is always better
-        rating = (curr_per_day - per_day) * 10000 + \
-                  max_streak * 50 + \
-                  solved * 100 + \
-                  (solved * 100.0 / total_submissions) * 40 + \
-                  (total_submissions - solved) * 10 + \
-                  per_day * 150
+        rating = max_streak * 50 + \
+                 solved * 100 + \
+                 (solved * 100.0 / total_submissions) * 80 + \
+                 (total_submissions - solved) * 20 + \
+                 per_day * 2000
     rating = int(rating)
 
     if update_flag:

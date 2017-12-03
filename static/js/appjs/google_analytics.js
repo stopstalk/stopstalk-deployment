@@ -1,11 +1,11 @@
 (function() {
     'use strict';
 
-    var sendToGA = function(eventCategory, eventLabel) {
+    var sendToGA = function(eventCategory, eventLabel, eventAction='click') {
         ga('send', {
             hitType: 'event',
             eventCategory: eventCategory,
-            eventAction: 'click',
+            eventAction: eventAction,
             eventLabel: eventLabel
         });
     };
@@ -13,11 +13,16 @@
     var addEventListener = function(selector, label, buttonLabel) {
         $(document).on('click', selector, function() {
             if (buttonLabel) {
-                sendToGA('button', $(this).data("analytics-label"));
+                sendToGA('button', $(this).data('analytics-label'));
             } else {
                 sendToGA('button', label);
             }
         });
+        if (buttonLabel) {
+            $(document).on('contextmenu', selector, function() {
+                sendToGA('button', $(this).data('analytics-label'), 'contextmenu');
+            });
+        }
     };
 
     var addNavItemsToGA = function() {
@@ -56,6 +61,8 @@
         addEventListener('#toggle-submission-graph', 'Toggle Submission Graph');
         addEventListener('.popup-contest-page', 'Contest Page button on User Profile');
         addEventListener('.custom-user-count-profile-page', 'Custom user count on User Profile');
+        addEventListener('#update-my-submissions', 'Refresh my submissions');
+        addEventListener('#disabled-update-my-submissions', 'Disabled refresh my submissions');
     };
 
     var addMiscellaneousToGA = function() {

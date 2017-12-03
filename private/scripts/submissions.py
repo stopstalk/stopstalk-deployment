@@ -35,6 +35,7 @@ problem_solved_stats = {}
 
 atable = db.auth_user
 cftable = db.custom_friend
+nrtable = db.next_retrieval
 
 SERVER_FAILURE = "SERVER_FAILURE"
 NOT_FOUND = "NOT_FOUND"
@@ -42,6 +43,7 @@ OTHER_FAILURE = "OTHER_FAILURE"
 
 INVALID_HANDLES = None
 failed_user_retrievals = []
+retrieval_type = None
 
 # -----------------------------------------------------------------------------
 def _debug(stopstalk_handle, site, custom=False):
@@ -384,18 +386,22 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
     # To reflect all the updates to record into DB
     record.update_record()
 
-    # @ToDo: Too much main memory usage as strings are stored in a list
-    #        Aim to store only the ints and let typecasting and
-    #        "NULL" insertions happen just when required
-    for site in retrieval_failures:
-        if custom:
-            failed_user_retrievals.append("(%s,%s,'%s')" % ("NULL",
-                                                            str(record.id),
-                                                            site))
-        else:
-            failed_user_retrievals.append("(%s,%s,'%s')" % (str(record.id),
-                                                            "NULL",
-                                                            site))
+    if retrieval_type == "refreshed_users" and len(retrieval_failures):
+        current.REDIS_CLIENT.rpush("next_retrieve_custom_user" if custom else "next_retrieve_user",
+                                   record.id)
+    else:
+        # @ToDo: Too much main memory usage as strings are stored in a list
+        #        Aim to store only the ints and let typecasting and
+        #        "NULL" insertions happen just when required
+        for site in retrieval_failures:
+            if custom:
+                failed_user_retrievals.append("(%s,%s,'%s')" % ("NULL",
+                                                                str(record.id),
+                                                                site))
+            else:
+                failed_user_retrievals.append("(%s,%s,'%s')" % (str(record.id),
+                                                                "NULL",
+                                                                site))
 
 # ----------------------------------------------------------------------------
 def new_users():
@@ -507,6 +513,41 @@ def specific_user():
         users.append(atable(user_id))
     return (users, custom_users)
 
+# ----------------------------------------------------------------------------
+def refreshed_users():
+    """
+        Get the user_ids and custom_user_ids who requested for updates
+
+        @return (Tuple): (list of user_ids, list of custom_user_ids)
+    """
+
+    custom = (sys.argv[2] == "custom")
+    users = set([])
+    custom_users = set([])
+
+    if custom:
+        while current.REDIS_CLIENT.llen("next_retrieve_custom_user") and \
+              len(custom_users) < 10:
+            custom_users.add(int(current.REDIS_CLIENT.lpop("next_retrieve_custom_user")))
+    else:
+        while current.REDIS_CLIENT.llen("next_retrieve_user") and \
+              len(users) < 10:
+            users.add(int(current.REDIS_CLIENT.lpop("next_retrieve_user")))
+
+    users = [atable(user_id) for user_id in users]
+    custom_users = [cftable(user_id) for user_id in custom_users]
+
+    update_fields = dict([(site.lower() + "_delay", 1) for site in current.SITES])
+    for user in users:
+        record = db(nrtable.user_id == user.id).select().first()
+        record.update_record(**update_fields)
+
+    for custom_user in custom_users:
+        record = db(nrtable.custom_user_id == custom_user.id).select().first()
+        record.update_record(**update_fields)
+
+    return (users, custom_users)
+
 if __name__ == "__main__":
 
     retrieval_type = sys.argv[1]
@@ -519,6 +560,8 @@ if __name__ == "__main__":
         users, custom_users = re_retrieve()
     elif retrieval_type == "specific_user":
         users, custom_users = specific_user()
+    elif retrieval_type == "refreshed_users":
+        users, custom_users = refreshed_users()
     else:
         print "Invalid arguments"
         sys.exit()

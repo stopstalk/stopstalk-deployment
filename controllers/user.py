@@ -556,7 +556,7 @@ def profile():
         if auth.is_logged_in():
             handle = str(session.handle)
         else:
-            redirect(URL("default", "index"))
+            redirect(URL("default", "user", "login"))
     else:
         handle = str(request.args[0])
 
@@ -571,6 +571,8 @@ def profile():
     cftable = db.custom_friend
     output = {}
     output["nouser"] = False
+    output["show_refresh_now"] = False
+    output["can_update"] = False
 
     if len(rows) == 0:
         query = (cftable.stopstalk_handle == handle)
@@ -589,6 +591,9 @@ def profile():
             if row.duplicate_cu:
                 flag = "duplicate-custom"
                 original_row = cftable(row.duplicate_cu)
+                if auth.is_logged_in():
+                    output["show_refresh_now"] = (row.user_id == session.user_id)
+                output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).days > 0
                 actual_handle = row.stopstalk_handle
                 handle = original_row.stopstalk_handle
                 original_row["first_name"] = row.first_name
@@ -599,12 +604,18 @@ def profile():
                 output["user_id"] = row.duplicate_cu
                 row = original_row
             else:
+                output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).days > 0
+                if auth.is_logged_in():
+                    output["show_refresh_now"] = (row.user_id == session.user_id)
                 output["user_id"] = row.id
             output["row"] = row
     else:
         row = rows.first()
         output["user_id"] = row.id
+        output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).days > 0
         output["row"] = row
+        if auth.is_logged_in():
+            output["show_refresh_now"] = (row.id == session.user_id)
 
     last_updated = str(max([row[site.lower() + "_lr"] for site in current.SITES]))
     if last_updated == current.INITIAL_DATE:
@@ -682,6 +693,40 @@ def profile():
     output["cf_count"] = cf_count
 
     return output
+
+# ------------------------------------------------------------------------------
+@auth.requires_login()
+def add_to_refresh_now():
+    custom = request.vars.get("custom", None)
+    stopstalk_handle = request.vars.get("stopstalk_handle", None)
+    if None in (custom, stopstalk_handle):
+        return "FAILURE"
+
+    db_table = db.custom_friend if custom == "True" else db.auth_user
+    row = db(db_table.stopstalk_handle == stopstalk_handle).select().first()
+    if row is None:
+        return "FAILURE"
+
+    authorized = False
+    user_id = row.id
+    if custom == "True":
+        authorized |= row.user_id == session.user_id
+        user_id = row.duplicate_cu if row.duplicate_cu else row.id
+    else:
+        authorized |= row.id == session.user_id
+
+    authorized &= (datetime.datetime.now() - row.refreshed_timestamp).days > 0
+
+    if not authorized:
+        return "FAILURE"
+    else:
+        if custom == "True":
+            current.REDIS_CLIENT.rpush("next_retrieve_custom_user", user_id)
+        else:
+            current.REDIS_CLIENT.rpush("next_retrieve_user", user_id)
+
+    row.update_record(refreshed_timestamp=datetime.datetime.now())
+    return "Successfully submitted request"
 
 # ------------------------------------------------------------------------------
 def submissions():
