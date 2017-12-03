@@ -45,7 +45,7 @@ pip install -r requirements.txt
     ```
     $ mysql -u root -p        # Enter your mysql root password after this.
 
-    mysql> CREATE DATABASE migration;
+    mysql> CREATE DATABASE stopstalkdb;
     mysql> CREATE DATABASE uvajudge;
     ```
 6. Copy `0firstrun.py` to `models/`
