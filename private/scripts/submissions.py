@@ -376,6 +376,8 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
             # Update this time so that this user is not picked
             # up again and again by new_user cron
             record.update({site_lr: datetime.datetime.now()})
+            if retrieval_type == "daily_retrieve":
+                nrtable_record.update({site_delay: 100000})
 
     for submissions in list_of_submissions:
         site = submissions[0]
