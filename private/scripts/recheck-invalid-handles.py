@@ -113,6 +113,7 @@ if __name__ == "__main__":
     atable = db.auth_user
     cftable = db.custom_friend
     stable = db.submission
+    nrtable = db.next_retrieval
     mapping = {}
     handle_to_row = {}
 
@@ -162,6 +163,11 @@ if __name__ == "__main__":
                 print "\t", row_obj.stopstalk_handle, "updated"
                 update_dict[row.site.lower() + "_lr"] = current.INITIAL_DATE
                 row_obj.update_record(**update_dict)
+                if "user_id" in row_obj:
+                    # Custom user
+                    db(nrtable.custom_user_id == row_obj.id).update(**{row.site.lower() + "_delay": 1})
+                else:
+                    db(nrtable.user_id == row_obj.id).update(**{row.site.lower() + "_delay": 1})
                 final_delete_query |= ((stable.site == row.site) & \
                                        (stable.stopstalk_handle == row_obj.stopstalk_handle))
                 del update_dict[row.site.lower() + "_lr"]

@@ -198,8 +198,12 @@ def update_details():
         if updated_sites != []:
             site_lrs = {}
             submission_query = (stable.user_id == session.user_id)
+            nrtable_record = db(db.next_retrieval.user_id == session.user_id).select().first()
             for site in updated_sites:
                 site_lrs[site.lower() + "_lr"] = current.INITIAL_DATE
+                nrtable_record.update({site.lower() + "_delay": 1})
+
+            nrtable_record.update_record()
 
             pickle_file_path = "./applications/stopstalk/graph_data/" + \
                                str(session.user_id) + ".pickle"
@@ -309,8 +313,13 @@ def update_friend():
                     os.remove(pickle_file_path)
                 submission_query = (stable.custom_user_id == int(request.args[0]))
                 reset_sites = current.SITES if record.duplicate_cu else updated_sites
+
+                nrtable_record = db(db.next_retrieval.custom_user_id == int(request.args[0])).select().first()
                 for site in reset_sites:
                     form.vars[site.lower() + "_lr"] = current.INITIAL_DATE
+                    nrtable_record.update({site.lower() + "_delay": 1})
+
+                nrtable_record.update_record()
 
                 submission_query &= (stable.site.belongs(reset_sites))
 
