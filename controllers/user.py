@@ -712,6 +712,7 @@ def add_to_refresh_now():
         return "FAILURE"
 
     db_table = db.custom_friend if custom == "True" else db.auth_user
+    nrtable = db.next_retrieval
     row = db(db_table.stopstalk_handle == stopstalk_handle).select().first()
     if row is None:
         return "FAILURE"
@@ -735,6 +736,14 @@ def add_to_refresh_now():
             current.REDIS_CLIENT.rpush("next_retrieve_user", user_id)
 
     row.update_record(refreshed_timestamp=datetime.datetime.now())
+    update_params = {}
+    for site in current.SITES:
+        update_params[site.lower() + "_delay"] = 1
+    if custom == "True":
+        db(nrtable.custom_user_id == user_id).update(**update_params)
+    else:
+        db(nrtable.user_id == user_id).update(**update_params)
+
     return "Successfully submitted request"
 
 # ------------------------------------------------------------------------------
