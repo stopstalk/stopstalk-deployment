@@ -514,6 +514,17 @@ def get_activity():
     return dict(table=table)
 
 # ------------------------------------------------------------------------------
+@auth.requires_login()
+def mark_read():
+    from json import dumps, loads
+    ratable = db.recent_announcements
+    rarecord = db(ratable.user_id == session.user_id).select().first()
+    data = loads(rarecord.data)
+    data[request.vars.key] = True
+    rarecord.update_record(data=dumps(data))
+    return dict()
+
+# ------------------------------------------------------------------------------
 def handle_details():
     import json
     atable = db.auth_user
