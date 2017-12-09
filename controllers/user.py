@@ -506,7 +506,7 @@ def get_activity():
     submissions = db(query).select(orderby=~stable.time_stamp)
 
     if len(submissions) > 0:
-        table = utilities.render_table(submissions)
+        table = utilities.render_table(submissions, [], session.user_id)
         table = DIV(H3(T("Activity on") + " " + date), table)
     else:
         table = H5(T("No activity on") + " " + date)
@@ -820,7 +820,7 @@ def submissions():
     offset = PER_PAGE * (int(page) - 1)
     all_submissions = db(query).select(orderby=~stable.time_stamp,
                                        limitby=(offset, offset + PER_PAGE))
-    table = utilities.render_table(all_submissions, duplicates)
+    table = utilities.render_table(all_submissions, duplicates, session.user_id)
 
     if handle == session.handle:
         user = "Self"

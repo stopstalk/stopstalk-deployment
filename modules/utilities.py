@@ -27,6 +27,43 @@ from gluon import current, IMG, DIV, TABLE, THEAD, \
                   TEXTAREA, SELECT, OPTION, URL, BUTTON
 
 # -----------------------------------------------------------------------------
+def get_solved_problems(user_id):
+    """
+        Get the solved and unsolved problems of a user
+
+        @param user_id(Integer): user_id of the logged in user
+    """
+    db = current.db
+    stable = db.submission
+    query = (stable.user_id == user_id) & (stable.status == "AC")
+    problems = db(query).select(stable.problem_link, distinct=True)
+    solved_problems = set([x.problem_link for x in problems])
+
+    query = (stable.user_id == user_id)
+    problems = db(query).select(stable.problem_link, distinct=True)
+    all_problems = set([x.problem_link for x in problems])
+    unsolved_problems = all_problems - solved_problems
+
+    return solved_problems, unsolved_problems
+
+# -----------------------------------------------------------------------------
+def get_link_class(problem_link, user_id):
+    if user_id is None:
+        return "unattempted-problem"
+
+    solved_problems, unsolved_problems = get_solved_problems(user_id)
+
+    link_class = ""
+    if problem_link in solved_problems:
+        link_class = "solved-problem"
+    elif problem_link in unsolved_problems:
+        link_class = "unsolved-problem"
+    else:
+        link_class = "unattempted-problem"
+
+    return link_class
+
+# -----------------------------------------------------------------------------
 def handles_updated(record, form):
     """
         Check if any of the handles are updated
@@ -458,7 +495,7 @@ def materialize_form(form, fields):
     return main_div
 
 # -----------------------------------------------------------------------------
-def render_table(submissions, duplicates=[]):
+def render_table(submissions, duplicates=[], user_id=None):
     """
         Create the HTML table from submissions
 
@@ -547,13 +584,7 @@ def render_table(submissions, duplicates=[]):
         if plink_to_class.has_key(plink):
             link_class = plink_to_class[plink]
         else:
-            if plink in current.solved_problems:
-                link_class = "solved-problem"
-            elif plink in current.unsolved_problems:
-                link_class = "unsolved-problem"
-            else:
-                # This will prevent from further lookups
-                link_class = "unattempted-problem"
+            link_class = get_link_class(plink, user_id)
             plink_to_class[plink] = link_class
 
         link_title = (" ".join(link_class.split("-"))).capitalize()
