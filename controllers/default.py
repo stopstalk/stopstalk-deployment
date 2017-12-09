@@ -1334,6 +1334,7 @@ def submissions():
     stable = db.submission
     atable = db.auth_user
     ptable = db.problem
+    ratable = db.recent_announcements
 
     # Get all the friends/custom friends of the logged-in user
     friends, cusfriends = utilities.get_friends(session.user_id)
@@ -1358,6 +1359,12 @@ def submissions():
     if request.extension == "json":
         return dict(count=count,
                     total_rows=1)
+
+    from json import loads
+    rarecord = db(ratable.user_id == session.user_id).select().first()
+    if rarecord is None:
+        ratable.insert(user_id=session.user_id)
+        rarecord = db(ratable.user_id == session.user_id).select().first()
 
     user = session.auth.user
     db.sessions_today.insert(message="%s %s %d %s" % (user.first_name,
@@ -1394,7 +1401,8 @@ def submissions():
                 total_rows=len(rows),
                 country=country,
                 country_form=country_form,
-                utilities=utilities)
+                utilities=utilities,
+                recent_announcements=loads(rarecord.data))
 
 # ----------------------------------------------------------------------------
 def faq():

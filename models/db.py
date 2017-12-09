@@ -697,6 +697,11 @@ db.define_table("testimonials",
                 Field("verification", default="pending"),
                 Field("created_at", "datetime"))
 
+# facebook_group - Notify about the new Facebook group
+db.define_table("recent_announcements",
+                Field("user_id", "reference auth_user"),
+                Field("data", "text", default="{}"))
+
 uvadb.define_table("problem",
                    Field("problem_id", "integer"),
                    Field("problem_num", "integer"),
