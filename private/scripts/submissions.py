@@ -491,7 +491,7 @@ def re_retrieve():
     users = {}
     custom_users = {}
     frtable = db.failed_retrieval
-    rows = db(frtable).select(limitby=(0, 10))
+    rows = db(frtable).select(limitby=(0, 20))
     for record in rows:
         if record.user_id:
             if users.has_key(record.user_id):
