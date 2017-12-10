@@ -155,9 +155,11 @@ if __name__ == "__main__":
                    "authentic": False}
 
     final_delete_query = False
+    cnt = 0
     for row in db(ihtable).select():
         # If not an invalid handle anymore
         if handle_to_row[row.site].has_key(row.handle) and mapping[row.site](row.handle) is False:
+            cnt += 1
             print row.site, row.handle, "deleted"
             for row_obj in handle_to_row[row.site][row.handle]:
                 print "\t", row_obj.stopstalk_handle, "updated"
@@ -172,6 +174,11 @@ if __name__ == "__main__":
                                        (stable.stopstalk_handle == row_obj.stopstalk_handle))
                 del update_dict[row.site.lower() + "_lr"]
             row.delete_record()
+        if cnt >= 10:
+            if final_delete_query:
+                db(final_delete_query).delete()
+            cnt = 0
+            final_delete_query = False
 
     if final_delete_query:
         db(final_delete_query).delete()
