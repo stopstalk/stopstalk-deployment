@@ -45,7 +45,7 @@ pip install -r requirements.txt
     ```
     $ mysql -u root -p        # Enter your mysql root password after this.
 
-    mysql> CREATE DATABASE migration;
+    mysql> CREATE DATABASE stopstalkdb;
     mysql> CREATE DATABASE uvajudge;
     ```
 6. Copy `0firstrun.py` to `models/`
@@ -138,11 +138,11 @@ The project also depends on a number of other open source packages, some of whic
 7. Done. :smile:
 
 ## Contact
-  > Email: admin@stopstalk.com, contactstopstalk@gmail.com, raj454raj@gmail.com
-
   > Contact Us Page: https://www.stopstalk.com/contact_us
 
-  > Creator Website: http://raj454raj.xyz
+  > Email: admin@stopstalk.com, contactstopstalk@gmail.com, raj454raj@gmail.com
+
+  > Creator Website: http://raj454raj.me
 
 ## Social Links
 

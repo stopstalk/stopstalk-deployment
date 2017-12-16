@@ -113,6 +113,7 @@ if __name__ == "__main__":
     atable = db.auth_user
     cftable = db.custom_friend
     stable = db.submission
+    nrtable = db.next_retrieval
     mapping = {}
     handle_to_row = {}
 
@@ -154,18 +155,30 @@ if __name__ == "__main__":
                    "authentic": False}
 
     final_delete_query = False
+    cnt = 0
     for row in db(ihtable).select():
         # If not an invalid handle anymore
         if handle_to_row[row.site].has_key(row.handle) and mapping[row.site](row.handle) is False:
+            cnt += 1
             print row.site, row.handle, "deleted"
             for row_obj in handle_to_row[row.site][row.handle]:
                 print "\t", row_obj.stopstalk_handle, "updated"
                 update_dict[row.site.lower() + "_lr"] = current.INITIAL_DATE
                 row_obj.update_record(**update_dict)
+                if "user_id" in row_obj:
+                    # Custom user
+                    db(nrtable.custom_user_id == row_obj.id).update(**{row.site.lower() + "_delay": 1})
+                else:
+                    db(nrtable.user_id == row_obj.id).update(**{row.site.lower() + "_delay": 1})
                 final_delete_query |= ((stable.site == row.site) & \
                                        (stable.stopstalk_handle == row_obj.stopstalk_handle))
                 del update_dict[row.site.lower() + "_lr"]
             row.delete_record()
+        if cnt >= 10:
+            if final_delete_query:
+                db(final_delete_query).delete()
+            cnt = 0
+            final_delete_query = False
 
     if final_delete_query:
         db(final_delete_query).delete()

@@ -250,15 +250,9 @@ def index():
     site = utilities.urltosite(problem_link).capitalize()
     problem_details = DIV(_class="row")
     details_table = TABLE(_style="font-size: 140%; float: left; width: 50%;")
-
     problem_class = ""
-    if problem_link in current.solved_problems:
-        link_class = "solved-problem"
-    elif problem_link in current.unsolved_problems:
-        link_class = "unsolved-problem"
-    else:
-        link_class = "unattempted-problem"
 
+    link_class = utilities.get_link_class(problem_link, session.user_id)
     link_title = (" ".join(link_class.split("-"))).capitalize()
 
     tbody = TBODY()
@@ -325,7 +319,7 @@ def index():
                                _id="chart_div",
                                _class="right"))
 
-    table = utilities.render_table(submissions, cusfriends)
+    table = utilities.render_table(submissions, cusfriends, session.user_id)
 
     return dict(site=site,
                 problem_details=problem_details,
@@ -456,15 +450,7 @@ def tag():
     tbody = TBODY()
     for problem in all_problems:
         tr = TR()
-        link_class = ""
-
-        if problem["link"] in current.solved_problems:
-            link_class = "solved-problem"
-        elif problem["link"] in current.unsolved_problems:
-            link_class = "unsolved-problem"
-        else:
-            link_class = "unattempted-problem"
-
+        link_class = utilities.get_link_class(problem["link"], session.user_id)
         link_title = (" ".join(link_class.split("-"))).capitalize()
 
         tr.append(TD(utilities.problem_widget(problem["name"],
@@ -517,14 +503,7 @@ def _render_trending(caption, problems, flag):
 
     for problem in problems:
         tr = TR()
-
-        if problem[0] in current.solved_problems:
-            link_class = "solved-problem"
-        elif problem[0] in current.unsolved_problems:
-            link_class = "unsolved-problem"
-        else:
-            link_class = "unattempted-problem"
-
+        link_class = utilities.get_link_class(problem[0], session.user_id)
         link_title = (" ".join(link_class.split("-"))).capitalize()
 
         tr.append(TD(utilities.problem_widget(problem[1]["name"],
