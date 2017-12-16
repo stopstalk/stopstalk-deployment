@@ -398,8 +398,9 @@
             method: "GET",
             data: {user_id: userID, custom: custom},
             success: function(response) {
-                $("#solved-problems-list").html(response["solved_html"]);
-                $("#unsolved-problems-list").html(response["unsolved_html"]);
+                console.log(response);
+                // $("#solved-problems-list").html(response["solved_html"]);
+                // $("#unsolved-problems-list").html(response["unsolved_html"]);
             },
             error: function(err) {
                 console.log(err);

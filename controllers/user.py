@@ -576,33 +576,82 @@ def get_solved_unsolved():
         return dict(error="Something went wrong")
 
     custom = (custom == "True")
-    solved_problems, unsolved_problems = current.get_solved_problems(user_id, custom)
-
+    solved_problems, unsolved_problems = utilities.get_solved_problems(user_id, custom)
+    solved_ids, unsolved_ids = [], []
     ptable = db.problem
-    query = ptable.link.belongs(solved_problems + unsolved_problems)
-    problem_details = db(query).select(ptable.link, ptable.name)
-    problem_details = dict([(x.link, x.name) for x in problem_details])
+    sttable = db.suggested_tags
+    ttable = db.tag
+    all_tags = db(ttable).select()
+    all_tags = dict([(tag.id, tag.value) for tag in all_tags])
 
-    def _get_html(problems):
-        final_div = DIV()
-        for plink in problems:
-            final_div.append(" | ")
-            if auth.is_logged_in():
-                if plink in current.solved_problems:
-                    link_class = "solved-problem"
-                elif plink in current.unsolved_problems:
-                    link_class = "unsolved-problem"
-                else:
-                    link_class = "unattempted-problem"
-                link_title = (" ".join(link_class.split("-"))).capitalize()
-                final_div.append(utilities.problem_widget(problem_details[plink], plink, link_class, link_title))
+    query = ptable.link.belongs(solved_problems.union(unsolved_problems))
+    problem_details = {}
+    pids = []
+    for problem in db(query).select(ptable.id, ptable.link, ptable.name):
+        pids.append(problem.id)
+        problem_details[problem.id] = [problem.link, problem.name]
+        if problem.link in solved_problems:
+            solved_ids.append(problem.id)
+        else:
+            unsolved_ids.append(problem.id)
+
+    problem_tags = {}
+    query = (sttable.problem_id.belongs(pids)) & \
+            (sttable.user_id == 1)
+    for prow in db(query).select(sttable.tag_id, sttable.problem_id):
+        if prow.problem_id not in problem_tags:
+            problem_tags[prow.problem_id] = set([])
+        problem_tags[prow.problem_id].add(prow.tag_id)
+
+    categories = {"Dynamic Programming": set([1]),
+                  "Greedy": set([28]),
+                  "Strings": set([20]),
+                  "Hashing": set([32]),
+                  "Bit Manipulation": set([21, 42]),
+                  "Trees": set([6, 9, 10, 11, 17, 31]),
+                  "Graphs": set([4, 5, 15, 22, 23, 24, 26]),
+                  "Algorithms": set([12, 14, 27, 29, 35, 36, 37, 38, 44, 51]),
+                  "Data Structures": set([2, 3, 7, 8, 33, 34, 49]),
+                  "Math": set([16, 30, 39, 40, 41, 43, 45, 50]),
+                  "Implementation": set([13, 18, 19]),
+                  "Miscellaneous": set([46, 47, 48, 52])}
+    ordered_categories = ["Dynamic Programming",
+                          "Greedy",
+                          "Strings",
+                          "Hashing",
+                          "Bit Manipulation",
+                          "Trees",
+                          "Graphs",
+                          "Algorithms",
+                          "Data Structures",
+                          "Math",
+                          "Implementation",
+                          "Miscellaneous"]
+
+    def _get_categorized_json(problem_ids):
+        result = dict([(category, []) for category in ordered_categories])
+        for pid in problem_ids:
+            this_category = None
+            if pid not in problem_tags:
+                this_category = "Miscellaneous"
             else:
-                final_div.append(utilities.problem_widget(problem_details[plink], plink, "unattempted-problem", "Unattempted problem"))
-        final_div.append(" | ")
-        return final_div
+                ptags = problem_tags[pid]
+                category_found = False
+                for category in ordered_categories:
+                    if len(categories[category].intersection(ptags)) > 0:
+                        this_category = category
+                        category_found = True
+                        break
+                if not category_found:
+                    this_category = "Miscellaneous"
+            result[this_category].append(problem_details[pid])
+        return result
 
-    return dict(solved_html=_get_html(solved_problems),
-                unsolved_html=_get_html(unsolved_problems))
+    return dict(solved_problems=_get_categorized_json(solved_ids),
+                unsolved_problems=_get_categorized_json(unsolved_ids),
+                solved_html_widget=utilities.problem_widget("", "", "solved-problem", "Solved problem"),
+                unsolved_html_widget=utilities.problem_widget("", "", "unsolved-problem", "Unsolved problem"),
+                attempted_html_widget=utilities.problem_widget("", "", "unattempted-problem", "Unattempted problem"))
 
 # ------------------------------------------------------------------------------
 def profile():
