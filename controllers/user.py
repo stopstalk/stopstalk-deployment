@@ -198,8 +198,12 @@ def update_details():
         if updated_sites != []:
             site_lrs = {}
             submission_query = (stable.user_id == session.user_id)
+            nrtable_record = db(db.next_retrieval.user_id == session.user_id).select().first()
             for site in updated_sites:
                 site_lrs[site.lower() + "_lr"] = current.INITIAL_DATE
+                nrtable_record.update({site.lower() + "_delay": 1})
+
+            nrtable_record.update_record()
 
             pickle_file_path = "./applications/stopstalk/graph_data/" + \
                                str(session.user_id) + ".pickle"
@@ -309,8 +313,13 @@ def update_friend():
                     os.remove(pickle_file_path)
                 submission_query = (stable.custom_user_id == int(request.args[0]))
                 reset_sites = current.SITES if record.duplicate_cu else updated_sites
+
+                nrtable_record = db(db.next_retrieval.custom_user_id == int(request.args[0])).select().first()
                 for site in reset_sites:
                     form.vars[site.lower() + "_lr"] = current.INITIAL_DATE
+                    nrtable_record.update({site.lower() + "_delay": 1})
+
+                nrtable_record.update_record()
 
                 submission_query &= (stable.site.belongs(reset_sites))
 
@@ -497,12 +506,23 @@ def get_activity():
     submissions = db(query).select(orderby=~stable.time_stamp)
 
     if len(submissions) > 0:
-        table = utilities.render_table(submissions)
+        table = utilities.render_table(submissions, [], session.user_id)
         table = DIV(H3(T("Activity on") + " " + date), table)
     else:
         table = H5(T("No activity on") + " " + date)
 
     return dict(table=table)
+
+# ------------------------------------------------------------------------------
+@auth.requires_login()
+def mark_read():
+    from json import dumps, loads
+    ratable = db.recent_announcements
+    rarecord = db(ratable.user_id == session.user_id).select().first()
+    data = loads(rarecord.data)
+    data[request.vars.key] = True
+    rarecord.update_record(data=dumps(data))
+    return dict()
 
 # ------------------------------------------------------------------------------
 def handle_details():
@@ -742,6 +762,7 @@ def add_to_refresh_now():
         return "FAILURE"
 
     db_table = db.custom_friend if custom == "True" else db.auth_user
+    nrtable = db.next_retrieval
     row = db(db_table.stopstalk_handle == stopstalk_handle).select().first()
     if row is None:
         return "FAILURE"
@@ -765,6 +786,14 @@ def add_to_refresh_now():
             current.REDIS_CLIENT.rpush("next_retrieve_user", user_id)
 
     row.update_record(refreshed_timestamp=datetime.datetime.now())
+    update_params = {}
+    for site in current.SITES:
+        update_params[site.lower() + "_delay"] = 1
+    if custom == "True":
+        db(nrtable.custom_user_id == user_id).update(**update_params)
+    else:
+        db(nrtable.user_id == user_id).update(**update_params)
+
     return "Successfully submitted request"
 
 # ------------------------------------------------------------------------------
@@ -830,7 +859,7 @@ def submissions():
     offset = PER_PAGE * (int(page) - 1)
     all_submissions = db(query).select(orderby=~stable.time_stamp,
                                        limitby=(offset, offset + PER_PAGE))
-    table = utilities.render_table(all_submissions, duplicates)
+    table = utilities.render_table(all_submissions, duplicates, session.user_id)
 
     if handle == session.handle:
         user = "Self"

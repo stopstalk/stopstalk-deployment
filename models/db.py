@@ -200,7 +200,7 @@ bulkmail.settings.login = current.bulk_sender_mail + ":" + current.bulk_sender_p
 
 from redis import Redis
 # REDIS CLIENT
-current.REDIS_CLIENT = Redis(host='localhost', port=6379, db=0)
+current.REDIS_CLIENT = Redis(host=current.redis_server, port=current.redis_port, db=0)
 
 # -----------------------------------------------------------------------------
 def send_mail(to, subject, message, mail_type, bulk=False):
@@ -697,6 +697,11 @@ db.define_table("testimonials",
                 Field("verification", default="pending"),
                 Field("created_at", "datetime"))
 
+# facebook_group - Notify about the new Facebook group
+db.define_table("recent_announcements",
+                Field("user_id", "reference auth_user"),
+                Field("data", "text", default="{}"))
+
 uvadb.define_table("problem",
                    Field("problem_id", "integer"),
                    Field("problem_num", "integer"),
@@ -707,47 +712,10 @@ uvadb.define_table("usernametoid",
                    Field("username"),
                    Field("uva_id"))
 
-def get_solved_problems(user_id, custom=False, update_current=False):
-    """
-        Get the solved and unsolved problems of a user
-
-        @param user_id(Integer): user_id of the user
-        @param custom(Boolean): If the user_id is of a custom_user
-        @param update_current(Boolean): If update the current global object
-    """
-    if update_current:
-        try:
-            # Session variables already set
-            return (list(current.solved_problems), list(current.unsolved_problems))
-        except AttributeError:
-            pass
-
-    stable = db.submission
-    column_name = "custom_user_id" if custom else "user_id"
-    query = (stable[column_name] == user_id) & (stable.status == "AC")
-    problems = db(query).select(stable.problem_link, distinct=True)
-    solved_problems = set([x.problem_link for x in problems])
-
-    query = (stable[column_name] == user_id)
-    problems = db(query).select(stable.problem_link, distinct=True)
-    all_problems = set([x.problem_link for x in problems])
-    unsolved_problems = all_problems - solved_problems
-
-    if update_current:
-        current.solved_problems = solved_problems
-        current.unsolved_problems = unsolved_problems
-
-    return (list(solved_problems), list(unsolved_problems))
-
 if session["auth"]:
     session["handle"] = session["auth"]["user"]["stopstalk_handle"]
     session["user_id"] = session["auth"]["user"]["id"]
-    get_solved_problems(session["user_id"], False, True)
-else:
-    current.solved_problems = set([])
-    current.unsolved_problems = set([])
 
-current.get_solved_problems = get_solved_problems
 current.db = db
 current.uvadb = uvadb
 

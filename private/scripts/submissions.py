@@ -24,7 +24,7 @@ import time
 import traceback
 import gevent
 import sys
-from datetime import datetime
+import datetime
 from gevent import monkey
 gevent.monkey.patch_all(thread=False)
 
@@ -164,7 +164,7 @@ WHERE link in (%s);
 
     if len(to_be_inserted):
         sql_query = ""
-        today = datetime.now().strftime("%Y-%m-%d")
+        today = datetime.datetime.now().strftime("%Y-%m-%d")
         insert_value = ""
         value_string = "(" + ",".join(["\"%s\""] * 8) + ",%s,%s)"
         for plink in to_be_inserted:
@@ -306,6 +306,9 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
     list_of_submissions = []
     retrieval_failures = []
     plink_to_id = {}
+    nrtable = db.next_retrieval
+    nrtable_record = db(nrtable["custom_user_id" if custom else "user_id"] == record.id).select().first()
+    skipped_retrieval = set([])
 
     disabled_sites = current.REDIS_CLIENT.smembers("disabled_retrieval")
     for site in disabled_sites:
@@ -326,12 +329,22 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
 
         site_handle = record[site.lower() + "_handle"]
         site_lr = site.lower() + "_lr"
+        site_delay = site.lower() + "_delay"
         last_retrieved = record[site_lr]
+
+        # Rocked it totally ! ;)
+        if retrieval_type == "daily_retrieve" and \
+           datetime.timedelta(days=nrtable_record[site_delay]) + \
+           last_retrieved.date() > datetime.datetime.today().date():
+           print "Skipping " + site + " for " + record.stopstalk_handle
+           skipped_retrieval.add(site)
+           continue
+
         last_retrieved = time.strptime(str(last_retrieved), time_conversion)
 
         if (site_handle, site) in INVALID_HANDLES:
             print "Not found %s %s" % (site_handle, site)
-            record.update({site_lr: datetime.now()})
+            record.update({site_lr: datetime.datetime.now()})
             continue
 
         if site_handle:
@@ -353,30 +366,38 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
                 handle_not_found(site, site_handle)
                 # Update the last retrieved of an invalid handle as we don't
                 # want new_user script to pick this user again and again
-                record.update({site_lr: datetime.now()})
+                record.update({site_lr: datetime.datetime.now()})
             else:
                 list_of_submissions.append((site, submissions))
                 # Immediately update the last_retrieved of the record
                 # Note: Only the record object is updated & not reflected in DB
-                record.update({site_lr: datetime.now()})
+                record.update({site_lr: datetime.datetime.now()})
         else:
             # Update this time so that this user is not picked
             # up again and again by new_user cron
-            record.update({site_lr: datetime.now()})
+            record.update({site_lr: datetime.datetime.now()})
+            if retrieval_type == "daily_retrieve":
+                nrtable_record.update({site_delay: 100000})
 
     for submissions in list_of_submissions:
         site = submissions[0]
         _debug(record.stopstalk_handle, site, custom)
-        site_handle = record[site.lower() + "_handle"]
-        get_submissions(record.id,
-                        site_handle,
-                        record.stopstalk_handle,
-                        submissions[1],
-                        site,
-                        custom)
+        site_delay = site.lower() + "_delay"
+        submissions_count = get_submissions(record.id,
+                                            record[site.lower() + "_handle"],
+                                            record.stopstalk_handle,
+                                            submissions[1],
+                                            site,
+                                            custom)
+        if retrieval_type == "daily_retrieve" and \
+           submissions_count == 0 and \
+           site not in skipped_retrieval:
+            nrtable_record.update({site_delay: nrtable_record[site_delay] + 1})
 
     # To reflect all the updates to record into DB
     record.update_record()
+    if retrieval_type == "daily_retrieve":
+        nrtable_record.update_record()
 
     if retrieval_type == "refreshed_users" and len(retrieval_failures):
         current.REDIS_CLIENT.rpush("next_retrieve_custom_user" if custom else "next_retrieve_user",
@@ -470,7 +491,7 @@ def re_retrieve():
     users = {}
     custom_users = {}
     frtable = db.failed_retrieval
-    rows = db(frtable).select(limitby=(0, 10))
+    rows = db(frtable).select(limitby=(0, 20))
     for record in rows:
         if record.user_id:
             if users.has_key(record.user_id):

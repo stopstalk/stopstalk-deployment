@@ -174,20 +174,13 @@ def todo():
                                                   ptable.total_submissions,
                                                   ptable.user_ids,
                                                   ptable.custom_user_ids)
-    link_class = ""
 
     def _get_ids(ids):
         ids = ids.split(",")
         return [] if ids[0] == "" else ids
 
     for row in rows:
-        if row.link in current.solved_problems:
-            link_class = "solved-problem"
-        elif row.link in current.unsolved_problems:
-            link_class = "unsolved-problem"
-        else:
-            link_class = "unattempted-problem"
-
+        link_class = utilities.get_link_class(row.link, session.user_id)
         uids, cuids = _get_ids(row.user_ids), _get_ids(row.custom_user_ids)
 
         link_title = (" ".join(link_class.split("-"))).capitalize()
@@ -881,7 +874,7 @@ def filters():
     if total_problems % 100 == 0:
         total_pages += 1
 
-    table = utilities.render_table(filtered, duplicates)
+    table = utilities.render_table(filtered, duplicates, session.user_id)
     switch = DIV(LABEL(H6(T("Friends' Submissions"),
                           INPUT(_type="checkbox", _id="submission-switch"),
                           SPAN(_class="lever pink accent-3"),
@@ -1334,6 +1327,7 @@ def submissions():
     stable = db.submission
     atable = db.auth_user
     ptable = db.problem
+    ratable = db.recent_announcements
 
     # Get all the friends/custom friends of the logged-in user
     friends, cusfriends = utilities.get_friends(session.user_id)
@@ -1359,6 +1353,12 @@ def submissions():
         return dict(count=count,
                     total_rows=1)
 
+    from json import loads
+    rarecord = db(ratable.user_id == session.user_id).select().first()
+    if rarecord is None:
+        ratable.insert(user_id=session.user_id)
+        rarecord = db(ratable.user_id == session.user_id).select().first()
+
     user = session.auth.user
     db.sessions_today.insert(message="%s %s %d %s" % (user.first_name,
                                                       user.last_name,
@@ -1370,7 +1370,7 @@ def submissions():
     rows = db(query).select(orderby=~db.submission.time_stamp,
                             limitby=(offset, offset + PER_PAGE))
 
-    table = utilities.render_table(rows, cusfriends)
+    table = utilities.render_table(rows, cusfriends, session.user_id)
 
     country_value = session.auth.user.get("country")
     country = country_value if country_value else "not-available"
@@ -1394,7 +1394,8 @@ def submissions():
                 total_rows=len(rows),
                 country=country,
                 country_form=country_form,
-                utilities=utilities)
+                utilities=utilities,
+                recent_announcements=loads(rarecord.data))
 
 # ----------------------------------------------------------------------------
 def faq():
