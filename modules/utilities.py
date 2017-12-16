@@ -27,19 +27,23 @@ from gluon import current, IMG, DIV, TABLE, THEAD, \
                   TEXTAREA, SELECT, OPTION, URL, BUTTON
 
 # -----------------------------------------------------------------------------
-def get_solved_problems(user_id):
+def get_solved_problems(user_id, custom=False):
     """
         Get the solved and unsolved problems of a user
 
-        @param user_id(Integer): user_id of the logged in user
+        @param user_id(Integer): user_id
+        @param custom(Boolean): If the user_id is a custom user
+        @return(Tuple): List of solved and unsolved problems
     """
     db = current.db
     stable = db.submission
-    query = (stable.user_id == user_id) & (stable.status == "AC")
+
+    base_query = (stable.custom_user_id == user_id) if custom else (stable.user_id == user_id)
+    query = base_query & (stable.status == "AC")
     problems = db(query).select(stable.problem_link, distinct=True)
     solved_problems = set([x.problem_link for x in problems])
 
-    query = (stable.user_id == user_id)
+    query = base_query
     problems = db(query).select(stable.problem_link, distinct=True)
     all_problems = set([x.problem_link for x in problems])
     unsolved_problems = all_problems - solved_problems
@@ -51,7 +55,7 @@ def get_link_class(problem_link, user_id):
     if user_id is None:
         return "unattempted-problem"
 
-    solved_problems, unsolved_problems = get_solved_problems(user_id)
+    solved_problems, unsolved_problems = get_solved_problems(user_id, False)
 
     link_class = ""
     if problem_link in solved_problems:
