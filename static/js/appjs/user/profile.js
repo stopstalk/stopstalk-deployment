@@ -394,10 +394,14 @@
 
     var getSolvedUnsolvedProblems = function() {
 
+        var getStopStalkProblemPageURL = function(problemLink, problemName) {
+            return problemIndexURL + "?" + $.param({pname: problemName, plink: problemLink});
+        };
+
         var getSpanElement = function(element, problemLink, problemName) {
             var newSpanElement = element.clone(),
                 newSpanChildren = newSpanElement.children();
-            newSpanChildren[0]["href"] = problemLink;
+            newSpanChildren[0]["href"] = getStopStalkProblemPageURL(problemLink, problemName);
             newSpanChildren[0].innerHTML = problemName;
             return "<span class='todo-list-icon'>" +
                    newSpanChildren[0].outerHTML +
