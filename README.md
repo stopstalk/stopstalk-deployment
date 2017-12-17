@@ -11,20 +11,19 @@ pip install -r requirements.txt
 ```
 
 ## Installation
-1. Install web2py in a directory
-    * From source
-    ```
-    $ git clone --recursive https://github.com/web2py/web2py.git
-    ```
-    * From zip
+1. Install web2py (We need 2.14.6 version only) in a directory. We have commited the web2py source so that you can directly unzip and start using it
 
-        Directly [download](http://web2py.com/init/default/download) appropriate zip
-        and unzip it to get the `web2py` directory set up on your local machine.
+    * Unzip the web2py_src.zip somewhere outside the stopstalk directory.
+    * After unzipping the web2py, copy the source of stopstalk to its applications directory
+    * Final directory structure should be something like -
+      - web2py/
+        - applications/
+          - stopstalk/
+            - models
+            - views
+            - controllers
+            - ...
 
-        Note: In this method you will have a fixed version of web2py, whereas in the former
-              you might as well keep on pulling the latest changes made in web2py source.
-
-   If you have it already jump to step 2.
 2. Navigate into the applications directory in web2py directory.
 
     ```
