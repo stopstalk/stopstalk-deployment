@@ -58,10 +58,12 @@ def get_link_class(problem_link, user_id):
     solved_problems, unsolved_problems = get_solved_problems(user_id, False)
 
     link_class = ""
-    if problem_link in solved_problems:
-        link_class = "solved-problem"
-    elif problem_link in unsolved_problems:
+    if problem_link in unsolved_problems:
+        # Checking for unsolved first because most of the problem links
+        # would be found here instead of a failed lookup in solved_problems
         link_class = "unsolved-problem"
+    elif problem_link in solved_problems:
+        link_class = "solved-problem"
     else:
         link_class = "unattempted-problem"
 
@@ -521,7 +523,7 @@ def render_table(submissions, duplicates=[], user_id=None):
                    "PS": "Partially Solved",
                    "OTH": "Others"}
 
-    table = TABLE(_class="bordered centered")
+    table = TABLE(_class="bordered centered submissions-table")
     table.append(THEAD(TR(TH(T("Name")),
                           TH(T("Site Profile")),
                           TH(T("Time of submission")),
