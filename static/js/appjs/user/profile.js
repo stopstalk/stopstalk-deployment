@@ -393,14 +393,72 @@
     };
 
     var getSolvedUnsolvedProblems = function() {
+
+        var getSpanElement = function(element, problemLink, problemName) {
+            var newSpanElement = element.clone(),
+                newSpanChildren = newSpanElement.children();
+            newSpanChildren[0]["href"] = problemLink;
+            newSpanChildren[0].innerHTML = problemName;
+            return "<span class='todo-list-icon'>" +
+                   newSpanChildren[0].outerHTML +
+                   newSpanChildren[1].outerHTML +
+                   "</span>";
+        };
+
+        var getProblemListingTable = function(response, tableType) {
+            var tableData = response[tableType + "_problems"],
+                tableContent = "<table class='bordered col offset-s1 s10'>",
+                widgets = [$($.parseHTML(response["solved_html_widget"])),
+                           $($.parseHTML(response["unsolved_html_widget"])),
+                           $($.parseHTML(response["unattempted_html_widget"]))];
+
+            var orderedCategories = ["Dynamic Programming",
+                                     "Greedy",
+                                     "Strings",
+                                     "Hashing",
+                                     "Bit Manipulation",
+                                     "Trees",
+                                     "Graphs",
+                                     "Algorithms",
+                                     "Data Structures",
+                                     "Math",
+                                     "Implementation",
+                                     "Miscellaneous"];
+            $.each(orderedCategories, function(i, category) {
+                var problems = tableData[category];
+                if (problems.length === 0) return;
+                tableContent += "<tr>";
+                tableContent += "<td><strong>" + category + "</strong></td><td> | ";
+                $.each(problems, function(i, problemData) {
+                    tableContent += getSpanElement(widgets[problemData[2]],
+                                                   problemData[0],
+                                                   problemData[1]);
+                    tableContent += " | ";
+                });
+                tableContent += "</td></tr>";
+            });
+            tableContent += "</table>";
+            return tableContent;
+        };
+
+        $(document).on('mouseenter', '.todo-list-icon', function() {
+            var todoIcon = $(this).find('.add-to-todo-list');
+            todoIcon.show();
+        });
+
+        $(document).on('mouseleave', '.todo-list-icon', function() {
+            var todoIcon = $(this).find('.add-to-todo-list');
+            todoIcon.hide();
+        });
         $.ajax({
             url: getSolvedUnsolvedURL,
             method: "GET",
             data: {user_id: userID, custom: custom},
             success: function(response) {
                 console.log(response);
-                // $("#solved-problems-list").html(response["solved_html"]);
-                // $("#unsolved-problems-list").html(response["unsolved_html"]);
+                // getProblemListingTable(response, "solved");
+                $("#solved-problems-list").html(getProblemListingTable(response, "solved"));
+                $("#unsolved-problems-list").html(getProblemListingTable(response, "unsolved"));
             },
             error: function(err) {
                 console.log(err);
@@ -409,22 +467,30 @@
         });
     };
 
-    $(document).ready(function() {
-
-        $('.carousel.carousel-slider').carousel({fullWidth: true});
+    // ---------------------------------------------------------------------------------
+    var initCardSlider = function() {
+        var currentActive = 0;
         $(document).keydown(function(e) {
             switch (e.which) {
                 case 37: // left
-                    $('.carousel').carousel('prev');
+                    currentActive = ((currentActive - 1) + 4) % 4;
+                    console.log(currentActive);
                     break;
                 case 39: // right
-                    $('.carousel').carousel('next');
+                    currentActive = ((currentActive + 1) + 4) % 4;
+                    console.log(currentActive);
                     break;
                 default:
                     return; // exit this handler for other keys
             }
             e.preventDefault(); // prevent the default action (scroll / move caret)
         });
+    };
+
+    $(document).ready(function() {
+
+        initCardSlider();
+
         /* Get the details about the solved/unsolved problems */
         $.ajax({
             url: getSolvedCountsURL,

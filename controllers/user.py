@@ -577,6 +577,15 @@ def get_solved_unsolved():
 
     custom = (custom == "True")
     solved_problems, unsolved_problems = utilities.get_solved_problems(user_id, custom)
+    if auth.is_logged_in() and session.user_id == user_id and not custom:
+        user_solved_problems, user_unsolved_problems = solved_problems, unsolved_problems
+    else:
+        if auth.is_logged_in():
+            user_solved_problems, user_unsolved_problems = utilities.get_solved_problems(session.user_id, False)
+        else:
+            user_solved_problems, user_unsolved_problems = set([]), set([])
+
+
     solved_ids, unsolved_ids = [], []
     ptable = db.problem
     sttable = db.suggested_tags
@@ -585,11 +594,26 @@ def get_solved_unsolved():
     all_tags = dict([(tag.id, tag.value) for tag in all_tags])
 
     query = ptable.link.belongs(solved_problems.union(unsolved_problems))
+    # id => [problem_link, problem_name, problem_class]
+    # problem_class =>
+    #    0 (Logged in user has solved the problem)
+    #    1 (Logged in user has attemted the problem)
+    #    2 (User not logged in or not attempted the problem)
     problem_details = {}
     pids = []
     for problem in db(query).select(ptable.id, ptable.link, ptable.name):
         pids.append(problem.id)
-        problem_details[problem.id] = [problem.link, problem.name]
+
+        problem_status = 2
+        if problem.link in user_unsolved_problems:
+            # Checking for unsolved first because most of the problem links
+            # would be found here instead of a failed lookup in solved_problems
+            problem_status = 1
+        elif problem.link in user_solved_problems:
+            problem_status = 0
+
+        problem_details[problem.id] = [problem.link, problem.name, problem_status]
+
         if problem.link in solved_problems:
             solved_ids.append(problem.id)
         else:
@@ -651,7 +675,7 @@ def get_solved_unsolved():
                 unsolved_problems=_get_categorized_json(unsolved_ids),
                 solved_html_widget=utilities.problem_widget("", "", "solved-problem", "Solved problem"),
                 unsolved_html_widget=utilities.problem_widget("", "", "unsolved-problem", "Unsolved problem"),
-                attempted_html_widget=utilities.problem_widget("", "", "unattempted-problem", "Unattempted problem"))
+                unattempted_html_widget=utilities.problem_widget("", "", "unattempted-problem", "Unattempted problem"))
 
 # ------------------------------------------------------------------------------
 def profile():
