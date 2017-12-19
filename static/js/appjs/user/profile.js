@@ -411,7 +411,7 @@
 
         var getProblemListingTable = function(response, tableType) {
             var tableData = response[tableType + "_problems"],
-                tableContent = "<table class='bordered col offset-s1 s10'>",
+                tableContent = "<table class='bordered col offset-s1 s10' id='solved-unsolved-table'>",
                 widgets = [$($.parseHTML(response["solved_html_widget"])),
                            $($.parseHTML(response["unsolved_html_widget"])),
                            $($.parseHTML(response["unattempted_html_widget"]))];

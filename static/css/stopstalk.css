@@ -314,3 +314,7 @@ nav ul a:hover {
 #profile-page-carousel {
     height: 100%;
 }
+
+#solved-unsolved-table td {
+    text-align: justify;
+}
