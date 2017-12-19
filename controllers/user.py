@@ -613,7 +613,7 @@ def profile():
                 original_row = cftable(row.duplicate_cu)
                 if auth.is_logged_in():
                     output["show_refresh_now"] = (row.user_id == session.user_id)
-                output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).days > 0
+                output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).total_seconds() > 3600
                 actual_handle = row.stopstalk_handle
                 handle = original_row.stopstalk_handle
                 original_row["first_name"] = row.first_name
@@ -624,7 +624,7 @@ def profile():
                 output["user_id"] = row.duplicate_cu
                 row = original_row
             else:
-                output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).days > 0
+                output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).total_seconds() > 3600
                 if auth.is_logged_in():
                     output["show_refresh_now"] = (row.user_id == session.user_id)
                 output["user_id"] = row.id
@@ -632,7 +632,7 @@ def profile():
     else:
         row = rows.first()
         output["user_id"] = row.id
-        output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).days > 0
+        output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).total_seconds() > 3600
         output["row"] = row
         if auth.is_logged_in():
             output["show_refresh_now"] = (row.id == session.user_id)
@@ -736,7 +736,7 @@ def add_to_refresh_now():
     else:
         authorized |= row.id == session.user_id
 
-    authorized &= (datetime.datetime.now() - row.refreshed_timestamp).days > 0
+    authorized &= (datetime.datetime.now() - row.refreshed_timestamp).total_seconds() > 3600
 
     if not authorized:
         return "FAILURE"

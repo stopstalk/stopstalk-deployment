@@ -333,12 +333,12 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
         last_retrieved = record[site_lr]
 
         # Rocked it totally ! ;)
-        if retrieval_type == "daily_retrieve" and \
-           datetime.timedelta(days=nrtable_record[site_delay]) + \
-           last_retrieved.date() > datetime.datetime.today().date():
-           print "Skipping " + site + " for " + record.stopstalk_handle
-           skipped_retrieval.add(site)
-           continue
+#        if retrieval_type == "daily_retrieve" and \
+#           datetime.timedelta(days=nrtable_record[site_delay]) + \
+#           last_retrieved.date() > datetime.datetime.today().date():
+#           print "Skipping " + site + " for " + record.stopstalk_handle
+#           skipped_retrieval.add(site)
+#           continue
 
         last_retrieved = time.strptime(str(last_retrieved), time_conversion)
 
