@@ -1,10 +1,6 @@
 (function($) {
     "use strict";
 
-    // Load the Visualization API and the piechart package.
-    google.load('visualization', '1.1', {'packages': ['corechart', 'calendar'],
-                                         'callback': drawCharts});
-
     function drawCharts() {
         // Set a callback to run when the Google Visualization API is loaded.
         drawPieChart();
@@ -459,8 +455,6 @@
             method: "GET",
             data: {user_id: userID, custom: custom},
             success: function(response) {
-                console.log(response);
-                // getProblemListingTable(response, "solved");
                 $("#solved-problems-list").html(getProblemListingTable(response, "solved"));
                 $("#unsolved-problems-list").html(getProblemListingTable(response, "unsolved"));
             },
@@ -478,11 +472,9 @@
             switch (e.which) {
                 case 37: // left
                     currentActive = ((currentActive - 1) + 4) % 4;
-                    console.log(currentActive);
                     break;
                 case 39: // right
                     currentActive = ((currentActive + 1) + 4) % 4;
-                    console.log(currentActive);
                     break;
                 default:
                     return; // exit this handler for other keys
@@ -493,22 +485,28 @@
 
     $(document).ready(function() {
 
-        initCardSlider();
+        if (totalSubmissions !== "0") {
+            // Load the Visualization API and the piechart package.
+            google.load('visualization', '1.1', {'packages': ['corechart', 'calendar'],
+                                                 'callback': drawCharts});
 
-        /* Get the details about the solved/unsolved problems */
-        $.ajax({
-            url: getSolvedCountsURL,
-            method: "GET",
-            data: {user_id: userID,
-                   custom: custom},
-            success: function(response) {
-                $('#solved-problems').html(response['solved_problems']);
-                $('#total-problems').html(response['total_problems']);
-            },
-            error: function(response) {
-                $.web2py.flash('Error getting solved problems');
-            }
-        });
+            /* Get the details about the solved/unsolved problems */
+            $.ajax({
+                url: getSolvedCountsURL,
+                method: "GET",
+                data: {user_id: userID,
+                       custom: custom},
+                success: function(response) {
+                    $('#solved-problems').html(response['solved_problems']);
+                    $('#total-problems').html(response['total_problems']);
+                },
+                error: function(response) {
+                    $.web2py.flash('Error getting solved problems');
+                }
+            });
+        } else {
+            $('#user-details').css('margin-left', '35%');
+        }
 
         $('#stopstalk-handle').modal();
         $('#profile-add-to-my-custom-friend').click(function() {

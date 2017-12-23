@@ -62,6 +62,7 @@
         var refreshNowURL = "{{=URL('user', 'add_to_refresh_now')}}";
         var canUpdate = ("{{=can_update}}" === "True");
         var problemIndexURL = "{{=URL('problems', 'index')}}";
+        var totalSubmissions = "{{=total_submissions}}";
     </script>
     <script src="{{=get_static_url('js/appjs/user/profile.js')}}" type="text/javascript"></script>
   </head>
@@ -80,6 +81,13 @@
                     <div id="user-details" class="center">
                         <div class="row">
                             <table class="centered">
+                                <tr>
+                                    <th style="text-align: center;" colspan="4">
+                                        {{if show_refresh_now and can_update and total_submissions == 0:}}
+                                            <h6 class="green-text">Click on the Blue button below to update your profile now</h6>
+                                        {{pass}}
+                                    </th>
+                                </tr>
                                 <tr>
                                     <th>
                                         <h4>
@@ -199,23 +207,26 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td id="curr-streak"></td>
-                                    <td id="max-streak"></td>
-                                    <td id="curr-accepted-streak"></td>
-                                    <td id="max-accepted-streak"></td>
-                                    <td id="solved-problems"></td>
-                                    <td id="total-problems"></td>
+                                    <td id="curr-streak">-</td>
+                                    <td id="max-streak">-</td>
+                                    <td id="curr-accepted-streak">-</td>
+                                    <td id="max-accepted-streak">-</td>
+                                    <td id="solved-problems">-</td>
+                                    <td id="total-problems">-</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </td>
+                {{if total_submissions != 0:}}
                 <td>
                     <div id="chart_div"></div>
                 </td>
+                {{pass}}
             </tr>
         </table>
       </div>
+      {{if total_submissions != 0:}}
       <div id="carousel-item-2">
         <h5>Contest Ratings</h5>
         {{if row.graph_data_retrieved:}}
@@ -261,5 +272,6 @@
         <div id="unsolved-problems-list" class="row"></div>
       </div>
     </div>
+    {{pass}}
   </body>
 </html>
