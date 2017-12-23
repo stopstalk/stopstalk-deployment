@@ -571,14 +571,20 @@ def profile():
         Controller to show user profile
         @ToDo: Lots of cleanup! Atleast run a lint
     """
-
     if len(request.args) < 1:
         if auth.is_logged_in():
             handle = str(session.handle)
         else:
-            redirect(URL("default", "user", "login"))
+            redirect(URL("default", "user", "login", vars={"_next": URL("user", "profile")}))
     else:
         handle = str(request.args[0])
+    http_referer = request.env.http_referer
+    if auth.is_logged_in() and \
+       session.welcome_shown is None and \
+       http_referer is not None and \
+       http_referer.__contains__("/user/login"):
+       response.flash = T("Welcome StopStalker!!")
+       session.welcome_shown = True
 
     query = (db.auth_user.stopstalk_handle == handle)
     rows = db(query).select()

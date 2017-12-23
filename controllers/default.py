@@ -146,7 +146,8 @@ def index():
     """
     # If the user is logged in
     if auth.is_logged_in():
-        session.flash = T("Welcome StopStalker!!")
+        if session.welcome_shown is None:
+            session.flash = T("Welcome StopStalker!!")
         redirect(URL("default", "submissions", args=[1]))
 
     return dict()
@@ -1322,6 +1323,7 @@ def submissions():
             # The pagination page number is not integer
             raise HTTP(404)
             return
+    session.welcome_shown = True
 
     cftable = db.custom_friend
     stable = db.submission
