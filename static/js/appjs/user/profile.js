@@ -1,10 +1,6 @@
 (function($) {
     "use strict";
 
-    // Load the Visualization API and the piechart package.
-    google.load('visualization', '1.1', {'packages': ['corechart', 'calendar'],
-                                         'callback': drawCharts});
-
     function drawCharts() {
         // Set a callback to run when the Google Visualization API is loaded.
         drawPieChart();
@@ -392,22 +388,125 @@
         });
     };
 
-    $(document).ready(function() {
+    var getSolvedUnsolvedProblems = function() {
 
-        /* Get the details about the solved/unsolved problems */
+        var getStopStalkProblemPageURL = function(problemLink, problemName) {
+            return problemIndexURL + "?" + $.param({pname: problemName, plink: problemLink});
+        };
+
+        var getSpanElement = function(element, problemLink, problemName) {
+            var newSpanElement = element.clone(),
+                newSpanChildren = newSpanElement.children();
+            newSpanChildren[0]["href"] = getStopStalkProblemPageURL(problemLink, problemName);
+            newSpanChildren[0].innerHTML = problemName;
+            return "<span class='todo-list-icon'>" +
+                   newSpanChildren[0].outerHTML +
+                   newSpanChildren[1].outerHTML +
+                   "</span>";
+        };
+
+        var getProblemListingTable = function(response, tableType) {
+            var tableData = response[tableType + "_problems"],
+                tableContent = "<table class='bordered col offset-s1 s10' id='solved-unsolved-table'>",
+                widgets = [$($.parseHTML(response["solved_html_widget"])),
+                           $($.parseHTML(response["unsolved_html_widget"])),
+                           $($.parseHTML(response["unattempted_html_widget"]))];
+
+            var orderedCategories = ["Dynamic Programming",
+                                     "Greedy",
+                                     "Strings",
+                                     "Hashing",
+                                     "Bit Manipulation",
+                                     "Trees",
+                                     "Graphs",
+                                     "Algorithms",
+                                     "Data Structures",
+                                     "Math",
+                                     "Implementation",
+                                     "Miscellaneous"];
+            $.each(orderedCategories, function(i, category) {
+                var problems = tableData[category];
+                if (problems.length === 0) return;
+                tableContent += "<tr>";
+                tableContent += "<td><strong>" + category + "</strong></td><td> | ";
+                $.each(problems, function(i, problemData) {
+                    tableContent += getSpanElement(widgets[problemData[2]],
+                                                   problemData[0],
+                                                   problemData[1]);
+                    tableContent += " | ";
+                });
+                tableContent += "</td></tr>";
+            });
+            tableContent += "</table>";
+            return tableContent;
+        };
+
+        $(document).on('mouseenter', '.todo-list-icon', function() {
+            var todoIcon = $(this).find('.add-to-todo-list');
+            todoIcon.show();
+        });
+
+        $(document).on('mouseleave', '.todo-list-icon', function() {
+            var todoIcon = $(this).find('.add-to-todo-list');
+            todoIcon.hide();
+        });
         $.ajax({
-            url: getSolvedCountsURL,
+            url: getSolvedUnsolvedURL,
             method: "GET",
-            data: {user_id: userID,
-                   custom: custom},
+            data: {user_id: userID, custom: custom},
             success: function(response) {
-                $('#solved-problems').html(response['solved_problems']);
-                $('#total-problems').html(response['total_problems']);
+                $("#solved-problems-list").html(getProblemListingTable(response, "solved"));
+                $("#unsolved-problems-list").html(getProblemListingTable(response, "unsolved"));
             },
-            error: function(response) {
-                $.web2py.flash('Error getting solved problems');
+            error: function(err) {
+                console.log(err);
+                $.web2py.flash("Something went wrong");
             }
         });
+    };
+
+    // ---------------------------------------------------------------------------------
+    var initCardSlider = function() {
+        var currentActive = 0;
+        $(document).keydown(function(e) {
+            switch (e.which) {
+                case 37: // left
+                    currentActive = ((currentActive - 1) + 4) % 4;
+                    break;
+                case 39: // right
+                    currentActive = ((currentActive + 1) + 4) % 4;
+                    break;
+                default:
+                    return; // exit this handler for other keys
+            }
+            e.preventDefault(); // prevent the default action (scroll / move caret)
+        });
+    };
+
+    $(document).ready(function() {
+
+        if (totalSubmissions !== "0") {
+            // Load the Visualization API and the piechart package.
+            google.load('visualization', '1.1', {'packages': ['corechart', 'calendar'],
+                                                 'callback': drawCharts});
+
+            /* Get the details about the solved/unsolved problems */
+            $.ajax({
+                url: getSolvedCountsURL,
+                method: "GET",
+                data: {user_id: userID,
+                       custom: custom},
+                success: function(response) {
+                    $('#solved-problems').html(response['solved_problems']);
+                    $('#total-problems').html(response['total_problems']);
+                },
+                error: function(response) {
+                    $.web2py.flash('Error getting solved problems');
+                }
+            });
+        } else {
+            $('#user-details').css('margin-left', '35%');
+        }
 
         $('#stopstalk-handle').modal();
         $('#profile-add-to-my-custom-friend').click(function() {
@@ -435,6 +534,8 @@
                 })
             }
         });
+
+        getSolvedUnsolvedProblems();
 
         /* Color the handles accordingly */
         $.ajax({
