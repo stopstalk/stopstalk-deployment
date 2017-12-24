@@ -119,12 +119,12 @@
             document.activeElement.blur();
         }
 
-        $(document).on('mouseenter', 'tr', function() {
+        $(document).on('mouseenter', '.submissions-table tr', function() {
             var todoIcon = $(this).find('.add-to-todo-list');
             todoIcon.show();
         });
 
-        $(document).on('mouseleave', 'tr', function() {
+        $(document).on('mouseleave', '.submissions-table tr', function() {
             var todoIcon = $(this).find('.add-to-todo-list');
             todoIcon.hide();
         });
