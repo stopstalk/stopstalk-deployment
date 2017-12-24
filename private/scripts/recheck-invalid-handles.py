@@ -167,9 +167,9 @@ if __name__ == "__main__":
                 row_obj.update_record(**update_dict)
                 if "user_id" in row_obj:
                     # Custom user
-                    db(nrtable.custom_user_id == row_obj.id).update(**{row.site.lower() + "_delay": 1})
+                    db(nrtable.custom_user_id == row_obj.id).update(**{row.site.lower() + "_delay": 0})
                 else:
-                    db(nrtable.user_id == row_obj.id).update(**{row.site.lower() + "_delay": 1})
+                    db(nrtable.user_id == row_obj.id).update(**{row.site.lower() + "_delay": 0})
                 final_delete_query |= ((stable.site == row.site) & \
                                        (stable.stopstalk_handle == row_obj.stopstalk_handle))
                 del update_dict[row.site.lower() + "_lr"]

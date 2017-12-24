@@ -640,7 +640,7 @@ nr_fields = [Field("user_id", "reference auth_user"),
              Field("custom_user_id", "reference custom_friend")]
 
 for site in current.SITES:
-    nr_fields.append(Field(site.lower() + "_delay", "integer", default=1))
+    nr_fields.append(Field(site.lower() + "_delay", "integer", default=0))
 
 db.define_table("next_retrieval", *nr_fields)
 
