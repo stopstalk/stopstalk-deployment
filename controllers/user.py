@@ -201,7 +201,7 @@ def update_details():
             nrtable_record = db(db.next_retrieval.user_id == session.user_id).select().first()
             for site in updated_sites:
                 site_lrs[site.lower() + "_lr"] = current.INITIAL_DATE
-                nrtable_record.update({site.lower() + "_delay": 1})
+                nrtable_record.update({site.lower() + "_delay": 0})
 
             nrtable_record.update_record()
 
@@ -317,7 +317,7 @@ def update_friend():
                 nrtable_record = db(db.next_retrieval.custom_user_id == int(request.args[0])).select().first()
                 for site in reset_sites:
                     form.vars[site.lower() + "_lr"] = current.INITIAL_DATE
-                    nrtable_record.update({site.lower() + "_delay": 1})
+                    nrtable_record.update({site.lower() + "_delay": 0})
 
                 nrtable_record.update_record()
 

@@ -306,8 +306,8 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
     list_of_submissions = []
     retrieval_failures = []
     plink_to_id = {}
-    nrtable = db.next_retrieval
-    nrtable_record = db(nrtable["custom_user_id" if custom else "user_id"] == record.id).select().first()
+    # nrtable = db.next_retrieval
+    # nrtable_record = db(nrtable["custom_user_id" if custom else "user_id"] == record.id).select().first()
     skipped_retrieval = set([])
 
     disabled_sites = current.REDIS_CLIENT.smembers("disabled_retrieval")
@@ -376,8 +376,8 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
             # Update this time so that this user is not picked
             # up again and again by new_user cron
             record.update({site_lr: datetime.datetime.now()})
-            if retrieval_type == "daily_retrieve":
-                nrtable_record.update({site_delay: 100000})
+            # if retrieval_type == "daily_retrieve":
+            #     nrtable_record.update({site_delay: 100000})
 
     for submissions in list_of_submissions:
         site = submissions[0]
@@ -389,15 +389,15 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
                                             submissions[1],
                                             site,
                                             custom)
-        if retrieval_type == "daily_retrieve" and \
-           submissions_count == 0 and \
-           site not in skipped_retrieval:
-            nrtable_record.update({site_delay: nrtable_record[site_delay] + 1})
+        # if retrieval_type == "daily_retrieve" and \
+        #    submissions_count == 0 and \
+        #    site not in skipped_retrieval:
+        #     nrtable_record.update({site_delay: nrtable_record[site_delay] + 1})
 
     # To reflect all the updates to record into DB
     record.update_record()
-    if retrieval_type == "daily_retrieve":
-        nrtable_record.update_record()
+    # if retrieval_type == "daily_retrieve":
+    #     nrtable_record.update_record()
 
     if retrieval_type == "refreshed_users" and len(retrieval_failures):
         current.REDIS_CLIENT.rpush("next_retrieve_custom_user" if custom else "next_retrieve_user",
@@ -550,7 +550,7 @@ def refreshed_users():
     users = [atable(user_id) for user_id in users]
     custom_users = [cftable(user_id) for user_id in custom_users]
 
-    update_fields = dict([(site.lower() + "_delay", 1) for site in current.SITES])
+    update_fields = dict([(site.lower() + "_delay", 0) for site in current.SITES])
     for user in users:
         record = db(nrtable.user_id == user.id).select().first()
         record.update_record(**update_fields)
