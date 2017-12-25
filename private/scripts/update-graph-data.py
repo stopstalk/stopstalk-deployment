@@ -294,7 +294,8 @@ def get_user_objects(aquery=None, cquery=None, sites=None):
     user_objects = []
     users = []
     if aquery:
-        aquery &= (atable.registration_key == "")
+        aquery &= (atable.registration_key == "") & \
+                  (atable.blacklisted == False)
         users += db(aquery).select().records
     if cquery:
         users += db(cquery).select().records
