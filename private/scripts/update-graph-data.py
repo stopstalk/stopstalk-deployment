@@ -29,7 +29,7 @@
 #       Third argument - normal/custom
 #       Fourth argument - <user_id>
 #   * new_user - Retrieve contest data for all the users whose graph_data_retrieved is not True
-# python web2py.py -S stopstalk -M -R applications/stopstalk/private/scripts/update-graph-data.py -A codechef,codeforces,hackerrank batch 5 100
+# python web2py.py -S stopstalk -M -R applications/stopstalk/private/scripts/update-graph-data.py -A codechef,codeforces,hackerrank,hackerearth batch 5 100
 
 import requests, re, os, sys, json, gevent, pickle
 from getpass import getuser
@@ -249,7 +249,29 @@ class User:
         pass
 
     def hackerearth_data(self):
-        pass
+        url = "https://www.hackerearth.com/ratings/AJAX/rating-graph/" + \
+              self.handles["hackerearth_handle"]
+        response = get_request(url)
+        if response in REQUEST_FAILURES:
+            print "Request ERROR: HackerEarth " + url + " " + response
+            return
+        if response.text == "":
+            print "Request ERROR: HackerEarth " + url + " " + NOT_FOUND
+            return
+        contest_data = eval(re.findall(r"var dataset = \[.*?\]", response.text)[0][14:])
+        if len(contest_data) == 0:
+            return
+
+        hackerearth_data = {}
+        for contest in contest_data:
+            time_stamp = str(datetime.strptime(contest["event_start"], "%d %b %Y, %I:%M %p"))
+            url = "https://www.hackerearth.com" + contest["event_url"]
+            hackerearth_data[time_stamp] = {"name": contest["event_title"],
+                                            "rating": contest["rating"],
+                                            "url": url,
+                                            "rank": contest["rank"]}
+        self.graph_data["hackerearth_data"] = [{"title": "HackerEarth",
+                                                "data": hackerearth_data}]
 
     def uva_data(self):
         pass

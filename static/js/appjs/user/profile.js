@@ -23,6 +23,8 @@
                 return "codeforces";
             } else if (url.search("hackerrank.com") !== -1) {
                 return "hackerrank";
+            } else if (url.search("hackerearth.com") !== -1) {
+                return "hackerearth";
             } else {
                 $.web2py.flash("Some error occurred");
                 return "";
