@@ -229,6 +229,7 @@
                 color: '#eeeeee'
             },
             height: 750,
+            width: 920,
             calendar: {
                 monthOutlineColor: {
                     stroke: '#ffffff',
