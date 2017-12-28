@@ -36,6 +36,15 @@
         .pending-retrieval {
             background-color: #9B5DD8;
         }
+
+        #cumulative_graph div[dir='ltr'] {
+           margin: 0 auto;
+        }
+
+        #calendar_submission div[dir='ltr'] {
+            margin: 0 auto;
+        }
+
     </style>
 
     <!--Load the AJAX API-->
@@ -232,7 +241,7 @@
         {{if row.graph_data_retrieved:}}
         <div id="contest_graphs">
             <p>Normal scrolling / pinching works for zooming in and out the graph. Right click to reset the zoom.</p>
-            <div id="cumulative_graph" style="margin-left: 17%;"></div>
+            <div id="cumulative_graph"></div>
         </div>
         {{else:}}
             <p>No graph data available at the moment !</p>
@@ -262,7 +271,7 @@
                 Submission Graph
             </label>
         </div>
-        <div id="calendar_submission" class="center" style="margin-left: 15%; width: 70%;"></div>
+        <div id="calendar_submission" class="center"></div>
         <div id="activity"></div>
       </div>
       <div id="carousel-item-4">
