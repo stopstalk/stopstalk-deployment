@@ -190,16 +190,22 @@
 
     // ---------------------------------------------------------------------------------
     function drawCalendarFromData(calendarChart, allData) {
-        var dataTable = new google.visualization.DataTable(), dateList = [], dt;
+        var dataTable = new google.visualization.DataTable(),
+            dateList = [],
+            years = new Set(),
+            dt;
+
         dataTable.addColumn({ type: 'date', id: 'Date' });
         dataTable.addColumn({ type: 'number', id: 'Number' });
         dataTable.addColumn({ type: 'string', role: 'tooltip', 'p': {'html': true} });
         $.each(allData, function(key, val) {
             dt = key.split('-');
+            years.add(dt[0]);
             dateList.push([new Date(dt[0], --dt[1], dt[2]),
                            computeCellValue(val),
                            createCustomHTML(key, val)]);
         });
+
         dataTable.addRows(dateList);
         var colorAxisOption,
             graphTitle,
@@ -228,7 +234,7 @@
                 backgroundColor: '#eeeeee',
                 color: '#eeeeee'
             },
-            height: 750,
+            height: 36 + years.size * 144,
             width: 920,
             calendar: {
                 monthOutlineColor: {
@@ -508,7 +514,7 @@
                 }
             });
         } else {
-            $('#user-details').css('margin-left', '35%');
+            $('#user-details').css('margin-left', '32%');
         }
 
         $('#stopstalk-handle').modal();
