@@ -1,0 +1,71 @@
+{{extend 'layout.html'}}
+<title>Heuristical Submission Retrieval</title>
+<br/>
+<h3>Behind the scenes of submission retrieval</h3>
+<div class="left-align row">
+  <div class="col offset-s1 s10">
+    <div id="submission-retrieval-background">
+        <h5>What used to happen before ?</h5>
+        <div>
+          Currently we have 5700+ users along with 680+ custom users. This means we need to retrieve submissions of 6380+ users from all the 6 profile sites (CodeChef, CodeForces, Spoj, HackerRank, HackerEarth, UVa).
+<pre>Total requests every 24 hours = 6380 * 6 = 38280</pre>
+<b>Note:</b> This number is actually larger than this as most of the websites have pagination and we need to make extra requests to get all the submissions. Along with these requests other processing power is required to parse the submission details from the page html received followed by entering these details into the StopStalk <b><i>submission</i></b> table.
+          There are also a few optimizations to reduce the computation -<br/><br/>
+          <h6><strong><u>last_retrieved optimization</u></strong></h6>
+          There is a great optimization here which involves storing a <b><i>last_retrieved</i></b> for every site profile of every user which indicates what was the last timestamp the submissions from that site were retrieved. This helps in the next day's retrieval and breaking out from the processing of submissions once we hit a timestamp lesser than the <b><i>last_retrieved</i></b> value.<br/><br/>
+          <h6><strong><u>Invalid handles optimization</u></strong></h6>
+          We also store invalid handles entered by users and once found that the handle does not exist on the site we store it in <b><i>invalid_handles</i></b> table and skip the subsequent retrievals for these handles to avoid unnecessary 404s. These handles are checked regularly so as to consider the cases when the user actually registers on the site with this handle which didn't exist before.
+        </div>
+        <br/>
+        <div>
+          Even with these optimizations the time taken to completely retrieve the submissions for all the users across all the profile sites is about 8 hours which is tremendously huge. This time is directly proportional to the number of users implying as the user base increases we need a better optimization to serve the purpose.
+        </div>
+
+        <br/><br/>
+
+        <h5>New Heuristic approach</h5>
+        <div>
+          Insights to the logs of every day submission retrieval reveiled an interesting fact - why should crawling happen for every site for every user. Putting some manual input to the system explains the fact that a user wouldn't submit on every site every day. Even when a user has registered across sites it is practically not possible that he/she will submit on all the websites every day.<br/>
+          How do we capture this information and build an algorithm around it to reduce the number of requests everyday ?<br/>
+          We store a delay corresponding to every user every profile site whose default value is <b>0</b>. Now we will use this <b>&lt;site&gt;_delay</b> value along with the <b>&lt;site&gt;_lr</b> (site last retrieved) to come up with a delayed retrieval procedure.
+          <br/><br/>
+          Let's have a look at the pseudocode -
+          <pre>
+// user_record is the record object of a specific user
+ALL_SITES = ["CodeChef", "CodeForces", "Spoj", "HackerRank", "HackerEarth", "UVa"]
+for site in ALL_SITES
+    site_delay = user_record[site + "_delay"]
+    site_lr = user_record[site + "_last_retrieved"]
+    if site_delay / 5 + 1 + site_lr.date > today.date
+        Skip the retrieval today
+    else
+        // Get how many new submissions were retrieved
+        submission_count = retrieve_submissions(user_object[site + "_handle"], site_lr)
+    if submission_count == 0
+        // No submissions made for site and hence increment delay
+        site_delay += 1
+    else
+        // Reset the delay as user is active today
+        site_delay = 0
+          </pre>
+          <b>For example:</b><br/>
+          Say, initially the delay is 0 implying 0 / 5 + 1 + site_lr.date would be equal to today's date. Now if the user didn't submit today, we increment the delay by 1. <br/>
+          Dry running this further we understand that until the delay value is 5 we would be retrieving submissions every day. Once the value is 5, we get 1 + 1 + site_lr.date > today's date. Now if the user still hasn't submitted on that site, we start retrieving the submissions on alternate days as the delay value goes from 5 to 9.<br/>
+          As the value reaches 10, we start retrieving every third day - and this proceeds accordingly unless the user submits a problem on the site after which the cycle resets and the process is repeated for every site profile.
+          <br/>
+          Code in action - <a href="https://github.com/stopstalk/stopstalk-deployment/blob/476714e18f1771856024491e9f1606c901a77de2/private/scripts/submissions.py#L336">Link</a>
+        </div>
+
+        <br/><br/>
+
+        <h5>Are we penalizing rare submitting programmers ?</h5>
+        <div>Certainly not. We understand that there might be cases when user submits to a site when there is an interesting contest on the site. The user's can click on the "Retrieve my submissions" on the profile page and we will retrieve the submissions within 5 minutes. Not only this, we will also reset all the site_delay values to 0 :)</div>
+        <br/>
+        <div>
+          Please feel free to write to us in case of any queries - <a target="_blank" href="{{=URL('default', 'contact_us')}}">Contact us page</a> or <a target="_blank" href="https://www.facebook.com/groups/2445127375713225/">Facebook Group</a>
+        </div>
+
+        <br/><br/>
+    </div>
+  </div>
+</div>
