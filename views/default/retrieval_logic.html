@@ -32,25 +32,32 @@
           Let's have a look at the pseudocode -
           <pre>
 // user_record is the record object of a specific user
-ALL_SITES = ["CodeChef", "CodeForces", "Spoj", "HackerRank", "HackerEarth", "UVa"]
+ALL_SITES = ["CodeChef", "CodeForces", "SPOJ", "HackerRank", "HackerEarth", "UVa"]
 for site in ALL_SITES
     site_delay = user_record[site + "_delay"]
     site_lr = user_record[site + "_last_retrieved"]
     if site_delay / 5 + 1 + site_lr.date > today.date
-        Skip the retrieval today
+       // Skip the retrieval today
+       continue
     else
         // Get how many new submissions were retrieved
         submission_count = retrieve_submissions(user_object[site + "_handle"], site_lr)
+        
     if submission_count == 0
         // No submissions made for site and hence increment delay
         site_delay += 1
     else
         // Reset the delay as user is active today
         site_delay = 0
+
+    // Update site last retrieved, regardless of whether we actually retrieved something.
+    site_lr.date = today.date
+        
           </pre>
-          <b>For example:</b><br/>
-          Say, initially the delay is 0 implying 0 / 5 + 1 + site_lr.date would be equal to today's date. Now if the user didn't submit today, we increment the delay by 1. <br/>
-          Dry running this further we understand that until the delay value is 5 we would be retrieving submissions every day. Once the value is 5, we get 1 + 1 + site_lr.date > today's date. Now if the user still hasn't submitted on that site, we start retrieving the submissions on alternate days as the delay value goes from 5 to 9.<br/>
+          <b>Let's see it in action:</b><br/>
+          Say, we fetched details of one user yesterday (date.today - site_lr.date = 1) and the delay is 0 implying: 0 / 5 + 1 + site_lr.date would be equal to today's date, Therefore we will not skip this user and proceed to retrieve his submissions. Now if the user didn't submit today, we increment the delay by 1 and update site_lr.date to today's date. <br/>
+          Dry running this further we understand that until the delay value is 5 we would be retrieving submissions every day (Because the difference between site_lr.date and date.today will always remain 1). <br />
+          Once the value is 5, we get 1 + 1 + site_lr.date > today's date, therefore we will skip this user today (i.e. we won't retrieve submissions and won't update site_lr.date). Now, the next day we will try to retrieve the user's submissions. If he has some submissions, we will reset the site_delay (and update site_lr.date) and go back to our initial state. In case, the user still hasn't made a submission we increment site_delay to 6 (and update site_lr.date). You can observe that we start retrieving the submissions on alternate days as the delay value goes from 5 to 9.<br/>
           As the value reaches 10, we start retrieving every third day - and this proceeds accordingly unless the user submits a problem on the site after which the cycle resets and the process is repeated for every site profile.
           <br/>
           Code in action - <a href="https://github.com/stopstalk/stopstalk-deployment/blob/476714e18f1771856024491e9f1606c901a77de2/private/scripts/submissions.py#L336">Link</a>
