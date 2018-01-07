@@ -58,6 +58,7 @@ def add_custom_friend():
     post_vars = request.post_vars
     atable = db.auth_user
     cftable = db.custom_friend
+
     stopstalk_handle = post_vars["stopstalk_handle"]
     # Modify(Prepare) this dictionary for inserting it again
     # @ToDo: Need a better method. Major security flaw
@@ -122,7 +123,8 @@ def add_custom_friend():
     current_row["stopstalk_handle"] = stopstalk_handle
 
     # Insert a new Custom friend for the logged-in user
-    cftable.insert(**current_row)
+    custom_user_id = cftable.insert(**current_row)
+    current.create_next_retrieval_record(cftable(custom_user_id), True)
 
     session.flash = T("Custom user added!!")
     redirect(URL("user", "profile", args=stopstalk_handle))
