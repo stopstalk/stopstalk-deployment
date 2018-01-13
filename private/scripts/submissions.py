@@ -112,8 +112,8 @@ def flush_problem_stats():
             res = "WHEN '%s' THEN '%s'\n" % (link, value)
         return res
 
-    to_be_inserted = []
-    to_be_updated = []
+    to_be_inserted = set([])
+    to_be_updated = set([])
     for link in problem_solved_stats:
         val = problem_solved_stats[link]
         try:
@@ -133,10 +133,10 @@ def flush_problem_stats():
             if val[0]:
                 solved_case += _build_when(link, val[0], "solved_submissions")
             total_case += _build_when(link, val[1], "total_submissions")
-            to_be_updated.append(link)
+            to_be_updated.add(link)
         except KeyError:
             # Problem not in `problem` table
-            to_be_inserted.append(link)
+            to_be_inserted.add(link)
 
     if len(to_be_updated):
         non_empty_components = []
