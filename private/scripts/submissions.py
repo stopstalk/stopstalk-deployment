@@ -390,11 +390,16 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
                                             site,
                                             custom)
         if retrieval_type == "daily_retrieve" and \
-           site not in skipped_retrieval:
+           site not in skipped_retrieval and \
+           site not in retrieval_failures:
             if submissions_count == 0:
                 nrtable_record.update({site_delay: nrtable_record[site_delay] + 1})
             else:
                 nrtable_record.update({site_delay: 0})
+        elif retrieval_type == "daily_retrieve" and site in retrieval_failures:
+            # If retrieval failed for the user, then reset the delay so that
+            # the details can be retrieved the next day
+            nrtable_record.update({site_delay: 0})
 
     # To reflect all the updates to record into DB
     record.update_record()
