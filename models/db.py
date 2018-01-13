@@ -702,6 +702,14 @@ db.define_table("recent_announcements",
                 Field("user_id", "reference auth_user"),
                 Field("data", "text", default="{}"))
 
+db.define_table("user_editorials",
+                Field("user_id", "reference auth_user"),
+                Field("problem_id", "reference problem"),
+                Field("added_on", "datetime"),
+                Field("s3_key"),
+                Field("votes", "text"),
+                Field("verification", default="pending"))
+
 uvadb.define_table("problem",
                    Field("problem_id", "integer"),
                    Field("problem_num", "integer"),

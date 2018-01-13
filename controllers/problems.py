@@ -236,12 +236,11 @@ def index():
             response.flash = T("Login to view your/friends' submissions")
 
     submissions = db(query).select(orderby=~stable.time_stamp)
-
+    problem_record = db(ptable.link == problem_link).select().first()
     try:
-        query = (ptable.link == problem_link)
-        all_tags = db(query).select(ptable.tags).first()
+        all_tags = problem_record.tags
         if all_tags:
-            all_tags = eval(all_tags["tags"])
+            all_tags = eval(all_tags)
         else:
             all_tags = ["-"]
     except AttributeError:
@@ -276,14 +275,15 @@ def index():
                     _class="chip lime accent-3"))
 
     row = db(ptable.link == problem_link).select().first()
-    if row and row.editorial_link:
+    if row:
         links.append(" ")
         links.append(DIV(A(I(_class="fa fa-book"), " " + T("Editorial"),
-                           _href=row.editorial_link,
+                           _href=URL("problems", "editorials", args=row.id),
                            _class="problem-page-editorial-link",
                            _style="color: white;",
                            _target="_blank"),
                          _class="chip deep-purple darken-1"))
+
     tbody.append(TR(TD(),
                     TD(STRONG(T("Links") + ":")),
                     links))
@@ -327,6 +327,110 @@ def index():
                 problem_link=problem_link,
                 submission_type=submission_type,
                 table=table)
+
+# ----------------------------------------------------------------------------
+def editorials():
+    if len(request.args) < 1:
+        redirect(URL("default", "index"))
+    record = db.problem(int(request.args[0]))
+    if record is None:
+        redirect(URL("default", "index"))
+
+    uetable = db.user_editorials
+    atable = db.auth_user
+    query = (uetable.problem_id == record.id)
+    if auth.is_logged_in():
+        # Show only accepted editorials not made by the logged-in user and
+        # all the editorials submitted by the logged-in user
+        query &= (((uetable.verification == "accepted") & \
+                   (uetable.user_id != session.user_id)) | \
+                  (uetable.user_id == session.user_id))
+    else:
+        query &= (uetable.verification == "accepted")
+    user_editorials = db(query).select(orderby=~uetable.added_on)
+    table = TABLE(_class="centered")
+    thead = THEAD(TR(TH(T("Problem")),
+                     TH(T("Editorial By")),
+                     TH(T("Added on")),
+                     TH(T("Votes")),
+                     TH(T("Read"))))
+    color_mapping = {"accepted": "green",
+                     "rejected": "red",
+                     "pending": "blue"}
+
+    tbody = TBODY()
+    for editorial in user_editorials:
+        user = atable(editorial.user_id)
+        number_of_votes = len(editorial.votes.split(",")) if editorial.votes else 0
+        tr = TR(TD(A(record.name,
+                     _href=URL("problems",
+                               "index",
+                               vars={"pname": record.name,
+                                     "plink": record.link},
+                               extension=False))))
+        if auth.is_logged_in() and user.id == session.user_id:
+            tr.append(TD(A(user.first_name + " " + user.last_name,
+                         _href=URL("user",
+                                   "profile",
+                                   args=user.stopstalk_handle)),
+                         " ",
+                         DIV(editorial.verification.capitalize(),
+                             _class="verification-badge " + \
+                                    color_mapping[editorial.verification])))
+        else:
+            tr.append(TD(A(user.first_name + " " + user.last_name,
+                           _href=URL("user",
+                                     "profile",
+                                     args=user.stopstalk_handle))))
+
+        tr.append(TD(editorial.added_on))
+        vote_class = ""
+        if auth.is_logged_in() and str(session.user_id) in set(editorial.votes.split(",")):
+            vote_class = "red-text"
+        tr.append(TD(DIV(SPAN(I(_class="fa fa-heart " + vote_class),
+                              _class="love-editorial",
+                              data={"id": editorial.id}),
+                         " ",
+                         DIV(number_of_votes,
+                             _class="love-count",
+                             _style="margin-left: 5px;"),
+                         _style="display: inline-flex;")))
+        tr.append(TD(A(T("Read"),
+                       _href=URL("problems",
+                                 "read_editorial",
+                                 args=editorial.id))))
+        tbody.append(tr)
+
+    table.append(thead)
+    table.append(tbody)
+
+    return dict(name=record.name,
+                link=record.link,
+                editorial_link=record.editorial_link,
+                table=table)
+
+# ----------------------------------------------------------------------------
+def read_editorial():
+    return dict()
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
+def love_editorial():
+    if len(request.args) == 0:
+        raise HTTP(400, "Bad Request")
+        return
+
+    uetable = db.user_editorials
+    editorial = db(uetable.id == int(request.args[0])).select().first()
+    if editorial is None:
+        raise HTTP(400, "Bad Request")
+        return
+
+    votes = set(editorial.votes.split(","))
+    votes.add(str(session.user_id))
+    votes.remove("") if "" in votes else ""
+    editorial.update_record(votes=",".join(votes))
+    return dict(love_count=len(votes))
 
 # ----------------------------------------------------------------------------
 def tag():

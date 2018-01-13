@@ -318,3 +318,17 @@ nav ul a:hover {
 #solved-unsolved-table td {
     text-align: justify;
 }
+
+.verification-badge {
+    display: inline;
+    padding: .2em .4em .2em;
+    font-size: 70%;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: 3px;
+    border-radius: .25em;
+    margin-left: 10px;
+}
