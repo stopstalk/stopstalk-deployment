@@ -654,6 +654,7 @@ def get_solved_unsolved():
                           "Implementation",
                           "Miscellaneous"]
 
+    displayed_problems = set([])
     def _get_categorized_json(problem_ids):
         result = dict([(category, []) for category in ordered_categories])
         for pid in problem_ids:
@@ -670,7 +671,12 @@ def get_solved_unsolved():
                         break
                 if not category_found:
                     this_category = "Miscellaneous"
-            result[this_category].append(problem_details[pid])
+            pdetails = problem_details[pid]
+            plink, pname, _ = pdetails
+            psite = utilities.urltosite(plink)
+            if (pname, psite) not in displayed_problems:
+                displayed_problems.add((pname, psite))
+                result[this_category].append(problem_details[pid])
         return result
 
     return dict(solved_problems=_get_categorized_json(solved_ids),
