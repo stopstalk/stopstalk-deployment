@@ -69,6 +69,7 @@ def insert_this_batch():
                     columns + """ VALUES """ + \
                     ",".join(rows) + """;"""
         db.executesql(sql_query)
+        db.commit()
 
 # -----------------------------------------------------------------------------
 def flush_problem_stats():
