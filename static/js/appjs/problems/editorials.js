@@ -30,39 +30,6 @@
         }
       }
     });
-    var simplemde = new SimpleMDE({
-        autofocus: false,
-        autosave: {
-            enabled: true,
-            uniqueId: "MyUniqueID",
-            delay: 1000,
-        },
-        autoDownloadFontAwesome: true,
-        element: document.getElementById("simplemde"),
-        forceSync: true,
-        indentWithTabs: false,
-        lineWrapping: false,
-        parsingConfig: {
-            allowAtxHeaderWithoutSpace: true,
-            strikethrough: false,
-            underscoresBreakWords: true,
-        },
-        placeholder: "Start writing your editorial here ...",
-        promptURLs: true,
-        renderingConfig: {
-            singleLineBreaks: false,
-            codeSyntaxHighlighting: true,
-        },
-        shortcuts: {
-            drawTable: "Cmd-Alt-T"
-        },
-        showIcons: ["code", "table"],
-        spellChecker: false,
-        status: false,
-        status: ["autosave", "lines", "words", "cursor"], // Optional usage
-        styleSelectedText: false,
-        tabSize: 2,
-        toolbarTips: true
-    });
+
   });
 })(jQuery);

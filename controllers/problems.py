@@ -415,6 +415,12 @@ def read_editorial():
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
+def submit_editorial():
+    print request.vars
+    return dict()
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
 def love_editorial():
     if len(request.args) == 0:
         raise HTTP(400, "Bad Request")
