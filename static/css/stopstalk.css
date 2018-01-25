@@ -318,3 +318,11 @@ nav ul a:hover {
 #solved-unsolved-table td {
     text-align: justify;
 }
+
+#solved-unsolved-table .categories {
+    width: 214px;
+}
+
+#solved-unsolved-table .category-pcount {
+    padding-left: 10px;
+}
