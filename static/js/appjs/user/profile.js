@@ -437,7 +437,7 @@
                 var problems = tableData[category];
                 if (problems.length === 0) return;
                 tableContent += "<tr>";
-                tableContent += "<td><strong>" + category + "</strong></td><td> | ";
+                tableContent += "<td class='categories'><strong>" + category + "</strong> <strong class='purple-text text-darken-3 category-pcount'>" + problems.length + "</strong></td><td> | ";
                 $.each(problems, function(i, problemData) {
                     tableContent += getSpanElement(widgets[problemData[2]],
                                                    problemData[0],
