@@ -407,7 +407,8 @@ def editorials():
     return dict(name=record.name,
                 link=record.link,
                 editorial_link=record.editorial_link,
-                table=table)
+                table=table,
+                problem_id=record.id)
 
 # ----------------------------------------------------------------------------
 def read_editorial():
@@ -416,7 +417,55 @@ def read_editorial():
 # ----------------------------------------------------------------------------
 @auth.requires_login()
 def submit_editorial():
+    from uuid import uuid4
     print request.vars
+    problem_id = request.vars.get("problem_id", None)
+    content = request.vars.get("content", None)
+    editorials_dir = request.folder + "user_editorials/"
+    if problem_id is None or content is None:
+        raise HTTP(400, "Bad Request")
+        return dict(error="Invalid request params")
+
+    s3_key = "editorials/" + problem_id + "_" + str(session.user_id) + \
+             "_" + str(uuid4()).split("-")[0] + ".txt"
+
+    def create_editorial_file(filename):
+        file_obj = open(filename, "w")
+        file_obj.write(content)
+        file_obj.close()
+
+    def upload_to_s3():
+        import boto3, os
+        filename = editorials_dir + s3_key
+        create_editorial_file(filename)
+        client = boto3.client(
+            "s3",
+            aws_access_key_id=current.s3_access_key_id,
+            aws_secret_access_key=current.s3_secret_access_key
+        )
+        try:
+            client.upload_file(filename,
+                               current.s3_bucket,
+                               s3_key)
+            # Delete the local file
+            os.remove(filename)
+        except:
+            pass
+
+    def upload_to_filesystem():
+        # Used in case of development environments
+        create_editorial_file(editorials_dir + s3_key)
+
+    if current.environment == "development":
+        upload_to_s3()
+    else:
+        upload_to_filesystem()
+    db.user_editorials.insert(user_id=session.user_id,
+                              problem_id=problem_id,
+                              s3_key=s3_key,
+                              votes="",
+                              added_on=datetime.datetime.now(),
+                              verification="pending")
     return dict()
 
 # ----------------------------------------------------------------------------

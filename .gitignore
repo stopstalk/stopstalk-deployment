@@ -3,6 +3,7 @@
 /models/0firstrun.py
 /sessions/*
 /uploads/*
+/user_editorials/*.txt
 /databases/*
 /graph_data/*.pickle
 .~lock.*.csv#
