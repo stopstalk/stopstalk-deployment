@@ -112,8 +112,8 @@ def flush_problem_stats():
             res = "WHEN '%s' THEN '%s'\n" % (link, value)
         return res
 
-    to_be_inserted = []
-    to_be_updated = []
+    to_be_inserted = set([])
+    to_be_updated = set([])
     for link in problem_solved_stats:
         val = problem_solved_stats[link]
         try:
@@ -133,10 +133,10 @@ def flush_problem_stats():
             if val[0]:
                 solved_case += _build_when(link, val[0], "solved_submissions")
             total_case += _build_when(link, val[1], "total_submissions")
-            to_be_updated.append(link)
+            to_be_updated.add(link)
         except KeyError:
             # Problem not in `problem` table
-            to_be_inserted.append(link)
+            to_be_inserted.add(link)
 
     if len(to_be_updated):
         non_empty_components = []
@@ -390,11 +390,16 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
                                             site,
                                             custom)
         if retrieval_type == "daily_retrieve" and \
-           site not in skipped_retrieval:
+           site not in skipped_retrieval and \
+           site not in retrieval_failures:
             if submissions_count == 0:
                 nrtable_record.update({site_delay: nrtable_record[site_delay] + 1})
             else:
                 nrtable_record.update({site_delay: 0})
+        elif retrieval_type == "daily_retrieve" and site in retrieval_failures:
+            # If retrieval failed for the user, then reset the delay so that
+            # the details can be retrieved the next day
+            nrtable_record.update({site_delay: 0})
 
     # To reflect all the updates to record into DB
     record.update_record()

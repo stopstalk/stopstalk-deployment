@@ -332,3 +332,11 @@ nav ul a:hover {
     border-radius: .25em;
     margin-left: 10px;
 }
+
+#solved-unsolved-table .categories {
+    width: 214px;
+}
+
+#solved-unsolved-table .category-pcount {
+    padding-left: 10px;
+}

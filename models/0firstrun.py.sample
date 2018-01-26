@@ -52,4 +52,7 @@ current.calendar_token = ""
 current.neverbounce_user = ""
 current.neverbounce_password = ""
 
+current.neverbounce_user2 = ""
+current.neverbounce_password2 = ""
+
 # =============================================================================
