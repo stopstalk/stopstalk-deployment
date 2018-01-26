@@ -408,10 +408,14 @@
                 newSpanChildren = newSpanElement.children();
             newSpanChildren[0]["href"] = getStopStalkProblemPageURL(problemLink, problemName);
             newSpanChildren[0].innerHTML = problemName;
-            return "<span class='todo-list-icon'>" +
-                   newSpanChildren[0].outerHTML +
-                   newSpanChildren[1].outerHTML +
-                   "</span>";
+            if (isLoggedIn === "True") {
+                return "<span class='todo-list-icon'>" +
+                       newSpanChildren[0].outerHTML +
+                       newSpanChildren[1].outerHTML +
+                       "</span>";
+            } else {
+                return newSpanChildren[0].outerHTML;
+            }
         };
 
         var getProblemListingTable = function(response, tableType) {
@@ -437,7 +441,7 @@
                 var problems = tableData[category];
                 if (problems.length === 0) return;
                 tableContent += "<tr>";
-                tableContent += "<td><strong>" + category + "</strong></td><td> | ";
+                tableContent += "<td class='categories'><strong>" + category + "</strong> <strong class='purple-text text-darken-3 category-pcount'>" + problems.length + "</strong></td><td> | ";
                 $.each(problems, function(i, problemData) {
                     tableContent += getSpanElement(widgets[problemData[2]],
                                                    problemData[0],
