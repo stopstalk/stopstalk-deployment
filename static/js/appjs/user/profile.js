@@ -408,10 +408,14 @@
                 newSpanChildren = newSpanElement.children();
             newSpanChildren[0]["href"] = getStopStalkProblemPageURL(problemLink, problemName);
             newSpanChildren[0].innerHTML = problemName;
-            return "<span class='todo-list-icon'>" +
-                   newSpanChildren[0].outerHTML +
-                   newSpanChildren[1].outerHTML +
-                   "</span>";
+            if (isLoggedIn === "True") {
+                return "<span class='todo-list-icon'>" +
+                       newSpanChildren[0].outerHTML +
+                       newSpanChildren[1].outerHTML +
+                       "</span>";
+            } else {
+                return newSpanChildren[0].outerHTML;
+            }
         };
 
         var getProblemListingTable = function(response, tableType) {
