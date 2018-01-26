@@ -55,4 +55,12 @@ current.neverbounce_password = ""
 current.neverbounce_user2 = ""
 current.neverbounce_password2 = ""
 
+# Environment for running the application
+current.environment = "development"
+
+# S3 creds for user editorials
+current.s3_bucket = ""
+current.s3_access_key_id = ""
+current.s3_secret_access_key = ""
+
 # =============================================================================
