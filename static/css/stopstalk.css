@@ -340,3 +340,15 @@ nav ul a:hover {
 #solved-unsolved-table .category-pcount {
     padding-left: 10px;
 }
+
+.love-editorial {
+    cursor: pointer;
+}
+
+.preview-editor-wrapper .CodeMirror {
+    border: 0;
+}
+
+.preview-editor-wrapper .editor-preview {
+    background: white;
+}

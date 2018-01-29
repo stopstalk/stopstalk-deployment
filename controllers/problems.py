@@ -412,13 +412,52 @@ def editorials():
 
 # ----------------------------------------------------------------------------
 def read_editorial():
-    return dict()
+    if len(request.args) < 1:
+        redirect(URL("default", "index"))
+    uetable = db.user_editorials
+    ptable = db.problem
+    atable = db.auth_user
+    ue_record = uetable(int(request.args[0]))
+    if ue_record is None:
+        redirect(URL("default", "index"))
+
+    user = atable(ue_record.user_id)
+    problem = ptable(ue_record.problem_id)
+    editorials_dir = request.folder + "user_editorials/"
+    s3_key = ue_record.s3_key
+    filename = editorials_dir + s3_key
+
+    def read_file():
+        f = open(filename, "r")
+        content = f.read()
+        f.close()
+        return content
+
+    def download_from_s3():
+        import boto3
+        client = boto3.client(
+            "s3",
+            aws_access_key_id=current.s3_access_key_id,
+            aws_secret_access_key=current.s3_secret_access_key
+        )
+        client.download_file(current.s3_bucket, s3_key, filename)
+
+    if current.environment == "production":
+        import os
+        download_from_s3()
+        content = read_file()
+    else:
+        content = read_file()
+
+    return dict(problem_name=problem.name,
+                problem_link=problem.link,
+                stopstalk_handle=user.stopstalk_handle,
+                content=content)
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
 def submit_editorial():
     from uuid import uuid4
-    print request.vars
     problem_id = request.vars.get("problem_id", None)
     content = request.vars.get("content", None)
     editorials_dir = request.folder + "user_editorials/"
@@ -456,7 +495,7 @@ def submit_editorial():
         # Used in case of development environments
         create_editorial_file(editorials_dir + s3_key)
 
-    if current.environment == "development":
+    if current.environment == "production":
         upload_to_s3()
     else:
         upload_to_filesystem()
