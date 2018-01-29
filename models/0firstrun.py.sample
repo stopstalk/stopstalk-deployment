@@ -55,4 +55,7 @@ current.neverbounce_password = ""
 current.neverbounce_user2 = ""
 current.neverbounce_password2 = ""
 
+current.neverbounce_user3 = ""
+current.neverbounce_password3 = ""
+
 # =============================================================================
