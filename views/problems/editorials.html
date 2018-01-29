@@ -2,6 +2,7 @@
 <head>
   <link rel="stylesheet" href="{{=URL('static', 'simplemde/simplemde.min.css')}}">
   <script src="https://cdn.jsdelivr.net/highlight.js/latest/highlight.min.js"></script>
+  <script src="{{=URL('static', 'simplemde/simplemde.min.js')}}"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css">
   <title>Problem Editorial | {{=name}}</title>
 </head>
@@ -20,7 +21,6 @@
   var submitEditorialURL = "{{=URL('problems', 'submit_editorial')}}";
   var problemId = "{{=problem_id}}";
 </script>
-<script src="{{=URL('static', 'simplemde/simplemde.min.js')}}"></script>
 <!-- <script type="text/javascript" src="{{=get_static_url('js/appjs/problems/editorials.js')}}"/> -->
 
 {{if auth.is_logged_in():}}
@@ -33,11 +33,14 @@
        <textarea id="simplemde-textarea" style="text-align: left; visibility: hidden;"></textarea>
       </div>
       <p>Your editorial is saved locally and is autosaved whenever changed but it is not submitted until Submit button is clicked</p>
-      <input id="submit-editorial" type="submit" class="btn" value="Submit Editorial"/>
-      <button id="cancel-editorial" type="submit" class="btn red-text white" style="margin-left: 10px;">Cancel</button>
+      <form id="editorial-form">
+        <input id="submit-editorial" type="submit" class="btn" value="Submit Editorial"/>
+        <input id="cancel-editorial" type="submit" class="btn red-text white" style="margin-left: 10px;" value="Cancel"/>
+      </form>
     </div>
   </div>
 </div>
+{{pass}}
 <script type="text/javascript">
   var simpleMDEObject = null;
 
@@ -99,13 +102,13 @@
     if(editorialText.trim() === "") {
       $.web2py.flash("Cannot submit empty editorial");
     } else {
+      showEditorialListing();
       $.ajax({
         url: submitEditorialURL,
         method: 'POST',
         data: {content: editorialText,
                problem_id: problemId},
         success: function(response) {
-          showEditorialListing();
           simpleMDEObject.clearAutosavedValue();
           simpleMDEObject.toTextArea();
           $('#simplemde-textarea').val('');
@@ -133,15 +136,18 @@
       submitEditorial();
     });
 
+    $('#editorial-form').click(function() {
+      return false;
+    });
+
     $(".love-editorial").click(function() {
       var $this = $(this),
           $loveCount = $($this.siblings()[0]),
           $heartIcon = $this.children()[0];
-      console.log($heartIcon.classList);
       if ($heartIcon.classList.contains("red-text")) {
         $.web2py.flash("Already voted the editorial");
       } else {
-        if (loggedIn === "False") {
+        if (loggedIn === false) {
           $.web2py.flash("Please login to cast your vote");
         } else {
           $.ajax({
@@ -166,4 +172,3 @@
   });
 
 </script>
-{{pass}}

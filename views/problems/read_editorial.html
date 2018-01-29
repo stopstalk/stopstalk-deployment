@@ -1,0 +1,34 @@
+{{extend 'layout.html'}}
+<head>
+  <link rel="stylesheet" href="{{=URL('static', 'simplemde/simplemde.min.css')}}">
+  <script src="https://cdn.jsdelivr.net/highlight.js/latest/highlight.min.js"></script>
+  <script src="{{=URL('static', 'simplemde/simplemde.min.js')}}"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css">
+  <title>{{=problem_name}} | Editorial by {{=stopstalk_handle}}</title>
+</head>
+
+<h2><a href="{{=URL('problems', 'index', vars={'pname': problem_name, 'plink': problem_link})}}">{{=problem_name}}</a> | Editorial by <a href="{{=URL('user', 'profile', args=stopstalk_handle)}}">{{=stopstalk_handle}}</a></h2>
+<div class="row left-align preview-editor-wrapper">
+  <div class="col offset-s1 s10">
+    <textarea id="preview-textarea">{{=content}}</textarea>
+  </div>
+</div>
+<script type="text/javascript">
+  var simplemde = new SimpleMDE({
+    autoDownloadFontAwesome: false,
+    element: document.getElementById('preview-textarea'),
+    parsingConfig: {
+      allowAtxHeaderWithoutSpace: true,
+      strikethrough: false,
+      underscoresBreakWords: true,
+    },
+    renderingConfig: {
+      singleLineBreaks: true,
+      codeSyntaxHighlighting: true,
+    },
+    styleSelectedText: false,
+    tabSize: 4,
+    toolbar: false,
+    status: false
+  }).togglePreview();
+</script>
