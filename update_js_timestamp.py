@@ -108,6 +108,7 @@ all_js_files = ["js/web2py-bootstrap3.js",
                 "images/bitcoin-qrcode.png",
                 "images/paytm-accepted-here.png",
                 "images/paytm-qrcode.png",
+                "images/paypal-donate-button.png",
                 "js/appjs/google_analytics.js"]
 
 REDIS_CLIENT = redis.Redis(host='localhost', port=6379, db=0)
