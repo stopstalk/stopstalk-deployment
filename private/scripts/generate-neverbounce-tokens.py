@@ -25,12 +25,13 @@ from requests.auth import HTTPBasicAuth
 from datetime import datetime, timedelta
 import random
 
-tokens = [(current.neverbounce_user, current.neverbounce_password),
-          (current.neverbounce_user2, current.neverbounce_password2)]
+tokens = [(current.neverbounce_user, current.neverbounce_password, "contactstopstalk@gmail.com"),
+          (current.neverbounce_user2, current.neverbounce_password2, "raj454raj@gmail.com"),
+          (current.neverbounce_user3, current.neverbounce_password3, "admin@stopstalk.com")]
 for i in xrange(2):
     # Only 5 tries to get a particular token
     random.shuffle(tokens)
-    print tokens[0]
+    print tokens[0][2]
     for i in xrange(5):
         response = requests.post('https://api.neverbounce.com/v3/access_token',
                                  auth=HTTPBasicAuth(tokens[0][0],

@@ -68,6 +68,11 @@
 
     var addMiscellaneousToGA = function() {
         addEventListener('#heart-button', 'Heart Button');
+        addEventListener('#heart-facebook-group', 'Heart Facebook Group');
+        addEventListener('#heart-facebook', 'Heart Facebook');
+        addEventListener('#heart-twitter', 'Heart Twitter');
+        addEventListener('#heart-google-plus', 'Heart Google Plus');
+        addEventListener('#heart-github', 'Heart Github');
         addEventListener('#footer-faqs', 'Footer FAQs');
         addEventListener('#footer-contact-us', 'Footer Contact Us');
         addEventListener('#footer-license', 'Footer MIT License');
