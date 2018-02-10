@@ -455,11 +455,24 @@ def delete_editorial():
 def read_editorial():
     if len(request.args) < 1:
         redirect(URL("default", "index"))
+
     uetable = db.user_editorials
     ptable = db.problem
     atable = db.auth_user
     ue_record = uetable(int(request.args[0]))
+
+    # @ToDo: Refactor this later !
     if ue_record is None:
+        session.flash = "Invalid editorial URL"
+        redirect(URL("default", "index"))
+    elif auth.is_logged_in() and session.user_id != ue_record.user_id and ue_record.verification != "accepted":
+        session.flash = "Invalid editorial URL"
+        redirect(URL("default", "index"))
+    elif auth.is_logged_in() == False and ue_record.verification != "accepted":
+        session.flash = "Invalid editorial URL"
+        redirect(URL("default", "index"))
+    elif auth.is_logged_in() and session.user_id != ue_record.user_id and ue_record.verification != "accepted":
+        session.flash = "Invalid editorial URL"
         redirect(URL("default", "index"))
 
     user = atable(ue_record.user_id)
