@@ -576,7 +576,7 @@ def admin_editorial_approval():
     uetable = db.user_editorials
     uetable_record = uetable(request.args[1])
     user = db.auth_user(uetable_record.user_id)
-    if request.args[0] == "approved":
+    if request.args[0] == "accepted":
         current.send_mail(to=user.email,
                           subject="Your editorial on StopStalk is Published",
                           message="""
