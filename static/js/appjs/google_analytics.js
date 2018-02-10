@@ -93,11 +93,19 @@
         addEventListener('#friends-submissions-tab', 'Friends Submissions Tab');
         addEventListener('#global-submissions-tab', 'Global Submissions Tab');
         addEventListener('.problem-page-site-link', 'Problem page problem link');
-        addEventListener('.problem-page-editorial-link', 'Problem page editorial link');
+        addEventListener('.problem-page-editorials', 'Problem page editorials link');
         addEventListener('.suggest-tags-plus-logged-out', 'Suggest tags plus (Logged out)');
         addEventListener('.suggest-tags-plus', 'Suggest tags plus');
         addEventListener('#show-tags', 'Show tags');
         addEventListener('.problem-page-tag', 'Problem page tag');
+    };
+
+    var addUserEditorialsButtonsToGA = function() {
+        addEventListener('#all-editorials-button', 'Read editorial page All Editorials');
+        addEventListener('#site-editorial-link', 'Site editorial link');
+        addEventListener('#show-editor', 'Write Editorial button');
+        addEventListener('#submit-editorial', 'Submit Editorial button');
+        addEventListener('#cancel-editorial', 'Cancel Editorial button');
     };
 
     var addFriendsPageButtonsToGA = function() {
