@@ -336,18 +336,23 @@
         </a>
         <ul style="pointer-events: none;">
             <li>
-                <a class="btn-floating indigo darken-4" style="pointer-events: all; transform: scaleY(0.4) scaleX(0.4) translateY(0px) translateX(40px); opacity: 0;" target="_blank" href="https://www.facebook.com/stopstalkcommunity/"><i class="fa fa-facebook"></i></a>
+                <a id="heart-facebook-group" class="btn-floating" style="background-color: #5d92ff; pointer-events: all; transform: scaleY(0.4) scaleX(0.4) translateY(0px) translateX(40px); opacity: 0;" target="_blank" href="https://www.facebook.com/groups/stopstalk">
+                    <i class="fa fa-users"></i>
+                </a>
             </li>
             <li>
-                <a class="btn-floating blue lighten-1" style="pointer-events: all; transform: scaleY(0.4) scaleX(0.4) translateY(0px) translateX(40px); opacity: 0;" target="_blank" href="https://twitter.com/stop_stalk"><i class="fa fa-twitter"></i></a>
+                <a id="heart-facebook" class="btn-floating indigo darken-4" style="pointer-events: all; transform: scaleY(0.4) scaleX(0.4) translateY(0px) translateX(40px); opacity: 0;" target="_blank" href="https://www.facebook.com/stopstalkcommunity/"><i class="fa fa-facebook"></i></a>
             </li>
             <li>
-                <a class="btn-floating red darken-4"  style="pointer-events: all; transform: scaleY(0.4) scaleX(0.4) translateY(0px) translateX(40px); opacity: 0;" target="_blank" href="https://plus.google.com/110575194069678651985"><i class="fa fa-google-plus"></i></a>
+                <a id="heart-twitter" class="btn-floating blue lighten-1" style="pointer-events: all; transform: scaleY(0.4) scaleX(0.4) translateY(0px) translateX(40px); opacity: 0;" target="_blank" href="https://twitter.com/stop_stalk"><i class="fa fa-twitter"></i></a>
             </li>
             <li>
-                <a class="btn-floating black"  style="pointer-events: all; transform: scaleY(0.4) scaleX(0.4) translateY(0px) translateX(40px); opacity: 0;" target="_blank" href="https://github.com/stopstalk/stopstalk-deployment"><i class="fa fa-github"></i></a>
+                <a id="heart-google-plus" class="btn-floating red darken-4"  style="pointer-events: all; transform: scaleY(0.4) scaleX(0.4) translateY(0px) translateX(40px); opacity: 0;" target="_blank" href="https://plus.google.com/110575194069678651985"><i class="fa fa-google-plus"></i></a>
             </li>
-            </ul>
+            <li>
+                <a id="heart-github" class="btn-floating black"  style="pointer-events: all; transform: scaleY(0.4) scaleX(0.4) translateY(0px) translateX(40px); opacity: 0;" target="_blank" href="https://github.com/stopstalk/stopstalk-deployment"><i class="fa fa-github"></i></a>
+            </li>
+        </ul>
     </div>
     <!-- The javascript =============================== -->
     <script src="{{=get_static_url('materialize/js/materialize.min.js')}}"></script>
@@ -357,13 +362,17 @@
     <!-- Analytics ==================================== -->
     {{if current.analytics_id:}}
         <script>
-          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-             (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-               m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-                 })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+               (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                 m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+                   })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-          ga('create', '{{=current.analytics_id}}', 'auto');
-          ga('send', 'pageview');
+            if("{{=auth.is_logged_in()}}" === "True") {
+                ga('create', '{{=current.analytics_id}}', 'auto', {userId: '{{=session.user_id}}'});
+            } else {
+                ga('create', '{{=current.analytics_id}}', 'auto');
+            }
+            ga('send', 'pageview');
         </script>
         <script src="{{=get_static_url('js/appjs/google_analytics.js')}}"></script>
     {{pass}}
