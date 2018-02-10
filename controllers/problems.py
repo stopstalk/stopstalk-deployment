@@ -277,9 +277,9 @@ def index():
     row = db(ptable.link == problem_link).select().first()
     if row:
         links.append(" ")
-        links.append(DIV(A(I(_class="fa fa-book"), " " + T("Editorial"),
+        links.append(DIV(A(I(_class="fa fa-book"), " " + T("Editorials"),
                            _href=URL("problems", "editorials", args=row.id),
-                           _class="problem-page-editorial-link",
+                           _class="problem-page-editorials",
                            _style="color: white;",
                            _target="_blank"),
                          _class="chip deep-purple darken-1"))
@@ -353,7 +353,7 @@ def editorials():
                      TH(T("Editorial By")),
                      TH(T("Added on")),
                      TH(T("Votes")),
-                     TH(T("Read"))))
+                     TH(T("Actions"))))
     color_mapping = {"accepted": "green",
                      "rejected": "red",
                      "pending": "blue"}
@@ -395,10 +395,25 @@ def editorials():
                              _class="love-count",
                              _style="margin-left: 5px;"),
                          _style="display: inline-flex;")))
-        tr.append(TD(A(T("Read"),
-                       _href=URL("problems",
-                                 "read_editorial",
-                                 args=editorial.id))))
+
+        actions_td = TD(A(I(_class="fa fa-eye fa-2x"),
+                          _href=URL("problems",
+                                    "read_editorial",
+                                    args=editorial.id),
+                          _class="btn btn-primary tooltipped",
+                          _style="background-color: #13AA5F;",
+                          data={"position": "bottom",
+                                "delay": 40,
+                                "tooltip": T("Read Editorial")}))
+        if auth.is_logged_in() and user.id == session.user_id:
+            actions_td.append(BUTTON(I(_class="fa fa-trash fa-2x"),
+                                     _style="margin-left: 2%;",
+                                     _class="red tooltipped delete-editorial",
+                                     data={"position": "bottom",
+                                           "delay": 40,
+                                           "tooltip": T("Delete Editorial"),
+                                           "id": editorial.id}))
+        tr.append(actions_td)
         tbody.append(tr)
 
     table.append(thead)
@@ -408,7 +423,33 @@ def editorials():
                 link=record.link,
                 editorial_link=record.editorial_link,
                 table=table,
-                problem_id=record.id)
+                problem_id=record.id,
+                site=utilities.urltosite(record.link))
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
+def delete_editorial():
+    if len(request.args) < 1:
+        raise(HTTP(400, "Bad request"))
+        return
+
+    ue_record = db.user_editorials(int(request.args[0]))
+    if ue_record is None or session.user_id != ue_record.user_id:
+        raise(HTTP(400, "Bad request"))
+        return
+
+    ue_record.delete_record()
+
+    # if current.environment == "production":
+    #     client = utilities.get_boto3_client()
+    #     # Don't delete s3 files for now
+    #     client.delete_object(Bucket=current.s3_bucket,
+    #                          Key=ue_record.s3_key)
+    # else:
+    #     import os
+    #     os.remove(request.folder + "user_editorials/" + ue_record.s3_key)
+
+    return "SUCCESS"
 
 # ----------------------------------------------------------------------------
 def read_editorial():
@@ -434,12 +475,7 @@ def read_editorial():
         return content
 
     def download_from_s3():
-        import boto3
-        client = boto3.client(
-            "s3",
-            aws_access_key_id=current.s3_access_key_id,
-            aws_secret_access_key=current.s3_secret_access_key
-        )
+        client = utilities.get_boto3_client()
         client.download_file(current.s3_bucket, s3_key, filename)
 
     if current.environment == "production":
@@ -452,7 +488,10 @@ def read_editorial():
     return dict(problem_name=problem.name,
                 problem_link=problem.link,
                 stopstalk_handle=user.stopstalk_handle,
-                content=content)
+                content=content,
+                all_editorials_link=URL("problems",
+                                        "editorials",
+                                        args=problem.id))
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
@@ -474,14 +513,10 @@ def submit_editorial():
         file_obj.close()
 
     def upload_to_s3():
-        import boto3, os
+        import os
         filename = editorials_dir + s3_key
         create_editorial_file(filename)
-        client = boto3.client(
-            "s3",
-            aws_access_key_id=current.s3_access_key_id,
-            aws_secret_access_key=current.s3_secret_access_key
-        )
+        client = utilities.get_boto3_client()
         try:
             client.upload_file(filename,
                                current.s3_bucket,
@@ -499,13 +534,76 @@ def submit_editorial():
         upload_to_s3()
     else:
         upload_to_filesystem()
-    db.user_editorials.insert(user_id=session.user_id,
-                              problem_id=problem_id,
-                              s3_key=s3_key,
-                              votes="",
-                              added_on=datetime.datetime.now(),
-                              verification="pending")
+    new_editorial_id = db.user_editorials.insert(user_id=session.user_id,
+                                                 problem_id=problem_id,
+                                                 s3_key=s3_key,
+                                                 votes="",
+                                                 added_on=datetime.datetime.now(),
+                                                 verification="pending")
+
+    current.send_mail(to="raj454raj@gmail.com",
+                      subject="New editorial by " + session.handle + " for " + problem_id,
+                      message="""<html>
+                                    %s<br/>
+                                    <a href='%s'>Accept</a>
+                                    <a href='%s'>Reject</a>
+                                 </html>""" % (URL("problems",
+                                                   "read_editorial",
+                                                   args=new_editorial_id,
+                                                   scheme=True,
+                                                   host=True),
+                                               URL("problems",
+                                                   "admin_editorial_approval",
+                                                   args=["accepted", new_editorial_id],
+                                                   scheme=True,
+                                                   host=True),
+                                               URL("problems",
+                                                   "admin_editorial_approval",
+                                                   args=["rejected", new_editorial_id],
+                                                   scheme=True,
+                                                   host=True)),
+                      mail_type="admin",
+                      bulk=True)
     return dict()
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
+def admin_editorial_approval():
+    if session.user_id != 1 or len(request.args) < 2:
+        raise(HTTP(401, "Why are you here ?"))
+        return
+
+    uetable = db.user_editorials
+    uetable_record = uetable(request.args[1])
+    user = db.auth_user(uetable_record.user_id)
+    if request.args[0] == "approved":
+        current.send_mail(to=user.email,
+                          subject="Your editorial on StopStalk is Published",
+                          message="""
+<html>
+Hello %s,<br/><br/>
+
+Your <a href="%s">editorial</a> on StopStalk is <b>Approved</b>. Thank you for your valuable contribution to the community.<br/>
+Please share your editorial link on our Official <a href="https://www.facebook.com/groups/stopstalk/">Facebook Group</a> to help other Competitive Programmers.
+<br/><br/>
+
+Cheers,<br/>
+Team StopStalk
+
+</html>
+""" % (user.stopstalk_handle,
+       URL("problems",
+           "read_editorial",
+           args=request.args[1],
+           scheme=True,
+           host=True)),
+        mail_type="admin",
+        bulk=True)
+        uetable_record.update_record(verification="accepted")
+        return "ACCEPTED"
+    else:
+        uetable_record.update_record(verification="rejected")
+        return "REJECTED"
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()

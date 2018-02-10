@@ -94,7 +94,7 @@ a {
 
 .chip span {
     float: left;
-    margin: 0 8px 0 -12px;
+    margin: 0 8px 0 -13px;
     height: 32px;
     width: 32px;
     border-radius: 50%;
@@ -349,6 +349,34 @@ nav ul a:hover {
     border: 0;
 }
 
-.preview-editor-wrapper .editor-preview {
+.CodeMirror .editor-preview {
     background: white;
+}
+
+.CodeMirror .editor-preview ul:not(.browser-default) {
+    list-style-type: disc;
+    padding-left: 25px;
+}
+
+.CodeMirror .editor-preview ul:not(.browser-default) > li {
+    list-style-type: initial;
+}
+
+.CodeMirror .editor-preview img {
+    max-height: 400px;
+    max-width: 700px;
+}
+
+.editor-preview-side ul:not(.browser-default) {
+    list-style-type: disc;
+    padding-left: 25px;
+}
+
+.editor-preview-side ul:not(.browser-default) > li {
+    list-style-type: initial;
+}
+
+.editor-preview-side img {
+    max-height: 400px;
+    max-width: 700px;
 }
