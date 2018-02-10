@@ -94,7 +94,7 @@ a {
 
 .chip span {
     float: left;
-    margin: 0 8px 0 -12px;
+    margin: 0 8px 0 -13px;
     height: 32px;
     width: 32px;
     border-radius: 50%;
@@ -319,10 +319,64 @@ nav ul a:hover {
     text-align: justify;
 }
 
+.verification-badge {
+    display: inline;
+    padding: .2em .4em .2em;
+    font-size: 70%;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: 3px;
+    border-radius: .25em;
+    margin-left: 10px;
+}
+
 #solved-unsolved-table .categories {
     width: 214px;
 }
 
 #solved-unsolved-table .category-pcount {
     padding-left: 10px;
+}
+
+.love-editorial {
+    cursor: pointer;
+}
+
+.preview-editor-wrapper .CodeMirror {
+    border: 0;
+}
+
+.CodeMirror .editor-preview {
+    background: white;
+}
+
+.CodeMirror .editor-preview ul:not(.browser-default) {
+    list-style-type: disc;
+    padding-left: 25px;
+}
+
+.CodeMirror .editor-preview ul:not(.browser-default) > li {
+    list-style-type: initial;
+}
+
+.CodeMirror .editor-preview img {
+    max-height: 400px;
+    max-width: 700px;
+}
+
+.editor-preview-side ul:not(.browser-default) {
+    list-style-type: disc;
+    padding-left: 25px;
+}
+
+.editor-preview-side ul:not(.browser-default) > li {
+    list-style-type: initial;
+}
+
+.editor-preview-side img {
+    max-height: 400px;
+    max-width: 700px;
 }

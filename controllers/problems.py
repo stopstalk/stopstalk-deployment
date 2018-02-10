@@ -236,12 +236,11 @@ def index():
             response.flash = T("Login to view your/friends' submissions")
 
     submissions = db(query).select(orderby=~stable.time_stamp)
-
+    problem_record = db(ptable.link == problem_link).select().first()
     try:
-        query = (ptable.link == problem_link)
-        all_tags = db(query).select(ptable.tags).first()
+        all_tags = problem_record.tags
         if all_tags:
-            all_tags = eval(all_tags["tags"])
+            all_tags = eval(all_tags)
         else:
             all_tags = ["-"]
     except AttributeError:
@@ -276,14 +275,15 @@ def index():
                     _class="chip lime accent-3"))
 
     row = db(ptable.link == problem_link).select().first()
-    if row and row.editorial_link:
+    if row:
         links.append(" ")
-        links.append(DIV(A(I(_class="fa fa-book"), " " + T("Editorial"),
-                           _href=row.editorial_link,
-                           _class="problem-page-editorial-link",
+        links.append(DIV(A(I(_class="fa fa-book"), " " + T("Editorials"),
+                           _href=URL("problems", "editorials", args=row.id),
+                           _class="problem-page-editorials",
                            _style="color: white;",
                            _target="_blank"),
                          _class="chip deep-purple darken-1"))
+
     tbody.append(TR(TD(),
                     TD(STRONG(T("Links") + ":")),
                     links))
@@ -327,6 +327,302 @@ def index():
                 problem_link=problem_link,
                 submission_type=submission_type,
                 table=table)
+
+# ----------------------------------------------------------------------------
+def editorials():
+    if len(request.args) < 1:
+        redirect(URL("default", "index"))
+    record = db.problem(int(request.args[0]))
+    if record is None:
+        redirect(URL("default", "index"))
+
+    uetable = db.user_editorials
+    atable = db.auth_user
+    query = (uetable.problem_id == record.id)
+    if auth.is_logged_in():
+        # Show only accepted editorials not made by the logged-in user and
+        # all the editorials submitted by the logged-in user
+        query &= (((uetable.verification == "accepted") & \
+                   (uetable.user_id != session.user_id)) | \
+                  (uetable.user_id == session.user_id))
+    else:
+        query &= (uetable.verification == "accepted")
+    user_editorials = db(query).select(orderby=~uetable.added_on)
+    table = TABLE(_class="centered")
+    thead = THEAD(TR(TH(T("Problem")),
+                     TH(T("Editorial By")),
+                     TH(T("Added on")),
+                     TH(T("Votes")),
+                     TH(T("Actions"))))
+    color_mapping = {"accepted": "green",
+                     "rejected": "red",
+                     "pending": "blue"}
+
+    tbody = TBODY()
+    for editorial in user_editorials:
+        user = atable(editorial.user_id)
+        number_of_votes = len(editorial.votes.split(",")) if editorial.votes else 0
+        tr = TR(TD(A(record.name,
+                     _href=URL("problems",
+                               "index",
+                               vars={"pname": record.name,
+                                     "plink": record.link},
+                               extension=False))))
+        if auth.is_logged_in() and user.id == session.user_id:
+            tr.append(TD(A(user.first_name + " " + user.last_name,
+                         _href=URL("user",
+                                   "profile",
+                                   args=user.stopstalk_handle)),
+                         " ",
+                         DIV(editorial.verification.capitalize(),
+                             _class="verification-badge " + \
+                                    color_mapping[editorial.verification])))
+        else:
+            tr.append(TD(A(user.first_name + " " + user.last_name,
+                           _href=URL("user",
+                                     "profile",
+                                     args=user.stopstalk_handle))))
+
+        tr.append(TD(editorial.added_on))
+        vote_class = ""
+        if auth.is_logged_in() and str(session.user_id) in set(editorial.votes.split(",")):
+            vote_class = "red-text"
+        tr.append(TD(DIV(SPAN(I(_class="fa fa-heart " + vote_class),
+                              _class="love-editorial",
+                              data={"id": editorial.id}),
+                         " ",
+                         DIV(number_of_votes,
+                             _class="love-count",
+                             _style="margin-left: 5px;"),
+                         _style="display: inline-flex;")))
+
+        actions_td = TD(A(I(_class="fa fa-eye fa-2x"),
+                          _href=URL("problems",
+                                    "read_editorial",
+                                    args=editorial.id),
+                          _class="btn btn-primary tooltipped",
+                          _style="background-color: #13AA5F;",
+                          data={"position": "bottom",
+                                "delay": 40,
+                                "tooltip": T("Read Editorial")}))
+        if auth.is_logged_in() and user.id == session.user_id:
+            actions_td.append(BUTTON(I(_class="fa fa-trash fa-2x"),
+                                     _style="margin-left: 2%;",
+                                     _class="red tooltipped delete-editorial",
+                                     data={"position": "bottom",
+                                           "delay": 40,
+                                           "tooltip": T("Delete Editorial"),
+                                           "id": editorial.id}))
+        tr.append(actions_td)
+        tbody.append(tr)
+
+    table.append(thead)
+    table.append(tbody)
+
+    return dict(name=record.name,
+                link=record.link,
+                editorial_link=record.editorial_link,
+                table=table,
+                problem_id=record.id,
+                site=utilities.urltosite(record.link))
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
+def delete_editorial():
+    if len(request.args) < 1:
+        raise(HTTP(400, "Bad request"))
+        return
+
+    ue_record = db.user_editorials(int(request.args[0]))
+    if ue_record is None or session.user_id != ue_record.user_id:
+        raise(HTTP(400, "Bad request"))
+        return
+
+    ue_record.delete_record()
+
+    # if current.environment == "production":
+    #     client = utilities.get_boto3_client()
+    #     # Don't delete s3 files for now
+    #     client.delete_object(Bucket=current.s3_bucket,
+    #                          Key=ue_record.s3_key)
+    # else:
+    #     import os
+    #     os.remove(request.folder + "user_editorials/" + ue_record.s3_key)
+
+    return "SUCCESS"
+
+# ----------------------------------------------------------------------------
+def read_editorial():
+    if len(request.args) < 1:
+        redirect(URL("default", "index"))
+    uetable = db.user_editorials
+    ptable = db.problem
+    atable = db.auth_user
+    ue_record = uetable(int(request.args[0]))
+    if ue_record is None:
+        redirect(URL("default", "index"))
+
+    user = atable(ue_record.user_id)
+    problem = ptable(ue_record.problem_id)
+    editorials_dir = request.folder + "user_editorials/"
+    s3_key = ue_record.s3_key
+    filename = editorials_dir + s3_key
+
+    def read_file():
+        f = open(filename, "r")
+        content = f.read()
+        f.close()
+        return content
+
+    def download_from_s3():
+        client = utilities.get_boto3_client()
+        client.download_file(current.s3_bucket, s3_key, filename)
+
+    if current.environment == "production":
+        import os
+        download_from_s3()
+        content = read_file()
+    else:
+        content = read_file()
+
+    return dict(problem_name=problem.name,
+                problem_link=problem.link,
+                stopstalk_handle=user.stopstalk_handle,
+                content=content,
+                all_editorials_link=URL("problems",
+                                        "editorials",
+                                        args=problem.id))
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
+def submit_editorial():
+    from uuid import uuid4
+    problem_id = request.vars.get("problem_id", None)
+    content = request.vars.get("content", None)
+    editorials_dir = request.folder + "user_editorials/"
+    if problem_id is None or content is None:
+        raise HTTP(400, "Bad Request")
+        return dict(error="Invalid request params")
+
+    s3_key = "editorials/" + problem_id + "_" + str(session.user_id) + \
+             "_" + str(uuid4()).split("-")[0] + ".txt"
+
+    def create_editorial_file(filename):
+        file_obj = open(filename, "w")
+        file_obj.write(content)
+        file_obj.close()
+
+    def upload_to_s3():
+        import os
+        filename = editorials_dir + s3_key
+        create_editorial_file(filename)
+        client = utilities.get_boto3_client()
+        try:
+            client.upload_file(filename,
+                               current.s3_bucket,
+                               s3_key)
+            # Delete the local file
+            os.remove(filename)
+        except:
+            pass
+
+    def upload_to_filesystem():
+        # Used in case of development environments
+        create_editorial_file(editorials_dir + s3_key)
+
+    if current.environment == "production":
+        upload_to_s3()
+    else:
+        upload_to_filesystem()
+    new_editorial_id = db.user_editorials.insert(user_id=session.user_id,
+                                                 problem_id=problem_id,
+                                                 s3_key=s3_key,
+                                                 votes="",
+                                                 added_on=datetime.datetime.now(),
+                                                 verification="pending")
+
+    current.send_mail(to="raj454raj@gmail.com",
+                      subject="New editorial by " + session.handle + " for " + problem_id,
+                      message="""<html>
+                                    %s<br/>
+                                    <a href='%s'>Accept</a>
+                                    <a href='%s'>Reject</a>
+                                 </html>""" % (URL("problems",
+                                                   "read_editorial",
+                                                   args=new_editorial_id,
+                                                   scheme=True,
+                                                   host=True),
+                                               URL("problems",
+                                                   "admin_editorial_approval",
+                                                   args=["accepted", new_editorial_id],
+                                                   scheme=True,
+                                                   host=True),
+                                               URL("problems",
+                                                   "admin_editorial_approval",
+                                                   args=["rejected", new_editorial_id],
+                                                   scheme=True,
+                                                   host=True)),
+                      mail_type="admin",
+                      bulk=True)
+    return dict()
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
+def admin_editorial_approval():
+    if session.user_id != 1 or len(request.args) < 2:
+        raise(HTTP(401, "Why are you here ?"))
+        return
+
+    uetable = db.user_editorials
+    uetable_record = uetable(request.args[1])
+    user = db.auth_user(uetable_record.user_id)
+    if request.args[0] == "approved":
+        current.send_mail(to=user.email,
+                          subject="Your editorial on StopStalk is Published",
+                          message="""
+<html>
+Hello %s,<br/><br/>
+
+Your <a href="%s">editorial</a> on StopStalk is <b>Approved</b>. Thank you for your valuable contribution to the community.<br/>
+Please share your editorial link on our Official <a href="https://www.facebook.com/groups/stopstalk/">Facebook Group</a> to help other Competitive Programmers.
+<br/><br/>
+
+Cheers,<br/>
+Team StopStalk
+
+</html>
+""" % (user.stopstalk_handle,
+       URL("problems",
+           "read_editorial",
+           args=request.args[1],
+           scheme=True,
+           host=True)),
+        mail_type="admin",
+        bulk=True)
+        uetable_record.update_record(verification="accepted")
+        return "ACCEPTED"
+    else:
+        uetable_record.update_record(verification="rejected")
+        return "REJECTED"
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
+def love_editorial():
+    if len(request.args) == 0:
+        raise HTTP(400, "Bad Request")
+        return
+
+    uetable = db.user_editorials
+    editorial = db(uetable.id == int(request.args[0])).select().first()
+    if editorial is None:
+        raise HTTP(400, "Bad Request")
+        return
+
+    votes = set(editorial.votes.split(","))
+    votes.add(str(session.user_id))
+    votes.remove("") if "" in votes else ""
+    editorial.update_record(votes=",".join(votes))
+    return dict(love_count=len(votes))
 
 # ----------------------------------------------------------------------------
 def tag():

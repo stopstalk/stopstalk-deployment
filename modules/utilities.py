@@ -21,10 +21,17 @@
 """
 
 import re
+from boto3 import client
 from datetime import datetime
 from gluon import current, IMG, DIV, TABLE, THEAD, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, I, \
                   TEXTAREA, SELECT, OPTION, URL, BUTTON
+
+# -----------------------------------------------------------------------------
+def get_boto3_client():
+    return client("s3",
+                  aws_access_key_id=current.s3_access_key_id,
+                  aws_secret_access_key=current.s3_secret_access_key)
 
 # -----------------------------------------------------------------------------
 def get_solved_problems(user_id, custom=False):
