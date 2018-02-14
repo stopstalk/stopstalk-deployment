@@ -83,21 +83,23 @@ pip install -r requirements.txt
 
    In case if you want to send emails - Install `postfix` for your respective OS and configure the above smtp server accordingly.
 
-8. Navigate back to the web2py folder and start the web2py server.
+8. Install Redis - [here](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-redis-on-ubuntu-16-04)
+
+9. Navigate back to the web2py folder and start the web2py server.
 
     ```
     $ cd web2py
     $ python web2py.py -a yourPassword // Choose any password
     ```
 
-9. Open the browser and go to the URL -
+10. Open the browser and go to the URL -
 
     `http://localhost:8000/stopstalk/`
 
   **Note:**
   * The database will be completely empty after installation
 
-10. Done. :smile:
+11. Done. :smile:
 
 ## Project Dependencies
 
