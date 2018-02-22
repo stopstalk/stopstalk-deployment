@@ -101,6 +101,9 @@ pip install -r requirements.txt
 
 11. Done. :smile:
 
+
+A few steps to setup your local database - [StopStalk Wiki](https://github.com/stopstalk/stopstalk-deployment/wiki/Setup-basic-database-tables-locally)
+
 ## Project Dependencies
 
 StopStalk is built on the [Web2Py Framework](http://www.web2py.com), which is a Python based MVC framework.
@@ -117,7 +120,7 @@ The project also depends on a number of other open source packages, some of whic
 
 1. Fork the repository
 2. Clone your forked repository
-3. Find any of the issues from here - [Issues] (https://github.com/stopstalk/stopstalk-deployment/issues) and try solving it
+3. Find any of the issues from here - [Issues](https://github.com/stopstalk/stopstalk-deployment/issues) and try solving it
    or any other enhancements
 4. Solve the bug or enhance the code and send a Pull Request!
 
@@ -131,7 +134,7 @@ The project also depends on a number of other open source packages, some of whic
 
 ### Configuring Calendar API client ID
 
-1. Goto [Google developers console] (https://console.developers.google.com/) and click on New Project.
+1. Goto [Google developers console](https://console.developers.google.com/) and click on New Project.
 2. Give the project a name like stopstalk-test and create the project.
 3. Goto API Manager.
 4. Search and select Google Calendar API and enable it.
@@ -149,5 +152,6 @@ The project also depends on a number of other open source packages, some of whic
 ## Social Links
 
 * [Facebook](https://www.facebook.com/stopstalkcommunity/)
+* [Facebook Group](https://www.facebook.com/groups/stopstalk/)
 * [Twitter](https://twitter.com/stop_stalk)
 * [Google-Plus](https://plus.google.com/110575194069678651985)

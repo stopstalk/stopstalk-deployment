@@ -307,8 +307,13 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
     retrieval_failures = []
     plink_to_id = {}
     nrtable = db.next_retrieval
-    nrtable_record = db(nrtable["custom_user_id" if custom else "user_id"] == record.id).select().first()
+    user_column_name = "custom_user_id" if custom else "user_id"
+    nrtable_record = db(nrtable[user_column_name] == record.id).select().first()
     skipped_retrieval = set([])
+    if nrtable_record is None:
+        print "Record not found", user_column_name, record.id 
+        nrtable.insert(**{user_column_name: record.id})
+        nrtable_record = db(nrtable[user_column_name] == record.id).select().first()
 
     disabled_sites = current.REDIS_CLIENT.smembers("disabled_retrieval")
     for site in disabled_sites:
