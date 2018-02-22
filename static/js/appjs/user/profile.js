@@ -225,6 +225,7 @@
             graphTitle = acceptanceTitle;
             colorAxisOption = greenRedAxis;
         }
+        years = Array.from(years).map((el)=> parseInt(el));
         var options = {
             legend: 'none',
             tooltip: {isHtml: true},
@@ -234,7 +235,7 @@
                 backgroundColor: '#eeeeee',
                 color: '#eeeeee'
             },
-            height: 36 + years.size * 144,
+            height: 36 + (Math.max.apply(null, years) - Math.min.apply(null, years) + 1) * 144,
             width: 920,
             calendar: {
                 monthOutlineColor: {
