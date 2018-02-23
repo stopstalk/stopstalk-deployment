@@ -25,7 +25,6 @@ import datetime
 import parsedatetime as pdt
 import requests
 import utilities
-import urllib
 
 # ----------------------------------------------------------------------------
 def handle_error():
@@ -616,6 +615,7 @@ def leaderboard():
 
     if request.vars.has_key("q") and request.vars["q"]:
         heading = T("Institute Leaderboard")
+        import urllib
         institute = urllib.unquote(request.vars["q"])
         specific_institute = True
         aquery &= (atable.institute == institute)
