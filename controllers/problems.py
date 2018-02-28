@@ -465,6 +465,9 @@ def read_editorial():
     if ue_record is None:
         session.flash = "Invalid editorial URL"
         redirect(URL("default", "index"))
+    elif auth.is_logged_in() and session.user_id == 1:
+        # Admin user
+        pass
     elif auth.is_logged_in() and session.user_id != ue_record.user_id and ue_record.verification != "accepted":
         session.flash = "Invalid editorial URL"
         redirect(URL("default", "index"))
