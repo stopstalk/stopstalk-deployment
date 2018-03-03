@@ -362,7 +362,7 @@ def sanitize_fields(form):
     # 3.
     for site in handle_fields:
         site_handle = site + "_handle"
-        if site == "HackerRank" or site == "uva" or site == "stopstalk":
+        if site == "hackerrank" or site == "uva" or site == "stopstalk":
             continue
         if form.vars[site_handle] and \
            form.vars[site_handle] != form.vars[site_handle].lower():
