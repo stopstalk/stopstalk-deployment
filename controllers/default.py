@@ -1206,11 +1206,11 @@ Error: %s
 Response text: %s
                   """ % (session.handle, download_url, error, message_body)
 
-        current.send_mail(to="raj454raj@gmail.com",
-                          subject=subject,
-                          message=message,
-                          mail_type="admin",
-                          bulk=True)
+        # current.send_mail(to="raj454raj@gmail.com",
+        #                   subject=subject,
+        #                   message=message,
+        #                   mail_type="admin",
+        #                   bulk=True)
         return -1
 
     def _response_handler(download_url, response):
