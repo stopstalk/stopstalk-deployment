@@ -25,7 +25,7 @@
     };
 
     var buildCompleteURL = function(path, params) {
-        return path + "?" + $.param(params);
+        return path + "?" + $.param(decodeURI(params));
     };
 
     var createLeaderBoardTable = function(userList, requestParams) {
