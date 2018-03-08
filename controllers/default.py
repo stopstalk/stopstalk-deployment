@@ -615,7 +615,8 @@ def leaderboard():
 
     if request.vars.has_key("q") and request.vars["q"]:
         heading = T("Institute Leaderboard")
-        institute = request.vars["q"]
+        from urllib import unquote
+        institute = unquote(request.vars["q"])
         specific_institute = True
         aquery &= (atable.institute == institute)
 
