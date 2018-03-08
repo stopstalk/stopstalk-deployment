@@ -25,7 +25,7 @@
     };
 
     var buildCompleteURL = function(path, params) {
-        return path + "?" + $.param(decodeURI(params));
+        return path + "?" + decodeURI($.param(params));
     };
 
     var createLeaderBoardTable = function(userList, requestParams) {
@@ -140,8 +140,6 @@
 
         $('#leaderboard-switch').click(function() {
             var global = this.checked;
-            var redirectURL = null;
-            var currentURL = window.location.href;
             if (global) {
                 params['global'] = 'True';
             } else {
