@@ -758,7 +758,7 @@ def filters():
         else:
             custom_friends.append(cus_id.id)
 
-    query = True
+    query = (atable.id > 0)
     # Get the friends of logged in user
     if username != "":
         tmplist = username.split()
@@ -777,7 +777,7 @@ def filters():
     possible_users = db(query).select(atable.id)
     possible_users = [x.id for x in possible_users]
     friends = possible_users
-
+    query = (stable.id > 0)
     if global_submissions is False:
         query = (ftable.follower_id == session.user_id) & \
                 (ftable.user_id.belongs(possible_users))
@@ -788,14 +788,21 @@ def filters():
             # Show submissions of user also
             friends.append(session.user_id)
 
-    # User in one of the friends
-    query = (stable.user_id.belongs(friends))
-
-    # User in one of the custom friends
-    query |= (stable.custom_user_id.belongs(custom_friends))
+        # User in one of the friends
+        query = (stable.user_id.belongs(friends))
+        # User in one of the custom friends
+        query |= (stable.custom_user_id.belongs(custom_friends))
+    elif global_submissions is True and username != "":
+        # User in one of the friends
+        query = (stable.user_id.belongs(friends))
+        # User in one of the custom friends
+        query |= (stable.custom_user_id.belongs(custom_friends))
 
     start_date = get_vars["start_date"]
     end_date = get_vars["end_date"]
+    no_date_filter = False
+    if start_date == "" and end_date == "":
+        no_date_filter = True
 
     # Else part ensures that both the dates passed
     # are included in the range
@@ -828,7 +835,10 @@ def filters():
     start_time = time.strptime(start_date, "%Y-%m-%d %H:%M:%S")
     end_time = time.strptime(end_date, "%Y-%m-%d %H:%M:%S")
 
-    if end_time > start_time:
+    if no_date_filter:
+        # Do no modifications to the query
+        pass
+    elif end_time > start_time:
         # Submissions in the the range start_date to end_date
         query &= (stable.time_stamp >= start_date) & \
                  (stable.time_stamp <= end_date)
