@@ -690,8 +690,18 @@ def filters():
         page = int(request.args[0])
         page -= 1
 
-    all_languages = db(stable).select(stable.lang, distinct=True)
-    languages = [x.lang for x in all_languages]
+    if current.REDIS_CLIENT.get("languages_updated_on") is None or \
+       (datetime.datetime.now() - \
+        datetime.datetime.strptime(current.REDIS_CLIENT.get("languages_updated_on"),
+                                   "%Y-%m-%d %H:%M:%S")).days > 0: # Smart ;)
+        languages = db(stable).select(stable.lang, distinct=True)
+        languages = [x.lang for x in languages]
+        submission_languages = ",,".join(languages)
+        current.REDIS_CLIENT.set("languages_updated_on",
+                                 str(datetime.datetime.now())[:-7])
+        current.REDIS_CLIENT.set("submission_languages", submission_languages)
+    else:
+        languages = current.REDIS_CLIENT.get("submission_languages").split(",,")
 
     table = None
     global_submissions = False
