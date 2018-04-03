@@ -63,6 +63,8 @@ def get_request(url, headers={}, timeout=current.TIMEOUT):
     return OTHER_FAILURE
 
 def codechef_invalid(handle):
+    # CodeChef is very flaky
+    return True
     response = get_request("https://www.codechef.com/users/" + handle)
     if (response in REQUEST_FAILURES) or response.url.__contains__("teams/view"):
         return True
