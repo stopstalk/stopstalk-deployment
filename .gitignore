@@ -6,6 +6,8 @@
 /user_editorials/editorials/*.txt
 /databases/*
 /graph_data/*.pickle
+/rating_history/users/*.txt
+/rating_history/custom_users/*.txt
 .~lock.*.csv#
 *.log
 *.pyc
