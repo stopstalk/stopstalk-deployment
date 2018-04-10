@@ -160,8 +160,12 @@
         url: deleteEditorialURL + '/' + $this.data('id'),
         method: 'POST',
         success: function(response) {
-          $this.parent().parent().fadeOut();
-          $.web2py.flash("Editorial deleted successfully!");
+          if (response === "SUCCESS") {
+            $this.parent().parent().fadeOut();
+            $.web2py.flash("Editorial deleted successfully!");
+          } else {
+            $.web2py.flash("Can't delete accepted Editorial!");
+          }
         },
         error: function(err) {
           $.web2py.flash("Something went wrong!");
