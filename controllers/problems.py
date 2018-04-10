@@ -405,7 +405,9 @@ def editorials():
                           data={"position": "bottom",
                                 "delay": 40,
                                 "tooltip": T("Read Editorial")}))
-        if auth.is_logged_in() and user.id == session.user_id:
+        if auth.is_logged_in() and \
+           user.id == session.user_id and \
+           editorial.verification != "accepted":
             actions_td.append(BUTTON(I(_class="fa fa-trash fa-2x"),
                                      _style="margin-left: 2%;",
                                      _class="red tooltipped delete-editorial",
@@ -437,6 +439,9 @@ def delete_editorial():
     if ue_record is None or session.user_id != ue_record.user_id:
         raise(HTTP(400, "Bad request"))
         return
+
+    if ue_record.verification == "accepted":
+        return "ACCEPTED_EDITORIAL"
 
     ue_record.delete_record()
 
