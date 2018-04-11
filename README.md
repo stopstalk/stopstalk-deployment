@@ -4,10 +4,24 @@ Stop stalking and Start StopStalking :sunglasses:
 ## Module Requirements
 Note: Apply sudo if required for your system.
 
+First make sure the development packages of libxml2 and libxslt are installed
+
+Assuming you are running a Debian-based distribution, you can install them by using:
+
+```
+apt-get install python-dev libxml2-dev libxslt1-dev zlib1g-dev
+```
+
 Install the required packages by running:
 
 ```
 pip install -r requirements.txt
+```
+
+Also, pip doesn't respect proxy while installing packages from requirements file. So if you are using proxy in your terminal you MAY use:
+
+```
+pip install -r requirements.txt --proxy=<proxy address>
 ```
 
 ## Installation
