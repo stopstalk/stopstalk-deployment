@@ -888,7 +888,6 @@ def global_trending():
 def trending():
     """
         Show trending problems globally and among friends
-        @ToDo: Needs lot of comments explaining the code
     """
 
     if auth.is_logged_in():
@@ -906,7 +905,7 @@ def trending():
         # Show table with globally trending problems
         div = DIV(DIV("",
                       _id="global-trending-table",
-                      _class="col offset-s1 s10 z-depth-2",
+                      _class="col offset-s3 s6 z-depth-2",
                       _style="padding: 200px;"),
                   _class="row center")
 
