@@ -1,7 +1,9 @@
 {{extend 'layout.html'}}
-<head>
-    <title>{{=T("Contact Us")}}</title>
-</head>
+{{block head}}
+  <title>{{=T("Contact Us")}}</title>
+  <meta name="description" content="StopStalk Contact Page: Please write to us for any feedback / suggessions / bugs">
+{{end}}
+
 <h3>{{=T("Contact Us")}}</h3>
 {{if request.post_vars.stickers:}}
     <h5 style="color: red;">Important: Make sure that the address and phone number you enter are valid so that we can dispatch the stickers to the exact location.</h5>

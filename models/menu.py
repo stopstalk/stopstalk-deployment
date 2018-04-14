@@ -28,7 +28,6 @@ response.title = request.application.replace('_',' ').title()
 response.subtitle = ''
 
 response.meta.author = 'StopStalk admin@stopstalk.com'
-response.meta.description = 'Retrieves submissions of friends\' from various competitive websites and analyse them'
 response.meta.keywords = 'stopstalk, raj454raj, competitive programming, algorithms, algorithmic progress'
 response.meta.generator = ''
 

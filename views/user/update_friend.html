@@ -1,10 +1,12 @@
 {{extend 'layout.html'}}
-<head><title>{{=T("Update Custom Friend details")}}</title></head>
-
+{{block head}}
+  <title>{{=T("Update Custom Friend details")}}</title>
+  <meta name="description" content="Update Custom User profile on StopStalk">
+{{end}}
 <h1>{{=T("Update Custom User")}}</h1>
 <div class="row">
-    <div class="col offset-s2 s8">
-        <p class="red-text">{{=T("Note: If you update the handles, the rating and per-day change will become zero for some time and will be re-computed in the next round of update when the submissions from the updated handle are retrieved. This also means that the rating might increase or decrease if the previous per-day change value was negative or positive respectively.")}}</p>
-        {{=form}}
-    </div>
+  <div class="col offset-s2 s8">
+    <p class="red-text">{{=T("Note: If you update the handles, the rating and per-day change will become zero for some time and will be re-computed in the next round of update when the submissions from the updated handle are retrieved. This also means that the rating might increase or decrease if the previous per-day change value was negative or positive respectively.")}}</p>
+    {{=form}}
+  </div>
 </div>

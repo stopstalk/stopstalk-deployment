@@ -1,19 +1,24 @@
 {{extend 'layout.html'}}
-<title>{{=T("Upcoming Contests")}}</title>
-<h1>{{=T("Upcoming Contests")}}</h1>
-<h6>{{=T("Note: All the time stamps mentioned here are in your localized timezone (Browser Time)")}}</h6>
-<script src="https://apis.google.com/js/client.js?onload=checkAuth"></script>
-<script type="text/javascript">
-    // Your Client ID can be retrieved from your project in the Google
-    // Developer Console, https://console.developers.google.com
-    // Used in contests.js
-    var CLIENT_ID = '{{=current.calendar_token}}';
-</script>
-<script type="text/javascript" src="{{=get_static_url('js/appjs/default/contests.js')}}"></script>
+{{block head}}
+  <title>{{=T("Upcoming Contests")}}</title>
+  <meta name="description" content="List of Current and Upcoming Competitive Programming Contests">
+  <script src="https://apis.google.com/js/client.js?onload=checkAuth"></script>
+  <script type="text/javascript">
+      // Your Client ID can be retrieved from your project in the Google
+      // Developer Console, https://console.developers.google.com
+      // Used in contests.js
+      var CLIENT_ID = '{{=current.calendar_token}}';
+  </script>
+  <script type="text/javascript" src="{{=get_static_url('js/appjs/default/contests.js')}}"></script>
+{{end}}
+
 <body>
-    {{if retrieved:}}
-        {{=table}}
-    {{else:}}
-        <p>Error retrieving contests! If the problem persists please <a href="{{=URL('default', 'contact_us')}}">{{=T("Contact Us")}}</a></p>
-    {{pass}}
+  <h1>{{=T("Upcoming Contests")}}</h1>
+  <h6>{{=T("Note: All the time stamps mentioned here are in your localized timezone (Browser Time)")}}</h6>
+
+  {{if retrieved:}}
+    {{=table}}
+  {{else:}}
+    <p>Error retrieving contests! If the problem persists please <a href="{{=URL('default', 'contact_us')}}">{{=T("Contact Us")}}</a></p>
+  {{pass}}
 </body>

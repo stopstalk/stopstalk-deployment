@@ -1,11 +1,12 @@
 {{extend 'layout.html'}}
-<head>
+{{block head}}
   <link rel="stylesheet" href="{{=URL('static', 'simplemde/simplemde.min.css')}}">
   <script src="https://cdn.jsdelivr.net/highlight.js/latest/highlight.min.js"></script>
   <script src="{{=URL('static', 'simplemde/simplemde.min.js')}}"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/highlight.js/latest/styles/github.min.css">
   <title>{{=problem_name}} | Editorial by {{=stopstalk_handle}}</title>
-</head>
+  <meta name="description" content="{{=problem_name}} editorial by {{=stopstalk_handle}}">
+{{end}}
 
 <h2><a href="{{=URL('problems', 'index', vars={'pname': problem_name, 'plink': problem_link})}}">{{=problem_name}}</a> | Editorial by <a href="{{=URL('user', 'profile', args=stopstalk_handle)}}">{{=stopstalk_handle}}</a></h2>
 <a id="all-editorials-button" class="btn btn-primary purple accent-4" href="{{=all_editorials_link}}">All Editorials</a>

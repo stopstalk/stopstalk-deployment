@@ -1,8 +1,8 @@
 {{extend 'layout.html'}}
-<head>
+{{block head}}
     <title>{{=T("Recent submissions")}}</title>
-</head>
-
+    <meta name="description" content="List of recent submissions of your friends">
+{{end}}
 <script type="text/javascript">
     var pageURL = '{{=URL("default", "submissions")}}';
     var facebookGroup = '{{=recent_announcements.has_key("facebook_group") and recent_announcements["facebook_group"]}}';

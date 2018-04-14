@@ -1,9 +1,8 @@
 {{extend 'layout.html'}}
-<head>
-    <title>
-        {{=T("Notifications")}}
-    </title>
-</head>
+{{block head}}
+    <title>{{=T("Notifications")}}</title>
+    <meta name="description" content="List of friends on Day Streaks">
+{{end}}
 <h1>
     {{=T("Notifications")}}
 </h1>

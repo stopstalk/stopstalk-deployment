@@ -1,14 +1,13 @@
 {{extend 'layout.html'}}
-<head>
-<title>
-    {{=T("Updates")}}
-</title>
-<style>
-    .card-content a {
-        color: darkturquoise;
-    }
-</style>
-</head>
+{{block head}}
+    <title>{{=T("Updates")}}</title>
+    <style>
+        .card-content a {
+            color: darkturquoise;
+        }
+    </style>
+    <meta name="description" content="List of important updates on StopStalk">
+{{end}}
 <h1>
     {{=T("Updates")}}
 </h1>

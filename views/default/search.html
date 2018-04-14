@@ -1,5 +1,5 @@
 {{extend 'layout.html'}}
-<head>
+{{block head}}
     <title>
         {{=T("Find")}}
         {{if auth.is_logged_in():}}
@@ -8,7 +8,8 @@
             {{=T("Users")}}
         {{pass}}
     </title>
-</head>
+    <meta name="description" content="Search for users on StopStalk">
+{{end}}
 <h1>{{=T("Search for")}} {{if auth.is_logged_in():}} {{=T("Friends")}} {{else:}} {{=T("Users")}} {{pass}} {{=T("on StopStalk")}}</h1>
 <script type="text/javascript">
     var searchURL = "{{=URL('default', 'search', extension='json')}}";
