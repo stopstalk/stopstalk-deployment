@@ -1,9 +1,8 @@
 {{extend 'layout.html'}}
-<head>
-    <title>
-        {{=T("Filters")}}
-    </title>
-</head>
+{{block head}}
+    <title>{{=T("Filters")}}</title>
+    <meta name="description" content="Filter submissions with various options to view other coders' submissions">
+{{end}}
 <script type="text/javascript">
     $(document).ready(function() {
         if ('{{=global_submissions}}' === 'True') {

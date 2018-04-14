@@ -1,10 +1,13 @@
 {{extend 'layout.html'}}
-<head><title>{{=T("Tag Search")}}</title></head>
+{{block head}}
+    <title>{{=T("Tag Search")}}</title>
+    <script src="{{=get_static_url('js/jquery.bootpag.min.js')}}"></script>
+    <script type="text/javascript">
+        var baseURL = "{{=URL('problems', 'tag', host=True, scheme=True)}}";
+    </script>
+    <meta name="description" content="Search problems by tags across all Competitive Programming websites">
+{{end}}
 
-<script src="{{=get_static_url('js/jquery.bootpag.min.js')}}"></script>
-<script type="text/javascript">
-    var baseURL = "{{=URL('problems', 'tag', host=True, scheme=True)}}";
-</script>
 <script src="{{=get_static_url('js/appjs/problems/tag.js')}}"></script>
 <h3>{{=T("Search problems by tags")}}</h3>
 <form id="tagSearchForm" method="GET" action="">

@@ -1,5 +1,8 @@
 {{extend 'layout.html'}}
-<head><title>{{=T("Custom Friend")}}</title></head>
+{{block head}}
+  <title>{{=T("Custom Friend")}}</title>
+  <meta name="description" content="Add custom user if your friend is not on StopStalk">
+{{end}}
 <h2>{{=T("Custom Friend")}}</h2>
 <p>{{=T("Have a friend who is still not on StopStalk ? We got you covered ;) - just enter his/her details and you are all set!")}}</p>
 <h6>{{=T("Allowed Custom Friends")}}: <b>{{=allowed}}</b></h6>

@@ -1,15 +1,18 @@
 {{extend 'layout.html'}}
-<head><title>{{=T("User submissions")}}: {{=handle}}</title></head>
-<style>
-    #refresh-submissions {
-        margin-right: 4%;
-    }
-</style>
-<script src="{{=get_static_url('js/jquery.bootpag.min.js')}}"></script>
-<script>
-    var submissionsJSON = '{{=URL("user", "submissions", args=handle, extension="json")}}';
-    var submissionsURL = '{{=URL("user", "submissions", args=handle)}}';
-</script>
+{{block head}}
+    <title>{{=T("User submissions")}}: {{=handle}}</title>
+    <meta name="description" content="List of submissions of {{=handle}} on various Competitive Programming websites">
+    <style>
+        #refresh-submissions {
+            margin-right: 4%;
+        }
+    </style>
+    <script src="{{=get_static_url('js/jquery.bootpag.min.js')}}"></script>
+    <script>
+        var submissionsJSON = '{{=URL("user", "submissions", args=handle, extension="json")}}';
+        var submissionsURL = '{{=URL("user", "submissions", args=handle)}}';
+    </script>
+{{end}}
 <script src="{{=get_static_url('js/appjs/user/submissions.js')}}" type="text/javascript"></script>
 {{if total_rows:}}
     {{if user == "Self":}}

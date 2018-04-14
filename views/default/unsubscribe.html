@@ -1,5 +1,8 @@
 {{extend 'layout.html'}}
-<title>{{=T("Subscription details")}}</title>
+{{block head}}
+  <title>{{=T("Subscription details")}}</title>
+  <meta name="description" content="Update which your email settings">
+{{end}}
 <h3>{{=T("Did we do something wrong?")}} :(</h3>
 <h6>{{=MARKMIN(T("Please write to us for any feedback") + " - [[" + T("here") + " " + URL("default", "contact_us") + "]]")}}</h6>
 {{=form}}

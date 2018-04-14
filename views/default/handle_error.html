@@ -1,6 +1,8 @@
 {{extend 'layout.html'}}
-<title>{{=T("Error Page")}}</title>
-<link rel="stylesheet" href="{{=get_static_url('css/owlie.css')}}"/>
+{{block head}}
+  <title>{{=T("Error Page")}}</title>
+  <link rel="stylesheet" href="{{=get_static_url('css/owlie.css')}}"/>
+{{end}}
 
 <br /><br />
 {{if error_message == "Not found":}}
