@@ -23,7 +23,7 @@
 import re
 from boto3 import client
 from datetime import datetime
-from gluon import current, IMG, DIV, TABLE, THEAD, \
+from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, I, \
                   TEXTAREA, SELECT, OPTION, URL, BUTTON
 
@@ -657,5 +657,100 @@ def render_table(submissions, duplicates=[], user_id=None):
     table.append(tbody)
 
     return table
+
+# ----------------------------------------------------------------------------
+def render_trending_table(caption, problems, column_name, user_id):
+    """
+        Create trending table from the rows
+    """
+    T = current.T
+
+    table = TABLE(_class="bordered centered")
+    thead = THEAD(TR(TH(T("Problem")),
+                     TH(T("Recent Submissions")),
+                     TH(column_name)))
+    table.append(thead)
+    tbody = TBODY()
+
+    for problem in problems:
+        tr = TR()
+        link_class = get_link_class(problem[0], user_id)
+        link_title = (" ".join(link_class.split("-"))).capitalize()
+
+        tr.append(TD(problem_widget(problem[1]["name"],
+                                    problem[0],
+                                    link_class,
+                                    link_title)))
+        tr.append(TD(problem[1]["total_submissions"]))
+        tr.append(TD(len(problem[1]["users"]) + \
+                     len(problem[1]["custom_users"])))
+        tbody.append(tr)
+
+    table.append(tbody)
+    table = DIV(H5(caption, _class="center"), HR(), table)
+
+    return table
+
+# ----------------------------------------------------------------------------
+def compute_trending_table(submissions_list, table_type, user_id=None):
+    """
+        Create trending table from the rows
+
+        @params submission_list (Rows): Submissions to be considered
+        @params table_type (String): friends / global
+        @params user_id (Long): ID of signed in user else None
+    """
+
+    T = current.T
+    if table_type == "friends":
+        table_header = T("Trending among friends")
+        column_name = T("Friends")
+    else:
+        table_header = T("Trending Globally")
+        column_name = T("Users")
+
+    if len(submissions_list) == 0:
+        table = TABLE(_class="bordered centered")
+        thead = THEAD(TR(TH(T("Problem")),
+                         TH(T("Recent Submissions")),
+                         TH(column_name)))
+        table.append(thead)
+        table.append(TBODY(TR(TD("Not enough data to show", _colspan=3))))
+        return table
+
+    # Sort the rows according to the number of users
+    # who solved the problem in last PAST_DAYS
+    custom_compare = lambda x: (len(x[1]["users"]) + \
+                                len(x[1]["custom_users"]),
+                                x[1]["total_submissions"])
+
+    problems_dict = {}
+    for submission in submissions_list:
+        plink = submission.problem_link
+        pname = submission.problem_name
+        uid = submission.user_id
+        cid = submission.custom_user_id
+
+        if plink not in problems_dict:
+            problems_dict[plink] = {"name": pname,
+                                    "total_submissions": 0,
+                                    "users": set([]),
+                                    "custom_users": set([])}
+
+        pdict = problems_dict[plink]
+        pdict["total_submissions"] += 1
+        if uid:
+            pdict["users"].add(uid)
+        else:
+            pdict["custom_users"].add(cid)
+
+    trending_problems = sorted(problems_dict.items(),
+                               key=custom_compare,
+                               reverse=True)
+
+    return render_trending_table(table_header,
+                                 trending_problems[:current.PROBLEMS_PER_PAGE],
+                                 column_name,
+                                 user_id)
 
 # =============================================================================
