@@ -157,8 +157,8 @@
     <div class="flash alert alert-dismissable" style="display: none;">{{=response.flash or ''}}</div>
     <header>
     <ul id="welcome" class="dropdown-content" style="min-width: 190px; color: #536dfe;">
-        {{if session["user_id"]:}}
-            <li><a href="{{=URL('user', 'profile')}}" data-analytics-label="Nav User Profile" class="nav-dropdown">{{=T("Profile")}}</a></li>
+        {{if auth.is_logged_in():}}
+            <li><a href="{{=URL('user', 'profile', args=session.handle)}}" data-analytics-label="Nav User Profile" class="nav-dropdown">{{=T("Profile")}}</a></li>
             <li><a href="{{=URL('user', 'submissions')}}" data-analytics-label="Nav My Submissions" class="nav-dropdown">{{=T("My Submissions")}}</a></li>
             <li><a href="{{=URL('user', 'update_details')}}" data-analytics-label="Nav Update Details" class="nav-dropdown">{{=T("Update Details")}}</a></li>
             <li><a href="{{=URL('default', 'unsubscribe')}}" data-analytics-label="Nav Unsubscribe" class="nav-dropdown">{{=T("Unsubscribe")}}</a></li>

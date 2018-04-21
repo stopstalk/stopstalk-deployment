@@ -694,6 +694,8 @@ def profile():
     if len(request.args) < 1:
         if auth.is_logged_in():
             handle = str(session.handle)
+            redirect(URL("user", "profile", args=str(session.handle)))
+            return
         else:
             redirect(URL("default", "user", "login", vars={"_next": URL("user", "profile")}))
     else:
