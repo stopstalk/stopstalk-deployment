@@ -686,6 +686,69 @@ def get_solved_unsolved():
                 unattempted_html_widget=utilities.problem_widget("", "", "unattempted-problem", "Unattempted problem"))
 
 # ------------------------------------------------------------------------------
+@auth.requires_login()
+def get_stopstalk_rating_history():
+    user_id = request.vars.get("user_id", None)
+    custom = request.vars.get("custom", None)
+    if user_id is None and custom is None:
+        return dict(final_rating=[])
+    user_id = int(user_id)
+    custom = (custom == "True")
+    stable = db.submission
+    query = (stable["custom_user_id" if custom else "user_id"] == user_id)
+    rows = db(query).select(stable.time_stamp,
+                            stable.problem_link,
+                            stable.status,
+                            orderby=stable.time_stamp)
+
+    solved_problem_links = set([])
+    total_submissions = 0
+    final_rating = {}
+    curr_streak = 1
+    max_streak = 1
+    rating = 0
+    INITIAL_DATE = datetime.datetime.strptime(current.INITIAL_DATE,
+                                              "%Y-%m-%d %H:%M:%S").date()
+    prev_date = INITIAL_DATE
+    def compute_prev_day_rating(date):
+        if total_submissions == 0:
+            return
+        global rating
+        solved = len(solved_problem_links)
+        curr_per_day = total_submissions * 1.0 / ((date - INITIAL_DATE).days + 1)
+        rating = max_streak * 50 + \
+                 solved * 100 + \
+                 (solved * 100.0 / total_submissions) * 80 + \
+                 (total_submissions - solved) * 15 + \
+                 curr_per_day * 8000
+                 #per_day * 2000
+        final_rating[str(date)] = rating
+
+    for row in rows:
+        curr_date = row["time_stamp"].date()
+        number_of_dates = (curr_date - prev_date).days
+        for cnt in xrange(number_of_dates):
+            compute_prev_day_rating(prev_date + datetime.timedelta(days=cnt))
+        if prev_date != curr_date:
+            if prev_date is not None and (curr_date - prev_date).days == 1:
+                curr_streak += 1
+                if curr_streak > max_streak:
+                    max_streak = curr_streak
+            else:
+                curr_streak = 1
+
+            # compute rating of prev_date
+        if row["status"] == "AC":
+            solved_problem_links.add(row["problem_link"])
+        total_submissions += 1
+        prev_date = curr_date
+    number_of_dates = (datetime.datetime.now().date() - prev_date).days
+    for cnt in xrange(number_of_dates):
+        compute_prev_day_rating(prev_date + datetime.timedelta(days=cnt))
+
+    return dict(final_rating=sorted(final_rating.items()))
+
+# ------------------------------------------------------------------------------
 def profile():
     """
         Controller to show user profile

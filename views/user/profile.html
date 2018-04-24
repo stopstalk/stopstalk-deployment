@@ -42,6 +42,10 @@
            margin: 0 auto;
         }
 
+        #stopstalk-rating-graph div[dir='ltr'] {
+           margin: 0 auto;
+        }
+
         #calendar_submission div[dir='ltr'] {
             margin: 0 auto;
         }
@@ -56,6 +60,7 @@
         var handleDetailsURL = "{{=URL('user', 'handle_details', extension='json')}}";
         var handle = "{{=handle}}";
         var getSolvedCountsURL = "{{=URL('user', 'get_solved_counts', extension='json')}}";
+        var getStopStalkRatingHistoryURL = "{{=URL('user', 'get_stopstalk_rating_history', extension='json')}}";
         var custom = "{{=custom}}";
         var userID = "{{=user_id}}";
         var onlyGreen = false;
@@ -248,6 +253,14 @@
             <p>No graph data available at the moment !</p>
         {{pass}}
         <br/><br/><br/>
+        <h5>StopStalk Rating History</h5>
+        <div id="stopstalk-rating-graph">
+            {{if auth.is_logged_in():}}
+            {{else:}}
+                <p><a href="{{=URL('default', 'user', args='login')}}">Login</a> to view StopStalk Rating graph</p>
+            {{pass}}
+        </div>
+        <br/><br/><br/>
         <div id="contest-activity-modal" class="modal">
             <div class="modal-content">
                 <h4>{{=T("Contest Activity on")}} <span id="contest-activity-date"></span></h4>
@@ -263,6 +276,7 @@
             </div>
         </div>
       </div>
+      <h5>Submission Activity</h5>
       <div id="carousel-item-3">
         <div class="switch">
             <label>
@@ -276,9 +290,9 @@
         <div id="activity"></div>
       </div>
       <div id="carousel-item-4">
-        <h3>Solved Problems</h3>
+        <h4>Solved Problems</h4>
         <div id="solved-problems-list" class="row"></div>
-        <h3>Unsolved Problems</h3>
+        <h4>Unsolved Problems</h4>
         <div id="unsolved-problems-list" class="row"></div>
       </div>
     </div>
