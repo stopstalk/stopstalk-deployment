@@ -8,6 +8,52 @@
         if (linechartAvailable === 'True') {
             drawLineChart();
         }
+        if (totalSubmissions !== '0') {
+            drawStopStalkRatingChart();
+        }
+    }
+
+    function drawStopStalkRatingChart() {
+        $.ajax({
+            url: getStopStalkRatingHistoryURL,
+            method: 'GET',
+            data: {user_id: userID, custom: custom},
+            success: function(response) {
+                var dataTable = new google.visualization.DataTable();
+                dataTable.addColumn('date', 'Date');
+                dataTable.addColumn('number', 'StopStalk Rating');
+                var dataPoints = [];
+                $.each(response["final_rating"], function(key, val) {
+                    dataPoints.push([new Date(val[0]), val[1]]);
+                });
+                dataTable.addRows(dataPoints);
+
+                var lineColors = ['#03A9F4', '#FFC107', '#00BCD4', '#E91E63', '#7C4DFF', '#4CAF50', '#536DFE', '#C2185B', '#FF5252', '#CDDC39'];
+                var options = {
+                  curveType: 'function',
+                  width: 900,
+                  height: 500,
+                  colors:[lineColors[Math.floor(Math.random() * lineColors.length)]],
+                  tooltip: {
+                      trigger: 'selection',
+                      isHtml: true
+                  },
+                  explorer: {
+                      keepInBounds: true,
+                      maxZoomOut: 1.45,
+                      maxZoomIn: 0.4,
+                  }
+                };
+                var chart = new google.visualization.LineChart(document.getElementById('stopstalk-rating-graph'));
+                chart.draw(dataTable, options);
+            },
+            error: function(err) {
+                console.log(err);
+            }
+        })
+        // var dataTable = new google.visualization.DataTable();
+        // dataTable.addColumn({ type: 'date', id: 'Date' });
+        // dataTable.addColumn({ type: 'number', id: 'Number' });
     }
 
     function drawLineChart() {
