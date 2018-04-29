@@ -380,3 +380,10 @@ nav ul a:hover {
     max-height: 400px;
     max-width: 700px;
 }
+
+#view-submission-pre {
+    width: 100%;
+    text-align: left;
+    border: 0.5px solid #FEFEFE;
+    overflow-x: scroll;
+}
