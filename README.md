@@ -103,9 +103,9 @@ pip install -r requirements.txt --proxy=<proxy address>
 
     ```
     $ cd web2py
-    $ python web2py.py -a yourPassword // Choose any password
+    $ python2 web2py.py -a yourPassword // Choose any password
     ```
-
+    Note: web2py is not compatible with Python 3
 10. Open the browser and go to the URL -
 
     `http://localhost:8000/stopstalk/`
