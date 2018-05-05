@@ -20,12 +20,32 @@
             data: {user_id: userID, custom: custom},
             success: function(response) {
                 var dataTable = new google.visualization.DataTable();
+                var dataValues = [['Date', 'Max Streak', 'Solved', 'Accuracy', 'Attempted', 'Per-Day']];
+                $.each(response["final_rating"], function(key, val) {
+                    dataValues.push([
+                        new Date(val[0]),
+                        val[1][0],
+                        val[1][1],
+                        val[1][2],
+                        val[1][3],
+                        val[1][4]]);
+                });
+                var options = {
+                        width: 900,
+                        height: 500,
+                        legend: { position: 'right', maxLines: 3 },
+                        bar: { groupWidth: '75%' },
+                        isStacked: true,
+                        focusTarget: 'category'
+                      };
+                var data = google.visualization.arrayToDataTable(dataValues);
+                var view = new google.visualization.DataView(data);
+                var chart = new google.visualization.ColumnChart(document.getElementById("stopstalk-rating-graph"));
+                chart.draw(view, options);
+                /*
                 dataTable.addColumn('date', 'Date');
                 dataTable.addColumn('number', 'StopStalk Rating');
                 var dataPoints = [];
-                $.each(response["final_rating"], function(key, val) {
-                    dataPoints.push([new Date(val[0]), val[1]]);
-                });
                 dataTable.addRows(dataPoints);
 
                 var lineColors = ['#03A9F4', '#FFC107', '#00BCD4', '#E91E63', '#7C4DFF', '#4CAF50', '#536DFE', '#C2185B', '#FF5252', '#CDDC39'];
@@ -46,6 +66,7 @@
                 };
                 var chart = new google.visualization.LineChart(document.getElementById('stopstalk-rating-graph'));
                 chart.draw(dataTable, options);
+                */
             },
             error: function(err) {
                 console.log(err);
@@ -547,7 +568,7 @@
 
         if (totalSubmissions !== "0") {
             // Load the Visualization API and the piechart package.
-            google.load('visualization', '1.1', {'packages': ['corechart', 'calendar'],
+            google.load('visualization', '1.1', {'packages': ['corechart', 'calendar', 'bar'],
                                                  'callback': drawCharts});
 
             /* Get the details about the solved/unsolved problems */

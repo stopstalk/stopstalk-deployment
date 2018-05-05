@@ -719,10 +719,14 @@ def get_stopstalk_rating_history():
         rating = max_streak * 50 + \
                  solved * 100 + \
                  (solved * 100.0 / total_submissions) * 80 + \
-                 (total_submissions - solved) * 15 + \
+                 (total_submissions - solved) * 5 + \
                  curr_per_day * 8000
                  #per_day * 2000
-        final_rating[str(date)] = rating
+        final_rating[str(date)] = [max_streak * 50,
+                                   solved * 50,
+                                   (solved * 100.0 / total_submissions) * 80,
+                                   (total_submissions - solved) * 5,
+                                   curr_per_day * 8000]
 
     for row in rows:
         curr_date = row["time_stamp"].date()
