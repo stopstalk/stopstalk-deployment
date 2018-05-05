@@ -123,11 +123,7 @@ class User:
         def zero_pad(string):
             return "0" + string if len(string) == 1 else string
 
-        try:
-            ratings = eval(re.search("var all_rating = .*?;", response.text).group()[17:-1])
-        except Exception as e:
-            print e
-            return
+        ratings = eval(re.search("var all_rating = .*?;", response.text).group()[17:-1].replace("null", "None"))
 
         long_contest_data = {}
         cookoff_contest_data = {}
