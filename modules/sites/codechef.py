@@ -96,7 +96,7 @@ class Profile(object):
             url.insert(2, "PRACTICE")
         url = "https://" + "/".join(url)
 
-        response = get_request(url)
+        response = get_request(url, headers={"User-Agent": user_agent})
         if response in REQUEST_FAILURES:
             # @ToDo: Need to blacklist 404 urls also
             return ["-"]
@@ -122,7 +122,7 @@ class Profile(object):
             @return (String/None): Editorial URL
         """
         editorial_link = None
-        response = get_request(problem_link)
+        response = get_request(problem_link, headers={"User-Agent": user_agent})
         if response in REQUEST_FAILURES:
             return None
 
@@ -311,7 +311,8 @@ class Profile(object):
                                       "%Y-%m-%d %H:%M:%S")
         # Test for invalid handles
         if  last_retrieved == str_init_time:
-            response = get_request(domain_url + "users/" + handle)
+            response = get_request(domain_url + "users/" + handle,
+                                   headers={"User-Agent": user_agent})
             if response in REQUEST_FAILURES:
                 return response
             if response.url.__contains__("teams/view"):
