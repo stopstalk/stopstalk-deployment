@@ -328,7 +328,7 @@ class Profile(object):
             url = domain_url + "submissions?" + urlencode(params)
             response = get_request(url,
                                    headers={"User-Agent": user_agent},
-                                   timeout=15)
+                                   timeout=20)
             if response in REQUEST_FAILURES:
                 return response
 
