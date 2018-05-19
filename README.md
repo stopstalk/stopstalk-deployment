@@ -115,7 +115,8 @@ pip install -r requirements.txt --proxy=<proxy address>
 
 11. Done. :smile:
 
-
+12. To setup syntax check before all of your commits, just create a file in applications/stopstalk/.git/hooks/pre-commit with just `make` as it's content.
+ 
 A few steps to setup your local database - [StopStalk Wiki](https://github.com/stopstalk/stopstalk-deployment/wiki/Setup-basic-database-tables-locally)
 
 ## Project Dependencies

@@ -50,6 +50,7 @@ OTHER_FAILURE = "OTHER_FAILURE"
 REQUEST_FAILURES = (SERVER_FAILURE, NOT_FOUND, OTHER_FAILURE)
 INVALID_HANDLES = set([(row.handle, row.site.lower()) for row in db(db.invalid_handle).select()])
 DIR_PATH = "./applications/stopstalk/graph_data/"
+user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36"
 
 # -----------------------------------------------------------------------------
 def get_request(url, headers={}, timeout=current.TIMEOUT, params={}):
@@ -115,7 +116,7 @@ class User:
     def codechef_data(self):
         handle = self.handles["codechef_handle"]
         url = "https://www.codechef.com/users/" + handle
-        response = get_request(url)
+        response = get_request(url, headers={"User-Agent": user_agent})
         if response in REQUEST_FAILURES:
             print "Request ERROR: CodeChef " + url + " " + response
             return
@@ -123,11 +124,7 @@ class User:
         def zero_pad(string):
             return "0" + string if len(string) == 1 else string
 
-        try:
-            ratings = eval(re.search("var all_rating = .*?;", response.text).group()[17:-1])
-        except Exception as e:
-            print e
-            return
+        ratings = eval(re.search("var all_rating = .*?;", response.text).group()[17:-1].replace("null", "None"))
 
         long_contest_data = {}
         cookoff_contest_data = {}
