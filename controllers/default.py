@@ -26,6 +26,8 @@ import parsedatetime as pdt
 import requests
 import utilities
 
+user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36"
+
 # ----------------------------------------------------------------------------
 def handle_error():
     """
@@ -1270,7 +1272,8 @@ Response text: %s
         problem_id = view_link.strip("/").split("/")[-1]
         download_url = "https://www.codechef.com/viewplaintext/" + \
                        str(problem_id)
-        response = requests.get(download_url)
+        response = requests.get(download_url,
+                                headers={"User-Agent": user_agent})
         return _response_handler(download_url, response)
 
     def _retrieve_codeforces_submission(view_link):

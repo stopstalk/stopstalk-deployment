@@ -100,6 +100,9 @@ class User:
         self.previous_graph_data = None
         self.graph_data = dict([(x.lower() + "_data", []) for x in current.SITES])
         self.user_record = user_record
+        # To track one of the retrieval failed with server failure
+        # so that it can be re-tried
+        self.retrieval_failed = False
 
         if os.path.exists(self.pickle_file_path):
             self.previous_graph_data = pickle.load(open(self.pickle_file_path, "rb"))
@@ -118,6 +121,8 @@ class User:
         url = "https://www.codechef.com/users/" + handle
         response = get_request(url, headers={"User-Agent": user_agent})
         if response in REQUEST_FAILURES:
+            if response != NOT_FOUND:
+                self.retrieval_failed = True
             print "Request ERROR: CodeChef " + url + " " + response
             return
 
@@ -161,6 +166,8 @@ class User:
         url = "%sapi/contest.list" % website
         response = get_request(url)
         if response in REQUEST_FAILURES:
+            if response != NOT_FOUND:
+                self.retrieval_failed = True
             print "Request ERROR: Codeforces " + url + " " + response
             return
 
@@ -217,6 +224,8 @@ class User:
         url = "%srest/hackers/%s/rating_histories_elo" % (website, handle)
         response = get_request(url)
         if response in REQUEST_FAILURES:
+            if response != NOT_FOUND:
+                self.retrieval_failed = True
             print "Request ERROR: HackerRank " + url + " " + response
             return
         response = response.json()["models"]
@@ -250,6 +259,8 @@ class User:
               self.handles["hackerearth_handle"]
         response = get_request(url)
         if response in REQUEST_FAILURES:
+            if response != NOT_FOUND:
+                self.retrieval_failed = True
             print "Request ERROR: HackerEarth " + url + " " + response
             return
         if response.text == "":
@@ -306,8 +317,11 @@ class User:
                                                     site + "_data")))
 
         gevent.joinall(threads)
-        self.write_to_filesystem()
-        self.user_record.update_record(graph_data_retrieved=True)
+        if self.retrieval_failed == False:
+            self.write_to_filesystem()
+            self.user_record.update_record(graph_data_retrieved=True)
+        else:
+            print "Writing to file skipped"
 
 def get_user_objects(aquery=None, cquery=None, sites=None):
     user_objects = []
