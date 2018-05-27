@@ -8,7 +8,7 @@
         if (linechartAvailable === 'True') {
             drawLineChart();
         }
-        if (totalSubmissions !== '0') {
+        if (totalSubmissions !== '0' && isLoggedIn === "True") {
             drawStopStalkRatingChart();
         }
     }
@@ -20,23 +20,29 @@
             data: {user_id: userID, custom: custom},
             success: function(response) {
                 var dataTable = new google.visualization.DataTable();
-                var dataValues = [['Date', 'Max Streak', 'Solved', 'Accuracy', 'Attempted', 'Per-Day']];
-                $.each(response["final_rating"], function(key, val) {
+                var dataValues = [['Date', 'Current Streak', 'Maximum Streak', 'Solved', 'Accuracy', 'Attempted', 'Per-Day']];
+                $.each(response['final_rating'], function(key, val) {
                     dataValues.push([
                         new Date(val[0]),
                         val[1][0],
                         val[1][1],
                         val[1][2],
                         val[1][3],
-                        val[1][4]]);
+                        val[1][4],
+                        val[1][5]]);
                 });
                 var options = {
-                        width: 900,
+                        width: 1000,
                         height: 500,
                         legend: { position: 'right', maxLines: 3 },
-                        bar: { groupWidth: '75%' },
+                        bar: { groupWidth: '100%' },
                         isStacked: true,
-                        focusTarget: 'category'
+                        focusTarget: 'category',
+                        explorer: {
+                            keepInBounds: true,
+                            maxZoomOut: 1.0,
+                            maxZoomIn: 0.1,
+                        }
                       };
                 var data = google.visualization.arrayToDataTable(dataValues);
                 var view = new google.visualization.DataView(data);

@@ -729,6 +729,15 @@ if session["auth"]:
 current.db = db
 current.uvadb = uvadb
 
+current.WEIGHTING_FACTORS = {
+    "curr_streak": 100 * 1.5,
+    "max_streak": 100 * 1,
+    "solved": 1 * 1.5,
+    "accuracy": 10 * 3.5,
+    "attempted": 10 * 0.5,
+    "curr_per_day": 800 * 2
+}
+
 def get_profile_url(site, handle):
     if handle == "":
         return "NA"
