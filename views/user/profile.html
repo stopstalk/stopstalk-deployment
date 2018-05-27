@@ -123,7 +123,7 @@
                                             {{if can_update:}}
                                             <button id="update-my-submissions" class="tooltipped btn-floating btn-large waves-effect waves-light" data-delay="50" data-tooltip="Retrieve my submissions" style="background-color: deepskyblue;"><i class="fa fa-refresh fa-3x" style="white-text"></i></button>
                                             {{else:}}
-                                            <div class="tooltipped" data-delay="50" data-tooltip="Can only update once in 24 hours">
+                                            <div class="tooltipped" data-delay="50" data-tooltip="Can only update once in {{=current.REFRESH_INTERVAL / 3600}} hours">
                                                 <button id="disabled-update-my-submissions" class="tooltipped btn-floating btn-large waves-effect waves-light disabled" style="background-color: deepskyblue;"><i class="fa fa-refresh fa-3x" style="white-text"></i></button>
                                             </div>
                                             {{pass}}
