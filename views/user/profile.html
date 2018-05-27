@@ -47,7 +47,7 @@
         }
 
         #stopstalk-rating-graph {
-           margin: 0 auto;
+            margin-left: 15%;
         }
 
         #calendar_submission div[dir='ltr'] {
@@ -256,14 +256,22 @@
         {{else:}}
             <p>No graph data available at the moment !</p>
         {{pass}}
-        <br/><br/><br/>
+        <br/><br/>
         <h5>StopStalk Rating History</h5>
-        <div id="stopstalk-rating-graph">
-            {{if auth.is_logged_in():}}
+        <p>
+            {{if auth.is_logged_in() is False:}}
+                Contributions of various aspects to StopStalk Rating. Please <a href="{{=URL('default', 'user', args='login')}}" target="_blank">Login</a> to view StopStalk Rating graph
             {{else:}}
-                <p><a href="{{=URL('default', 'user', args='login')}}">Login</a> to view StopStalk Rating graph</p>
+                Contributions of various aspects to StopStalk Rating
             {{pass}}
-        </div>
+        </p>
+        {{if auth.is_logged_in():}}
+            <div id="stopstalk-rating-graph"></div>
+        {{else:}}
+            <div id="stopstalk-rating-graph"></div>
+                <img src="{{=URL('static', 'images/blurred_history.png')}}" style="height: 500px; width: 900px;">
+            </div>
+        {{pass}}
         <br/><br/><br/>
         <div id="contest-activity-modal" class="modal">
             <div class="modal-content">
