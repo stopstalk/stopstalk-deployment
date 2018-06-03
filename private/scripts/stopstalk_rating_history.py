@@ -54,18 +54,15 @@ def update_stopstalk_rating(user_id, user_submissions, custom):
     if final_rating == {}:
         print user_id, custom, "No submissions"
         return
+
     atable = db.auth_user
     cftable = db.custom_friend
 
-    if custom:
-        cftable(user_id).update_record()
-
-    today = datetime.datetime.now().date()
-    yesterday = str((today - datetime.timedelta(days=1)))
-    today = str(today)
-    last_rating = sum(final_rating[yesterday])
+    today = str(datetime.datetime.now().date())
     current_rating = sum(final_rating[today])
-    print user_id, custom, current_rating, current_rating - last_rating
+
+    print user_id, custom, current_rating
+
     update_params = dict(stopstalk_rating=int(current_rating))
     if custom:
         cftable(user_id).update_record(**update_params)
@@ -127,7 +124,7 @@ if __name__ == "__main__":
         last_custom_user_id = db(cftable).select(orderby=~cftable.id,
                                                  limitby=(0, 1)).first().id
 
-        # compute_group_ratings(last_custom_user_id, True)
+        compute_group_ratings(last_custom_user_id, True)
         compute_group_ratings(last_user_id, False)
     elif sys.argv[1] == "single":
         user_id = int(sys.argv[2])

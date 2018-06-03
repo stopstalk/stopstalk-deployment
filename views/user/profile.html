@@ -260,7 +260,7 @@
         <h5>StopStalk Rating History</h5>
         <p>
             {{if auth.is_logged_in() is False:}}
-                Contributions of various aspects to StopStalk Rating. Please <a href="{{=URL('default', 'user', args='login')}}" target="_blank">Login</a> to view StopStalk Rating graph
+                <b>Contributions of various aspects to StopStalk Rating. Please <a href="{{=URL('default', 'user', args='login')}}" target="_blank">Login</a> to view StopStalk Rating graph</b>
             {{else:}}
                 Contributions of various aspects to StopStalk Rating
             {{pass}}
