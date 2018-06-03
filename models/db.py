@@ -729,6 +729,14 @@ if session["auth"]:
 current.db = db
 current.uvadb = uvadb
 
+current.WEIGHTING_FACTORS = {
+    "curr_streak": 125 * 10,
+    "max_streak": 125 * 10,
+    "solved": 1 * 23,
+    "accuracy": 50 * 35,
+    "attempted": 2 * 2,
+    "curr_per_day": 1000 * 20
+}
 current.REFRESH_INTERVAL = 120 * 60
 
 def get_profile_url(site, handle):
