@@ -686,6 +686,24 @@ def get_solved_unsolved():
                 unattempted_html_widget=utilities.problem_widget("", "", "unattempted-problem", "Unattempted problem"))
 
 # ------------------------------------------------------------------------------
+@auth.requires_login()
+def get_stopstalk_rating_history():
+    user_id = request.vars.get("user_id", None)
+    custom = request.vars.get("custom", None)
+    if user_id is None or custom is None:
+        return dict(final_rating=[])
+    user_id = int(user_id)
+    stable = db.submission
+    query = (stable["custom_user_id" if (custom == "True") else "user_id"] == user_id)
+    rows = db(query).select(stable.time_stamp,
+                            stable.problem_link,
+                            stable.status,
+                            orderby=stable.time_stamp)
+
+    final_rating = utilities.get_stopstalk_rating_history_dict(rows)
+    return dict(final_rating=sorted(final_rating.items()))
+
+# ------------------------------------------------------------------------------
 def profile():
     """
         Controller to show user profile

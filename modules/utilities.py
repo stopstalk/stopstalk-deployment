@@ -21,8 +21,8 @@
 """
 
 import re
+import datetime
 from boto3 import client
-from datetime import datetime
 from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, I, \
                   TEXTAREA, SELECT, OPTION, URL, BUTTON
@@ -203,6 +203,73 @@ def get_friends(user_id, custom_list=True):
     return friends, cf_to_duplicate
 
 # ----------------------------------------------------------------------------
+def get_stopstalk_rating(parts):
+    WEIGHTING_FACTORS = current.WEIGHTING_FACTORS
+    rating_components = [
+        parts["curr_streak"] * WEIGHTING_FACTORS["curr_streak"],
+        parts["max_streak"] * WEIGHTING_FACTORS["max_streak"],
+        parts["solved"] * WEIGHTING_FACTORS["solved"],
+        (parts["accepted_submissions"] * 100.0 / parts["total_submissions"]) * WEIGHTING_FACTORS["accuracy"],
+        (parts["total_submissions"] - parts["accepted_submissions"]) * WEIGHTING_FACTORS["attempted"],
+        parts["curr_per_day"] * WEIGHTING_FACTORS["curr_per_day"]
+    ]
+    return {"components": rating_components,
+            "total": sum(rating_components)}
+
+# ----------------------------------------------------------------------------
+def get_stopstalk_rating_history_dict(user_submissions):
+    solved_problem_links = set([])
+    total_submissions = accepted_submissions = 0
+    curr_streak = max_streak = rating = 0
+    final_rating = {}
+    INITIAL_DATE = datetime.datetime.strptime(current.INITIAL_DATE,
+                                              "%Y-%m-%d %H:%M:%S").date()
+    prev_date = INITIAL_DATE
+    def _compute_prev_day_rating(date):
+        if total_submissions == 0:
+            return
+        global rating
+        solved = len(solved_problem_links)
+        curr_per_day = total_submissions * 1.0 / ((date - INITIAL_DATE).days + 1)
+        rating_components = get_stopstalk_rating(
+                                dict(
+                                    curr_streak=curr_streak,
+                                    max_streak=max_streak,
+                                    solved=solved,
+                                    total_submissions=total_submissions,
+                                    curr_per_day=curr_per_day,
+                                    accepted_submissions=accepted_submissions
+                                )
+                            )["components"]
+        final_rating[str(date)] = rating_components
+
+    for row in user_submissions:
+        curr_date = row["time_stamp"].date()
+        number_of_dates = (curr_date - prev_date).days
+        for cnt in xrange(number_of_dates):
+            _compute_prev_day_rating(prev_date + datetime.timedelta(days=cnt))
+        if prev_date != curr_date:
+            if prev_date is not None and (curr_date - prev_date).days == 1:
+                curr_streak += 1
+                if curr_streak > max_streak:
+                    max_streak = curr_streak
+            else:
+                curr_streak = 0
+
+            # compute rating of prev_date
+        if row["status"] == "AC":
+            accepted_submissions += 1
+            solved_problem_links.add(row["problem_link"])
+        total_submissions += 1
+        prev_date = curr_date
+
+    number_of_dates = (datetime.datetime.now().date() - prev_date).days + 1
+    for cnt in xrange(number_of_dates):
+        _compute_prev_day_rating(prev_date + datetime.timedelta(days=cnt))
+
+    return final_rating
+
+# ----------------------------------------------------------------------------
 def get_accepted_streak(user_id, custom):
     """
         Function that returns current streak of accepted solutions
@@ -307,7 +374,7 @@ def get_max_streak(submissions):
         if streak > max_streak:
             max_streak = streak
 
-    today = datetime.today().date()
+    today = datetime.datetime.today().date()
 
     # There are no submissions in the database for this user
     if prev is None:
@@ -354,9 +421,9 @@ def compute_row(record,
     max_streak = tup[0]
     total_submissions = tup[1]
 
-    today = datetime.today().date()
-    start = datetime.strptime(current.INITIAL_DATE,
-                              "%Y-%m-%d %H:%M:%S").date()
+    today = datetime.datetime.today().date()
+    start = datetime.datetime.strptime(current.INITIAL_DATE,
+                                       "%Y-%m-%d %H:%M:%S").date()
 
     if record.per_day is None or record.per_day == 0.0:
         per_day = total_submissions * 1.0 / (today - start).days
