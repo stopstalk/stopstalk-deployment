@@ -52,7 +52,7 @@
     {{if len(current.REDIS_CLIENT.smembers("disabled_retrieval")):}}
         <h7 class="red-text"> Disabled retrieval for {{=utilities.pretty_string(current.REDIS_CLIENT.smembers("disabled_retrieval"))}} due to their downtime. </h7>
     {{pass}}
-    <h6> <b>[New Feature]:</b> Add your editorials to StopStalk - {{=A("Know more", _href=URL("default", "updates"), _id="know-more", _target="_blank")}}</h6>
+    <h6> <b>[New Feature]:</b> StopStalk Rating History graph to your profile page - {{=A("Know more", _href=URL("default", "updates"), _id="know-more", _target="_blank")}}</h6>
     <p>Please take some time to fill out this {{=A("Survey Form", _href="http://goo.gl/oeLZHd", _target="_blank")}}</p>
 
     <div id="page-selection" class="center"></div>
@@ -64,7 +64,7 @@
     {{if len(current.REDIS_CLIENT.smembers("disabled_retrieval")):}}
         <h7 class="red-text"> Disabled retrieval for {{=utilities.pretty_string(current.REDIS_CLIENT.smembers("disabled_retrieval"))}} due to their downtime. </h7>
     {{pass}}
-    <h6> <b>[New Feature]:</b> Add your editorials to StopStalk - {{=A("Know more", _href=URL("default", "updates"), _id="know-more", _target="_blank")}}</h6>
+    <h6> <b>[New Feature]:</b> StopStalk Rating History graph to your profile page - {{=A("Know more", _href=URL("default", "updates"), _id="know-more", _target="_blank")}}</h6>
     <p>Please take some time to fill out this {{=A("Survey Form", _href="http://goo.gl/oeLZHd", _target="_blank")}}</p>
 
     <h5>{{=T("You do not have any friends on StopStalk yet!")}}</h5>

@@ -289,6 +289,7 @@ def validate_email(email):
                                    "email": email})
     if response.status_code == 200:
         response = response.json()
+        print response
         if response["success"]:
             return (response["result"] not in (1, 4))
         else:
@@ -730,12 +731,12 @@ current.db = db
 current.uvadb = uvadb
 
 current.WEIGHTING_FACTORS = {
-    "curr_streak": 100 * 1.5,
-    "max_streak": 100 * 1,
-    "solved": 1 * 1.5,
-    "accuracy": 10 * 3.5,
-    "attempted": 10 * 0.5,
-    "curr_per_day": 800 * 2
+    "curr_streak": 125 * 10,
+    "max_streak": 125 * 10,
+    "solved": 1 * 23,
+    "accuracy": 50 * 35,
+    "attempted": 2 * 2,
+    "curr_per_day": 1000 * 20
 }
 
 def get_profile_url(site, handle):

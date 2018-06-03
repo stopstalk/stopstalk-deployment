@@ -65,16 +65,12 @@ def update_stopstalk_rating(user_id, user_submissions, custom):
     today = str(today)
     last_rating = sum(final_rating[yesterday])
     current_rating = sum(final_rating[today])
-    print current_rating - last_rating
-    print final_rating[today][5] - final_rating[yesterday][5]
-    print "________________________"
-    update_params = dict(stopstalk_rating=int(sum(final_rating[today])))
+    print user_id, custom, current_rating, current_rating - last_rating
+    update_params = dict(stopstalk_rating=int(current_rating))
     if custom:
         cftable(user_id).update_record(**update_params)
     else:
         atable(user_id).update_record(**update_params)
-#    print last_rating, current_rating
-#    print final_rating[today], final_rating[yesterday]
 
 def compute_group_ratings(last_id, custom):
     if custom:
