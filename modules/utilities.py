@@ -219,12 +219,9 @@ def get_stopstalk_rating(parts):
 # ----------------------------------------------------------------------------
 def get_stopstalk_rating_history_dict(user_submissions):
     solved_problem_links = set([])
-    total_submissions = 0
-    accepted_submissions = 0
+    total_submissions = accepted_submissions = 0
+    curr_streak = max_streak = rating = 0
     final_rating = {}
-    curr_streak = 0
-    max_streak = 0
-    rating = 0
     INITIAL_DATE = datetime.datetime.strptime(current.INITIAL_DATE,
                                               "%Y-%m-%d %H:%M:%S").date()
     prev_date = INITIAL_DATE

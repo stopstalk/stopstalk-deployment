@@ -70,17 +70,13 @@ def update_stopstalk_rating(user_id, user_submissions, custom):
         atable(user_id).update_record(**update_params)
 
 def compute_group_ratings(last_id, custom):
-    if custom:
-        column_name = "custom_user_id"
-    else:
-        column_name = "user_id"
+    column_name = "custom_user_id" if custom else "user_id"
     start = 0
+
     for i in xrange(last_id / BATCH_SIZE + 1):
-        print datetime.datetime.now()
         res = get_sql_result(i * BATCH_SIZE,
                              (i + 1) * BATCH_SIZE,
                              custom)
-        print i * BATCH_SIZE, (i + 1) * BATCH_SIZE
         if len(res) == 0:
             # Batch had no submission
             continue
@@ -102,8 +98,6 @@ def compute_group_ratings(last_id, custom):
                 prev_user_id = user_id
         update_stopstalk_rating(prev_user_id, user_submissions, custom)
         start += BATCH_SIZE
-        print datetime.datetime.now()
-        print "___________________________________"
 
 def compute_single_rating(user_id, custom):
     res = get_sql_result(user_id, user_id, custom)

@@ -258,16 +258,11 @@
         {{pass}}
         <br/><br/>
         <h5>StopStalk Rating History</h5>
-        <p>
-            {{if auth.is_logged_in() is False:}}
-                <b>Contributions of various aspects to StopStalk Rating. Please <a href="{{=URL('default', 'user', args='login')}}" target="_blank">Login</a> to view StopStalk Rating graph</b>
-            {{else:}}
-                Contributions of various aspects to StopStalk Rating
-            {{pass}}
-        </p>
         {{if auth.is_logged_in():}}
+            <p>Contributions of various aspects to StopStalk Rating</p>
             <div id="stopstalk-rating-graph"></div>
         {{else:}}
+            <p><b>Contributions of various aspects to StopStalk Rating. Please <a href="{{=URL('default', 'user', args='login')}}" target="_blank">Login</a> to view StopStalk Rating graph</b></p>
             <div id="stopstalk-rating-graph"></div>
                 <img src="{{=URL('static', 'images/blurred_history.png')}}" style="height: 500px; width: 900px;">
             </div>
