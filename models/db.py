@@ -289,7 +289,6 @@ def validate_email(email):
                                    "email": email})
     if response.status_code == 200:
         response = response.json()
-        print response
         if response["success"]:
             return (response["result"] not in (1, 4))
         else:
