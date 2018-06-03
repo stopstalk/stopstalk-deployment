@@ -738,6 +738,7 @@ current.WEIGHTING_FACTORS = {
     "attempted": 2 * 2,
     "curr_per_day": 1000 * 20
 }
+current.REFRESH_INTERVAL = 120 * 60
 
 def get_profile_url(site, handle):
     if handle == "":
