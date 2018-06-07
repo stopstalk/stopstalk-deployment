@@ -40,7 +40,7 @@ BATCH_SIZE = 500
 def get_sql_result(start_id, end_id, custom):
     column_name = "custom_user_id" if custom else "user_id"
     query = """
-    SELECT %(column_name)s, time_stamp, problem_link, status
+    SELECT %(column_name)s, time_stamp, problem_link, status, site
     FROM submission
     WHERE %(column_name)s BETWEEN %(start_id)d AND %(end_id)d
     ORDER BY %(column_name)s, time_stamp
@@ -48,6 +48,13 @@ def get_sql_result(start_id, end_id, custom):
                     "start_id": start_id,
                     "end_id": end_id})
     return db.executesql(query)
+
+def get_submission_dict_from_row(submission_row):
+    return {"user_id": submission_row[0],
+            "time_stamp": submission_row[1],
+            "problem_link": submission_row[2],
+            "status": submission_row[3],
+            "site": submission_row[4]}
 
 def update_stopstalk_rating(user_id, user_submissions, custom):
     final_rating = utilities.get_stopstalk_rating_history_dict(user_submissions)
@@ -83,18 +90,13 @@ def compute_group_ratings(last_id, custom):
         prev_user_id = res[0][0]
         user_submissions = []
         for submission in res:
-            user_id, time_stamp, problem_link, status = submission
+            user_id, time_stamp, problem_link, status, site = submission
+            submission_dict = get_submission_dict_from_row(submission)
             if user_id == prev_user_id:
-                user_submissions.append({"user_id": user_id,
-                                         "time_stamp": time_stamp,
-                                         "problem_link": problem_link,
-                                         "status": status})
+                user_submissions.append(submission_dict)
             else:
                 update_stopstalk_rating(prev_user_id, user_submissions, custom)
-                user_submissions = [{"user_id": user_id,
-                                     "time_stamp": time_stamp,
-                                     "problem_link": problem_link,
-                                     "status": status}]
+                user_submissions = [submission_dict]
                 prev_user_id = user_id
         update_stopstalk_rating(prev_user_id, user_submissions, custom)
         start += BATCH_SIZE
@@ -103,13 +105,8 @@ def compute_single_rating(user_id, custom):
     res = get_sql_result(user_id, user_id, custom)
     user_submissions = []
     for submission in res:
-        _user_id, time_stamp, problem_link, status = submission
-        user_submissions.append({"user_id": _user_id,
-                                 "time_stamp": time_stamp,
-                                 "problem_link": problem_link,
-                                 "status": status})
+        user_submissions.append(get_submission_dict_from_row(submission))
     update_stopstalk_rating(user_id, user_submissions, custom)
-
 
 if __name__ == "__main__":
     if sys.argv[1] == "complete":

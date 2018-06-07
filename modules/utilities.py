@@ -257,7 +257,7 @@ def get_stopstalk_rating_history_dict(user_submissions):
                 curr_streak = 0
 
             # compute rating of prev_date
-        if row["status"] == "AC":
+        if row["status"] == "AC" and row["site"] != "HackerRank":
             accepted_submissions += 1
             solved_problem_links.add(row["problem_link"])
         total_submissions += 1
