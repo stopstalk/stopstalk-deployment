@@ -698,6 +698,7 @@ def get_stopstalk_rating_history():
     rows = db(query).select(stable.time_stamp,
                             stable.problem_link,
                             stable.status,
+                            stable.site,
                             orderby=stable.time_stamp)
 
     final_rating = utilities.get_stopstalk_rating_history_dict(rows)
