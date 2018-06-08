@@ -366,6 +366,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
                 print "%s %s %s" % (submissions, site, record.stopstalk_handle)
                 # Add the failure sites for inserting data into failed_retrieval
                 retrieval_failures.append(site)
+                current.REDIS_CLIENT.sadd("website_down_" + site.lower(), record.stopstalk_handle)
             elif submissions == NOT_FOUND:
                 print "New invalid handle %s %s" % (site_handle, site)
                 handle_not_found(site, site_handle)
