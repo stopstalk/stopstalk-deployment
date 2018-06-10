@@ -39,11 +39,12 @@ for site in current.SITES:
 
 for site in sites_dict:
     if sites_dict[site] >= 10:
-        requests.post("https://api.pushover.net/1/messages.json",
+        print requests.post("https://api.pushover.net/1/messages.json",
                       data={"token": current.pushover_api_token,
                             "user": current.pushover_user_token,
                             "message": prettify_dict(sites_dict),
-                            "title": "Site down"})
+                            "title": "Site down",
+                            "priority": 1}).json()
         break
 
 print str(datetime.datetime.now()), prettify_dict(sites_dict).replace("\n", " | ")
