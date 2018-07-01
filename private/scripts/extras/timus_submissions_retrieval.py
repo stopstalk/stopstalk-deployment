@@ -1,3 +1,25 @@
+"""
+    Copyright (c) 2015-2018 Raj Patel(raj454raj@gmail.com), StopStalk
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
+"""
+
 import bs4, requests, time, datetime, pprint
 
 pp = pprint.PrettyPrinter(indent=2)
@@ -17,11 +39,6 @@ for i in xrange(1000):
     soup = bs4.BeautifulSoup(response.text, "lxml")
     table = soup.find("table", class_="status")
     all_trs = table.find_all("tr")
-    print "****************"
-    print map(lambda x: x.text, all_trs[:2])
-    print "****************"
-    print map(lambda x: x.text, all_trs[-2:])
-    print "****************"
     trs = all_trs[2:-2]
 
     for tr in trs:
@@ -39,7 +56,7 @@ for i in xrange(1000):
                              "%Y-%m-%d %H:%M:%S")
 
 
-        problem_link = acm_link + tds[3].contents[0]["href"]
+        problem_link = acm_link + tds[3].contents[0]["href"] + "&locale=en"
         problem_name = tds[3].text
         language = tds[4].text
         status = tds[5].text
@@ -75,5 +92,5 @@ for i in xrange(1000):
 
     if len(trs) < count:
         break
-print len(submissions)
-#pp.pprint(submissions)
+#print submissions
+pp.pprint(submissions)
