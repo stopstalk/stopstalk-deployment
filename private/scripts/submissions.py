@@ -29,7 +29,7 @@ from gevent import monkey
 gevent.monkey.patch_all(thread=False)
 
 # @ToDo: Make this generalised
-from sites import codechef, codeforces, spoj, hackerearth, hackerrank, uva
+from sites import codechef, codeforces, spoj, hackerearth, hackerrank, uva, timus
 rows = []
 problem_solved_stats = {}
 
