@@ -39,6 +39,7 @@ current.SITES["Spoj"] = "https://www.spoj.com/"
 current.SITES["HackerEarth"] = "https://www.hackerearth.com/"
 current.SITES["HackerRank"] = "https://www.hackerrank.com/"
 current.SITES["UVa"] = "https://uva.onlinejudge.org/"
+current.SITES["Timus"] = "http://acm.timus.ru/"
 
 # If you are under a PROXY uncomment this and comment the next line
 #current.PROXY = {"http": "http://proxy.iiit.ac.in:8080/",
