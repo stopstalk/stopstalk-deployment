@@ -301,15 +301,16 @@ def sanitize_fields(form):
     """
         Display errors for the following:
 
-        1. Strip whitespaces from all the fields
-        2. Remove @ from the HackerEarth
-        3. Lowercase the handles
-        4. Fill the institute field with "Other" if empty
-        5. Email address entered is from a valid domain
-        6. Email address instead of handles
-        7. Spoj follows a specific convention for handle naming
-        8. stopstalk_handle is alphanumeric
-        9. Country field is compulsary
+        1.  Strip whitespaces from all the fields
+        2.  Remove @ from the HackerEarth
+        3.  Lowercase the handles
+        4.  Fill the institute field with "Other" if empty
+        5.  Email address entered is from a valid domain
+        6.  Email address instead of handles
+        7.  Spoj follows a specific convention for handle naming
+        8.  stopstalk_handle is alphanumeric
+        9.  Country field is compulsory
+        10. Only positive ints allowed in Timus field
 
         @param form (FORM): Registration / Add Custom friend form
     """
@@ -382,6 +383,15 @@ def sanitize_fields(form):
     if form.vars.email:
         if validate_email(form.vars.email) is False:
             form.errors.email = T("Invalid email address")
+
+    # 10.
+    if form.vars.timus_handle:
+        try:
+            timus_id = int(form.vars.timus_handle)
+            if timus_id <= 0:
+                form.errors.timus_handle = "Timus handle should be a number"
+        except ValueError:
+            form.errors.timus_handle = "Timus handle should be a number"
 
     if form.errors:
         response.flash = T("Form has errors")
@@ -753,6 +763,8 @@ def get_profile_url(site, handle):
         return "https://www.hackerearth.com/users/" + handle
     elif site == "HackerRank":
         return "https://www.hackerrank.com/" + handle
+    elif site == "Timus":
+        return "http://acm.timus.ru/author.aspx?id=" + handle
     elif site == "UVa":
         import requests
         utable = uvadb.usernametoid
