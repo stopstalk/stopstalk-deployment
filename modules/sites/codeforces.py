@@ -139,13 +139,13 @@ class Profile(object):
             curr = time.gmtime(row["creationTimeSeconds"] + 330 * 60)
             if curr <= last_retrieved:
                 return submissions
- 
+
             if row.has_key("contestId") == False:
                 print "Contest ID not found for", row["problem"]["name"]
                 continue
 
             arg = "problem/"
-            if len(str(row["contestId"])) > 3:
+            if int(row["contestId"]) > 90000:
                 arg = "gymProblem/"
 
             # Problem Name/URL
