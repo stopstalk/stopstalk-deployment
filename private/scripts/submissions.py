@@ -522,7 +522,7 @@ def re_retrieve():
     return (users, custom_users)
 
 # ----------------------------------------------------------------------------
-def specific_user():
+def specific_users():
     """
         Get the user_ids and custom_user_ids whose retrieval was
         failed
@@ -530,7 +530,7 @@ def specific_user():
         @return (Tuple): (list of user_ids, list of custom_user_ids)
     """
     custom = (sys.argv[2] == "custom") # Else "normal"
-    user_id = int(sys.argv[3])
+    user_ids = [int(x) for x in sys.argv[3].split(",")]
     users = []
     custom_users = []
     if custom:
@@ -584,8 +584,8 @@ if __name__ == "__main__":
         users, custom_users = daily_retrieve()
     elif retrieval_type == "re_retrieve":
         users, custom_users = re_retrieve()
-    elif retrieval_type == "specific_user":
-        users, custom_users = specific_user()
+    elif retrieval_type == "specific_users":
+        users, custom_users = specific_users()
     elif retrieval_type == "refreshed_users":
         users, custom_users = refreshed_users()
     else:
