@@ -389,9 +389,9 @@ def sanitize_fields(form):
         try:
             timus_id = int(form.vars.timus_handle)
             if timus_id <= 0:
-                form.errors.timus_handle = "Timus handle should be a number"
+                form.errors.timus_handle = "Timus handle / ID should be a number"
         except ValueError:
-            form.errors.timus_handle = "Timus handle should be a number"
+            form.errors.timus_handle = "Timus handle / ID should be a number"
 
     if form.errors:
         response.flash = T("Form has errors")
