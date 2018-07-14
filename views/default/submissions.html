@@ -5,7 +5,7 @@
 {{end}}
 <script type="text/javascript">
     var pageURL = '{{=URL("default", "submissions")}}';
-    var facebookGroup = '{{=recent_announcements.has_key("facebook_group") and recent_announcements["facebook_group"]}}';
+    var announcementValue = '{{=recent_announcements.has_key("timus_handle") and recent_announcements["timus_handle"]}}';
 
     $(document).ready(function() {
         if ('{{=country}}' === 'not-available') {
@@ -13,12 +13,12 @@
             $('#fill-country-modal').modal('open');
         }
 
-        if (facebookGroup === 'False') {
+        if (announcementValue === 'False') {
             $('#recent_announcements').modal({
                 complete: function() {
                     $.ajax({
                         url: '{{=URL("user", "mark_read")}}',
-                        data: {key: "facebook_group"}
+                        data: {key: "timus_handle"}
                     });
                 }
             });
@@ -36,12 +36,10 @@
 
 <div id="recent_announcements" class="modal">
   <div class="modal-content">
-    <h4>Our new Facebook Group</h4>
-    <p>We have created a Facebook Group for discussions</p>
-    <p>You can post your doubts / feedback / feature requests there and we can discuss and get other users' views</p>
-    <p>Please add your Programmer friends to the group.</p>
-    <b>Let's learn collectively :)</b>
-    <h5>Link to the Facebook group: <a target="_blank" style="color: #3B5998;" href="https://www.facebook.com/groups/2445127375713225/"><i class="fa fa-facebook-official"></i></a></h5>
+    <h4>Timus to StopStalk</h4>
+    <p>We have added yet another site to StopStalk - <a href="http://acm.timus.ru" target="_blank">Timus</a></p>
+    <p>Please update your handle / user ID on <a href="{{=URL('user', 'update_details')}}" target="_blank">Update details</a> page</p>
+    <b>Happy StopStalking!</b>
   </div>
 </div>
 
@@ -52,7 +50,7 @@
     {{if len(current.REDIS_CLIENT.smembers("disabled_retrieval")):}}
         <h7 class="red-text"> Disabled retrieval for {{=utilities.pretty_string(current.REDIS_CLIENT.smembers("disabled_retrieval"))}} due to their downtime. </h7>
     {{pass}}
-    <h6> <b>[New Feature]:</b> StopStalk Rating History graph to your profile page - {{=A("Know more", _href=URL("default", "updates"), _id="know-more", _target="_blank")}}</h6>
+    <h6> <b>[New Site]:</b> Added Timus to StopStalk - {{=A("Know more", _href=URL("default", "updates"), _id="know-more", _target="_blank")}}</h6>
     <p>Please take some time to fill out this {{=A("Survey Form", _href="http://goo.gl/oeLZHd", _target="_blank")}}</p>
 
     <div id="page-selection" class="center"></div>
@@ -64,7 +62,7 @@
     {{if len(current.REDIS_CLIENT.smembers("disabled_retrieval")):}}
         <h7 class="red-text"> Disabled retrieval for {{=utilities.pretty_string(current.REDIS_CLIENT.smembers("disabled_retrieval"))}} due to their downtime. </h7>
     {{pass}}
-    <h6> <b>[New Feature]:</b> StopStalk Rating History graph to your profile page - {{=A("Know more", _href=URL("default", "updates"), _id="know-more", _target="_blank")}}</h6>
+    <h6> <b>[New Site]:</b> Added Timus to StopStalk - {{=A("Know more", _href=URL("default", "updates"), _id="know-more", _target="_blank")}}</h6>
     <p>Please take some time to fill out this {{=A("Survey Form", _href="http://goo.gl/oeLZHd", _target="_blank")}}</p>
 
     <h5>{{=T("You do not have any friends on StopStalk yet!")}}</h5>
