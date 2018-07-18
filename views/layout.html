@@ -31,7 +31,7 @@
         <script src="{{=URL('static','js/respond-1.4.2.min.js')}}"></script>
         <![endif]-->
     <!-- Favicons -->
-    {{include 'web2py_ajax.html'}} <!-- this includes jquery.js, calendar.js/.css and web2py.js -->
+    {{include 'web2py_ajax.html'}} <!-- this includes jquery.min.js, calendar.min.js/.css and web2py.min.js -->
     {{block head}}{{end}}
     {{
     # using sidebars need to know what sidebar you want to use
@@ -357,7 +357,7 @@
     <!-- The javascript =============================== -->
     <script src="{{=get_static_url('materialize/js/materialize.min.js')}}"></script>
     <script src="{{=get_static_url('js/run_prettify.min.js')}}"></script>
-    <script src="{{=get_static_url('js/web2py-bootstrap3.js')}}"></script>
+    <script src="{{=get_static_url('js/web2py-bootstrap3.min.js')}}"></script>
     {{block page_js}}{{end page_js}}
     <!-- Analytics ==================================== -->
     {{if current.analytics_id:}}
@@ -379,8 +379,8 @@
     <script type="text/javascript">
         var addTodoURL = "{{=URL('problems', 'add_todo_problem')}}";
     </script>
-    <script src="{{=get_static_url('js/main.js')}}"></script> <!-- Resource jQuery -->
-    <script type="text/javascript" src="{{=get_static_url('js/appjs/layout.js')}}"></script>
+    <script src="{{=get_static_url('js/main.min.js')}}"></script> <!-- Resource jQuery -->
+    <script type="text/javascript" src="{{=get_static_url('js/appjs/layout.min.js')}}"></script>
     <script type="application/ld+json">
     {
       "@context": "http://schema.org",
