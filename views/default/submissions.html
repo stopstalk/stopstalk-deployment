@@ -47,7 +47,7 @@
 
 {{if total_rows:}}
     <script src="{{=get_static_url('js/jquery.bootpag.min.js')}}"></script>
-    <script src="{{=get_static_url('js/appjs/default/submissions.js')}}"></script>
+    <script src="{{=get_static_url('js/appjs/default/submissions.min.js')}}"></script>
     <h1>{{=T("Recent submissions")}}</h1>
     {{if len(current.REDIS_CLIENT.smembers("disabled_retrieval")):}}
         <h7 class="red-text"> Disabled retrieval for {{=utilities.pretty_string(current.REDIS_CLIENT.smembers("disabled_retrieval"))}} due to their downtime. </h7>
