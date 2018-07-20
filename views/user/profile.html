@@ -42,6 +42,14 @@
            margin: 0 auto;
         }
 
+        .google-visualization-tooltip {
+            margin-left: calc((50vw - 900px) / 2 - -370px);
+        }
+
+        #stopstalk-rating-graph {
+            margin-left: 15%;
+        }
+
         #calendar_submission div[dir='ltr'] {
             margin: 0 auto;
         }
@@ -56,6 +64,7 @@
         var handleDetailsURL = "{{=URL('user', 'handle_details', extension='json')}}";
         var handle = "{{=handle}}";
         var getSolvedCountsURL = "{{=URL('user', 'get_solved_counts', extension='json')}}";
+        var getStopStalkRatingHistoryURL = "{{=URL('user', 'get_stopstalk_rating_history', extension='json')}}";
         var custom = "{{=custom}}";
         var userID = "{{=user_id}}";
         var onlyGreen = false;
@@ -123,7 +132,7 @@
                                             {{if can_update:}}
                                             <button id="update-my-submissions" class="tooltipped btn-floating btn-large waves-effect waves-light" data-delay="50" data-tooltip="Retrieve my submissions" style="background-color: deepskyblue;"><i class="fa fa-refresh fa-3x" style="white-text"></i></button>
                                             {{else:}}
-                                            <div class="tooltipped" data-delay="50" data-tooltip="Can only update once in 24 hours">
+                                            <div class="tooltipped" data-delay="50" data-tooltip="Can only update once in {{=current.REFRESH_INTERVAL / 3600}} hours">
                                                 <button id="disabled-update-my-submissions" class="tooltipped btn-floating btn-large waves-effect waves-light disabled" style="background-color: deepskyblue;"><i class="fa fa-refresh fa-3x" style="white-text"></i></button>
                                             </div>
                                             {{pass}}
@@ -247,6 +256,17 @@
         {{else:}}
             <p>No graph data available at the moment !</p>
         {{pass}}
+        <br/><br/>
+        <h5>StopStalk Rating History</h5>
+        {{if auth.is_logged_in():}}
+            <p>Contributions of various aspects to StopStalk Rating</p>
+            <div id="stopstalk-rating-graph"></div>
+        {{else:}}
+            <p><b>Contributions of various aspects to StopStalk Rating. Please <a href="{{=URL('default', 'user', args='login')}}" target="_blank">Login</a> to view StopStalk Rating graph</b></p>
+            <div id="stopstalk-rating-graph"></div>
+                <img src="{{=URL('static', 'images/blurred_history.png')}}" style="height: 500px; width: 900px;">
+            </div>
+        {{pass}}
         <br/><br/><br/>
         <div id="contest-activity-modal" class="modal">
             <div class="modal-content">
@@ -263,6 +283,7 @@
             </div>
         </div>
       </div>
+      <h5>Submission Activity</h5>
       <div id="carousel-item-3">
         <div class="switch">
             <label>
@@ -276,9 +297,9 @@
         <div id="activity"></div>
       </div>
       <div id="carousel-item-4">
-        <h3>Solved Problems</h3>
+        <h4>Solved Problems</h4>
         <div id="solved-problems-list" class="row"></div>
-        <h3>Unsolved Problems</h3>
+        <h4>Unsolved Problems</h4>
         <div id="unsolved-problems-list" class="row"></div>
       </div>
     </div>

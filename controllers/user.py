@@ -686,6 +686,25 @@ def get_solved_unsolved():
                 unattempted_html_widget=utilities.problem_widget("", "", "unattempted-problem", "Unattempted problem"))
 
 # ------------------------------------------------------------------------------
+@auth.requires_login()
+def get_stopstalk_rating_history():
+    user_id = request.vars.get("user_id", None)
+    custom = request.vars.get("custom", None)
+    if user_id is None or custom is None:
+        return dict(final_rating=[])
+    user_id = int(user_id)
+    stable = db.submission
+    query = (stable["custom_user_id" if (custom == "True") else "user_id"] == user_id)
+    rows = db(query).select(stable.time_stamp,
+                            stable.problem_link,
+                            stable.status,
+                            stable.site,
+                            orderby=stable.time_stamp)
+
+    final_rating = utilities.get_stopstalk_rating_history_dict(rows)
+    return dict(final_rating=sorted(final_rating.items()))
+
+# ------------------------------------------------------------------------------
 def profile():
     """
         Controller to show user profile
@@ -741,7 +760,7 @@ def profile():
                 original_row = cftable(row.duplicate_cu)
                 if auth.is_logged_in():
                     output["show_refresh_now"] = (row.user_id == session.user_id)
-                output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).total_seconds() > 3600
+                output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).total_seconds() > current.REFRESH_INTERVAL
                 actual_handle = row.stopstalk_handle
                 handle = original_row.stopstalk_handle
                 original_row["first_name"] = row.first_name
@@ -752,7 +771,7 @@ def profile():
                 output["user_id"] = row.duplicate_cu
                 row = original_row
             else:
-                output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).total_seconds() > 3600
+                output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).total_seconds() > current.REFRESH_INTERVAL
                 if auth.is_logged_in():
                     output["show_refresh_now"] = (row.user_id == session.user_id)
                 output["user_id"] = row.id
@@ -760,7 +779,7 @@ def profile():
     else:
         row = rows.first()
         output["user_id"] = row.id
-        output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).total_seconds() > 3600
+        output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).total_seconds() > current.REFRESH_INTERVAL
         output["row"] = row
         if auth.is_logged_in():
             output["show_refresh_now"] = (row.id == session.user_id)
@@ -864,7 +883,7 @@ def add_to_refresh_now():
     else:
         authorized |= row.id == session.user_id
 
-    authorized &= (datetime.datetime.now() - row.refreshed_timestamp).total_seconds() > 3600
+    authorized &= (datetime.datetime.now() - row.refreshed_timestamp).total_seconds() > current.REFRESH_INTERVAL
 
     if not authorized:
         return "FAILURE"
