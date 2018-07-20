@@ -50,6 +50,7 @@ OTHER_FAILURE = "OTHER_FAILURE"
 REQUEST_FAILURES = (SERVER_FAILURE, NOT_FOUND, OTHER_FAILURE)
 INVALID_HANDLES = set([(row.handle, row.site.lower()) for row in db(db.invalid_handle).select()])
 DIR_PATH = "./applications/stopstalk/graph_data/"
+user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36"
 
 # -----------------------------------------------------------------------------
 def get_request(url, headers={}, timeout=current.TIMEOUT, params={}):
@@ -99,6 +100,9 @@ class User:
         self.previous_graph_data = None
         self.graph_data = dict([(x.lower() + "_data", []) for x in current.SITES])
         self.user_record = user_record
+        # To track one of the retrieval failed with server failure
+        # so that it can be re-tried
+        self.retrieval_failed = False
 
         if os.path.exists(self.pickle_file_path):
             self.previous_graph_data = pickle.load(open(self.pickle_file_path, "rb"))
@@ -115,19 +119,17 @@ class User:
     def codechef_data(self):
         handle = self.handles["codechef_handle"]
         url = "https://www.codechef.com/users/" + handle
-        response = get_request(url)
+        response = get_request(url, headers={"User-Agent": user_agent})
         if response in REQUEST_FAILURES:
+            if response != NOT_FOUND:
+                self.retrieval_failed = True
             print "Request ERROR: CodeChef " + url + " " + response
             return
 
         def zero_pad(string):
             return "0" + string if len(string) == 1 else string
 
-        try:
-            ratings = eval(re.search("var all_rating = .*?;", response.text).group()[17:-1])
-        except Exception as e:
-            print e
-            return
+        ratings = eval(re.search("var all_rating = .*?;", response.text).group()[17:-1].replace("null", "None"))
 
         long_contest_data = {}
         cookoff_contest_data = {}
@@ -164,6 +166,8 @@ class User:
         url = "%sapi/contest.list" % website
         response = get_request(url)
         if response in REQUEST_FAILURES:
+            if response != NOT_FOUND:
+                self.retrieval_failed = True
             print "Request ERROR: Codeforces " + url + " " + response
             return
 
@@ -220,6 +224,8 @@ class User:
         url = "%srest/hackers/%s/rating_histories_elo" % (website, handle)
         response = get_request(url)
         if response in REQUEST_FAILURES:
+            if response != NOT_FOUND:
+                self.retrieval_failed = True
             print "Request ERROR: HackerRank " + url + " " + response
             return
         response = response.json()["models"]
@@ -253,6 +259,8 @@ class User:
               self.handles["hackerearth_handle"]
         response = get_request(url)
         if response in REQUEST_FAILURES:
+            if response != NOT_FOUND:
+                self.retrieval_failed = True
             print "Request ERROR: HackerEarth " + url + " " + response
             return
         if response.text == "":
@@ -309,8 +317,11 @@ class User:
                                                     site + "_data")))
 
         gevent.joinall(threads)
-        self.write_to_filesystem()
-        self.user_record.update_record(graph_data_retrieved=True)
+        if self.retrieval_failed == False:
+            self.write_to_filesystem()
+            self.user_record.update_record(graph_data_retrieved=True)
+        else:
+            print "Writing to file skipped"
 
 def get_user_objects(aquery=None, cquery=None, sites=None):
     user_objects = []
