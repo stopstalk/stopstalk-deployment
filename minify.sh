@@ -37,16 +37,17 @@ if [ ${#static_files[@]} != 0 ]
 then
     for filename in $static_files;
     do
+        newfilename=static/minified_files/${filename}
         filename=static/${filename}
         if [ "${filename: -3}" = ".js" ]
         then
             js_file=${filename%$".min.js"}.js
             echo "Minifying js file:" $js_file
-            uglifyjs $js_file --output $filename
+            uglifyjs $js_file --output $newfilename
         else
             css_file=${filename%$".min.css"}.css
             echo "Minifying css file:" $css_file
-            uglifycss $css_file --output $filename
+            uglifycss $css_file --output $newfilename
         fi
     done
 
