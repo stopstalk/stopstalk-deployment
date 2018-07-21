@@ -22,47 +22,12 @@
 """
 
 import sys, redis
-import datetime
+import datetime,numpy
 
-all_js_files = ["js/web2py-bootstrap3.min.js",
-                "js/appjs/google_analytics.js",
-                "js/main.min.js",
-                "js/jquery.min.js",
-                "js/appjs/layout.min.js",
-                "js/appjs/default/contests.min.js",
-                "js/appjs/default/faq.min.js",
-                "js/appjs/default/filters.min.js",
-                "js/appjs/default/search.min.js",
-                "js/appjs/default/friends.min.js",
-                "js/appjs/default/leaderboard.min.js",
-                "js/appjs/default/submissions.min.js",
-                "js/appjs/default/todo.min.js",
-                "js/materialize-tags.min.js",
-                "js/bloodhound.min.js",
-                "js/appjs/problems/index.min.js",
-                "js/appjs/problems/tag.min.js",
-                "js/appjs/problems/trending.min.js",
-                "js/appjs/user/profile.js",
-                "js/appjs/user/submissions.min.js",
-                "js/appjs/problems/editorials.min.js",
-                "js/corejs-typeahead.bundle.min.js",
-                "js/run_prettify.min.js",
-                "js/jquery.bootpag.min.js",
-                "js/modernizr-2.8.3.min.js",
-                "js/calendar.min.js",
-                "js/web2py.min.js",
-                "js/appjs/testimonials/index.min.js",
-                "js/appjs/google_analytics.js",
-                "materialize/css/materialize.min.css",
-                "materialize/js/materialize.min.js",
-                "css/stopstalk.min.css",
-                "css/style.min.css",
-                "css/calendar.min.css",
-                "css/owlie.min.css",
-                "fa/css/font-awesome.min.css",
-                "flag-icon/css/flag-icon.min.css",
-                "css/materialize-tags.min.css",
-                "images/favicon.ico",
+text_file = open("files.txt", "r")
+all_js_css_files = text_file.read().splitlines()
+
+all_images_files = ["images/favicon.ico",
                 "images/favicon.png",
                 "images/StopStalk.png",
                 "images/svg/users.svg",
@@ -122,7 +87,7 @@ if __name__ == "__main__":
     else:
         files = sys.argv[1:]
         if files[0] == "ALL":
-            files = all_js_files
+            files = all_js_css_files+all_images_files
     if files != []:
         current_timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         for filename in files:
