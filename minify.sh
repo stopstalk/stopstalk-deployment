@@ -21,74 +21,33 @@
     THE SOFTWARE.
     '
 
-all_js_files=("static/materialize/js/materialize.js"
-    "static/js/bloodhound.js"
-    "static/js/main.js"
-    "static/js/jquery.js"
-    "static/js/corejs-typeahead.bundle.js"
-    "static/js/calendar.js"
-    "static/js/web2py.js"
-    "static/js/web2py-bootstrap3.js"
-    #"static/js/appjs/google_analytics.js"
-    "static/js/appjs/layout.js"
-    "static/js/appjs/default/contests.min.js"
-    "static/js/appjs/default/faq.js"
-    "static/js/appjs/default/filters.js"
-    "static/js/appjs/default/search.js"
-    "static/js/appjs/default/friends.js"
-    "static/js/appjs/default/leaderboard.js"
-    "static/js/appjs/default/submissions.js"
-    "static/js/appjs/default/todo.js"
-    "static/js/appjs/testimonials/index.js"
-    "static/js/appjs/problems/index.js"
-    "static/js/appjs/problems/tag.js"
-    "static/js/appjs/problems/trending.js"
-    "static/js/appjs/problems/editorials.js"
-    #"static/js/appjs/user/profile.js"
-    "static/js/appjs/user/submissions.js"
-    "static/js/materialize-tags.min.js")            
-
-all_css_files=("static/materialize/css/materialize.css"
-                "static/css/stopstalk.css"
-                "static/css/style.css"
-                "static/css/material.css"
-                "static/css/materialize-tags.css"
-                "static/css/reset.css"
-                "static/css/web2py.css"
-                "static/css/web2py-bootstrap3.css"
-                "static/css/calendar.css"
-                "static/css/owlie.css"
-                "static/fa/css/font-awesome.css"
-                "static/flag-icon/css/flag-icon.css")
+readarray all_js_css_files < files.txt
 
 if [ $# -lt 1 ]
 then
-    js_files=()
-    css_files=()
+    static_files=()
 else
     if [ "$1" = "ALL" ]
     then
-        js_files=${all_js_files[*]}
-        css_files=${all_css_files[*]}
+        static_files=${all_js_css_files[*]}
     fi
 fi
 
-if [ ${#js_files[@]} != 0 ]
+if [ ${#static_files[@]} != 0 ]
 then
-    for filename in $js_files;
+    for filename in $static_files;
     do
-        echo "Minifying js file:" $filename
-        newfilename=${filename%$".js"}
-        uglifyjs $filename --output $newfilename.min.js
+        filename=static/${filename}
+        if [ "${filename: -3}" = ".js" ]
+        then
+            js_file=${filename%$".min.js"}.js
+            echo "Minifying js file:" $js_file
+            uglifyjs $js_file --output $filename
+        else
+            css_file=${filename%$".min.css"}.css
+            echo "Minifying css file:" $css_file
+            uglifycss $css_file --output $filename
+        fi
     done
-fi
 
-if [ ${#css_files[@]} != 0 ]
-then
-    for filename in $css_files;
-    do
-        echo "Minifying css file:" $filename
-        newfilename=${filename%$".css"}
-        uglifycss $filename --output $newfilename.min.css
-    done
 fi
