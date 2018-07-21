@@ -4,7 +4,7 @@ Stop stalking and Start StopStalking :sunglasses:
 ## Module Requirements
 Note: Apply sudo if required for your system.
 
-First make sure the development packages of libxml2 and libxslt are installed
+1. First make sure the development packages of libxml2 and libxslt are installed
 
 Assuming you are running a Debian-based distribution, you can install them by using:
 
@@ -22,6 +22,18 @@ Also, pip doesn't respect proxy while installing packages from requirements file
 
 ```
 pip install -r requirements.txt --proxy=<proxy address>
+```
+
+2. To deploy the code, uglify-js and uglifycss needs to be installed
+
+To install uglifyjs:
+```
+npm install uglify-js -g
+```
+
+To install uglifycss:
+```
+npm install uglifycss -g
 ```
 
 ## Installation
