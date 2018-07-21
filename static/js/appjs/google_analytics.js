@@ -1,7 +1,7 @@
 (function() {
     'use strict';
 
-    var sendToGA = function(eventCategory, eventLabel, eventAction='click') {
+    var sendToGA = function(eventCategory, eventLabel, eventAction) {
         ga('send', {
             hitType: 'event',
             eventCategory: eventCategory,
