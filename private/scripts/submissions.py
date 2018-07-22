@@ -439,14 +439,17 @@ def new_users():
                           Dict - (custom_user_id, list of sites))
     """
 
+    disabled_sites = current.REDIS_CLIENT.smembers("disabled_retrieval")
     def _get_initial_query(table):
         query = False
         for site in current.SITES:
+            if site in disabled_sites:
+                continue
             query |= ((table[site.lower() + "_lr"] == current.INITIAL_DATE) & \
                       (table[site.lower() + "_handle"] != ""))
         return query
 
-    max_limit = 50
+    max_limit = 10
     query = _get_initial_query(atable) & \
             (atable.blacklisted == False) & \
             (atable.registration_key == "") # Unverified email
