@@ -151,7 +151,11 @@ def get_graph_data():
         return empty_dict
 
     graph_data = pickle.load(open(file_path, "rb"))
-    graphs = sum([graph_data[site.lower() + "_data"] for site in current.SITES], [])
+    graphs = []
+    for site in current.SITES:
+        lower_site = site.lower()
+        if graph_data.has_key(lower_site + "_data"):
+            graphs.extend(graph_data[lower_site + "_data"])
     graphs = filter(lambda x: x["data"] != {}, graphs)
 
     return dict(graphs=graphs)
