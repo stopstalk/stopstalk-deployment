@@ -443,7 +443,7 @@ def new_users():
         query = False
         for site in current.SITES:
             query |= ((table[site.lower() + "_lr"] == current.INITIAL_DATE) & \
-                      (table[site.lower() + "_handle" != ""]))
+                      (table[site.lower() + "_handle"] != ""))
         return query
 
     max_limit = 50
