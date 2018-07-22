@@ -442,10 +442,11 @@ def new_users():
     def _get_initial_query(table):
         query = False
         for site in current.SITES:
-            query |= (table[site.lower() + "_lr"] == current.INITIAL_DATE)
+            query |= ((table[site.lower() + "_lr"] == current.INITIAL_DATE) & \
+                      (table[site.lower() + "_handle" != ""]))
         return query
 
-    max_limit = 5
+    max_limit = 50
     query = _get_initial_query(atable) & \
             (atable.blacklisted == False) & \
             (atable.registration_key == "") # Unverified email
@@ -534,9 +535,9 @@ def specific_users():
     users = []
     custom_users = []
     if custom:
-        custom_users.append(cftable(user_id))
+        custom_users.extend([cftable(user_id) for user_id in user_ids])
     else:
-        users.append(atable(user_id))
+        users.extend([atable(user_id) for user_id in user_ids])
     return (users, custom_users)
 
 # ----------------------------------------------------------------------------
