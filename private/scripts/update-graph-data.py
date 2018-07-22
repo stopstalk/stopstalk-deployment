@@ -284,6 +284,9 @@ class User:
     def uva_data(self):
         pass
 
+    def timus_data(self):
+        pass
+
     def write_to_filesystem(self):
         if self.previous_graph_data == self.graph_data:
             print "No update in graph data"
