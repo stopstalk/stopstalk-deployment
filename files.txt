@@ -1,10 +1,10 @@
-materialize/js/materialize.min.js
 js/bloodhound.min.js
 js/main.min.js
 js/jquery.min.js
 js/corejs-typeahead.bundle.min.js
 js/calendar.min.js
 js/web2py.min.js
+js/materialize-tags.min.js
 js/web2py-bootstrap3.min.js
 js/appjs/google_analytics.min.js
 js/appjs/layout.min.js
@@ -22,8 +22,7 @@ js/appjs/problems/tag.min.js
 js/appjs/problems/trending.min.js
 js/appjs/problems/editorials.min.js
 js/appjs/user/submissions.min.js
-js/materialize-tags.min.js
-materialize/css/materialize.min.css
+js/appjs/user/profile.min.js
 css/stopstalk.min.css
 css/style.min.css
 css/material.min.css
@@ -33,5 +32,4 @@ css/web2py.min.css
 css/web2py-bootstrap3.min.css
 css/calendar.min.css
 css/owlie.min.css
-fa/css/font-awesome.min.css
 flag-icon/css/flag-icon.min.css

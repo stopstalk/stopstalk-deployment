@@ -7,7 +7,7 @@
             margin-right: 4%;
         }
     </style>
-    <script src="{{=get_static_url('js/jquery.bootpag.min.js')}}"></script>
+    <script src="{{=URL('static','js/jquery.bootpag.min.js')}}"></script>
     <script>
         var submissionsJSON = '{{=URL("user", "submissions", args=handle, extension="json")}}';
         var submissionsURL = '{{=URL("user", "submissions", args=handle)}}';

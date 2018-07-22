@@ -43,7 +43,7 @@ then
         then
             js_file=${filename%$".min.js"}.js
             echo "Minifying js file:" $js_file
-            uglifyjs $js_file --output $newfilename
+            uglifyjs $js_file --mangle --output $newfilename
         else
             css_file=${filename%$".min.css"}.css
             echo "Minifying css file:" $css_file
