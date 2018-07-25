@@ -779,9 +779,9 @@ def get_static_url(file_path):
       new_file_path = file_path[:-4] + ".min.css"
     else:
       return URL("static",
-               file_path,
-               vars={'_rev': current.REDIS_CLIENT.get(file_path)},
-               extension=False)
+                 file_path,
+                 vars={'_rev': current.REDIS_CLIENT.get(file_path)},
+                 extension=False)
 
     return URL("static/minified_files",
                new_file_path,
