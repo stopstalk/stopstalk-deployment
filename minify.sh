@@ -21,7 +21,7 @@
     THE SOFTWARE.
     '
 
-readarray all_js_css_files < files.txt
+readarray all_js_css_files < static_files_list.txt
 
 if [ $# -lt 1 ]
 then
@@ -41,13 +41,13 @@ then
         filename=static/${filename}
         if [ "${filename: -3}" = ".js" ]
         then
-            js_file=${filename%$".min.js"}.js
-            echo "Minifying js file:" $js_file
-            uglifyjs $js_file --mangle --output $newfilename
+            js_file=${newfilename%$".js"}.min.js
+            echo "Minifying js file:" $filename
+            uglifyjs $filename --mangle --output $js_file
         else
-            css_file=${filename%$".min.css"}.css
-            echo "Minifying css file:" $css_file
-            uglifycss $css_file --output $newfilename
+            css_file=${newfilename%$".css"}.min.css
+            echo "Minifying css file:" $filename
+            uglifycss $filename --output $css_file
         fi
     done
 

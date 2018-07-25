@@ -22,12 +22,20 @@
 """
 
 import sys, redis
-import datetime,numpy
+import datetime
 
-text_file = open("files.txt", "r")
-all_js_css_files = text_file.read().splitlines()
+with open('static_files_list.txt', 'r') as fp:
+    all_js_css_files = fp.readlines()
+fp.close()
 
-all_images_files = ["images/favicon.ico",
+for line in all_js_css_files:
+    line = line.rstrip('\n')
+    if line[-3:] == ".js":
+        line = line[:-3] + ".min.js"
+    else:
+        line = line[:-4] + ".min.css"
+
+all_image_files = ["images/favicon.ico",
                 "images/favicon.png",
                 "images/StopStalk.png",
                 "images/svg/users.svg",
@@ -87,7 +95,7 @@ if __name__ == "__main__":
     else:
         files = sys.argv[1:]
         if files[0] == "ALL":
-            files = all_js_css_files+all_images_files
+            files = all_js_css_files + all_image_files
     if files != []:
         current_timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         for filename in files:
