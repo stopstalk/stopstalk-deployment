@@ -13,9 +13,9 @@
     var addEventListener = function(selector, label, buttonLabel) {
         $(document).on('click', selector, function() {
             if (buttonLabel) {
-                sendToGA('button', $(this).data('analytics-label'));
+                sendToGA('button', $(this).data('analytics-label'), 'click');
             } else {
-                sendToGA('button', label);
+                sendToGA('button', label, 'click');
             }
         });
         if (buttonLabel) {
