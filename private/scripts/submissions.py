@@ -36,6 +36,7 @@ problem_solved_stats = {}
 atable = db.auth_user
 cftable = db.custom_friend
 nrtable = db.next_retrieval
+ptable = db.problem
 
 SERVER_FAILURE = "SERVER_FAILURE"
 NOT_FOUND = "NOT_FOUND"
@@ -44,6 +45,7 @@ OTHER_FAILURE = "OTHER_FAILURE"
 INVALID_HANDLES = None
 failed_user_retrievals = []
 retrieval_type = None
+plink_to_id = {}
 
 # -----------------------------------------------------------------------------
 def _debug(stopstalk_handle, site, custom=False):
@@ -301,11 +303,11 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
 
     global INVALID_HANDLES
     global failed_user_retrievals
+    global plink_to_id
 
     time_conversion = "%Y-%m-%d %H:%M:%S"
     list_of_submissions = []
     retrieval_failures = []
-    plink_to_id = {}
     nrtable = db.next_retrieval
     user_column_name = "custom_user_id" if custom else "user_id"
     nrtable_record = db(nrtable[user_column_name] == record.id).select().first()
@@ -319,16 +321,6 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
     for site in disabled_sites:
         if site in all_sites:
             all_sites.remove(site)
-
-    if "CodeForces" in all_sites:
-        ptable = db.problem
-        query = ptable.link.contains("codeforces")
-        problem_records = db(query).select(ptable.id,
-                                           ptable.link,
-                                           ptable.tags)
-        for problem_record in problem_records:
-            plink_to_id[problem_record.link] = (problem_record.tags,
-                                                problem_record.id)
 
     for site in all_sites:
 
@@ -595,6 +587,14 @@ if __name__ == "__main__":
     else:
         print "Invalid arguments"
         sys.exit()
+
+    query = ptable.link.contains("codeforces")
+    problem_records = db(query).select(ptable.id,
+                                       ptable.link,
+                                       ptable.tags)
+    for problem_record in problem_records:
+        plink_to_id[problem_record.link] = (problem_record.tags,
+                                            problem_record.id)
 
     # Get the handles which returned 404 before
     INVALID_HANDLES = db(db.invalid_handle).select()
