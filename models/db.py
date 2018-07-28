@@ -783,10 +783,28 @@ def get_profile_url(site, handle):
 current.get_profile_url = get_profile_url
 
 def get_static_url(file_path):
-  return URL("static",
-             file_path,
-             vars={'_rev': current.REDIS_CLIENT.get(file_path)},
-             extension=False)
+  if current.environment == "production":
+    new_file_path = file_path
+    if file_path[-3:] == ".js":
+      new_file_path = file_path[:-3] + ".min.js"
+    elif file_path[-4:] == ".css":
+      new_file_path = file_path[:-4] + ".min.css"
+    else:
+      return URL("static",
+                 file_path,
+                 vars={'_rev': current.REDIS_CLIENT.get(file_path)},
+                 extension=False)
+
+    return URL("static/minified_files",
+               new_file_path,
+               vars={'_rev': current.REDIS_CLIENT.get(file_path)},
+               extension=False)
+  else:
+    return URL("static",
+               file_path,
+               extension=False)
+
+    
 
 current.get_static_url = get_static_url
 # =============================================================================

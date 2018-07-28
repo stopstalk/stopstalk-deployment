@@ -24,44 +24,18 @@
 import sys, redis
 import datetime
 
-all_js_files = ["js/web2py-bootstrap3.js",
-                "js/appjs/google_analytics.js",
-                "js/main.js",
-                "js/jquery.js",
-                "js/appjs/layout.js",
-                "js/appjs/default/contests.js",
-                "js/appjs/default/faq.js",
-                "js/appjs/default/filters.js",
-                "js/appjs/default/search.js",
-                "js/appjs/default/friends.js",
-                "js/appjs/default/leaderboard.js",
-                "js/appjs/default/submissions.js",
-                "js/appjs/default/todo.js",
-                "js/materialize-tags.js",
-                "js/bloodhound.js",
-                "js/appjs/problems/index.js",
-                "js/appjs/problems/tag.js",
-                "js/appjs/problems/trending.js",
-                "js/appjs/user/profile.js",
-                "js/appjs/user/submissions.js",
-                "js/appjs/problems/editorials.js",
-                "js/corejs-typeahead.bundle.js",
-                "js/run_prettify.min.js",
-                "js/jquery.bootpag.min.js",
-                "materialize/js/materialize.min.js",
-                "js/modernizr-2.8.3.min.js",
-                "js/calendar.js",
-                "js/web2py.js",
-                "js/appjs/testimonials/index.js",
-                "materialize/css/materialize.min.css",
-                "css/stopstalk.css",
-                "css/style.css",
-                "css/calendar.css",
-                "css/owlie.css",
-                "fa/css/font-awesome.min.css",
-                "flag-icon/css/flag-icon.min.css",
-                "css/materialize-tags.css",
-                "images/favicon.ico",
+with open('static_files_list.txt', 'r') as fp:
+    all_js_css_files = fp.readlines()
+fp.close()
+
+for line in all_js_css_files:
+    line = line.rstrip('\n')
+    if line[-3:] == ".js":
+        line = line[:-3] + ".min.js"
+    else:
+        line = line[:-4] + ".min.css"
+
+all_image_files = ["images/favicon.ico",
                 "images/favicon.png",
                 "images/StopStalk.png",
                 "images/svg/users.svg",
@@ -111,8 +85,7 @@ all_js_files = ["js/web2py-bootstrap3.js",
                 "images/paytm-accepted-here.png",
                 "images/paytm-qrcode.png",
                 "images/paypal-donate-button.png",
-                "images/me.jpg",
-                "js/appjs/google_analytics.js"]
+                "images/me.jpg"]
 
 REDIS_CLIENT = redis.Redis(host='localhost', port=6379, db=0)
 
@@ -122,7 +95,7 @@ if __name__ == "__main__":
     else:
         files = sys.argv[1:]
         if files[0] == "ALL":
-            files = all_js_files
+            files = all_js_css_files + all_image_files
     if files != []:
         current_timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         for filename in files:
