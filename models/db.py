@@ -797,7 +797,7 @@ def get_static_url(file_path):
 
     return URL("static/minified_files",
                new_file_path,
-               vars={'_rev': current.REDIS_CLIENT.get(file_path)},
+               vars={'_rev': current.REDIS_CLIENT.get(new_file_path)},
                extension=False)
   else:
     return URL("static",
