@@ -21,6 +21,10 @@
     THE SOFTWARE.
     '
 
+mkfile() {
+    mkdir -p $( dirname "$1") && touch "$1"
+}
+
 readarray all_js_css_files < static_files_list.txt
 
 if [ $# -lt 1 ]
@@ -38,6 +42,7 @@ then
     for filename in $static_files;
     do
         newfilename=static/minified_files/${filename}
+        mkfile $newfilename
         filename=static/${filename}
         if [ "${filename: -3}" = ".js" ]
         then
