@@ -8,6 +8,7 @@
 /graph_data/*.pickle
 /rating_history/users/*.txt
 /rating_history/custom_users/*.txt
+/minified_files/*
 .~lock.*.csv#
 *.log
 *.pyc
