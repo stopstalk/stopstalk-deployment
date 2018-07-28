@@ -85,6 +85,9 @@ class Profile(object):
                 return response
 
             soup = bs4.BeautifulSoup(response.text, "lxml")
+            if soup.find("p", class_="status_filter") is None:
+                return NOT_FOUND
+
             table = soup.find("table", class_="status")
             all_trs = table.find_all("tr")
             trs = all_trs[2:-2]
