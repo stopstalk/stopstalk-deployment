@@ -270,7 +270,7 @@
             graphTitle = acceptanceTitle;
             colorAxisOption = greenRedAxis;
         }
-        years = Array.from(years).map((el)=> parseInt(el));
+        years = Array.from(years).map(function(el) { return parseInt(el); });
         var options = {
             legend: 'none',
             tooltip: {isHtml: true},
