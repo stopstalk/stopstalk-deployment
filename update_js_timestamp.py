@@ -28,15 +28,8 @@ with open('static_files_list.txt', 'r') as fp:
     all_js_css_files = fp.readlines()
 fp.close()
 
-for line in all_js_css_files:
-    line = line.rstrip('\n')
-    if line[-3:] == ".js":
-        line = line[:-3] + ".min.js"
-    else:
-        line = line[:-4] + ".min.css"
-
 def convert_to_min(filename):
-    filename = filename.rstrip('\n')
+    filename = filename.strip()
     if filename[-3:] == ".js":
         filename = filename[:-3] + ".min.js"
     elif filename[-4:] == ".css":
