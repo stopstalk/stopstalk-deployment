@@ -20,7 +20,7 @@
     THE SOFTWARE.
 """
 
-import requests
+import requests, bs4
 
 # Constants to be used in case of request failures
 SERVER_FAILURE = "SERVER_FAILURE"
@@ -108,6 +108,25 @@ def uva_invalid(handle):
     if response in (SERVER_FAILURE, OTHER_FAILURE) or response.text.strip() == "0":
         return True
     return False
+
+def timus_invalid(handle):
+    # Practically it is not possible for a user to enter a userID and it being
+    # registered to the same user after registering on StopStalk
+    return True
+
+    """
+    # @ToDo: Test the below code and handle the invalids
+    url = current.SITES["Timus"] + "status.aspx?author=" + handle
+    response = get_request(url)
+    if response in (SERVER_FAILURE, OTHER_FAILURE):
+        return True
+
+    soup = bs4.BeautifulSoup(response.text, "lxml")
+    if soup.find("p", class_="status_filter") is None:
+        return True
+
+    return False
+    """
 
 if __name__ == "__main__":
 
