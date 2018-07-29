@@ -100,7 +100,7 @@ if __name__ == "__main__":
         files = sys.argv[1:]
         if files[0] == "ALL":
             files = all_js_css_files + all_image_files
-    if files != []:
+    if len(files):
         current_timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         for filename in files:
             print "Updating timestamp for", filename
