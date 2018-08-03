@@ -46,10 +46,12 @@
 
         var getNameTD = function(name, stopstalkHandle, cfCount) {
             var td = $("<td></td>");
-            td.append("<div class='left'>" + name +"</div>")
 
             if(cfCount > 0) {
-                td.append("<div class='right'><button class='custom-user-count btn-floating btn-very-small tooltipped' data-position='right' data-delay='50' data-tooltip='Number of custom users' data-stopstalk-handle='" + stopstalkHandle + "'>" + cfCount + "</button></div>");
+                td.append("<div class='left'>" + name +"</div>");
+                td.append("<div class='right'><button class='custom-user-count btn-floating btn-very-small' data-stopstalk-handle='" + stopstalkHandle + "'>" + cfCount + "</button></div>");
+            } else {
+                td.html(name);
             }
             return td.html();
         };
@@ -96,7 +98,6 @@
                           "</td><td>" + getStopStalkHandleTD(row[1]) +
                           "</td><td>" + getInstituteTD(row[2]) +
                           "</td><td class='center-align'>" + row[3] +
-                          // "</td><td class='center-align'>" + getRatingChangesTD(row[5]) +
                           "</td><td class='center-align'>" + getPerDayChangesTD(row[4]) +
                           "</td></tr>");
             ++rank;
