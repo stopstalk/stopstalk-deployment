@@ -585,6 +585,7 @@ def leaderboard():
     """
 
     specific_institute = False
+    specific_country = False
     atable = db.auth_user
     cftable = db.custom_friend
 
@@ -628,11 +629,20 @@ def leaderboard():
 
     if request.vars.has_key("country") and request.vars["country"]:
         heading = T("Country Leaderboard")
+        specific_country = True
         aquery &= (atable.country == reverse_country_mapping[request.vars["country"]])
 
     if request.extension == "html":
         return dict(heading=heading,
                     global_leaderboard=global_leaderboard)
+
+    import json
+    if global_leaderboard == True and \
+       specific_institute == False and \
+       specific_country == False:
+        user_ratings = current.REDIS_CLIENT.get("global_leaderboard_cache")
+        if user_ratings:
+            return dict(users=json.loads(user_ratings))
 
     reg_users = db(aquery).select(*afields, orderby=~atable.stopstalk_rating)
 
@@ -664,6 +674,13 @@ def leaderboard():
                       # user.stopstalk_rating - user.stopstalk_prev_rating,
                       country_details,
                       cf_count))
+
+    if global_leaderboard == True and \
+       specific_institute == False and \
+       specific_country == False:
+        current.REDIS_CLIENT.set("global_leaderboard_cache",
+                                 json.dumps(users),
+                                 ex=5 * 60 * 60)
 
     return dict(users=users)
 
