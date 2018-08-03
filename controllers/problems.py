@@ -872,6 +872,10 @@ def friends_trending():
 
 # ----------------------------------------------------------------------------
 def global_trending():
+    trending_table = current.REDIS_CLIENT.get("global_trending_table_cache")
+    if trending_table:
+        return trending_table
+
     stable = db.submission
     today = datetime.datetime.today()
     # Consider submissions only after PAST_DAYS(customizable)
@@ -882,13 +886,11 @@ def global_trending():
                                         stable.problem_link,
                                         stable.user_id,
                                         stable.custom_user_id)
-    trending_table = current.REDIS_CLIENT.get("global_trending_table_cache")
-    if trending_table is None:
-        trending_table = utilities.compute_trending_table(last_submissions,
-                                                          "global")
-        current.REDIS_CLIENT.set("global_trending_table_cache",
-                                 trending_table,
-                                 ex=60 * 60)
+    trending_table = utilities.compute_trending_table(last_submissions,
+                                                      "global")
+    current.REDIS_CLIENT.set("global_trending_table_cache",
+                             trending_table,
+                             ex=60 * 60)
     return trending_table
 
 # ----------------------------------------------------------------------------
