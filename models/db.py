@@ -350,8 +350,6 @@ def sanitize_fields(form):
                 form.errors[field_handle] = T("White spaces not allowed")
             elif IS_EMAIL(error_message="check")(form.vars[field_handle])[1] != "check":
                 form.errors[field_handle] = T("Email address instead of handle")
-            elif IS_URL(error_message="check")(form.vars[field_handle])[1] != "check":
-                form.errors[field_handle] = T("Just handle is required")
 
     # 2.
     _remove_at_symbol("HackerEarth")
@@ -804,7 +802,6 @@ def get_static_url(file_path):
                file_path,
                extension=False)
 
-    
-
 current.get_static_url = get_static_url
+
 # =============================================================================
