@@ -882,7 +882,14 @@ def global_trending():
                                         stable.problem_link,
                                         stable.user_id,
                                         stable.custom_user_id)
-    return utilities.compute_trending_table(last_submissions, "global")
+    trending_table = current.REDIS_CLIENT.get("global_trending_table_cache")
+    if trending_table is None:
+        trending_table = utilities.compute_trending_table(last_submissions,
+                                                          "global")
+        current.REDIS_CLIENT.set("global_trending_table_cache",
+                                 trending_table,
+                                 ex=60 * 60)
+    return trending_table
 
 # ----------------------------------------------------------------------------
 def trending():
