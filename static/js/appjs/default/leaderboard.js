@@ -35,12 +35,12 @@
             if(!countryDetails) { return td.html(); }
             var countryCode = countryDetails[0],
                 countryName = countryDetails[1];
-            td.append("<a href='" + buildCompleteURL(leaderboardURL,
+            td.append("<a class='flag-icon flag-icon-" + countryCode.toLowerCase() +
+                      "' href='" + buildCompleteURL(leaderboardURL,
                                                      Object.assign({},
                                                                    requestParams,
                                                                    {country: countryCode})) +
-                      "'><span class='flag-icon flag-icon-" + countryCode.toLowerCase() +
-                      "' title='" + countryName + "'></span></a>");
+                      "' title='" + countryName + "'></a>");
             return td.html();
         };
 
@@ -57,16 +57,11 @@
         };
 
         var getStopStalkHandleTD = function(stopstalkHandle) {
-            return "<a target='_blank' class='leaderboard-stopstalk-handle' href='" + userProfileURL + "/" + stopstalkHandle + "'>" + stopstalkHandle + "</a>";
+            return "<a class='leaderboard-stopstalk-handle'>" + stopstalkHandle + "</a>";
         };
 
         var getInstituteTD = function(institute) {
-            return "<a class='leaderboard-institute' href='" +
-                   buildCompleteURL(leaderboardURL,
-                                    Object.assign({},
-                                    requestParams,
-                                    {q: institute})) +
-                   "'>" + institute + "</a>";
+            return "<a class='leaderboard-institute'>" + institute + "</a>";
         };
 
         var getRatingChangesTD = function(ratingChanges) {
@@ -92,13 +87,13 @@
         var rank = 1;
         var $tbody = $($("#leaderboard-table tbody")[0]);
         $.each(userList, function(_, row) {
-            $tbody.append("<tr><td class='center-align'>" + rank.toString() +
-                          ".</td><td class='center-align'>" + getCountryTD(row[5]) +
+            $tbody.append("<tr><td>" + rank.toString() +
+                          ".</td><td>" + getCountryTD(row[5]) +
                           "</td><td>" + getNameTD(row[0], row[1], row[6]) +
                           "</td><td>" + getStopStalkHandleTD(row[1]) +
                           "</td><td>" + getInstituteTD(row[2]) +
-                          "</td><td class='center-align'>" + row[3] +
-                          "</td><td class='center-align'>" + getPerDayChangesTD(row[4]) +
+                          "</td><td>" + row[3] +
+                          "</td><td>" + getPerDayChangesTD(row[4]) +
                           "</td></tr>");
             ++rank;
         });
@@ -147,6 +142,21 @@
                 params['global'] = 'False';
             }
             window.location.href = buildCompleteURL(leaderboardURL, params);
+        });
+
+        $(document).on('click', '.leaderboard-stopstalk-handle', function() {
+            var stopstalkHandle = $(this).html();
+            window.location.href = userProfileURL + '/' + stopstalkHandle;
+        });
+
+        $(document).on('click', '.leaderboard-institute', function() {
+            var institute = $(this).html();
+            window.location.href = buildCompleteURL(leaderboardURL,
+                                                    Object.assign(
+                                                        {},
+                                                        params,
+                                                        {q: institute}
+                                                    ));
         });
 
         $(document).on('click', '.custom-user-count', function() {
