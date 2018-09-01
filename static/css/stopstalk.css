@@ -155,7 +155,6 @@ textarea.materialize-textarea:focus:not([readonly]) + label {
 
 [type="checkbox"] + label:before {
     left: 0px;
-    margin-top: -2px;
 }
 
 [type="checkbox"]:checked + label:before {
