@@ -651,6 +651,15 @@ def tag():
         Tag search page
     """
 
+    redirect(URL("problems", "search", vars=request.vars))
+    return
+
+# ----------------------------------------------------------------------------
+def search():
+    """
+        Search page for problems
+    """
+
     table = TABLE(_class="bordered centered")
     thead = THEAD(TR(TH(T("Problem Name")),
                      TH(T("Problem URL")),
@@ -661,28 +670,41 @@ def tag():
     table.append(thead)
 
     ttable = db.tag
+    uetable = db.user_editorials
+
+    problem_name = request.vars.get("name", None)
+    orderby = request.vars.get("orderby", None)
+    clubbed_tags = request.vars.get("generalized_tags", None)
+    q = request.vars.get("q", None)
+    sites = request.vars.get("site", None)
+
     generalized_tags = db(ttable).select(ttable.value, orderby=ttable.value)
     generalized_tags = [x.value for x in generalized_tags]
 
-    # If URL does not have vars containing q
-    # then remain at the search page and return
-    # an empty table
-    q = request.vars.get("q", None)
-    clubbed_tags = request.vars.get("generalized_tags", None)
+    if any([problem_name, orderby, clubbed_tags, q, sites]) is False:
+        if request.extension == "json":
+            return dict(total_pages=0)
+        else:
+            if len(request.get_vars):
+                # No filter is applied
+                response.flash = "No filter is applied"
+            return dict(table=DIV(), generalized_tags=generalized_tags)
+
+    rows = db(uetable.verification == "accepted").select(uetable.problem_id)
+    problem_with_user_editorials = [x["problem_id"] for x in rows]
+
+    include_editorials = request.vars.get("include_editorials", "")
+
     clubbed_tags = None if clubbed_tags == "" else clubbed_tags
-    if q is None and not clubbed_tags:
-        return dict(table=table, generalized_tags=generalized_tags)
 
     try:
-        sites = request.vars.get("site", "")
-        if sites == "":
+        if sites == None or sites == "":
             sites = []
         elif isinstance(sites, str):
             sites = [sites]
     except:
         sites = []
 
-    orderby = request.vars.get("orderby", None)
     if orderby not in ("accuracy-asc", "accuracy-desc",
                        "solved-count-asc", "solved-count-desc"):
         orderby = None
@@ -706,7 +728,7 @@ def tag():
             # & => Search for problem containing all these tags
             # | => Search for problem containing one of the tags
             query &= ptable.tags.contains(tag)
-    else:
+    elif clubbed_tags:
         clubbed_tags = [clubbed_tags] if isinstance(clubbed_tags, str) else clubbed_tags
         ttable = db.tag
         sttable = db.suggested_tags
@@ -719,6 +741,15 @@ def tag():
 
         query &= ptable.id.belongs(problem_ids)
 
+    if problem_name:
+        query &= ptable.name.contains(problem_name)
+
+    if include_editorials:
+        # Check if the site editorial link is present or the problem id exists
+        # in user_editorials table with accepted status
+        query &= (((ptable.editorial_link != None) & \
+                   (ptable.editorial_link != "")) | \
+                  (ptable.id.belongs(problem_with_user_editorials)))
 
     site_query = None
     for site in sites:
@@ -745,12 +776,13 @@ def tag():
     query &= (ptable.user_ids != None)
     query &= (ptable.custom_user_ids != None)
 
-    total_problems = db(query).count()
-    total_pages = total_problems / PER_PAGE
-    if total_problems % PER_PAGE != 0:
-        total_pages = total_problems / PER_PAGE + 1
-
     if request.extension == "json":
+        total_problems = db(query).count()
+
+        total_pages = total_problems / PER_PAGE
+        if total_problems % PER_PAGE != 0:
+            total_pages = total_problems / PER_PAGE + 1
+
         return dict(total_pages=total_pages)
 
     if orderby and orderby.__contains__("solved-count"):
@@ -804,7 +836,6 @@ def tag():
     table.append(tbody)
 
     return dict(table=table, generalized_tags=generalized_tags)
-
 
 # ----------------------------------------------------------------------------
 def _get_total_users(trending_problems,
