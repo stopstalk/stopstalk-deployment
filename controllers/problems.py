@@ -651,6 +651,13 @@ def tag():
         Tag search page
     """
 
+    redirect(URL("problems", "search", vars=request.vars))
+    return
+
+# ----------------------------------------------------------------------------
+def search():
+
+    print request.vars
     table = TABLE(_class="bordered centered")
     thead = THEAD(TR(TH(T("Problem Name")),
                      TH(T("Problem URL")),
@@ -661,17 +668,19 @@ def tag():
     table.append(thead)
 
     ttable = db.tag
+    uetable = db.user_editorials
+    rows = db(uetable.verification == "accepted").select(uetable.problem_id)
+    problem_with_user_editorials = [x["problem_id"] for x in rows]
+
     generalized_tags = db(ttable).select(ttable.value, orderby=ttable.value)
     generalized_tags = [x.value for x in generalized_tags]
 
-    # If URL does not have vars containing q
-    # then remain at the search page and return
-    # an empty table
+    problem_name = request.vars.get("name", "")
+    include_editorials = request.vars.get("include_editorials", "")
     q = request.vars.get("q", None)
+
     clubbed_tags = request.vars.get("generalized_tags", None)
     clubbed_tags = None if clubbed_tags == "" else clubbed_tags
-    if q is None and not clubbed_tags:
-        return dict(table=table, generalized_tags=generalized_tags)
 
     try:
         sites = request.vars.get("site", "")
@@ -719,6 +728,15 @@ def tag():
 
         query &= ptable.id.belongs(problem_ids)
 
+    if problem_name:
+        query &= ptable.name.contains(problem_name)
+
+    if include_editorials:
+        # Check if the site editorial link is present or the problem id exists
+        # in user_editorials table with accepted status
+        query &= (((ptable.editorial_link != None) & \
+                   (ptable.editorial_link != "")) | \
+                  (ptable.id.belongs(problem_with_user_editorials)))
 
     site_query = None
     for site in sites:
@@ -746,6 +764,9 @@ def tag():
     query &= (ptable.custom_user_ids != None)
 
     total_problems = db(query).count()
+
+    print db._lastsql
+    print "Total problems", total_problems
     total_pages = total_problems / PER_PAGE
     if total_problems % PER_PAGE != 0:
         total_pages = total_problems / PER_PAGE + 1
@@ -804,7 +825,6 @@ def tag():
     table.append(tbody)
 
     return dict(table=table, generalized_tags=generalized_tags)
-
 
 # ----------------------------------------------------------------------------
 def _get_total_users(trending_problems,

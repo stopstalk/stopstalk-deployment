@@ -10,7 +10,30 @@
 
 <script src="{{=get_static_url('js/appjs/problems/search.js')}}"></script>
 <h3>{{=T("Search Problems")}}</h3>
-<form id="tagSearchForm" method="GET" action="">
+<form method="GET" action="">
+    <div class="row">
+        <div class="input-field col offset-s1 s4">
+            <input id="problem-name" name="name" type="text" value="{{=request.vars.get('name', '')}}"/>
+            <label for="problem-name">{{=T("Problem Name")}}</label>
+        </div>
+        <div class="input-field col s2">
+            <select id="profile-site" name="site" multiple>
+                <option value="" disabled selected>{{=T("Site")}}</option>
+                {{for site in current.SITES:}}
+                    <option value="{{=site}}">{{=site}}</option>
+                {{pass}}
+            </select>
+        </div>
+        <div class="input-field col s4">
+            <select id="orderby-problems" name="orderby">
+                <option value="" disabled selected>{{=T("Sort By")}}</option>
+                <option value="accuracy-asc">{{=T("Accuracy (Ascending)")}}</option>
+                <option value="accuracy-desc">{{=T("Accuracy (Descending)")}}</option>
+                <option value="solved-count-asc">{{=T("Solved Count (Ascending)")}}</option>
+                <option value="solved-count-desc">{{=T("Solved Count (Descending)")}}</option>
+            </select>
+        </div>
+    </div>
     <div class="row center">
         <div class="input-field col offset-s1 s4">
             <input id="search" name="q" type="text" value="{{=request.vars.get('q', '')}}"/>
@@ -28,24 +51,15 @@
                 {{pass}}
             </select>
         </div>
-
+    </div>
     <div class="row">
-        <div class="input-field col offset-s2 s4">
-            <select id="profile-site" name="site" multiple>
-                <option value="" disabled selected>{{=T("Site")}}</option>
-                {{for site in current.SITES:}}
-                    <option value="{{=site}}">{{=site}}</option>
-                {{pass}}
-            </select>
-        </div>
-        <div class="input-field col s4">
-            <select id="orderby-problems" name="orderby">
-                <option value="" disabled selected>{{=T("Sort By")}}</option>
-                <option value="accuracy-asc">{{=T("Accuracy (Ascending)")}}</option>
-                <option value="accuracy-desc">{{=T("Accuracy (Descending)")}}</option>
-                <option value="solved-count-asc">{{=T("Solved Count (Ascending)")}}</option>
-                <option value="solved-count-desc">{{=T("Solved Count (Descending)")}}</option>
-            </select>
+        <div class="col offset-s3 s6">
+            {{if request.vars.get('include_editorials', '') == 'on':}}
+                <input id="include-editorials" type="checkbox" name="include_editorials" checked/>
+            {{else:}}
+                <input id="include-editorials" type="checkbox" name="include_editorials"/>
+            {{pass}}
+            <label for="include-editorials">{{=T("Only show Problems with Editorials")}}</label>
         </div>
     </div>
     <div class="row">
