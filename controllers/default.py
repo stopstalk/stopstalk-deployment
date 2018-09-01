@@ -1397,14 +1397,15 @@ def submissions():
 
     query = (stable.user_id.belongs(friends)) | \
             (stable.custom_user_id.belongs(custom_friends))
-    total_count = db(query).count()
 
     PER_PAGE = current.PER_PAGE
-    count = total_count / PER_PAGE
-    if total_count % PER_PAGE:
-        count += 1
 
     if request.extension == "json":
+        total_count = db(query).count()
+        count = total_count / PER_PAGE
+        if total_count % PER_PAGE:
+            count += 1
+
         return dict(count=count,
                     total_rows=1)
 
