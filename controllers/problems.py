@@ -688,7 +688,7 @@ def search():
             if len(request.get_vars):
                 # No filter is applied
                 response.flash = "No filter is applied"
-            return dict(table=table, generalized_tags=generalized_tags)
+            return dict(table=DIV(), generalized_tags=generalized_tags)
 
     rows = db(uetable.verification == "accepted").select(uetable.problem_id)
     problem_with_user_editorials = [x["problem_id"] for x in rows]
