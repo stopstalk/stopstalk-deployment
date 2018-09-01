@@ -765,13 +765,13 @@ def search():
     query &= (ptable.user_ids != None)
     query &= (ptable.custom_user_ids != None)
 
-    total_problems = db(query).count()
-
-    total_pages = total_problems / PER_PAGE
-    if total_problems % PER_PAGE != 0:
-        total_pages = total_problems / PER_PAGE + 1
-
     if request.extension == "json":
+        total_problems = db(query).count()
+
+        total_pages = total_problems / PER_PAGE
+        if total_problems % PER_PAGE != 0:
+            total_pages = total_problems / PER_PAGE + 1
+
         return dict(total_pages=total_pages)
 
     if orderby and orderby.__contains__("solved-count"):
