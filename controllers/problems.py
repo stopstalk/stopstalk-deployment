@@ -315,11 +315,14 @@ def index():
 
     details_table.append(tbody)
     problem_details.append(details_table)
-    problem_details.append(DIV(_style="width: 50%; margin-top: 3%",
+    problem_details.append(DIV(_style="width: 50%; height: 200px; margin-top: 3%",
                                _id="chart_div",
                                _class="right"))
 
-    table = utilities.render_table(submissions, cusfriends, session.user_id)
+    if len(submissions):
+        table = utilities.render_table(submissions, cusfriends, session.user_id)
+    else:
+        table = DIV(T("No submissions found"))
 
     return dict(site=site,
                 problem_details=problem_details,
