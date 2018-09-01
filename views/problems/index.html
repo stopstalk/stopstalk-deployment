@@ -121,6 +121,15 @@
                     // Instantiate and draw our chart, passing in some options.
                     var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
                     chart.draw(data, options);
+                } else {
+                    var $chartDiv = $('#chart_div');
+                    $chartDiv.css({
+                        'position': 'absolute',
+                        'margin-left': '50%',
+                        'margin-top': '7%',
+                        'color': 'grey'
+                    });
+                    $chartDiv.html('<h6>Not enough data to display graph</h6>');
                 }
             });
         }

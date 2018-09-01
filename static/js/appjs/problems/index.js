@@ -63,6 +63,10 @@
 
         handleSubmissionTabs();
 
+        var $pieThrobber = $("#view-submission-preloader").clone();
+        $pieThrobber.attr('id', 'problemsPagePieThrobber');
+        $('#chart_div').html($pieThrobber);
+
         $('#show-tags').click(function() {
             var problemTags = $(this).data('tags');
             var $tagsSpan = $('<span>');
