@@ -656,8 +656,10 @@ def tag():
 
 # ----------------------------------------------------------------------------
 def search():
+    """
+        Search page for problems
+    """
 
-    print request.vars
     table = TABLE(_class="bordered centered")
     thead = THEAD(TR(TH(T("Problem Name")),
                      TH(T("Problem URL")),
@@ -765,8 +767,6 @@ def search():
 
     total_problems = db(query).count()
 
-    print db._lastsql
-    print "Total problems", total_problems
     total_pages = total_problems / PER_PAGE
     if total_problems % PER_PAGE != 0:
         total_pages = total_problems / PER_PAGE + 1
