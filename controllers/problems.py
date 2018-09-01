@@ -671,29 +671,40 @@ def search():
 
     ttable = db.tag
     uetable = db.user_editorials
-    rows = db(uetable.verification == "accepted").select(uetable.problem_id)
-    problem_with_user_editorials = [x["problem_id"] for x in rows]
+
+    problem_name = request.vars.get("name", None)
+    orderby = request.vars.get("orderby", None)
+    clubbed_tags = request.vars.get("generalized_tags", None)
+    q = request.vars.get("q", None)
+    sites = request.vars.get("site", None)
 
     generalized_tags = db(ttable).select(ttable.value, orderby=ttable.value)
     generalized_tags = [x.value for x in generalized_tags]
 
-    problem_name = request.vars.get("name", "")
-    include_editorials = request.vars.get("include_editorials", "")
-    q = request.vars.get("q", None)
+    if any([problem_name, orderby, clubbed_tags, q, sites]) is False:
+        if request.extension == "json":
+            return dict(total_pages=0)
+        else:
+            if len(request.get_vars):
+                # No filter is applied
+                response.flash = "No filter is applied"
+            return dict(table=table, generalized_tags=generalized_tags)
 
-    clubbed_tags = request.vars.get("generalized_tags", None)
+    rows = db(uetable.verification == "accepted").select(uetable.problem_id)
+    problem_with_user_editorials = [x["problem_id"] for x in rows]
+
+    include_editorials = request.vars.get("include_editorials", "")
+
     clubbed_tags = None if clubbed_tags == "" else clubbed_tags
 
     try:
-        sites = request.vars.get("site", "")
-        if sites == "":
+        if sites == None or sites == "":
             sites = []
         elif isinstance(sites, str):
             sites = [sites]
     except:
         sites = []
 
-    orderby = request.vars.get("orderby", None)
     if orderby not in ("accuracy-asc", "accuracy-desc",
                        "solved-count-asc", "solved-count-desc"):
         orderby = None
@@ -717,7 +728,7 @@ def search():
             # & => Search for problem containing all these tags
             # | => Search for problem containing one of the tags
             query &= ptable.tags.contains(tag)
-    else:
+    elif clubbed_tags:
         clubbed_tags = [clubbed_tags] if isinstance(clubbed_tags, str) else clubbed_tags
         ttable = db.tag
         sttable = db.suggested_tags
