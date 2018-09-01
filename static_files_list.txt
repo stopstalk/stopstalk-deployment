@@ -18,7 +18,6 @@ js/appjs/default/submissions.js
 js/appjs/default/todo.js
 js/appjs/testimonials/index.js
 js/appjs/problems/index.js
-js/appjs/problems/tag.js
 js/appjs/problems/search.js
 js/appjs/problems/trending.js
 js/appjs/problems/editorials.js
