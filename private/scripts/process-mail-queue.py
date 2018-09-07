@@ -27,11 +27,11 @@ emails = db(query).select(atable.email)
 unverified_emails = set([x.email for x in emails])
 
 rows = db(db.queue.status == "pending").select(orderby="<random>",
-                                               limitby=(0, 80))
+                                               limitby=(0, 300))
 
 count = 0
 for row in rows:
-    if count == 40:
+    if count == 200:
         break
     if row.email in unverified_emails:
         continue
