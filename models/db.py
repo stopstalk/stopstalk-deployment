@@ -196,7 +196,7 @@ mail.settings.login = current.sender_mail + ":" + current.sender_password
 bulkmail = Mail()
 bulkmail.settings.server = current.bulk_smtp_server
 bulkmail.settings.sender = "Team StopStalk <" + current.bulk_sender_mail + ">"
-bulkmail.settings.login = current.bulk_sender_mail + ":" + current.bulk_sender_password
+bulkmail.settings.login = current.bulk_sender_user + ":" + current.bulk_sender_password
 
 from redis import Redis
 # REDIS CLIENT
