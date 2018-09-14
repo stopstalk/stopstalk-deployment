@@ -15,7 +15,7 @@ syntax_check_for_language() {
       passed=$((passed+1))
       echo -e "$line \033[1;32m OK \033[0m"
     fi
-  done < <(find . -name "*.$2");
+  done < <(git diff --name-only --staged | grep -E "\.$2$");
 }
 IFS=""
 commands=("python -m py_compile@py" "bash -n@sh" "node -c@js")
