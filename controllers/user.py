@@ -23,6 +23,7 @@
 import utilities
 import time
 import datetime
+import json
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()
@@ -141,9 +142,19 @@ def get_graph_data():
     if user_id is None or custom is None:
         return empty_dict
 
+    custom = (custom == "True")
+
+    stopstalk_handle = utilities.get_stopstalk_handle(user_id, custom)
+    redis_cache_key = "get_graph_data_" + stopstalk_handle
+
+    # Check if data is present in REDIS
+    data = current.REDIS_CLIENT.get(redis_cache_key)
+    if data:
+        return json.loads(data)
+
     file_path = "./applications/%s/graph_data/%s" % (request.application,
                                                      user_id)
-    if custom == "True":
+    if custom:
         file_path += "_custom.pickle"
     else:
         file_path += ".pickle"
@@ -158,7 +169,11 @@ def get_graph_data():
             graphs.extend(graph_data[lower_site + "_data"])
     graphs = filter(lambda x: x["data"] != {}, graphs)
 
-    return dict(graphs=graphs)
+    data = dict(graphs=graphs)
+    current.REDIS_CLIENT.set(redis_cache_key,
+                             json.dumps(data, separators=(",", ":")),
+                             ex=1 * 60 * 60)
+    return data
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()
@@ -202,6 +217,7 @@ def update_details():
 
         updated_sites = utilities.handles_updated(record, form)
         if updated_sites != []:
+            current.REDIS_CLIENT.delete("handle_details_" + record.stopstalk_handle)
             site_lrs = {}
             submission_query = (stable.user_id == session.user_id)
             nrtable_record = db(db.next_retrieval.user_id == session.user_id).select().first()
@@ -364,6 +380,14 @@ def get_dates():
         raise HTTP(400, "Bad request")
         return
 
+    stopstalk_handle = utilities.get_stopstalk_handle(user_id, custom)
+    redis_cache_key = "get_dates_" + stopstalk_handle
+
+    # Check if data is present in REDIS
+    data = current.REDIS_CLIENT.get(redis_cache_key)
+    if data:
+        return json.loads(data)
+
     if custom:
         attribute = "submission.custom_user_id"
     else:
@@ -422,11 +446,16 @@ def get_dates():
     if prev is None or (today - prev).days > 1:
         streak = 0
 
-    return dict(total=total_submissions,
+    data = dict(total=total_submissions,
                 max_streak=max_streak,
                 curr_streak=streak,
                 curr_accepted_streak=curr_accepted_streak,
                 max_accepted_streak=max_accepted_streak)
+
+    current.REDIS_CLIENT.set(redis_cache_key,
+                             json.dumps(data, separators=(",", ":")),
+                             ex=24 * 60 * 60)
+    return data
 
 # ------------------------------------------------------------------------------
 def get_solved_counts():
@@ -439,14 +468,18 @@ def get_solved_counts():
        request.vars["custom"] is None:
         raise HTTP(400, "Bad request")
         return
+    user_id = int(request.vars.user_id)
+    custom = (request.vars.custom == "True")
+    stopstalk_handle = utilities.get_stopstalk_handle(user_id, custom)
+    redis_cache_key = "get_solved_counts_" + stopstalk_handle
+
+    # Check if data is present in REDIS
+    data = current.REDIS_CLIENT.get(redis_cache_key)
+    if data:
+        return json.loads(data)
 
     stable = db.submission
-    if request.vars.custom == "True":
-        query = (stable.custom_user_id == int(request.vars.user_id))
-    elif request.vars.custom == "False":
-        query = (stable.user_id == int(request.vars.user_id))
-    else:
-        return dict(total_problems=0, solved_problems=0)
+    query = (stable["custom_user_id" if custom else "user_id"] == user_id)
 
     total_problems = db(query).count(distinct=stable.problem_link)
     query &= (stable.status == "AC")
@@ -456,9 +489,15 @@ def get_solved_counts():
         site_counts[site.lower()] = 0
     for problem in solved_problems:
         site_counts[utilities.urltosite(problem.problem_link)] += 1
-    return dict(total_problems=total_problems,
+
+    data = dict(total_problems=total_problems,
                 solved_problems=len(solved_problems),
                 site_counts=site_counts)
+
+    current.REDIS_CLIENT.set(redis_cache_key,
+                             json.dumps(data, separators=(",", ":")),
+                             ex=24 * 60 * 60)
+    return data
 
 # ------------------------------------------------------------------------------
 def get_stats():
@@ -466,26 +505,37 @@ def get_stats():
         Get statistics of the user
     """
 
-    if request.extension != "json":
+    if request.extension != "json" or \
+       request.vars["user_id"] is None or \
+       request.vars["custom"] is None:
         raise HTTP(400, "Bad request")
         return
 
-    if request.vars.user_id and request.vars.custom:
-        user_id = int(request.vars.user_id)
-        custom = (request.vars.custom == "True")
-    else:
-        raise HTTP(400, "Bad request")
-        return
+    user_id = int(request.vars.user_id)
+    custom = (request.vars.custom == "True")
+    stopstalk_handle = utilities.get_stopstalk_handle(user_id, custom)
+    redis_cache_key = "get_stats_" + stopstalk_handle
+
+    # Check if data is present in REDIS
+    data = current.REDIS_CLIENT.get(redis_cache_key)
+    if data:
+        return dict(row=json.loads(data))
 
     stable = db.submission
     count = stable.id.count()
-    query = (stable.user_id == user_id)
-    if custom:
-        query = (stable.custom_user_id == user_id)
+    query = (stable["custom_user_id" if custom else "user_id"] == user_id)
     row = db(query).select(stable.status,
                            count,
                            groupby=stable.status)
-    return dict(row=row)
+
+    result = map(lambda x: (x["_extra"]["COUNT(submission.id)"],
+                            x["submission"]["status"]),
+                 row.as_list())
+
+    current.REDIS_CLIENT.set(redis_cache_key,
+                             json.dumps(result, separators=(",", ":")),
+                             ex=24 * 60 * 60)
+    return dict(row=result)
 
 # ------------------------------------------------------------------------------
 def get_activity():
@@ -529,17 +579,15 @@ def get_activity():
 # ------------------------------------------------------------------------------
 @auth.requires_login()
 def mark_read():
-    from json import dumps, loads
     ratable = db.recent_announcements
     rarecord = db(ratable.user_id == session.user_id).select().first()
-    data = loads(rarecord.data)
+    data = json.loads(rarecord.data)
     data[request.vars.key] = True
-    rarecord.update_record(data=dumps(data))
+    rarecord.update_record(data=json.dumps(data, separators=(",", ":")))
     return dict()
 
 # ------------------------------------------------------------------------------
 def handle_details():
-    import json
     atable = db.auth_user
     cftable = db.custom_friend
     ihtable = db.invalid_handle
@@ -552,10 +600,17 @@ def handle_details():
             # Invalid handle in the get params
             return dict()
 
+    redis_cache_key = "handle_details_" + handle
+
+    # Check if data is present in REDIS
+    data = current.REDIS_CLIENT.get(redis_cache_key)
+    if data:
+        return data
+
     query = False
     for site in current.SITES:
-        query |= (ihtable.site == site) & \
-                 (ihtable.handle == row[site.lower() + "_handle"])
+        query |= ((ihtable.site == site) & \
+                  (ihtable.handle == row[site.lower() + "_handle"]))
     ihandles = db(query).select()
     invalid_sites = set([])
     for record in ihandles:
@@ -576,7 +631,11 @@ def handle_details():
         if row[smallsite + "_handle"] == "":
             response[smallsite] = "not-provided"
 
-    return json.dumps(response)
+    result = json.dumps(response, separators=(",", ":"))
+    current.REDIS_CLIENT.set(redis_cache_key,
+                             result,
+                             ex=24 * 60 * 60)
+    return result
 
 # ------------------------------------------------------------------------------
 def get_solved_unsolved():
@@ -589,6 +648,14 @@ def get_solved_unsolved():
         return dict(error="Something went wrong")
 
     custom = (custom == "True")
+    stopstalk_handle = utilities.get_stopstalk_handle(user_id, custom)
+    redis_cache_key = "get_solved_unsolved_" + stopstalk_handle
+
+    # Check if data is present in REDIS
+    data = current.REDIS_CLIENT.get(redis_cache_key)
+    if data:
+        return json.loads(data)
+
     solved_problems, unsolved_problems = utilities.get_solved_problems(user_id, custom)
     if auth.is_logged_in() and session.user_id == user_id and not custom:
         user_solved_problems, user_unsolved_problems = solved_problems, unsolved_problems
@@ -649,7 +716,7 @@ def get_solved_unsolved():
                   "Graphs": set([4, 5, 15, 22, 23, 24, 26]),
                   "Algorithms": set([12, 14, 27, 29, 35, 36, 37, 38, 44, 51]),
                   "Data Structures": set([2, 3, 7, 8, 33, 34, 49]),
-                  "Math": set([16, 30, 39, 40, 41, 43, 45, 50]),
+                  "Math": set([16, 30, 39, 40, 41, 43, 45, 50, 54]),
                   "Implementation": set([13, 18, 19]),
                   "Miscellaneous": set([46, 47, 48, 52])}
     ordered_categories = ["Dynamic Programming",
@@ -690,11 +757,17 @@ def get_solved_unsolved():
                 result[this_category].append(problem_details[pid])
         return result
 
-    return dict(solved_problems=_get_categorized_json(solved_ids),
+    data = dict(solved_problems=_get_categorized_json(solved_ids),
                 unsolved_problems=_get_categorized_json(unsolved_ids),
-                solved_html_widget=utilities.problem_widget("", "", "solved-problem", "Solved problem"),
-                unsolved_html_widget=utilities.problem_widget("", "", "unsolved-problem", "Unsolved problem"),
-                unattempted_html_widget=utilities.problem_widget("", "", "unattempted-problem", "Unattempted problem"))
+                solved_html_widget=str(utilities.problem_widget("", "", "solved-problem", "Solved problem")),
+                unsolved_html_widget=str(utilities.problem_widget("", "", "unsolved-problem", "Unsolved problem")),
+                unattempted_html_widget=str(utilities.problem_widget("", "", "unattempted-problem", "Unattempted problem")))
+
+    current.REDIS_CLIENT.set(redis_cache_key,
+                             json.dumps(data, separators=(",", ":")),
+                             ex=1 * 60 * 60)
+
+    return data
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()
@@ -704,8 +777,17 @@ def get_stopstalk_rating_history():
     if user_id is None or custom is None:
         return dict(final_rating=[])
     user_id = int(user_id)
+    custom = (custom == "True")
+    stopstalk_handle = utilities.get_stopstalk_handle(user_id, custom)
+    redis_cache_key = "get_stopstalk_rating_history_" + stopstalk_handle
+
+    # Check if data is present in REDIS
+    data = current.REDIS_CLIENT.get(redis_cache_key)
+    if data:
+        return json.loads(data)
+
     stable = db.submission
-    query = (stable["custom_user_id" if (custom == "True") else "user_id"] == user_id)
+    query = (stable["custom_user_id" if custom else "user_id"] == user_id)
     rows = db(query).select(stable.time_stamp,
                             stable.problem_link,
                             stable.status,
@@ -713,7 +795,12 @@ def get_stopstalk_rating_history():
                             orderby=stable.time_stamp)
 
     final_rating = utilities.get_stopstalk_rating_history_dict(rows)
-    return dict(final_rating=sorted(final_rating.items()))
+
+    result = dict(final_rating=sorted(final_rating.items()))
+    current.REDIS_CLIENT.set(redis_cache_key,
+                             json.dumps(result, separators=(",", ":")),
+                             ex=1 * 60 * 60)
+    return result
 
 # ------------------------------------------------------------------------------
 def profile():
