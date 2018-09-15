@@ -336,4 +336,5 @@
 "List of custom users created by ": "List of custom users created by ",
 "Site Handles": "Site Handles",
 "Problem Search": "Problem Search",
-"No submissions found": "No submissions found"}
+"No submissions found": "No submissions found",
+"Solved Counts": "Solved Counts"}

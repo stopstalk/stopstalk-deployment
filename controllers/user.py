@@ -450,8 +450,15 @@ def get_solved_counts():
 
     total_problems = db(query).count(distinct=stable.problem_link)
     query &= (stable.status == "AC")
-    solved_problems = db(query).count(distinct=stable.problem_link)
-    return dict(total_problems=total_problems, solved_problems=solved_problems)
+    solved_problems = db(query).select(stable.problem_link, distinct=True)
+    site_counts = {}
+    for site in current.SITES:
+        site_counts[site.lower()] = 0
+    for problem in solved_problems:
+        site_counts[utilities.urltosite(problem.problem_link)] += 1
+    return dict(total_problems=total_problems,
+                solved_problems=len(solved_problems),
+                site_counts=site_counts)
 
 # ------------------------------------------------------------------------------
 def get_stats():

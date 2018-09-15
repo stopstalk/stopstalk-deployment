@@ -558,6 +558,9 @@
                 success: function(response) {
                     $('#solved-problems').html(response['solved_problems']);
                     $('#total-problems').html(response['total_problems']);
+                    $.each(response['site_counts'], function(key, val) {
+                        $('#' + key + '-solved-count').html(val);
+                    })
                 },
                 error: function(response) {
                     $.web2py.flash('Error getting solved problems');
