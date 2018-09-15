@@ -520,7 +520,7 @@ def get_stats():
     # Check if data is present in REDIS
     data = current.REDIS_CLIENT.get(redis_cache_key)
     if data:
-        return dict(row=json.loads(data))
+        return json.loads(data)
 
     stable = db.submission
     count = stable.id.count()
@@ -529,14 +529,14 @@ def get_stats():
                            count,
                            groupby=stable.status)
 
-    result = map(lambda x: (x["_extra"]["COUNT(submission.id)"],
-                            x["submission"]["status"]),
-                 row.as_list())
+    result = dict(row=map(lambda x: (x["_extra"]["COUNT(submission.id)"],
+                                     x["submission"]["status"]),
+                          row.as_list()))
 
     current.REDIS_CLIENT.set(redis_cache_key,
                              json.dumps(result, separators=(",", ":")),
                              ex=24 * 60 * 60)
-    return dict(row=result)
+    return result
 
 # ------------------------------------------------------------------------------
 def get_activity():
