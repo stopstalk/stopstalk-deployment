@@ -217,7 +217,7 @@ def update_details():
 
         updated_sites = utilities.handles_updated(record, form)
         if updated_sites != []:
-            current.REDIS_CLIENT.delete("handle_details_" + record.stopstalk_handle)
+            utilities.clear_profile_page_cache(record.stopstalk_handle)
             site_lrs = {}
             submission_query = (stable.user_id == session.user_id)
             nrtable_record = db(db.next_retrieval.user_id == session.user_id).select().first()
@@ -300,6 +300,7 @@ def update_friend():
         pickle_file_path = "./applications/stopstalk/graph_data/" + \
                            str(record.id) + "_custom.pickle"
         import os
+        utilities.clear_profile_page_cache(record.stopstalk_handle)
 
         if form.deleted:
             ## DELETE
@@ -454,7 +455,7 @@ def get_dates():
 
     current.REDIS_CLIENT.set(redis_cache_key,
                              json.dumps(data, separators=(",", ":")),
-                             ex=24 * 60 * 60)
+                             ex=5 * 60 * 60)
     return data
 
 # ------------------------------------------------------------------------------
@@ -600,7 +601,7 @@ def handle_details():
             # Invalid handle in the get params
             return dict()
 
-    redis_cache_key = "handle_details_" + handle
+    redis_cache_key = "handle_details_" + row.stopstalk_handle
 
     # Check if data is present in REDIS
     data = current.REDIS_CLIENT.get(redis_cache_key)
