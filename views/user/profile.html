@@ -14,12 +14,12 @@
 
         #user-details {
             float: left;
-            margin-top: 7%;
+            margin-top: 2%;
             margin-left: 9%;
         }
 
         #chart_div {
-            margin-top: 7%;
+            margin-top: 15%;
         }
 
         #no-user {
@@ -52,6 +52,10 @@
 
         #calendar_submission div[dir='ltr'] {
             margin: 0 auto;
+        }
+
+        .centered td {
+            text-align: center;
         }
 
     </style>
@@ -211,6 +215,26 @@
                         <table class="bordered centered">
                             <thead>
                                 <tr>
+                                    <td colspan="{{=len(current.SITES)}}"><strong>{{=T("Solved Counts")}}</strong></td>
+                                </tr>
+                                <tr>
+                                    {{for site in current.SITES:}}
+                                        <td><strong>{{=site}}</strong></td>
+                                    {{pass}}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    {{for site in current.SITES:}}
+                                        <td id="{{=site.lower()}}-solved-count">-</td>
+                                    {{pass}}
+                                </tr>
+                            </tbody>
+                        </table>
+                        <br/>
+                        <table class="bordered centered">
+                            <thead>
+                                <tr>
                                     <th colspan="2"><strong>{{=T("Day Streak")}}</strong></th>
                                     <th colspan="2"><strong>{{=T("Accepted Solution Streak")}}</strong></th>
                                     <th colspan="2"><strong>{{=T("Problems")}}</strong></th>
@@ -245,6 +269,7 @@
             </tr>
         </table>
       </div>
+      <br/>
       {{if total_submissions != 0:}}
       <div id="carousel-item-2">
         <h5>Contest Ratings</h5>
