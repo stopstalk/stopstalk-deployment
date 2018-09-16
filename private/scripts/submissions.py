@@ -25,6 +25,7 @@ import traceback
 import gevent
 import sys
 import datetime
+import utilities
 from gevent import monkey
 gevent.monkey.patch_all(thread=False)
 
@@ -313,7 +314,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
     nrtable_record = db(nrtable[user_column_name] == record.id).select().first()
     skipped_retrieval = set([])
     if nrtable_record is None:
-        print "Record not found", user_column_name, record.id 
+        print "Record not found", user_column_name, record.id
         nrtable.insert(**{user_column_name: record.id})
         nrtable_record = db(nrtable[user_column_name] == record.id).select().first()
 
@@ -377,6 +378,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
             if retrieval_type == "daily_retrieve":
                 nrtable_record.update({site_delay: 100000})
 
+    total_submissions_retrieved = 0
     for submissions in list_of_submissions:
         site = submissions[0]
         _debug(record.stopstalk_handle, site, custom)
@@ -387,6 +389,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
                                             submissions[1],
                                             site,
                                             custom)
+        total_submissions_retrieved += submissions_count
         if retrieval_type == "daily_retrieve" and \
            site not in skipped_retrieval and \
            site not in retrieval_failures:
@@ -398,6 +401,10 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
             # If retrieval failed for the user, then reset the delay so that
             # the details can be retrieved the next day
             nrtable_record.update({site_delay: 0})
+
+    # Clear the profile page cache in case there is atleast one submission retrieved
+    if total_submissions_retrieved != 0:
+        utilities.clear_profile_page_cache(record.stopstalk_handle)
 
     # To reflect all the updates to record into DB
     record.update_record()

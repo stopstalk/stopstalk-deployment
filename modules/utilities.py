@@ -77,6 +77,20 @@ def get_link_class(problem_link, user_id):
     return link_class
 
 # -----------------------------------------------------------------------------
+def get_stopstalk_handle(user_id, custom):
+    """
+        Given a user_id (custom/normal), get the stopstalk_handle
+
+        @param user_id (Integer): user_id stopstalk_handle of which needs to be returned
+        @param custom (Boolean): If the user_id corresponds to custom_friend table
+
+        @return (String): stopstalk_handle of the user
+    """
+
+    table = current.db.custom_friend if custom else current.db.auth_user
+    return table(user_id).stopstalk_handle
+
+# -----------------------------------------------------------------------------
 def handles_updated(record, form):
     """
         Check if any of the handles are updated
@@ -211,12 +225,25 @@ def get_stopstalk_rating(parts):
         parts["curr_streak"] * WEIGHTING_FACTORS["curr_streak"],
         parts["max_streak"] * WEIGHTING_FACTORS["max_streak"],
         parts["solved"] * WEIGHTING_FACTORS["solved"],
-        (parts["accepted_submissions"] * 100.0 / parts["total_submissions"]) * WEIGHTING_FACTORS["accuracy"],
+        float("%.2f" % ((parts["accepted_submissions"] * 100.0 / parts["total_submissions"]) * WEIGHTING_FACTORS["accuracy"])),
         (parts["total_submissions"] - parts["accepted_submissions"]) * WEIGHTING_FACTORS["attempted"],
-        parts["curr_per_day"] * WEIGHTING_FACTORS["curr_per_day"]
+        float("%.2f" % (parts["curr_per_day"] * WEIGHTING_FACTORS["curr_per_day"]))
     ]
     return {"components": rating_components,
             "total": sum(rating_components)}
+
+# ----------------------------------------------------------------------------
+def clear_profile_page_cache(stopstalk_handle):
+    """
+        Clear all the data in REDIS corresponding to stopstalk_handle
+    """
+    current.REDIS_CLIENT.delete("get_stats_" + stopstalk_handle)
+    current.REDIS_CLIENT.delete("handle_details_" + stopstalk_handle)
+    current.REDIS_CLIENT.delete("get_solved_unsolved_" + stopstalk_handle)
+    current.REDIS_CLIENT.delete("get_stopstalk_rating_history_" + stopstalk_handle)
+    current.REDIS_CLIENT.delete("get_graph_data_" + stopstalk_handle)
+    current.REDIS_CLIENT.delete("get_dates_" + stopstalk_handle)
+    current.REDIS_CLIENT.delete("get_solved_counts_" + stopstalk_handle)
 
 # ----------------------------------------------------------------------------
 def get_stopstalk_rating_history_dict(user_submissions):
