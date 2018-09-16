@@ -970,7 +970,9 @@ def add_to_refresh_now():
     if stopstalk_handle is None or custom is None:
         return "FAILURE"
 
-    db_table = db.custom_friend if custom == "True" else db.auth_user
+    custom = (custom == "True")
+
+    db_table = db.custom_friend if custom else db.auth_user
     nrtable = db.next_retrieval
     row = db(db_table.stopstalk_handle == stopstalk_handle).select().first()
     if row is None:
@@ -989,7 +991,7 @@ def add_to_refresh_now():
     if not authorized:
         return "FAILURE"
     else:
-        if custom == "True":
+        if custom:
             current.REDIS_CLIENT.rpush("next_retrieve_custom_user", user_id)
         else:
             current.REDIS_CLIENT.rpush("next_retrieve_user", user_id)
@@ -998,7 +1000,7 @@ def add_to_refresh_now():
     update_params = {}
     for site in current.SITES:
         update_params[site.lower() + "_delay"] = 1
-    if custom == "True":
+    if custom:
         db(nrtable.custom_user_id == user_id).update(**update_params)
     else:
         db(nrtable.user_id == user_id).update(**update_params)
