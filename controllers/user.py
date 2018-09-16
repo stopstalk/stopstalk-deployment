@@ -651,14 +651,6 @@ def get_solved_unsolved():
     user_id = int(request.vars.user_id)
     custom = (request.vars.custom == "True")
 
-    stopstalk_handle = utilities.get_stopstalk_handle(user_id, custom)
-    redis_cache_key = "get_solved_unsolved_" + stopstalk_handle
-
-    # Check if data is present in REDIS
-    data = current.REDIS_CLIENT.get(redis_cache_key)
-    if data:
-        return json.loads(data)
-
     solved_problems, unsolved_problems = utilities.get_solved_problems(user_id, custom)
     if auth.is_logged_in() and session.user_id == user_id and not custom:
         user_solved_problems, user_unsolved_problems = solved_problems, unsolved_problems
@@ -760,17 +752,11 @@ def get_solved_unsolved():
                 result[this_category].append(problem_details[pid])
         return result
 
-    data = dict(solved_problems=_get_categorized_json(solved_ids),
+    return dict(solved_problems=_get_categorized_json(solved_ids),
                 unsolved_problems=_get_categorized_json(unsolved_ids),
                 solved_html_widget=str(utilities.problem_widget("", "", "solved-problem", "Solved problem")),
                 unsolved_html_widget=str(utilities.problem_widget("", "", "unsolved-problem", "Unsolved problem")),
                 unattempted_html_widget=str(utilities.problem_widget("", "", "unattempted-problem", "Unattempted problem")))
-
-    current.REDIS_CLIENT.set(redis_cache_key,
-                             json.dumps(data, separators=(",", ":")),
-                             ex=1 * 60 * 60)
-
-    return data
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()
