@@ -372,7 +372,7 @@
 
             var statuses = data['row'];
             $.each(statuses, function(i) {
-                numJSON[statuses[i]['submission']['status']] = statuses[i]['_extra']['COUNT(submission.id)'];
+                numJSON[statuses[i][1]] = statuses[i][0];
             });
             // Create the data table.
             var data = new google.visualization.DataTable();
