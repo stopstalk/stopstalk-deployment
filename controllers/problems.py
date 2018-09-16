@@ -351,6 +351,19 @@ def editorials():
     else:
         query &= (uetable.verification == "accepted")
     user_editorials = db(query).select(orderby=~uetable.added_on)
+    if len(user_editorials) == 0:
+        if auth.is_logged_in():
+            table_contents = T("No editorials found! Please contribute to the community by writing an editorial if you've solved the problem.")
+        else:
+            table_contents = T("No editorials found! Please login if you want to write an editorial.")
+
+        return dict(name=record.name,
+                    link=record.link,
+                    editorial_link=record.editorial_link,
+                    table=DIV(BR(), H6(table_contents)),
+                    problem_id=record.id,
+                    site=utilities.urltosite(record.link))
+
     table = TABLE(_class="centered")
     thead = THEAD(TR(TH(T("Problem")),
                      TH(T("Editorial By")),
