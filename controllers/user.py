@@ -374,12 +374,14 @@ def get_dates():
         on each date
     """
 
-    if request.vars.user_id and request.vars.custom:
-        user_id = int(request.vars.user_id)
-        custom = (request.vars.custom == "True")
-    else:
+    if request.extension != "json" or \
+       request.vars.user_id is None or \
+       request.vars.custom is None:
         raise HTTP(400, "Bad request")
         return
+
+    user_id = int(request.vars.user_id)
+    custom = (request.vars.custom == "True")
 
     stopstalk_handle = utilities.get_stopstalk_handle(user_id, custom)
     redis_cache_key = "get_dates_" + stopstalk_handle
@@ -465,10 +467,11 @@ def get_solved_counts():
     """
 
     if request.extension != "json" or \
-       request.vars["user_id"] is None or \
-       request.vars["custom"] is None:
+       request.vars.user_id is None or \
+       request.vars.custom is None:
         raise HTTP(400, "Bad request")
         return
+
     user_id = int(request.vars.user_id)
     custom = (request.vars.custom == "True")
     stopstalk_handle = utilities.get_stopstalk_handle(user_id, custom)
@@ -507,8 +510,8 @@ def get_stats():
     """
 
     if request.extension != "json" or \
-       request.vars["user_id"] is None or \
-       request.vars["custom"] is None:
+       request.vars.user_id is None or \
+       request.vars.custom is None:
         raise HTTP(400, "Bad request")
         return
 
@@ -541,16 +544,14 @@ def get_stats():
 # ------------------------------------------------------------------------------
 def get_activity():
 
-    if request.extension != "json":
-        return dict(table="")
-
-    if request.vars.user_id and request.vars.custom:
-        user_id = int(request.vars.user_id)
-        custom = (request.vars.custom == "True")
-    else:
+    if request.extension != "json" or \
+       request.vars.user_id is None or \
+       request.vars.custom is None:
         raise HTTP(400, "Bad request")
         return
-        redirect(URL("default", "index"))
+
+    user_id = int(request.vars.user_id)
+    custom = (request.vars.custom == "True")
 
     stable = db.submission
     post_vars = request.post_vars
@@ -592,7 +593,7 @@ def handle_details():
     atable = db.auth_user
     cftable = db.custom_friend
     ihtable = db.invalid_handle
-    handle = request.vars["handle"]
+    handle = request.vars.handle
 
     row = db(atable.stopstalk_handle == handle).select().first()
     if row is None:
@@ -640,15 +641,16 @@ def handle_details():
 
 # ------------------------------------------------------------------------------
 def get_solved_unsolved():
-    if request.extension != "json":
-        return dict()
 
-    user_id = request.vars.get("user_id", None)
-    custom = request.vars.get("custom", None)
-    if user_id is None and custom is None:
-        return dict(error="Something went wrong")
+    if request.extension != "json" or \
+       request.vars.user_id is None or \
+       request.vars.custom is None:
+        raise HTTP(400, "Bad request")
+        return
 
-    custom = (custom == "True")
+    user_id = int(request.vars.user_id)
+    custom = (request.vars.custom == "True")
+
     stopstalk_handle = utilities.get_stopstalk_handle(user_id, custom)
     redis_cache_key = "get_solved_unsolved_" + stopstalk_handle
 
@@ -965,7 +967,7 @@ def profile():
 def add_to_refresh_now():
     custom = request.vars.get("custom", None)
     stopstalk_handle = request.vars.get("stopstalk_handle", None)
-    if None in (custom, stopstalk_handle):
+    if stopstalk_handle is None or custom is None:
         return "FAILURE"
 
     db_table = db.custom_friend if custom == "True" else db.auth_user
@@ -1041,8 +1043,8 @@ def submissions():
         else:
             user_id = row.id
 
-    if request.vars["page"]:
-        page = request.vars["page"]
+    if request.vars.page:
+        page = request.vars.page
     else:
         page = "1"
 
