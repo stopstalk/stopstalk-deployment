@@ -21,11 +21,14 @@
 """
 
 import sys
+import datetime
 
 hetable = db.http_errors
 errors = db(hetable).select(orderby=hetable.status_code)
 if len(errors) == 0:
     sys.exit()
+
+print str(datetime.datetime.now()), "________________"
 
 all_errors = {}
 for error in errors:
