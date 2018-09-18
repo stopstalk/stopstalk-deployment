@@ -77,7 +77,7 @@ def handle_error():
 
         similar_users.sort(key=lambda x: x[1], reverse=True)
 
-        return [x[0] for x in similar_users]
+        return [x[0] for x in similar_users[:10]]
 
     def _get_failure_message(ticket):
 
