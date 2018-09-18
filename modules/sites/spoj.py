@@ -90,7 +90,7 @@ class Profile(object):
         # Test for invalid handles
         if  last_retrieved == str_init_time:
             url = current.SITES[self.site] + "users/" + handle
-            tmpreq = get_request(url)
+            tmpreq = get_request(url, timeout=10)
 
             if tmpreq in REQUEST_FAILURES:
                 return tmpreq
@@ -107,7 +107,7 @@ class Profile(object):
                   str(start)
 
             start += 20
-            t = get_request(url)
+            t = get_request(url, timeout=10)
             if t in REQUEST_FAILURES:
                 return t
 
