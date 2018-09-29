@@ -768,11 +768,14 @@ def get_profile_url(site, handle):
         utable = uvadb.usernametoid
         row = uvadb(utable.username == handle).select().first()
         if row is None:
-            response = requests.get("http://uhunt.felix-halim.net/api/uname2uid/" + handle)
-            if response.status_code == 200 and response.text != "0":
-                utable.insert(username=handle, uva_id=response.text.strip())
-                return "http://uhunt.felix-halim.net/id/" + response.text
-            else:
+            try:
+                response = requests.get("http://uhunt.felix-halim.net/api/uname2uid/" + handle)
+                if response.status_code == 200 and response.text != "0":
+                    utable.insert(username=handle, uva_id=response.text.strip())
+                    return "http://uhunt.felix-halim.net/id/" + response.text
+                else:
+                    return "NA"
+            except:
                 return "NA"
         else:
             return "http://uhunt.felix-halim.net/id/" + row.uva_id
