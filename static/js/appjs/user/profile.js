@@ -445,6 +445,10 @@
 
     var getSolvedUnsolvedProblems = function() {
 
+        if (totalSubmissions === '0') {
+            return;
+        }
+
         var getStopStalkProblemPageURL = function(problemLink, problemName) {
             return problemIndexURL + "?" + $.param({pname: problemName, plink: problemLink});
         };
