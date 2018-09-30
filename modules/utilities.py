@@ -22,6 +22,7 @@
 
 import re
 import datetime
+import json
 from boto3 import client
 from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, I, \
@@ -42,8 +43,17 @@ def get_solved_problems(user_id, custom=False):
         @param custom(Boolean): If the user_id is a custom user
         @return(Tuple): List of solved and unsolved problems
     """
+
+    def _settify_return_value(data):
+        return map(lambda x: set(x), data)
+
     db = current.db
     stable = db.submission
+    stopstalk_handle = get_stopstalk_handle(user_id, custom)
+    redis_cache_key = "solved_unsolved_" + stopstalk_handle
+    data = current.REDIS_CLIENT.get(redis_cache_key)
+    if data:
+       return _settify_return_value(json.loads(data))
 
     base_query = (stable.custom_user_id == user_id) if custom else (stable.user_id == user_id)
     query = base_query & (stable.status == "AC")
@@ -55,7 +65,12 @@ def get_solved_problems(user_id, custom=False):
     all_problems = set([x.problem_link for x in problems])
     unsolved_problems = all_problems - solved_problems
 
-    return solved_problems, unsolved_problems
+    data = [list(solved_problems), list(unsolved_problems)]
+    current.REDIS_CLIENT.set(redis_cache_key,
+                             json.dumps(data, separators=(",", ":")),
+                             ex=1 * 60 * 60)
+
+    return _settify_return_value(data)
 
 # -----------------------------------------------------------------------------
 def get_link_class(problem_link, user_id):
@@ -239,7 +254,7 @@ def clear_profile_page_cache(stopstalk_handle):
     """
     current.REDIS_CLIENT.delete("get_stats_" + stopstalk_handle)
     current.REDIS_CLIENT.delete("handle_details_" + stopstalk_handle)
-    current.REDIS_CLIENT.delete("get_solved_unsolved_" + stopstalk_handle)
+    current.REDIS_CLIENT.delete("solved_unsolved_" + stopstalk_handle)
     current.REDIS_CLIENT.delete("get_stopstalk_rating_history_" + stopstalk_handle)
     current.REDIS_CLIENT.delete("get_graph_data_" + stopstalk_handle)
     current.REDIS_CLIENT.delete("get_dates_" + stopstalk_handle)
