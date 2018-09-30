@@ -27,6 +27,16 @@ import datetime
 import json
 
 def get_problem_wise_submissions(spoj_handle, problem_slug, last_retrieved):
+    """
+        Given the spoj handle and the problem, get the spoj submissions made
+        after the timestamp represented by last_retrieved
+
+        @params spoj_handle (String): Spoj handle
+        @params problem_slug (String): Unique problem identifier on Spoj
+        @params last_retrieved (String): Last retrieved for the user
+
+        @return (List): List of [time of submission, name, status, points, language]
+    """
     submissions = []
     last_retrieved = time.strptime(str(last_retrieved), "%Y-%m-%d %H:%M:%S")
 
@@ -67,13 +77,8 @@ def get_problem_wise_submissions(spoj_handle, problem_slug, last_retrieved):
                                      datetime.timedelta(minutes=210)
             tos = str(curr)
             curr = time.strptime(tos, "%Y-%m-%d %H:%M:%S")
-            # if curr <= last_retrieved:
-            #     return submissions
-
-            # Problem Name/URL
-            uri = tr.contents[5].contents[0]
-            uri["href"] = "https://www.spoj.com" + uri["href"]
-            problem_link = eval(repr(uri["href"]).replace("\\", ""))
+            if curr <= last_retrieved:
+                return submissions
 
             # Problem Status
             status = str(tr.contents[6])
@@ -97,12 +102,10 @@ def get_problem_wise_submissions(spoj_handle, problem_slug, last_retrieved):
                 points = "0"
 
             submissions.append((tos,
-                                problem_link,
-                                uri.contents[0].strip(),
+                                tr.contents[5].contents[0].contents[0].strip(),
                                 submission_status,
                                 points,
-                                tr.contents[12].contents[1].contents[0],
-                                ""))
+                                tr.contents[12].contents[1].contents[0]))
 
         if not has_pagination:
             # The problem didn't have more than one page of submissions
