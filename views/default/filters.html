@@ -35,7 +35,7 @@
         </div>
         <div class="row">
             <div class="input-field col offset-s1 s4">
-                <select multiple="" name="status">
+                <select id="submission-status" multiple="" name="status">
                     <option disabled="" selected="" value="">{{=T("Submission Status")}}</option>
                     {{for status in (("AC", "Accepted"),
                                      ("PS", "Partially Solved"),
@@ -52,7 +52,7 @@
                 </select>
             </div>
             <div class="input-field col s2">
-                <select multiple="" name="site">
+                <select id="submission-site" multiple="" name="site">
                     <option disabled="" selected="" value="">{{=T("Site")}}</option>
                     {{for site in current.SITES:}}
                         <option value="{{=site}}">{{=site}}</option>
@@ -60,7 +60,7 @@
                 </select>
             </div>
             <div class="input-field col s4">
-                <select multiple="" name="language">
+                <select id="submission-language" multiple="" name="language">
                     <option disabled="" selected="" value="">{{=T("Language")}}</option>
                     {{for language in languages:}}
                         <option value="{{=language}}">{{=language}}</option>
