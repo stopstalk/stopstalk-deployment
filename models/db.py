@@ -747,60 +747,34 @@ current.WEIGHTING_FACTORS = {
 }
 current.REFRESH_INTERVAL = 120 * 60
 
-def get_profile_url(site, handle):
-    if handle == "":
-        return "NA"
-
-    if site == "CodeChef":
-        return "http://www.codechef.com/users/" + handle
-    elif site == "CodeForces":
-        return "http://www.codeforces.com/profile/" + handle
-    elif site == "Spoj":
-        return "http://www.spoj.com/users/" + handle
-    elif site == "HackerEarth":
-        return "https://www.hackerearth.com/users/" + handle
-    elif site == "HackerRank":
-        return "https://www.hackerrank.com/" + handle
-    elif site == "Timus":
-        return "http://acm.timus.ru/author.aspx?id=" + handle
-    elif site == "UVa":
-        import requests
-        utable = uvadb.usernametoid
-        row = uvadb(utable.username == handle).select().first()
-        if row is None:
-            response = requests.get("http://uhunt.felix-halim.net/api/uname2uid/" + handle)
-            if response.status_code == 200 and response.text != "0":
-                utable.insert(username=handle, uva_id=response.text.strip())
-                return "http://uhunt.felix-halim.net/id/" + response.text
-            else:
-                return "NA"
-        else:
-            return "http://uhunt.felix-halim.net/id/" + row.uva_id
-    return "NA"
-
-current.get_profile_url = get_profile_url
-
+# ----------------------------------------------------------------------------
 def get_static_url(file_path):
-  if current.environment == "production":
-    new_file_path = file_path
-    if file_path[-3:] == ".js":
-      new_file_path = file_path[:-3] + ".min.js"
-    elif file_path[-4:] == ".css":
-      new_file_path = file_path[:-4] + ".min.css"
-    else:
-      return URL("static",
-                 file_path,
-                 vars={'_rev': current.REDIS_CLIENT.get(file_path)},
-                 extension=False)
+    """
+        Get the link to the minified static file with versioning
+        @params file_path (String): Relative path of the static file
 
-    return URL("static/minified_files",
-               new_file_path,
-               vars={'_rev': current.REDIS_CLIENT.get(new_file_path)},
-               extension=False)
-  else:
-    return URL("static",
-               file_path,
-               extension=False)
+        @return (String): URL of the minified static resource with versioning
+    """
+
+    if current.environment == "production":
+        new_file_path = file_path
+        if file_path[-3:] == ".js":
+            new_file_path = file_path[:-3] + ".min.js"
+        elif file_path[-4:] == ".css":
+            new_file_path = file_path[:-4] + ".min.css"
+        else:
+            return URL("static",
+                       file_path,
+                       vars={"_rev": current.REDIS_CLIENT.get(file_path)},
+                       extension=False)
+        return URL("static/minified_files",
+                   new_file_path,
+                   vars={"_rev": current.REDIS_CLIENT.get(new_file_path)},
+                   extension=False)
+    else:
+        return URL("static",
+                   file_path,
+                   extension=False)
 
 current.get_static_url = get_static_url
 

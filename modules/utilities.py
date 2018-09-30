@@ -678,12 +678,12 @@ def render_table(submissions, duplicates=[], user_id=None):
                         _class="submission-user-name",
                         _target="_blank"))))
         append(TD(A(IMG(_src=current.get_static_url("images/" + \
-                                            submission.site.lower() + \
-                                            "_small.png"),
+                                                    submission.site.lower() + \
+                                                    "_small.png"),
                         _style="height: 30px; width: 30px;"),
                     _class="submission-site-profile",
-                    _href=current.get_profile_url(submission.site,
-                                                  submission.site_handle),
+                    _href=get_profile_url(submission.site,
+                                          submission.site_handle),
                     _target="_blank")))
 
         append(TD(submission.time_stamp, _class="stopstalk-timestamp"))
@@ -848,5 +848,47 @@ def compute_trending_table(submissions_list, table_type, user_id=None):
                                  trending_problems[:current.PROBLEMS_PER_PAGE],
                                  column_name,
                                  user_id)
+
+# ----------------------------------------------------------------------------
+def get_profile_url(site, handle):
+    """
+        Get the link to the site profile of a user
+
+        @params site (String): Name of the site according to current.SITES
+        @params handle (String): Handle of the user on that site
+
+        @return (String): URL of the user profile on the site
+    """
+
+    if handle == "":
+        return "NA"
+
+    if site == "CodeChef":
+        return "http://www.codechef.com/users/" + handle
+    elif site == "CodeForces":
+        return "http://www.codeforces.com/profile/" + handle
+    elif site == "Spoj":
+        return "http://www.spoj.com/users/" + handle
+    elif site == "HackerEarth":
+        return "https://www.hackerearth.com/users/" + handle
+    elif site == "HackerRank":
+        return "https://www.hackerrank.com/" + handle
+    elif site == "Timus":
+        return "http://acm.timus.ru/author.aspx?id=" + handle
+    elif site == "UVa":
+        import requests
+        uvadb = current.uvadb
+        utable = uvadb.usernametoid
+        row = uvadb(utable.username == handle).select().first()
+        if row is None:
+            response = requests.get("http://uhunt.felix-halim.net/api/uname2uid/" + handle)
+            if response.status_code == 200 and response.text != "0":
+                utable.insert(username=handle, uva_id=response.text.strip())
+                return "http://uhunt.felix-halim.net/id/" + response.text
+            else:
+                return "NA"
+        else:
+            return "http://uhunt.felix-halim.net/id/" + row.uva_id
+    return "NA"
 
 # =============================================================================
