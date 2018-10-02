@@ -127,7 +127,7 @@ class Profile(object):
                     tos = str(curr)
                     curr = time.strptime(tos, "%Y-%m-%d %H:%M:%S")
                     if curr <= last_retrieved:
-                        return submissions
+                        return self.submissions
 
                     # Problem Name/URL
                     uri = i.contents[5].contents[0]
