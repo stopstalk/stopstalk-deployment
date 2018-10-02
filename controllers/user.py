@@ -937,9 +937,9 @@ def profile():
 
     profile_urls = {}
     for site in current.SITES:
-        profile_urls[site] = current.get_profile_url(site,
-                                                     row[site.lower() + \
-                                                         '_handle'])
+        profile_urls[site] = utilities.get_profile_url(site,
+                                                       row[site.lower() + \
+                                                           '_handle'])
     output["profile_urls"] = profile_urls
     if custom is False:
         cf_count = db(cftable.user_id == row.id).count()

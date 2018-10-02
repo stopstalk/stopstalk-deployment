@@ -408,8 +408,8 @@ def get_custom_users():
                                     user[site.lower() + "_handle"],
                                     _style="background-color: #e4e4e4; color: black;",
                                     _class="chip"),
-                                _href=current.get_profile_url(site,
-                                                              user[site.lower() + "_handle"]),
+                                _href=utilities.get_profile_url(site,
+                                                                user[site.lower() + "_handle"]),
                                 _class="custom-user-modal-site-profile",
                                 _target="_blank"))
             tr.append(td)
@@ -1185,8 +1185,8 @@ def search():
                               user[site.lower() + "_handle"],
                               _style="background-color: #e4e4e4; color: black;",
                               _class="chip"),
-                          _href=current.get_profile_url(site,
-                                                        user[site.lower() + "_handle"]),
+                          _href=utilities.get_profile_url(site,
+                                                          user[site.lower() + "_handle"]),
                           _class="search-site-profile",
                           _target="_blank"))
         tr.append(td)
