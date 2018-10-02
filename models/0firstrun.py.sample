@@ -70,4 +70,7 @@ current.s3_secret_access_key = ""
 current.pushover_api_token = ""
 current.pushover_user_token = ""
 
+# AWS API Gateway url for Spoj retrieval lambda function
+current.spoj_lambda_url = ""
+
 # =============================================================================
