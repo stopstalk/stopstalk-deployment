@@ -21,33 +21,25 @@
 """
 
 import requests
-from requests.auth import HTTPBasicAuth
 from datetime import datetime, timedelta
-import random
 
 attable = db.access_tokens
-tokens = [(current.neverbounce_user, current.neverbounce_password, "contactstopstalk@gmail.com"),
-          (current.neverbounce_user2, current.neverbounce_password2, "raj454raj@gmail.com"),
-          (current.neverbounce_user3, current.neverbounce_password3, "admin@stopstalk.com")]
 
-for i in xrange(2):
-    # Only 5 tries to get a particular token
-    random.shuffle(tokens)
-    print tokens[0][2]
-    for i in xrange(5):
-        response = requests.post('https://api.neverbounce.com/v3/access_token',
-                                 auth=HTTPBasicAuth(tokens[0][0],
-                                                    tokens[0][1]),
-                                 data={"grant_type": "client_credentials",
-                                       "scope": "basic user"})
-        if response.status_code == 200:
-            response = response.json()
-            if response.has_key("access_token"):
-                attable.insert(value=response["access_token"],
-                               type="NeverBounce access_token",
-                               time_stamp=datetime.now())
-                break
+response = requests.post("https://api.codechef.com/oauth/token",
+                         data={"grant_type": "client_credentials",
+                               "scope": "public",
+                               "client_id": current.codechef_client_id,
+                               "client_secret": current.codechef_client_secret,
+                               "redirect_uri": ""})
+json_data = response.json()
+
+if response.status_code == 200 and json_data["status"] == "OK":
+    attable.insert(value=json_data["result"]["data"]["access_token"],
+                   type="CodeChef access_token",
+                   time_stamp=datetime.now())
+else:
+    print "Error requesting CodeChef API for access token"
 
 query = (attable.time_stamp < datetime.now() - timedelta(days=2)) & \
-        (attable.type == "NeverBounce access_token")
+        (attable.type == "CodeChef access_token")
 db(query).delete()
