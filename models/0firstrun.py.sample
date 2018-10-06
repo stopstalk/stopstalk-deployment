@@ -73,4 +73,8 @@ current.pushover_user_token = ""
 # AWS API Gateway url for Spoj retrieval lambda function
 current.spoj_lambda_url = ""
 
+# Codechef API credentials
+current.codechef_client_id = ""
+current.codechef_client_secret = ""
+
 # =============================================================================
