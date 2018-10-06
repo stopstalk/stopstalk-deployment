@@ -276,8 +276,9 @@ def validate_email(email):
             return False
 
     attable = db.access_tokens
-    query = attable.time_stamp > (datetime.datetime.now() - \
-                                  datetime.timedelta(minutes=55))
+    query = (attable.time_stamp > (datetime.datetime.now() - \
+                                   datetime.timedelta(minutes=55))) & \
+            (attable.type == "NeverBounce access_token")
     row = db(query).select(orderby="<random>").first()
     if row:
         access_token = row.value
