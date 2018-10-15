@@ -93,6 +93,15 @@ class Profile(object):
         return editorial_link
 
     # -------------------------------------------------------------------------
+    @staticmethod
+    def is_invalid_handle(handle):
+        response = get_request("http://codeforces.com/api/user.status?handle=" + \
+                               handle + "&from=1&count=2")
+        if response in REQUEST_FAILURES:
+            return True
+        return False
+
+    # -------------------------------------------------------------------------
     def get_submissions(self, last_retrieved, plink_to_id):
         """
             Retrieve CodeForces submissions after last retrieved timestamp

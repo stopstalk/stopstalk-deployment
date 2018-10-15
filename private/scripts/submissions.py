@@ -26,11 +26,10 @@ import gevent
 import sys
 import datetime
 import utilities
+import sites
 from gevent import monkey
 gevent.monkey.patch_all(thread=False)
 
-# @ToDo: Make this generalised
-from sites import codechef, codeforces, spoj, hackerearth, hackerrank, uva, timus
 rows = []
 problem_solved_stats = {}
 
@@ -346,7 +345,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
             continue
 
         if site_handle:
-            Site = globals()[site.lower()]
+            Site = getattr(sites, site.lower())
             P = Site.Profile(site_handle)
 
             # Retrieve submissions from the profile site

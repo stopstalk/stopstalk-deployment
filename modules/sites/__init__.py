@@ -20,3 +20,11 @@
     THE SOFTWARE.
 """
 
+import codechef
+import codeforces
+import spoj
+import hackerearth
+import hackerrank
+import uva
+import timus
+

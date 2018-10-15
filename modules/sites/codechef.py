@@ -141,13 +141,23 @@ class Profile(object):
 
         return editorial_link
 
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def is_invalid_handle(handle):
+        # CodeChef is very flaky
+        return True
+        response = get_request("https://www.codechef.com/users/" + handle)
+        if (response in REQUEST_FAILURES) or response.url.__contains__("teams/view"):
+            return True
+        return False
+
     # --------------------------------------------------------------------------
     def __validate_handle(self):
         """
             Make an API request to Codechef to see if a user exists
         """
 
-        return "VALID_HANDLE"
         response = get_request("%s/users/%s" % (CODECHEF_API_URL, self.handle),
                                headers={"User-Agent": user_agent,
                                         "Authorization": "Bearer %s" % self.access_token},
