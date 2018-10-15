@@ -67,6 +67,9 @@ def get_request(url, headers={}, timeout=current.TIMEOUT, params={}):
             # User not found
             # 400 for CodeForces users
             return NOT_FOUND
+        elif response.status_code == 429:
+            # For CodeChef API rate limiting, don't retry
+            return OTHER_FAILURE
         i += 1
 
     # Request unsuccessful even after MAX_TRIES_ALLOWED
