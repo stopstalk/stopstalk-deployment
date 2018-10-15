@@ -25,6 +25,7 @@ import gevent
 from gevent import monkey
 import datetime
 import utilities
+import sites
 
 gevent.monkey.patch_all(thread=False)
 
