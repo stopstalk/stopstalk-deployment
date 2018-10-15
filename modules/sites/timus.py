@@ -59,6 +59,28 @@ class Profile(object):
             return ["-"]
 
     # -------------------------------------------------------------------------
+    @staticmethod
+    def is_invalid_handle(handle):
+        # Practically it is not possible for a user to enter a userID and it being
+        # registered to the same user after registering on StopStalk
+
+        """
+            # @ToDo: Test the below code and handle the invalids
+            url = current.SITES["Timus"] + "status.aspx?author=" + handle
+            response = get_request(url)
+            if response in (SERVER_FAILURE, OTHER_FAILURE):
+                return True
+
+            soup = bs4.BeautifulSoup(response.text, "lxml")
+            if soup.find("p", class_="status_filter") is None:
+                return True
+
+            return False
+        """
+
+        return True
+
+    # -------------------------------------------------------------------------
     def get_submissions(self, last_retrieved):
         """
             Retrieve Timus submissions after last retrieved timestamp

@@ -25,9 +25,8 @@ import gevent
 from gevent import monkey
 import datetime
 import utilities
+import sites
 
-# @ToDo: Make this generalised
-from sites import codechef, codeforces, spoj, hackerearth, hackerrank, uva, timus
 gevent.monkey.patch_all(thread=False)
 
 total_inserted = 0
@@ -107,8 +106,8 @@ def get_tag(link, name, today):
     site = utilities.urltosite(link)
 
     try:
-        Site = globals()[site]
-        tags_func = Site.Profile().get_tags
+        Site = getattr(sites, site.lower())
+        tags_func = Site.Profile.get_tags
         all_tags = tags_func(link)
         if all_tags == []:
             all_tags = ["-"]

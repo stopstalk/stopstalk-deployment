@@ -71,6 +71,18 @@ class Profile(object):
         return all_tags
 
     # -------------------------------------------------------------------------
+    @staticmethod
+    def is_invalid_handle(handle):
+        response = get_request("http://www.spoj.com/users/" + handle,
+                               timeout=10)
+        if response in REQUEST_FAILURES:
+            return True
+        # Bad but correct way of checking if the handle exists
+        if response.text.find("History of submissions") == -1:
+            return True
+        return False
+
+    # -------------------------------------------------------------------------
     def old_submission_retrieval(self, last_retrieved):
         """
             This will be used in case of dev environments and just in case we

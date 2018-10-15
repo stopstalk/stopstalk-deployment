@@ -38,6 +38,15 @@ class Profile(object):
         self.handle = handle
 
     # -------------------------------------------------------------------------
+    @staticmethod
+    def is_invalid_handle(handle):
+        url = "http://uhunt.felix-halim.net/api/uname2uid/" + handle
+        response = get_request(url)
+        if response in (SERVER_FAILURE, OTHER_FAILURE) or response.text.strip() == "0":
+            return True
+        return False
+
+    # -------------------------------------------------------------------------
     def get_submissions(self, last_retrieved):
         """
             Retrieve UVa submissions after last retrieved timestamp

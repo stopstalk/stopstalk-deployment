@@ -105,6 +105,17 @@ class Profile(object):
         return problem_link + "/editorial/" if editorial_present else None
 
     # -------------------------------------------------------------------------
+    @staticmethod
+    def is_invalid_handle(handle):
+        url = "https://www.hackerrank.com/rest/hackers/" + \
+              handle + \
+              "/recent_challenges?offset=0&limit=2"
+        response = get_request(url)
+        if response in REQUEST_FAILURES:
+            return True
+        return False
+
+    # -------------------------------------------------------------------------
     def get_submissions(self, last_retrieved):
         """
             Retrieve HackerRank submissions after last retrieved timestamp
