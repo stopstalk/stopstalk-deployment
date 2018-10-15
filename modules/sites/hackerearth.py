@@ -79,6 +79,15 @@ class Profile(object):
         return problem_link + "editorial/"
 
     # -------------------------------------------------------------------------
+    @staticmethod
+    def is_invalid_handle(handle):
+        url = "https://www.hackerearth.com/submissions/" + handle
+        response = get_request(url)
+        if response in REQUEST_FAILURES:
+            return True
+        return False
+
+    # -------------------------------------------------------------------------
     def get_submissions(self, last_retrieved):
         """
             Retrieve HackerEarth submissions after last retrieved timestamp

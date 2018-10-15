@@ -25,9 +25,8 @@ import gevent
 from gevent import monkey
 import datetime
 import utilities
+import sites
 
-# @ToDo: Make this generalised
-from sites import codechef, codeforces, spoj, hackerearth, hackerrank, uva, timus
 gevent.monkey.patch_all(thread=False)
 
 total_inserted = 0
@@ -95,8 +94,8 @@ def get_editorial(link, today):
     site = utilities.urltosite(link)
 
     try:
-        Site = globals()[site]
-        editorial_func = Site.Profile().get_editorial_link
+        Site = getattr(sites, site.lower())
+        editorial_func = Site.Profile.get_editorial_link
         editorial_link = editorial_func(link)
     except AttributeError:
         editorial_link = None
