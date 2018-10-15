@@ -141,6 +141,16 @@ class Profile(object):
         return editorial_link
 
     # -------------------------------------------------------------------------
+    @staticmethod
+    def is_invalid_handle(handle):
+        # CodeChef is very flaky
+        return True
+        response = get_request("https://www.codechef.com/users/" + handle)
+        if (response in REQUEST_FAILURES) or response.url.__contains__("teams/view"):
+            return True
+        return False
+
+    # -------------------------------------------------------------------------
     def process_trs(self, year, page, trs):
         """
             Process all the trs from the /submissions page of CodeChef
