@@ -238,9 +238,10 @@ class Profile(object):
                                                        submission["problemCode"])
                 problem_name = submission["problemCode"]
                 status = submission["result"]
-                points = "0"
+                points = submission["score"]
                 if status == "AC":
-                    points = "100"
+                    if int(points) < 100:
+                        status = "PS"
                 elif status in ["WA", "TLE"]:
                     pass
                 elif status == "CTE":
