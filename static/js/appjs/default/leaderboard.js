@@ -117,6 +117,15 @@
         })
     };
 
+    var unescapeHtml = function(unsafe) {
+        return unsafe
+             .replace("&amp;", "&")
+             .replace("&lt;", "<")
+             .replace("&gt;", ">")
+             .replace("&quot;", "\"")
+             .replace("&#039;", "'");
+     };
+
     $(document).ready(function() {
 
         if (globalLeaderboard === 'True') {
@@ -145,12 +154,12 @@
         });
 
         $(document).on('click', '.leaderboard-stopstalk-handle', function() {
-            var stopstalkHandle = $(this).html();
+            var stopstalkHandle = unescapeHtml($(this).html());
             window.location.href = userProfileURL + '/' + stopstalkHandle;
         });
 
         $(document).on('click', '.leaderboard-institute', function() {
-            var institute = $(this).html();
+            var institute = unescapeHtml($(this).html());
             window.location.href = buildCompleteURL(leaderboardURL,
                                                     Object.assign(
                                                         {},
