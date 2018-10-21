@@ -162,7 +162,7 @@ class Profile(object):
         if current.REDIS_CLIENT.ttl(redis_key) > SAFE_TIME:
             return current.REDIS_CLIENT.get(redis_key)
 
-        response = requests.post("https://api.codechef.com/oauth/token",
+        response = requests.post("%s/oauth/token" % CODECHEF_API_URL,
                                  data={"grant_type": "client_credentials",
                                        "scope": "public",
                                        "client_id": current.codechef_client_id,
