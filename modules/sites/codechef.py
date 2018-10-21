@@ -153,10 +153,10 @@ class Profile(object):
         """
 
         # Codechef has a TTL of 1 hour for every generated access token
-        TTL_TIME = 60 * 60 * 60
+        TTL_TIME = 60 * 60
         # We are assuming there might be cases when 1 submission retrieval takes
         # more than 10 minutes
-        SAFE_TIME = 10 * 60 * 60
+        SAFE_TIME = 10 * 60
 
         redis_key = "codechef_access_token"
         if current.REDIS_CLIENT.ttl(redis_key) > SAFE_TIME:
