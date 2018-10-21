@@ -184,7 +184,7 @@ class Profile(object):
                  datetime.timedelta(minutes=55))) & \
                 (attable.type == "CodeChef access_token")
 
-        return db(query).select().first().value
+        return db(query).select().last().value
 
     # --------------------------------------------------------------------------
     def __parse_submissions(self, data):
@@ -215,7 +215,7 @@ class Profile(object):
         SUBMISSION_REQUEST_PARAMS["year"] = year
         SUBMISSION_REQUEST_PARAMS["offset"] = 0
         submissions = []
-        for i in xrange(100):
+        for i in xrange(1000):
             response = get_request("%s/submissions" % CODECHEF_API_URL,
                                    headers={"Authorization": "Bearer %s" % self.access_token},
                                    params=SUBMISSION_REQUEST_PARAMS,
@@ -240,7 +240,7 @@ class Profile(object):
                 status = submission["result"]
                 points = submission["score"]
                 if status == "AC":
-                    if int(points) < 100:
+                    if float(points) > 0 and float(points) < 100:
                         status = "PS"
                 elif status in ["WA", "TLE"]:
                     pass
