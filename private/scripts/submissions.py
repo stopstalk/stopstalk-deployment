@@ -623,16 +623,19 @@ if __name__ == "__main__":
         for user_id in users:
             retrieve_submissions(atable(user_id),
                                  False,
-                                 users[user_id])
+                                 users[user_id],
+                                 current.SITES.keys())
         for custom_user_id in custom_users:
             retrieve_submissions(cftable(custom_user_id),
                                  True,
-                                 custom_users[custom_user_id])
+                                 custom_users[custom_user_id],
+                                 current.SITES.keys())
     else:
+        codechef_retrieval = (retrieval_type == "codechef_new_retrievals")
         for record in users:
-            retrieve_submissions(record, False)
+            retrieve_submissions(record, False, current.SITES.keys(), codechef_retrieval)
         for record in custom_users:
-            retrieve_submissions(record, True)
+            retrieve_submissions(record, True, current.SITES.keys(), codechef_retrieval)
 
     # Just in case the last batch has some residue
     insert_this_batch()
