@@ -20,9 +20,8 @@
     THE SOFTWARE.
 """
 
-from .init import *
 from urllib import urlencode
-from gevent.coros import BoundedSemaphore
+from .init import *
 
 PER_PAGE_LIMIT = 20
 CODECHEF_API_URL = "https://api.codechef.com"
@@ -54,31 +53,6 @@ class Profile(object):
         self.handle = handle
         self.submissions = []
         self.access_token = None
-
-    # --------------------------------------------------------------------------
-    @staticmethod
-    def parsetime(time_str):
-        """
-            Try to parse any generalised time to
-            standard format.
-            For now used by Codechef
-
-            @param time_str (String): Time in string format
-                @examples: 01:59 PM 05/06/16
-                           2 min ago
-                           4 hours ago
-
-            @return (DateTime): DateTime object representing the same timestamp
-        """
-
-        try:
-            dt = datetime.datetime.strptime(time_str, "%I:%M %p %d/%m/%y")
-            return dt
-        except ValueError:
-            cal = pdt.Calendar()
-            dt, flags = cal.parseDT(time_str)
-            assert flags
-            return dt
 
     # --------------------------------------------------------------------------
     @staticmethod
@@ -187,17 +161,6 @@ class Profile(object):
         return db(query).select().last().value
 
     # --------------------------------------------------------------------------
-    def __parse_submissions(self, data):
-        time_of_submission = time.strptime(submission["date"],
-                                           TIME_CONVERSION_STRING)
-        problem_link = "https://www.codechef.com/%s/problems/%s" % (submission["contestCode"], submission["problemCode"])
-
-        return map(lambda submission: [time.strptime(submission["date"],
-                                                     "%Y-%m-%d %H:%M:%S"),
-                                       ],
-                   data)
-
-    # --------------------------------------------------------------------------
     def __get_problem_link(self, contest_code, problem_code):
         """
             Get the problem link given the contest_code and problem_code
@@ -215,7 +178,7 @@ class Profile(object):
         SUBMISSION_REQUEST_PARAMS["year"] = year
         SUBMISSION_REQUEST_PARAMS["offset"] = 0
         submissions = []
-        for i in xrange(1000):
+        for _ in xrange(1000):
             response = get_request("%s/submissions" % CODECHEF_API_URL,
                                    headers={"Authorization": "Bearer %s" % self.access_token},
                                    params=SUBMISSION_REQUEST_PARAMS,
@@ -277,8 +240,6 @@ class Profile(object):
             @return (Dict): Dictionary of submissions containing all the
                             information about the submissions
         """
-
-        handle = self.handle
 
         if current.environment == "development":
             # Locally client credentials for CodeChef API wouldn't be valid and
