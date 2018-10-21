@@ -296,7 +296,7 @@ def handle_not_found(site, site_handle):
     db.invalid_handle.insert(site=site, handle=site_handle)
 
 # ----------------------------------------------------------------------------
-def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
+def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codechef_retrieval=False):
     """
         Retrieve submissions that are not already in the database
     """
@@ -317,10 +317,13 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
         nrtable.insert(**{user_column_name: record.id})
         nrtable_record = db(nrtable[user_column_name] == record.id).select().first()
 
-    disabled_sites = current.REDIS_CLIENT.smembers("disabled_retrieval")
-    for site in disabled_sites:
-        if site in all_sites:
-            all_sites.remove(site)
+    if codechef_retrieval is True:
+        all_sites = ["CodeChef"]
+    else:
+        disabled_sites = current.REDIS_CLIENT.smembers("disabled_retrieval")
+        for site in disabled_sites:
+            if site in all_sites:
+                all_sites.remove(site)
 
     for site in all_sites:
 
@@ -565,16 +568,23 @@ def refreshed_users():
     users = [atable(user_id) for user_id in users]
     custom_users = [cftable(user_id) for user_id in custom_users]
 
-    update_fields = dict([(site.lower() + "_delay", 0) for site in current.SITES])
-    for user in users:
-        record = db(nrtable.user_id == user.id).select().first()
-        record.update_record(**update_fields)
-
-    for custom_user in custom_users:
-        record = db(nrtable.custom_user_id == custom_user.id).select().first()
-        record.update_record(**update_fields)
-
     return (users, custom_users)
+
+# ----------------------------------------------------------------------------
+def codechef_new_retrievals():
+    query = (cftable.codechef_handle != "") & \
+            (cftable.codechef_lr == current.INITIAL_DATE)
+    custom_friend = db(query).select(orderby="<random>").first()
+    if custom_friend is not None:
+        return ([], [custom_friend])
+    else:
+        query = (atable.codechef_lr == current.INITIAL_DATE) & \
+                (atable.codechef_handle != "") & \
+                (atable.blacklisted == False) & \
+                (atable.registration_key == "") # Unverified email
+
+        user = db(query).select(orderby="<random>").first()
+        return ([user], [])
 
 if __name__ == "__main__":
 
@@ -590,6 +600,8 @@ if __name__ == "__main__":
         users, custom_users = specific_users()
     elif retrieval_type == "refreshed_users":
         users, custom_users = refreshed_users()
+    elif retrieval_type == "codechef_new_retrievals":
+        users, custom_users = codechef_new_retrievals()
     else:
         print "Invalid arguments"
         sys.exit()
@@ -611,16 +623,19 @@ if __name__ == "__main__":
         for user_id in users:
             retrieve_submissions(atable(user_id),
                                  False,
-                                 users[user_id])
+                                 users[user_id],
+                                 current.SITES.keys())
         for custom_user_id in custom_users:
             retrieve_submissions(cftable(custom_user_id),
                                  True,
-                                 custom_users[custom_user_id])
+                                 custom_users[custom_user_id],
+                                 current.SITES.keys())
     else:
+        codechef_retrieval = (retrieval_type == "codechef_new_retrievals")
         for record in users:
-            retrieve_submissions(record, False)
+            retrieve_submissions(record, False, current.SITES.keys(), codechef_retrieval)
         for record in custom_users:
-            retrieve_submissions(record, True)
+            retrieve_submissions(record, True, current.SITES.keys(), codechef_retrieval)
 
     # Just in case the last batch has some residue
     insert_this_batch()
