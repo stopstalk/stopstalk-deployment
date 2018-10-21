@@ -152,13 +152,32 @@ class Profile(object):
             Get CodeChef API access_token from the database
         """
 
-        db = current.db
-        attable = db.access_tokens
-        query = (attable.time_stamp > (datetime.datetime.now() - \
-                 datetime.timedelta(minutes=55))) & \
-                (attable.type == "CodeChef access_token")
+        # Codechef has a TTL of 1 hour for every generated access token
+        TTL_TIME = 60 * 60 * 60
+        # We are assuming there might be cases when 1 submission retrieval takes
+        # more than 10 minutes
+        SAFE_TIME = 10 * 60 * 60
 
-        return db(query).select().last().value
+        redis_key = "codechef_access_token"
+        if current.REDIS_CLIENT.ttl(redis_key) > SAFE_TIME:
+            return current.REDIS_CLIENT.get(redis_key)
+
+        response = requests.post("https://api.codechef.com/oauth/token",
+                                 data={"grant_type": "client_credentials",
+                                       "scope": "public",
+                                       "client_id": current.codechef_client_id,
+                                       "client_secret": current.codechef_client_secret,
+                                       "redirect_uri": ""})
+        json_data = response.json()
+        if response.status_code == 200 and json_data["status"] == "OK":
+            access_token = json_data["result"]["data"]["access_token"]
+            current.REDIS_CLIENT.set(redis_key,
+                                     access_token,
+                                     ex=TTL_TIME)
+            return access_token
+        else:
+            print "Error requesting CodeChef API for access token"
+            return
 
     # --------------------------------------------------------------------------
     def __get_problem_link(self, contest_code, problem_code):
@@ -252,6 +271,9 @@ class Profile(object):
                                       "%Y-%m-%d %H:%M:%S")
 
         self.access_token = self.__get_access_token()
+        if self.access_token is None:
+            print "Access token found none"
+            return SERVER_FAILURE
 
         # Test for invalid handles
         if  last_retrieved == str_init_time:
