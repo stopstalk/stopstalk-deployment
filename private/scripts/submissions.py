@@ -572,6 +572,7 @@ def refreshed_users():
 
 # ----------------------------------------------------------------------------
 def codechef_new_retrievals():
+    print datetime.datetime.now()
     query = (cftable.codechef_handle != "") & \
             (cftable.codechef_lr == current.INITIAL_DATE)
     custom_friend = db(query).select(orderby="<random>").first()
