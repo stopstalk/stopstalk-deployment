@@ -159,7 +159,8 @@ class Profile(object):
         SAFE_TIME = 10 * 60
 
         redis_key = "codechef_access_token"
-        if current.REDIS_CLIENT.ttl(redis_key) > SAFE_TIME:
+        redis_ttl = current.REDIS_CLIENT.ttl(redis_key)
+        if redis_ttl is not None and redis_ttl > SAFE_TIME:
             return current.REDIS_CLIENT.get(redis_key)
 
         response = requests.post("%s/oauth/token" % CODECHEF_API_URL,
