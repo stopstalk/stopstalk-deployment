@@ -280,13 +280,18 @@ class Profile(object):
 
         handle = self.handle
 
+        if current.environment == "development":
+            # Locally client credentials for CodeChef API wouldn't be valid and
+            # there is no other fallback method which can be used for retrieval
+            return SERVER_FAILURE
+
         start_year = int(current.INITIAL_DATE.split("-")[0])
         current_year = datetime.datetime.now().year
         str_init_time = time.strptime(str(current.INITIAL_DATE),
                                       "%Y-%m-%d %H:%M:%S")
 
         self.access_token = self.__get_access_token()
-        print self.access_token
+
         # Test for invalid handles
         if  last_retrieved == str_init_time:
             response = self.__validate_handle()
