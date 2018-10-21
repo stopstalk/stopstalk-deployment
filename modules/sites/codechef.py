@@ -20,18 +20,22 @@
     THE SOFTWARE.
 """
 
-from .init import *
 from urllib import urlencode
-from gevent.coros import BoundedSemaphore
+from .init import *
 
-PARAMS = {"page": 0,
-          "sort_by": "All",
-          "sorting_order": "asc",
-          "language": "All",
-          "status": "All",
-          "pcode": "",
-          "ccode": "",
-          "Submit": "GO"}
+PER_PAGE_LIMIT = 20
+CODECHEF_API_URL = "https://api.codechef.com"
+CODECHEF_SITE_URL = "https://www.codechef.com"
+TIME_CONVERSION_STRING = "%Y-%m-%d %H:%M:%S"
+SUBMISSION_REQUEST_PARAMS = {"year": None,
+                             "username": "",
+                             "limit": PER_PAGE_LIMIT,
+                             "offset": 0,
+                             "result": "",
+                             "language": "",
+                             "problemCode": "",
+                             "contestCode": "",
+                             "fields": ""}
 
 class Profile(object):
     """
@@ -39,7 +43,7 @@ class Profile(object):
         submissions of user
     """
 
-    # -------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def __init__(self, handle=""):
         """
             @param handle (String): Codechef Handle
@@ -48,38 +52,9 @@ class Profile(object):
         self.site = "CodeChef"
         self.handle = handle
         self.submissions = []
-        self.retrieve_failed = False
-        # Used to store the error message in case
-        # of failed requests (40x/50x)
-        self.retrieve_status = None
-        self.semaphore = None
+        self.access_token = None
 
-    # -------------------------------------------------------------------------
-    @staticmethod
-    def parsetime(time_str):
-        """
-            Try to parse any generalised time to
-            standard format.
-            For now used by Codechef
-
-            @param time_str (String): Time in string format
-                @examples: 01:59 PM 05/06/16
-                           2 min ago
-                           4 hours ago
-
-            @return (DateTime): DateTime object representing the same timestamp
-        """
-
-        try:
-            dt = datetime.datetime.strptime(time_str, "%I:%M %p %d/%m/%y")
-            return dt
-        except ValueError:
-            cal = pdt.Calendar()
-            dt, flags = cal.parseDT(time_str)
-            assert flags
-            return dt
-
-    # -------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     @staticmethod
     def get_tags(problem_link):
         """
@@ -112,7 +87,7 @@ class Profile(object):
         except KeyError:
             return all_tags
 
-    # -------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     @staticmethod
     def get_editorial_link(problem_link):
         """
@@ -140,6 +115,7 @@ class Profile(object):
 
         return editorial_link
 
+
     # -------------------------------------------------------------------------
     @staticmethod
     def is_invalid_handle(handle):
@@ -150,156 +126,131 @@ class Profile(object):
             return True
         return False
 
-    # -------------------------------------------------------------------------
-    def process_trs(self, year, page, trs):
+    # --------------------------------------------------------------------------
+    def __validate_handle(self):
         """
-            Process all the trs from the /submissions page of CodeChef
-
-            @param year (Number): year
-            @param page (Number): Pagination number
-            @param trs (List): List of trs from the corresponding page
+            Make an API request to Codechef to see if a user exists
         """
 
-        page_submissions = []
-        handle = self.handle
-        for tr in trs:
-            all_tds = tr.find_all("td")
-            if len(all_tds) == 1:
-                # No recent activity
-                continue
-
-            # Time of Submission
-            try:
-                time_stamp = self.parsetime(all_tds[1].contents[0])
-            except AttributeError:
-                continue
-
-            curr = time.strptime(str(time_stamp), "%Y-%m-%d %H:%M:%S")
-            # So cool optimization!
-            if curr <= self.last_retrieved:
-                if self.semaphore is not None:
-                    self.semaphore.acquire(timeout=5)
-                    self.submissions.extend(page_submissions)
-                    self.semaphore.release()
-                else:
-                    self.submissions.extend(page_submissions)
-                return "DONE"
-
-            # Problem name/URL
-            problem_link = "https://www.codechef.com" + \
-                            all_tds[3].contents[0]["href"]
-            try:
-                problem_name = all_tds[3].contents[0].contents[0]
-            except:
-                print all_tds
-                continue
-
-            # Submission status
-            status_span = all_tds[5].find("span")
-            status = ""
-            if status_span["title"] == "":
-                status = status_span.text
-            else:
-                status = status_span["title"]
-
-            submission_status = "AC"
-            points = "0"
-            if status.__contains__("pts"):
-                submission_status = "AC"
-                points = status
-                if float(re.sub("\[.*?\]", "", status)) < 100:
-                    submission_status = "PS"
-            elif status == "accepted":
-                points = "100"
-                submission_status = "AC"
-            elif status == "wrong answer":
-                submission_status = "WA"
-            elif status == "compilation error":
-                submission_status = "CE"
-            elif status.__contains__("runtime"):
-                submission_status = "RE"
-            elif status == "time limit exceeded":
-                submission_status = "TLE"
-            else:
-                submission_status = "OTH"
-
-            # Do not retrieve any further because this leads to ambiguity
-            # If 2 hours ago => 2 hours 20 mins or 2 hours 14 mins ...
-            # Let the user come back later when the datetime is exact
-            # This prevents from redundant addition into database
-            # @ToDo: For now we are allowing redundant submissions
-            #        for codechef :/ . Find a way to change it.
-            #if str(time_stamp).__contains__("hours"):
-            #   continue
-            page_submissions.append((str(time_stamp),
-                                     problem_link,
-                                     problem_name,
-                                     submission_status,
-                                     points,
-                                     all_tds[8].contents[0],
-                                     "https://www.codechef.com/viewsolution/" + \
-                                     all_tds[0].contents[0]))
-
-        if self.semaphore is not None:
-            self.semaphore.acquire(timeout=5)
-            self.submissions.extend(page_submissions)
-            self.semaphore.release()
-        else:
-            self.submissions.extend(page_submissions)
-
-    # -------------------------------------------------------------------------
-    def process_page(self, year, page, url):
-        """
-            Process a particular submissions page
-
-            @param year (Number): year
-            @param page (Number): Pagination number
-            @param url (String): url of the page to be processed
-        """
-        if self.retrieve_failed:
-            # Note: Any thread can fail
-            return
-
-        response = get_request(url, headers={"User-Agent": user_agent})
+        response = get_request("%s/users/%s" % (CODECHEF_API_URL, self.handle),
+                               headers={"User-Agent": user_agent,
+                                        "Authorization": "Bearer %s" % self.access_token},
+                               timeout=10)
         if response in REQUEST_FAILURES:
-            self.retrieve_failed = True
-            self.retrieve_status = response
-            return
+            return response
 
-        soup = bs4.BeautifulSoup(response.text, "lxml")
+        # User was not found in Codechef database
+        json_data = response.json()
+        if json_data["result"]["data"]["code"] == 9003:
+            return NOT_FOUND
+        else:
+            return "VALID_HANDLE"
 
-        # CodeChef blocks the submissions endpoint
-        # for an ongoing important contest
-        try:
-            trs = soup.find("div", class_="tablebox").find("tbody").find_all("tr")
-        except AttributeError:
-            self.retrieve_failed = True
-            self.retrieve_status = SERVER_FAILURE
-            return
-
-        self.process_trs(year, page, trs)
-
-    # -------------------------------------------------------------------------
-    def process_parallely(self, year, last_page):
+    # --------------------------------------------------------------------------
+    def __get_access_token(self):
         """
-            Process various pages of a particular year parallely
-
-            @param year (Number): year
-            @param last_page (Number): Last page number
+            Get CodeChef API access_token from the database
         """
 
-        threads = []
-        params = dict(PARAMS)
-        params["year"] = year
-        for page in xrange(1, last_page):
-            params["page"] = page
-            url = "https://www.codechef.com/submissions?" + urlencode(params)
-            threads.append(gevent.spawn(self.process_page, year, page, url))
+        # Codechef has a TTL of 1 hour for every generated access token
+        TTL_TIME = 60 * 60 * 60
+        # We are assuming there might be cases when 1 submission retrieval takes
+        # more than 10 minutes
+        SAFE_TIME = 10 * 60 * 60
 
-        self.semaphore = BoundedSemaphore(len(threads))
-        gevent.joinall(threads)
+        redis_key = "codechef_access_token"
+        if current.REDIS_CLIENT.ttl(redis_key) > SAFE_TIME:
+            return current.REDIS_CLIENT.get(redis_key)
 
-    # -------------------------------------------------------------------------
+        response = requests.post("https://api.codechef.com/oauth/token",
+                                 data={"grant_type": "client_credentials",
+                                       "scope": "public",
+                                       "client_id": current.codechef_client_id,
+                                       "client_secret": current.codechef_client_secret,
+                                       "redirect_uri": ""})
+        json_data = response.json()
+        if response.status_code == 200 and json_data["status"] == "OK":
+            access_token = json_data["result"]["data"]["access_token"]
+            current.REDIS_CLIENT.set(redis_key,
+                                     access_token,
+                                     ex=TTL_TIME)
+            return access_token
+        else:
+            print "Error requesting CodeChef API for access token"
+            return
+
+    # --------------------------------------------------------------------------
+    def __get_problem_link(self, contest_code, problem_code):
+        """
+            Get the problem link given the contest_code and problem_code
+            @params contest_code (String): Contest code of the problem
+            @params problem_code (String): Problem code of the problem
+
+            @return (String): URL of the problem
+        """
+        return "%s/%s/problems/%s" % (CODECHEF_SITE_URL,
+                                      contest_code,
+                                      problem_code)
+
+    # --------------------------------------------------------------------------
+    def __process_year_submissions(self, year, last_retrieved):
+        SUBMISSION_REQUEST_PARAMS["year"] = year
+        SUBMISSION_REQUEST_PARAMS["offset"] = 0
+        submissions = []
+        for _ in xrange(1000):
+            response = get_request("%s/submissions" % CODECHEF_API_URL,
+                                   headers={"Authorization": "Bearer %s" % self.access_token},
+                                   params=SUBMISSION_REQUEST_PARAMS,
+                                   timeout=10)
+            if response in REQUEST_FAILURES:
+                return response
+
+            json_response = response.json()
+            if json_response["result"]["data"]["code"] == 9003:
+                # No submisions for the year
+                return submissions
+
+            for submission in json_response["result"]["data"]["content"]:
+                curr = time.strptime(submission["date"],
+                                     TIME_CONVERSION_STRING)
+                if curr <= last_retrieved:
+                    return submissions
+
+                problem_link = self.__get_problem_link(submission["contestCode"],
+                                                       submission["problemCode"])
+                problem_name = submission["problemCode"]
+                status = submission["result"]
+                points = submission["score"]
+                if status == "AC":
+                    if float(points) > 0 and float(points) < 100:
+                        status = "PS"
+                elif status in ["WA", "TLE"]:
+                    pass
+                elif status == "CTE":
+                    status = "CE"
+                elif status == "RTE":
+                    status = "RE"
+                else:
+                    print "*****************", status
+                    status = "OTH"
+                language = submission["language"]
+                view_link = "%s/viewsolution/%d" % (CODECHEF_SITE_URL,
+                                                    submission["id"])
+                submissions.append((submission["date"],
+                                    problem_link,
+                                    problem_name,
+                                    status,
+                                    points,
+                                    language,
+                                    view_link))
+            if len(json_response["result"]["data"]["content"]) < PER_PAGE_LIMIT:
+                break
+
+            SUBMISSION_REQUEST_PARAMS["offset"] += PER_PAGE_LIMIT
+
+        return submissions
+
+    # --------------------------------------------------------------------------
     def get_submissions(self, last_retrieved):
         """
             Retrieve CodeChef submissions after last retrieved timestamp
@@ -309,63 +260,39 @@ class Profile(object):
                             information about the submissions
         """
 
-        handle = self.handle
-        self.last_retrieved = last_retrieved
-        PARAMS["handle"] = handle
+        if current.environment == "development":
+            # Locally client credentials for CodeChef API wouldn't be valid and
+            # there is no other fallback method which can be used for retrieval
+            return SERVER_FAILURE
+
         start_year = int(current.INITIAL_DATE.split("-")[0])
         current_year = datetime.datetime.now().year
-
-        domain_url = "https://www.codechef.com/"
-
         str_init_time = time.strptime(str(current.INITIAL_DATE),
                                       "%Y-%m-%d %H:%M:%S")
+
+        self.access_token = self.__get_access_token()
+        if self.access_token is None:
+            print "Access token found none"
+            return SERVER_FAILURE
+
         # Test for invalid handles
         if  last_retrieved == str_init_time:
-            response = get_request(domain_url + "users/" + handle,
-                                   headers={"User-Agent": user_agent})
+            response = self.__validate_handle()
             if response in REQUEST_FAILURES:
                 return response
-            if response.url.__contains__("teams/view"):
-                return NOT_FOUND
 
+        SUBMISSION_REQUEST_PARAMS["username"] = self.handle
         self.submissions = []
 
         for year in xrange(current_year, start_year - 1, -1):
             # Years processed in the reverse order to break out when
             # last_retrieved time_stamp is matched
-            params = dict(PARAMS)
-            params["year"] = year
-            url = domain_url + "submissions?" + urlencode(params)
-            response = get_request(url,
-                                   headers={"User-Agent": user_agent},
-                                   timeout=20)
-            if response in REQUEST_FAILURES:
-                return response
 
-            if self.retrieve_failed:
-                # One of the threads failed from the previous iteration (year)
-                return self.retrieve_status
-
-            soup = bs4.BeautifulSoup(response.text, "lxml")
-
-            # CodeChef blocks the submissions endpoint
-            # for an ongoing important contest
-            try:
-                trs = soup.find("div",
-                                class_="tablebox").find("tbody").find_all("tr")
-            except AttributeError:
-                return SERVER_FAILURE
-
-            year_index = "%d_%d" % (year, 0)
-            ret = self.process_trs(year, 0, trs)
-
-            if ret == "DONE":
-                return self.submissions
-
-            pagination = soup.find("div", class_="pageinfo")
-            if pagination:
-                last_page = pagination.contents[0].split(" of ")[1]
-                self.process_parallely(year, int(last_page))
+            result = self.__process_year_submissions(year, last_retrieved)
+            if result in REQUEST_FAILURES:
+                return result
+            else:
+                self.submissions.extend(result)
 
         return self.submissions
 
