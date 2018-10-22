@@ -266,6 +266,13 @@ class Profile(object):
             # there is no other fallback method which can be used for retrieval
             return SERVER_FAILURE
 
+        try:
+            # If the handle is a URL return NOT_FOUND
+            re.match("https?://.*\.com", self.handle).group()
+            return NOT_FOUND
+        except AttributeError:
+            pass
+
         start_year = int(current.INITIAL_DATE.split("-")[0])
         current_year = datetime.datetime.now().year
         str_init_time = time.strptime(str(current.INITIAL_DATE),
