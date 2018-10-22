@@ -584,11 +584,8 @@ def codechef_new_retrievals():
                 (atable.blacklisted == False) & \
                 (atable.registration_key == "") # Unverified email
 
-        user = db(query).select(orderby="<random>").first()
-        if user is None:
-            return ([], [])
-        else:
-            return ([user], [])
+        users = db(query).select(orderby="<random>", limitby=(0, 5))
+        return (users, [])
 
 if __name__ == "__main__":
 
