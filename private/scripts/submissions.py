@@ -317,13 +317,10 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
         nrtable.insert(**{user_column_name: record.id})
         nrtable_record = db(nrtable[user_column_name] == record.id).select().first()
 
-    if codechef_retrieval is True:
-        all_sites = ["CodeChef"]
-    else:
-        disabled_sites = current.REDIS_CLIENT.smembers("disabled_retrieval")
-        for site in disabled_sites:
-            if site in all_sites:
-                all_sites.remove(site)
+    disabled_sites = current.REDIS_CLIENT.smembers("disabled_retrieval")
+    for site in disabled_sites:
+        if site in all_sites:
+            all_sites.remove(site)
 
     for site in all_sites:
 
