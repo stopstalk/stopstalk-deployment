@@ -64,7 +64,6 @@
     <!-- @Todo: Load only if we have any submissions for the user -->
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
-        var isLoggedIn = "{{=auth.is_logged_in()}}";
         var handleDetailsURL = "{{=URL('user', 'handle_details', extension='json')}}";
         var handle = "{{=handle}}";
         var getSolvedCountsURL = "{{=URL('user', 'get_solved_counts', extension='json')}}";

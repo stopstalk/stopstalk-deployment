@@ -42,7 +42,7 @@ def get_menu_tuple(icon_class, tooltip, button_label, url, new_item=False):
                   url,
                   ""]
     if new_item:
-        item_tuple[4] = SPAN(_class="new badge")
+        item_tuple[4] = SPAN(_class="new badge pulse")
     return item_tuple
 
 if session.user_id:
@@ -95,8 +95,7 @@ response.menu += [get_menu_tuple("fa-search",
                   get_menu_tuple("fa-bullhorn",
                                  T("Feature Updates"),
                                  "Nav Feature Updates",
-                                 URL("default", "updates"),
-                                 True)]
+                                 URL("default", "updates"))]
 
 if "auth" in locals(): auth.wikimenu()
 

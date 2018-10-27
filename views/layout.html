@@ -32,6 +32,11 @@
         <![endif]-->
     <!-- Favicons -->
     {{include 'web2py_ajax.html'}} <!-- this includes jquery.js, calendar.js/.css and web2py.js -->
+    <script type="text/javascript">
+        var clickedHeartButton = false;
+        var isLoggedIn = ("{{=auth.is_logged_in()}}" === "True");
+        var markReadURL = "{{=URL('user', 'mark_read')}}";
+    </script>
     {{block head}}{{end}}
     {{
     # using sidebars need to know what sidebar you want to use
@@ -330,8 +335,27 @@
             </div>
         </div>
     </footer>
+
+    {{db = current.db; ratable = db.recent_announcements}}
+    {{if auth.is_logged_in():}}
+        {{announcement_record = db(ratable.user_id == session.user_id).select().first()}}
+    {{else:}}
+        {{announcement_record = None}}
+    {{pass}}
+
+    {{if announcement_record is None:}}
+        {{pulse_class = "pulse"}}
+    {{else:}}
+        {{try:}}
+            {{clicked_heart_button = (json_for_views.loads(announcement_record.data)["heart_button"] == True)}}
+            {{pulse_class = "" if clicked_heart_button else "pulse"}}
+            <script type="text/javascript">clickedHeartButton = "{{=clicked_heart_button}}" === "True";</script>
+        {{except Exception as e:}}
+            {{pulse_class = "pulse"}}
+        {{pass}}
+    {{pass}}
     <div class="fixed-action-btn click-to-toggle vertical" style="bottom: 45px; right: 24px;">
-        <a class="btn-floating btn-large pink accent-3" id="heart-button">
+        <a class="btn-floating btn-large pink accent-3 {{=pulse_class}}" id="heart-button">
             <i class="fa fa-heart"></i>
         </a>
         <ul style="pointer-events: none;">
