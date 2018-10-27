@@ -5,7 +5,7 @@
 {{end}}
 <script type="text/javascript">
     var pageURL = '{{=URL("default", "submissions")}}';
-    var announcementValue = '{{=recent_announcements.has_key("timus_handle") and recent_announcements["timus_handle"]}}';
+//    var announcementValue = '{{=recent_announcements.has_key("timus_handle") and recent_announcements["timus_handle"]}}';
 
     $(document).ready(function() {
         if ('{{=country}}' === 'not-available') {
@@ -13,7 +13,7 @@
             $('#fill-country-modal').modal('open');
         }
 
-        if (announcementValue === 'False') {
+ /*       if (announcementValue === 'False') {
             $('#recent_announcements').modal({
                 complete: function() {
                     $.ajax({
@@ -24,6 +24,7 @@
             });
             $('#recent_announcements').modal('open');
         }
+ */
     });
 </script>
 <div id="fill-country-modal" class="modal">
