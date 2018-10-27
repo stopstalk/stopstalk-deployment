@@ -295,6 +295,7 @@ nav ul a:hover {
 
 .side-nav span.badge {
     margin-top: 19px;
+    margin-right: 8px;
     background-color: mediumvioletred;
 }
 

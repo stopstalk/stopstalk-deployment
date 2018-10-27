@@ -29,6 +29,7 @@
 from gluon.contrib.appconfig import AppConfig
 from gluon.tools import Mail
 
+import json as json_for_views
 ## once in production, remove reload=True to gain full speed
 myconf = AppConfig(reload=True)
 

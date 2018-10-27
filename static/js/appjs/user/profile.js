@@ -8,7 +8,7 @@
         if (linechartAvailable === 'True') {
             drawLineChart();
         }
-        if (totalSubmissions !== '0' && isLoggedIn === "True") {
+        if (totalSubmissions !== '0' && isLoggedIn) {
             drawStopStalkRatingChart();
         }
     }
@@ -458,7 +458,7 @@
                 newSpanChildren = newSpanElement.children();
             newSpanChildren[0]["href"] = getStopStalkProblemPageURL(problemLink, problemName);
             newSpanChildren[0].innerHTML = problemName;
-            if (isLoggedIn === "True") {
+            if (isLoggedIn) {
                 return "<span class='todo-list-icon'>" +
                        newSpanChildren[0].outerHTML +
                        newSpanChildren[1].outerHTML +
@@ -628,7 +628,7 @@
                 child = $(thisButton.children()[0]);
 
             if (buttonType == 'add-friend') {
-                if (isLoggedIn === 'True') {
+                if (isLoggedIn) {
                     thisButton.removeClass('green');
                     thisButton.addClass('black');
                     thisButton.attr('data-type', 'unfriend');

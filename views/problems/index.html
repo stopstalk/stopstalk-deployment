@@ -15,7 +15,6 @@
         var globalSubmissionURL = '{{=URL("problems", "index", vars={"pname": problem_name, "plink": problem_link, "submission_type": "global"})}}'.replace(/&amp;/g, '&');
         var friendsSubmissionURL = '{{=URL("problems", "index", vars={"pname": problem_name, "plink": problem_link, "submission_type": "friends"})}}'.replace(/&amp;/g, '&');
         var mySubmissionURL = '{{=URL("problems", "index", vars={"pname": problem_name, "plink": problem_link, "submission_type": "my"})}}'.replace(/&amp;/g, '&');
-        var isLoggedIn = '{{=auth.is_logged_in()}}';
         var openModal = ('{{=request.vars.open_modal}}' === 'True');
     </script>
     <script type="text/javascript">
