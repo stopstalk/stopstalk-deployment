@@ -232,6 +232,19 @@
             });
         });
 
+        $(document).on('click', '#heart-button', function() {
+            if (isLoggedIn && !clickedHeartButton) {
+                $.ajax({
+                    url: markReadURL,
+                    data: {key: 'heart_button'},
+                    success: function() {
+                        clickedHeartButton = true;
+                        $('#heart-button').removeClass('pulse');
+                    }
+                });
+            }
+        });
+
         $(document).on('click', '.download-submission-button', function() {
             var site = $(this).data('site');
             var viewLink = $(this).data('view-link');
