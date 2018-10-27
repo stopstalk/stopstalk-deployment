@@ -93,7 +93,7 @@
 
         $('.modal').modal();
 
-        if (isLoggedIn == "True") {
+        if (isLoggedIn) {
             if (openModal)
                 $('#suggest-tags-modal').modal('open');
 
