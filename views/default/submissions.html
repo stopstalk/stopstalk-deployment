@@ -59,6 +59,7 @@
     {{=table}}
 {{else:}}
     {{if len(current.REDIS_CLIENT.smembers("disabled_retrieval")):}}
+        <br/>
         <h7 class="red-text"> Disabled retrieval for {{=utilities.pretty_string(current.REDIS_CLIENT.smembers("disabled_retrieval"))}} due to their downtime. </h7>
     {{pass}}
 
