@@ -247,7 +247,7 @@
             {{pulse_class = "pulse"}}
         {{pass}}
     {{pass}}
-    <div class="fixed-action-btn click-to-toggle vertical" style="bottom: 45px; right: 24px;">
+    <div class="fixed-action-btn click-to-toggle vertical" style="bottom: 100px; right: 24px;">
         <a class="btn-floating btn-large pink accent-3 {{=pulse_class}}" id="heart-button">
             <i class="fa fa-heart"></i>
         </a>
@@ -270,6 +270,9 @@
                 <a id="heart-github" class="btn-floating black"  style="pointer-events: all; transform: scaleY(0.4) scaleX(0.4) translateY(0px) translateX(40px); opacity: 0;" target="_blank" href="https://github.com/stopstalk/stopstalk-deployment"><i class="fa fa-github"></i></a>
             </li>
         </ul>
+    </div>
+    <div class="fixed-action-btn">
+        <a class="btn-floating btn-small orange pulse" style="bottom: 26px; right: 10px;" target="_blank" href="{{=URL('default', 'get_started')}}"><i class="fa fa-question-circle"></i></a>
     </div>
     <!-- The javascript =============================== -->
     <script src="{{=URL('static', 'materialize/js/materialize.min.js')}}"></script>

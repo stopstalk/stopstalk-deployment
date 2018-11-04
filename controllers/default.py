@@ -140,6 +140,10 @@ def handle_error():
     return dict(error_message=error_message, similar_users=similar_users)
 
 # ----------------------------------------------------------------------------
+def get_started():
+    return dict()
+
+# ----------------------------------------------------------------------------
 def retrieval_logic():
     return dict()
 
