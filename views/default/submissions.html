@@ -58,25 +58,9 @@
     <div id="content"></div>
     {{=table}}
 {{else:}}
-    <br /><br />
-    <h4>{{=T("Welcome to StopStalk!")}}</h4><br />
     {{if len(current.REDIS_CLIENT.smembers("disabled_retrieval")):}}
         <h7 class="red-text"> Disabled retrieval for {{=utilities.pretty_string(current.REDIS_CLIENT.smembers("disabled_retrieval"))}} due to their downtime. </h7>
     {{pass}}
-    <h6> Tag Search Page is now Problem Search Page - {{=A("Know more", _href=URL("default", "updates"), _id="know-more", _target="_blank")}}</h6>
-    <p>Please take some time to fill out this {{=A("Survey Form", _href="http://goo.gl/oeLZHd", _target="_blank")}}</p>
 
-    <h5>{{=T("You do not have any friends on StopStalk yet!")}}</h5>
-    <h5>
-        {{=T("Try adding friends on StopStalk")}} &nbsp;
-        <a id="first-friend-search" href="{{=URL('default', 'search')}}" target="_blank">
-            <i class="fa fa-long-arrow-right"></i>
-        </a>
-    </h5>
-    <h5>
-        {{=T("You can also add Custom Users if your friend is not on StopStalk")}} &nbsp;
-        <a id="first-custom-friend" href="{{=URL('user', 'custom_friend')}}" target="_blank">
-            <i class="fa fa-long-arrow-right"></i>
-        </a>
-    </h5>
+    {{include 'onboarding.html'}}
 {{pass}}
