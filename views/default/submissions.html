@@ -1,6 +1,6 @@
 {{extend 'layout.html'}}
 {{block head}}
-    <title>{{=T("Recent submissions")}}</title>
+    <title>{{=T("Recent submissions") if total_rows else T("Get Started")}}</title>
     <meta name="description" content="List of recent submissions of your friends">
 {{end}}
 <script type="text/javascript">
