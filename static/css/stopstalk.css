@@ -504,3 +504,15 @@ nav ul a:hover {
 #leaderboard-table td:nth-child(7) {
     text-align: center;
 }
+
+.left-text {
+    text-align: left;
+}
+
+.right-text {
+    text-align: right;
+}
+
+.justify-text {
+    text-align: justify;
+}

@@ -16,6 +16,7 @@ js/appjs/default/friends.js
 js/appjs/default/leaderboard.js
 js/appjs/default/submissions.js
 js/appjs/default/todo.js
+js/appjs/default/get_started.js
 js/appjs/testimonials/index.js
 js/appjs/problems/index.js
 js/appjs/problems/search.js
