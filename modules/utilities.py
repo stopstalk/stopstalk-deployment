@@ -878,24 +878,19 @@ def get_profile_url(site, handle):
     if handle == "":
         return "NA"
 
-    if site == "CodeChef":
-        return "http://www.codechef.com/users/" + handle
-    elif site == "CodeForces":
-        return "http://www.codeforces.com/profile/" + handle
-    elif site == "Spoj":
-        return "http://www.spoj.com/users/" + handle
-    elif site == "HackerEarth":
-        return "https://www.hackerearth.com/users/" + handle
-    elif site == "HackerRank":
-        return "https://www.hackerrank.com/" + handle
-    elif site == "Timus":
-        return "http://acm.timus.ru/author.aspx?id=" + handle
-    elif site == "UVa":
-        import requests
+    url_mappings = {"CodeChef": "users/",
+                    "CodeForces": "profile/",
+                    "HackerEarth": "users/",
+                    "HackerRank": "",
+                    "Spoj": "users/",
+                    "Timus": "author.aspx?id="}
+
+    if site == "UVa":
         uvadb = current.uvadb
         utable = uvadb.usernametoid
         row = uvadb(utable.username == handle).select().first()
         if row is None:
+            import requests
             response = requests.get("http://uhunt.felix-halim.net/api/uname2uid/" + handle)
             if response.status_code == 200 and response.text != "0":
                 utable.insert(username=handle, uva_id=response.text.strip())
@@ -904,6 +899,8 @@ def get_profile_url(site, handle):
                 return "NA"
         else:
             return "http://uhunt.felix-halim.net/id/" + row.uva_id
-    return "NA"
+
+    else:
+        return "%s%s%s" % (current.SITES[site], url_mappings[site], handle)
 
 # =============================================================================
