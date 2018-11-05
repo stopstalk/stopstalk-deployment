@@ -146,19 +146,6 @@
         addEventListener('#include-editorials', 'Problem Search Include Editorials field', false);
     };
 
-    var addOnboardingPageToGA = function() {
-        addEventListener('.list-onboarding-things .collapsible-header', '', true);
-        addEventListener('#onboarding-page-friend-search', 'Onboarding link - Friend search', false);
-        addEventListener('#onboarding-page-custom-friend', 'Onboarding link - Custom friend', false);
-        addEventListener('#onboarding-page-friend-trending', 'Onboarding link - Friend trending', false);
-        addEventListener('#onboarding-page-friend-leaderboard', 'Onboarding link - Friend leaderboard', false);
-        addEventListener('#onboarding-page-todo', 'Onboarding link - Todo page', false);
-        addEventListener('#onboarding-page-problem-search', 'Onboarding link - Problem search', false);
-        addEventListener('#onboarding-page-contests', 'Onboarding link - Upcoming contests', false);
-        addEventListener('#onboarding-page-retrieval-logic', 'Onboarding link - Retrieval logic', false);
-        addEventListener('#onboarding-page-user-profile', 'Onboarding link - User profile', false);
-    };
-
     $(document).ready(function() {
         addNavItemsToGA();
         addSubmissionPageButtonsToGA();
@@ -169,7 +156,6 @@
         addContestPageButtonsToGA();
         addLeaderboardPageButtonsToGA();
         addProblemSearchPageToGA();
-        addOnboardingPageToGA();
         addMiscellaneousToGA();
     });
 })(jQuery);
