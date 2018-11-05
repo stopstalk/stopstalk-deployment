@@ -72,7 +72,20 @@
         if (!results) return null;
         if (!results[2]) return '';
         return decodeURIComponent(results[2].replace(/\+/g, " "));
-    }
+    };
+
+    var markPulseButtonClick = function(elementID, key) {
+        if (isLoggedIn && !clickedButton[key]) {
+            $.ajax({
+                url: markReadURL,
+                data: {key: key},
+                success: function() {
+                    clickedButton[key] = true;
+                    $('#' + elementID).removeClass('pulse');
+                }
+            });
+        }
+    };
 
     $(document).ready(function() {
 
@@ -233,16 +246,11 @@
         });
 
         $(document).on('click', '#heart-button', function() {
-            if (isLoggedIn && !clickedHeartButton) {
-                $.ajax({
-                    url: markReadURL,
-                    data: {key: 'heart_button'},
-                    success: function() {
-                        clickedHeartButton = true;
-                        $('#heart-button').removeClass('pulse');
-                    }
-                });
-            }
+            markPulseButtonClick('heart-button', 'heart_button');
+        });
+
+        $(document).on('click', '#onboarding-button', function() {
+            markPulseButtonClick('onboarding-button', 'onboarding_button');
         });
 
         $(document).on('click', '.download-submission-button', function() {
