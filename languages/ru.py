@@ -339,5 +339,4 @@
 "No submissions found": "No submissions found",
 "Solved Counts": "Solved Counts",
 "No editorials found! Please contribute to the community by writing an editorial if you've solved the problem.": "No editorials found! Please contribute to the community by writing an editorial if you've solved the problem.",
-"No editorials found! Please login if you want to write an editorial.": "No editorials found! Please login if you want to write an editorial.",
-"Get Started": "Get Started"}
+"No editorials found! Please login if you want to write an editorial.": "No editorials found! Please login if you want to write an editorial."}
