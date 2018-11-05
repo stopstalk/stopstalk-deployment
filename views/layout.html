@@ -33,7 +33,7 @@
     <!-- Favicons -->
     {{include 'web2py_ajax.html'}} <!-- this includes jquery.js, calendar.js/.css and web2py.js -->
     <script type="text/javascript">
-        var clickedHeartButton = false;
+        var clickedButton = {"heart_button": false, "onboarding_button": false};
         var isLoggedIn = ("{{=auth.is_logged_in()}}" === "True");
         var markReadURL = "{{=URL('user', 'mark_read')}}";
     </script>
@@ -48,113 +48,6 @@
     middle_column = {0: mc0, 1: mc1, 2: mc2}[
     (left_sidebar_enabled and 1 or 0)+(right_sidebar_enabled and 1 or 0)]
     }}
-    <style>
-        input.form-control {
-            width: 50%;
-            text-align:  center;
-        }
-
-        .pagination li.active{
-            background-color: #259b24;
-        }
-
-        #welcome {
-            min-width: 180px;
-        }
-
-        #welcome > li > a {
-            color: #424242;
-        }
-
-        body {
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            cursor: default;
-        }
-
-        .Site {
-            display: flex;
-            min-height: 100vh;
-            flex-direction: column;
-        }
-
-        .Site-content {
-            flex: 1;
-        }
-
-        iframe {
-            visibility: block;
-        }
-
-        div.error {
-            color: red;
-        }
-
-        .solved-problem {
-            color: green;
-            font-weight: bolder;
-        }
-
-        .unsolved-problem {
-            color: #D9071D;
-            font-weight: bolder;
-        }
-
-        .status-icon {
-            height: 25px;
-            width: 25px;
-        }
-
-        .prettyprint {
-            -webkit-touch-callout: text;
-            -webkit-user-select: text;
-            -khtml-user-select: text;
-            -moz-user-select: text;
-            -ms-user-select: text;
-            user-select: text;
-            cursor: text;
-            overflow: hidden;
-        }
-
-        /* desert scheme ported from vim to google prettify */
-        pre.prettyprint { display: block; background-color: #333 }
-        pre .nocode { background-color: none; color: #000 }
-        pre .str { color: #ffa0a0 } /* string  - pink */
-        pre .kwd { color: #f0e68c; font-weight: bold }
-        pre .com { color: #87ceeb } /* comment - skyblue */
-        pre .typ { color: #98fb98 } /* type    - lightgreen */
-        pre .lit { color: #cd5c5c } /* literal - darkred */
-        pre .pun { color: #fff }    /* punctuation */
-        pre .pln { color: #fff }    /* plaintext */
-        pre .tag { color: #f0e68c; font-weight: bold } /* html/xml tag    - lightyellow */
-        pre .atn { color: #bdb76b; font-weight: bold } /* attribute name  - khaki */
-        pre .atv { color: #ffa0a0 } /* attribute value - pink */
-        pre .dec { color: #98fb98 } /* decimal         - lightgreen */
-
-        /* Specify class=linenums on a pre to get line numbering */
-        ol.linenums { margin-top: 0; margin-bottom: 0; color: #AEAEAE } /* IE indents via margin-left */
-        li.L0,li.L1,li.L2,li.L3,li.L5,li.L6,li.L7,li.L8 { list-style-type: none }
-        /* Alternate shading for lines */
-        li.L1,li.L3,li.L5,li.L7,li.L9 { }
-
-        @media print {
-            pre.prettyprint { background-color: none }
-            pre .str, code .str { color: #060 }
-            pre .kwd, code .kwd { color: #006; font-weight: bold }
-            pre .com, code .com { color: #600; font-style: italic }
-            pre .typ, code .typ { color: #404; font-weight: bold }
-            pre .lit, code .lit { color: #044 }
-            pre .pun, code .pun { color: #440 }
-            pre .pln, code .pln { color: #000 }
-            pre .tag, code .tag { color: #006; font-weight: bold }
-            pre .atn, code .atn { color: #404 }
-            pre .atv, code .atv { color: #060 }
-        }
-    </style>
   </head>
   <body class="center Site">
     <!--[if lt IE 8]><p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p><![endif]-->
@@ -337,6 +230,7 @@
     </footer>
 
     {{db = current.db; ratable = db.recent_announcements}}
+    {{pulse_class = {"heart_button": "", "onboarding_button": ""}; clicked_button = {};}}
     {{if auth.is_logged_in():}}
         {{announcement_record = db(ratable.user_id == session.user_id).select().first()}}
     {{else:}}
@@ -344,18 +238,24 @@
     {{pass}}
 
     {{if announcement_record is None:}}
-        {{pulse_class = "pulse"}}
-    {{else:}}
-        {{try:}}
-            {{clicked_heart_button = (json_for_views.loads(announcement_record.data)["heart_button"] == True)}}
-            {{pulse_class = "" if clicked_heart_button else "pulse"}}
-            <script type="text/javascript">clickedHeartButton = "{{=clicked_heart_button}}" === "True";</script>
-        {{except Exception as e:}}
-            {{pulse_class = "pulse"}}
+        {{for key in pulse_class.keys():}}
+            {{pulse_class[key] = "pulse"}}
         {{pass}}
+    {{else:}}
+        {{from gluon import storage}}
+        {{record_data = storage.Storage(json_for_views.loads(announcement_record.data))}}
+        {{for key in pulse_class.keys():}}
+            {{clicked_button[key] = record_data.get(key, None) == True}}
+            {{pulse_class[key] = "" if clicked_button[key] else "pulse"}}
+        {{pass}}
+        <script type="text/javascript">
+            {{for key in pulse_class.keys():}}
+                clickedButton["{{=key}}"] = "{{=clicked_button[key]}}" === "True";
+            {{pass}}
+        </script>
     {{pass}}
-    <div class="fixed-action-btn click-to-toggle vertical" style="bottom: 45px; right: 24px;">
-        <a class="btn-floating btn-large pink accent-3 {{=pulse_class}}" id="heart-button">
+    <div class="fixed-action-btn click-to-toggle vertical" style="bottom: 100px; right: 24px;">
+        <a class="btn-floating btn-large pink accent-3 {{=pulse_class['heart_button']}}" id="heart-button">
             <i class="fa fa-heart"></i>
         </a>
         <ul style="pointer-events: none;">
@@ -377,6 +277,9 @@
                 <a id="heart-github" class="btn-floating black"  style="pointer-events: all; transform: scaleY(0.4) scaleX(0.4) translateY(0px) translateX(40px); opacity: 0;" target="_blank" href="https://github.com/stopstalk/stopstalk-deployment"><i class="fa fa-github"></i></a>
             </li>
         </ul>
+    </div>
+    <div class="fixed-action-btn">
+        <a class="btn-floating btn-small orange {{=pulse_class['onboarding_button']}}" style="bottom: 26px; right: 10px;" target="_blank" href="{{=URL('default', 'get_started')}}" id="onboarding-button"><i class="fa fa-question-circle"></i></a>
     </div>
     <!-- The javascript =============================== -->
     <script src="{{=URL('static', 'materialize/js/materialize.min.js')}}"></script>
