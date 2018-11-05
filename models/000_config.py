@@ -33,7 +33,7 @@ from collections import OrderedDict
 # Site Name => Site website url
 # OrderedDict is used to maintain the order of insertion
 current.SITES = OrderedDict()
-current.SITES["CodeChef"] = "http://www.codechef.com/"
+current.SITES["CodeChef"] = "https://www.codechef.com/"
 current.SITES["CodeForces"] = "http://www.codeforces.com/"
 current.SITES["Spoj"] = "https://www.spoj.com/"
 current.SITES["HackerEarth"] = "https://www.hackerearth.com/"
