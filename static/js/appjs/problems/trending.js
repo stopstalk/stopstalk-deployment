@@ -23,6 +23,16 @@
         });
       }
 
+      $(document).on('mouseenter', 'tbody tr', function() {
+          var todoIcon = $(this).find('.add-to-todo-list');
+          todoIcon.show();
+      });
+
+      $(document).on('mouseleave', 'tbody tr', function() {
+          var todoIcon = $(this).find('.add-to-todo-list');
+          todoIcon.hide();
+      });
+
       $.ajax({
         url: globalTableURL,
         method: 'GET',
