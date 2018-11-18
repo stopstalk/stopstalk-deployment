@@ -202,7 +202,7 @@ class Profile(object):
             response = get_request("%s/submissions" % CODECHEF_API_URL,
                                    headers={"Authorization": "Bearer %s" % self.access_token},
                                    params=SUBMISSION_REQUEST_PARAMS,
-                                   timeout=5)
+                                   timeout=10)
             if response in REQUEST_FAILURES:
                 return response
 
