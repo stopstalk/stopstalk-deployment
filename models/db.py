@@ -429,6 +429,14 @@ def create_next_retrieval_record(record, custom=False):
     else:
         db.next_retrieval.insert(user_id=record.id)
 
+def append_user_to_refreshed_users(record):
+    """
+        Add the user in refreshed list to retrieve submissions asap
+
+        @param record (Row): Record with the new user details
+    """
+    current.REDIS_CLIENT.rpush("next_retrieve_user", record.id)
+
 # -----------------------------------------------------------------------------
 def register_callback(form):
     """
@@ -464,7 +472,8 @@ Referrer: %s\n""" % (form.vars.first_name,
 auth.settings.register_onvalidation = [sanitize_fields]
 auth.settings.register_onaccept.append(register_callback)
 auth.settings.verify_email_onaccept.extend([notify_institute_users,
-                                            create_next_retrieval_record])
+                                            create_next_retrieval_record,
+                                            append_user_to_refreshed_users])
 current.auth = auth
 current.response.formstyle = materialize_form
 current.sanitize_fields = sanitize_fields

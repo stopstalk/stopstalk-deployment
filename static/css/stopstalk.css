@@ -516,3 +516,7 @@ nav ul a:hover {
 .justify-text {
     text-align: justify;
 }
+
+#recent_announcements .modal-content {
+    padding-bottom: 0px;
+}
