@@ -174,7 +174,7 @@ The project also depends on a number of other open source packages, some of whic
 
   > Email: admin@stopstalk.com, contactstopstalk@gmail.com, raj454raj@gmail.com
 
-  > Creator Website: http://raj454raj.me
+  > Creator Website: http://raj454raj.com
 
 ## Social Links
 
