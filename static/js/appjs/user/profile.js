@@ -621,6 +621,13 @@
 
         handleRefreshNow();
 
+        $(document).on('click', '.profile-page-site-profile-url', function() {
+            var $thisChip = $(this),
+                site = $thisChip.data()['tooltip'];
+
+            window.open(profileURLs[site], '_blank');
+        });
+
         $('.friends-button').click(function() {
             var thisButton = $(this),
                 userID = thisButton.attr('data-user-id'),
