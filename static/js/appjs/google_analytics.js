@@ -29,7 +29,6 @@
     var addNavItemsToGA = function() {
         addEventListener('.side-nav-item', '', true);
         addEventListener('.nav-dropdown', '', true);
-        addEventListener('#help-us-continue', 'Donate', false);
     };
 
     var addSubmissionPageButtonsToGA = function() {
