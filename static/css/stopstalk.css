@@ -520,3 +520,7 @@ nav ul a:hover {
 #recent_announcements .modal-content {
     padding-bottom: 0px;
 }
+
+.profile-page-site-profile-url {
+    cursor: pointer;
+}

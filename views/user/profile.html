@@ -64,6 +64,7 @@
     <!-- @Todo: Load only if we have any submissions for the user -->
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
+        {{import json}}
         var handleDetailsURL = "{{=URL('user', 'handle_details', extension='json')}}";
         var handle = "{{=handle}}";
         var getSolvedCountsURL = "{{=URL('user', 'get_solved_counts', extension='json')}}";
@@ -85,6 +86,8 @@
         var canUpdate = ("{{=can_update}}" === "True");
         var problemIndexURL = "{{=URL('problems', 'index')}}";
         var totalSubmissions = "{{=total_submissions}}";
+        var profileURLs = "{{=json.dumps(profile_urls)}}";
+        profileURLs = JSON.parse($("<textarea/>").html(profileURLs).text());
     </script>
     <script src="{{=get_static_url('js/appjs/user/profile.js')}}" type="text/javascript"></script>
   {{end}}
@@ -195,7 +198,7 @@
                             <h6><strong>{{=T("Accuracy")}}</strong></h6>
                             {{for site in current.SITES:}}
                                 {{if profile_urls[site] != "NA":}}
-                                    <a id="{{=site.lower()}}-profile-url" href="{{=profile_urls[site]}}" class="tooltipped" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank">
+                                    <a id="{{=site.lower()}}-profile-url" class="tooltipped profile-page-site-profile-url" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank">
                                         <div class="chip" id="{{=site.lower()}}_chip">
                                             <img src="{{=get_static_url('images/' + site.lower() + '_logo.png')}}" alt="{{=site}}"/>
                                             {{=efficiency[site]}}
