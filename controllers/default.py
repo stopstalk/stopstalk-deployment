@@ -236,6 +236,103 @@ def remove_todo():
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
+def job_profile():
+    from json import dumps
+
+    s3_key = "resumes/" + str(session.user_id) + ".pdf"
+
+    def _get_response_from_record(record):
+        """
+            @param record (Row): Row object from resume_data table
+
+            @return (String): JSON dump of the record
+        """
+        return dict(resume_data_record=dumps(dict(
+                        can_contact=record.can_contact,
+                        contact_number=record.contact_number,
+                        expected_salary=record.expected_salary,
+                        will_relocate=record.will_relocate,
+                        experience=record.experience,
+                        fulltime_or_internship=record.fulltime_or_internship.split(","),
+                        join_from=str(record.join_from),
+                        graduation_year=record.graduation_year,
+                        linkedin_profile=record.linkedin_profile,
+                        github_profile=record.github_profile
+                    )))
+
+    def _upload_resume():
+        import os
+        import uuid
+        random_upload_uuid = uuid.uuid4().hex
+        temporary_file = "/tmp/resume_" + random_upload_uuid + ".pdf"
+
+        if request.vars.resume_data_file.filename[-4:] != ".pdf":
+            response.flash = "Please upload resume in pdf format"
+            return "ERROR"
+
+        try:
+            with open(temporary_file, 'wb') as f:
+                f.write(request.vars.resume_data_file.file.read())
+        except Exception as e:
+            response.flash = "Something went wrong!"
+            return "ERROR"
+
+        client = utilities.get_boto3_client()
+        try:
+            client.upload_file(temporary_file,
+                               current.s3_bucket,
+                               s3_key)
+            # Delete the local file
+            os.remove(temporary_file)
+        except Exception as e:
+            response.flash = "Error uploading"
+            return "ERROR"
+
+        return "SUCCESS"
+
+    rdtable = db.resume_data
+    resume_data_record = db(rdtable.user_id == session.user_id).select().first()
+    if request.env.request_method == "GET":
+        if resume_data_record:
+            return _get_response_from_record(resume_data_record)
+        else:
+            return dict(resume_data_record={})
+
+
+    result = _upload_resume()
+    if result == "ERROR":
+        return dict()
+
+    opportunity_type = request.vars.get("resume_data_opportunity_type", "")
+    if type(opportunity_type) == list:
+        opportunity_type = ",".join(opportunity_type)
+
+    update_params = dict(
+        user_id=session.user_id,
+        resume_file_s3_path=s3_key,
+        will_relocate=request.vars.get("resume_data_will_relocate", "") == "on",
+        github_profile=request.vars.get("resume_data_github_profile", ""),
+        linkedin_profile=request.vars.get("resume_data_linkedin_profile", ""),
+        join_from=request.vars.get("resume_data_join_from", ""),
+        graduation_year=request.vars.get("resume_data_graduation_year", ""),
+        experience=request.vars.get("resume_data_experience", ""),
+        fulltime_or_internship=opportunity_type,
+        contact_number=request.vars.get("resume_data_contact_number", ""),
+        can_contact=request.vars.get("resume_data_can_contact", "") == "on",
+        expected_salary=request.vars.get("resume_data_expected_salary", "")
+    )
+    if resume_data_record is not None:
+        # Update in already existing record
+        resume_data_record.update_record(**update_params)
+    else:
+        rdtable.insert(**update_params)
+        resume_data_record = db(rdtable.user_id == session.user_id).select().first()
+
+    response.flash = "Successfully saved your details!"
+    return _get_response_from_record(resume_data_record)
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
 def notifications():
     """
         Show friends (includes CUSTOM) of the logged-in user on day streak
