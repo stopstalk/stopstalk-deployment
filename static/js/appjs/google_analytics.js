@@ -87,6 +87,7 @@
         addEventListener('.custom-user-list-name', 'Custom user name in Modal', false);
         addEventListener('.custom-user-modal-site-profile', 'Custom user Site Profile in Modal', false);
         addEventListener('#open-side-nav', 'Open Side Navbar', false);
+        addEventListener('#job-profile-cta', 'StopStalk Job profile CTA', false);
 
         addEventListener('#recent-announcements-todo-onboarding-already-using', 'Onboarding ToDo - Already using', false);
         addEventListener('#recent-announcements-todo-onboarding-will-start-using', 'Onboarding ToDo - Will start using', false);
