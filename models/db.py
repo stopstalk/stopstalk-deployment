@@ -731,6 +731,20 @@ db.define_table("user_editorials",
                 Field("votes", "text"),
                 Field("verification", default="pending"))
 
+db.define_table("resume_data",
+                Field("user_id", "reference auth_user"),
+                Field("resume_file_s3_path"),
+                Field("will_relocate", "boolean"),
+                Field("github_profile"),
+                Field("linkedin_profile"),
+                Field("join_from", "datetime"),
+                Field("graduation_year"),
+                Field("experience"),
+                Field("fulltime_or_internship"),
+                Field("contact_number"),
+                Field("can_contact", "boolean"),
+                Field("expected_salary"))
+
 uvadb.define_table("problem",
                    Field("problem_id", "integer"),
                    Field("problem_num", "integer"),
