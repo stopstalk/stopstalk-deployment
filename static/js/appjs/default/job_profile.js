@@ -8,7 +8,7 @@
         $('#resume_data_expected_salary').val(resumeDataRecord.expected_salary);
         $('#resume_data_will_relocate').prop('checked', resumeDataRecord.will_relocate);
         $('#resume_data_experience').val(resumeDataRecord.experience);
-        $('#resume_data_join_from').val(resumeDataRecord.join_from);
+        $('#resume_data_join_from').val(resumeDataRecord.join_from.split(" ")[0]);
         $('#resume_data_contact_number').val(resumeDataRecord.contact_number);
         $('#resume_data_graduation_year').val(resumeDataRecord.graduation_year);
         $('#resume_data_can_contact').prop('checked', resumeDataRecord.can_contact);
