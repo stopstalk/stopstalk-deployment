@@ -298,10 +298,9 @@ def job_profile():
         else:
             return dict(resume_data_record={})
 
-
     result = _upload_resume()
     if result == "ERROR":
-        return dict()
+        return dict(resume_data_record={})
 
     opportunity_type = request.vars.get("resume_data_opportunity_type", "")
     if type(opportunity_type) == list:
