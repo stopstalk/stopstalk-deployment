@@ -1,0 +1,115 @@
+{{extend 'layout.html'}}
+{{block head}}
+  <title>StopStalk Job Profile</title>
+{{end}}
+<script type="text/javascript">
+  var resumeDataRecord = JSON.parse($("<textarea/>").html("{{=resume_data_record}}").text());
+</script>
+<script src="{{=get_static_url('js/appjs/default/job_profile.js')}}" type="text/javascript"></script>
+<h1>StopStalk Job Profile</h1>
+<p>Fill in your details if you are looking for Software Engineering Jobs or Internships! We will contact you if we find a relevant job opportunity for you!</p>
+
+<div class="row">
+  <div class="col offset-s2 s8">
+    <form action="{{=URL('default', 'job_profile')}}" class="form-horizontal center" id="resume-data-form" enctype="multipart/form-data" method="POST">
+      <div class="center">
+        <div class="row center valign-wrapper">
+          <div class="input-field col offset-s3 s6">
+            <select id="resume_data_opportunity_type" name="resume_data_opportunity_type" multiple="multiple">
+              <option value="" disabled>Interested in</option>
+              <option value="job">Full Time Job</option>
+              <option value="3-month-internship">3 Month Internship</option>
+              <option value="6-month-internship">6 Month Internship</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row center valign-wrapper">
+          <div class="input-field col offset-s3 s6">
+            <input class="string" id="resume_data_github_profile" name="resume_data_github_profile" type="text">
+            <label for="resume_data_github_profile" id="resume_data_github_profile__label">Github Profile</label>
+          </div>
+        </div>
+
+        <div class="row center valign-wrapper">
+          <div class="input-field col offset-s3 s6">
+            <input class="string" id="resume_data_linkedin_profile" name="resume_data_linkedin_profile" type="text">
+            <label for="resume_data_linkedin_profile" id="resume_data_linkedin_profile__label">LinkedIn Profile</label>
+          </div>
+        </div>
+
+        <div class="row center valign-wrapper">
+          <div class="col offset-s3 s6 file-field input-field">
+            <div class="btn">
+              <span>File</span>
+              <input id="resume_data_file" name="resume_data_file" type="file" required/>
+            </div>
+            <div class="file-path-wrapper">
+              <input class="file-path" type="text" placeholder="Resume (.pdf)" />
+            </div>
+          </div>
+        </div>
+
+        <div class="row center valign-wrapper">
+          <div class="input-field col offset-s3 s6">
+            <select id="resume_data_expected_salary" name="resume_data_expected_salary">
+              <option value="">Expected Annual Income (INR)</option>
+              <option value="less-than-5">Less than 5 Lakhs</option>
+              <option value="between-5-and-10">5 to 10 Lakhs</option>
+              <option value="between-10-and-15">10 to 15 Lakhs</option>
+              <option value="between-15-and-20">15 to 20 Lakhs</option>
+              <option value="more-than-20">More than 20 Lakhs</option>
+            </select>
+          </div>
+        </div>
+        <div class="row center valign-wrapper">
+          <div class="col offset-s3">
+            <input class="boolean" id="resume_data_will_relocate" name="resume_data_will_relocate" type="checkbox" value="on">
+            <label for="resume_data_will_relocate" id="resume_data_will_relocate__label">Willing to relocate</label>
+          </div>
+        </div>
+
+        <div class="row center valign-wrapper">
+          <div class="input-field col offset-s3 s6">
+            <input class="string" id="resume_data_experience" name="resume_data_experience" type="text">
+            <label for="resume_data_experience" id="resume_data_experience__label">Experience (in years)</label>
+          </div>
+        </div>
+
+        <div class="row center valign-wrapper">
+          <div class="input-field col offset-s3 s6">
+            <label class="left" for="resume_data_join_from">Can join from</label>
+            <input class="datepicker" data-value="" id="resume_data_join_from" name="resume_data_join_from" type="date"/>
+          </div>
+        </div>
+
+        <div class="row center valign-wrapper">
+          <div class="input-field col offset-s3 s6">
+            <input class="string" id="resume_data_contact_number" name="resume_data_contact_number" type="text">
+            <label for="resume_data_contact_number" id="resume_data_contact_number__label">Contact Number</label>
+          </div>
+        </div>
+
+        <div class="row center valign-wrapper">
+          <div class="input-field col offset-s3 s6">
+            <input class="string" id="resume_data_graduation_year" name="resume_data_graduation_year" type="text">
+            <label for="resume_data_graduation_year" id="resume_data_graduation_year__label">Graduation year</label>
+          </div>
+        </div>
+
+        <div class="row center valign-wrapper">
+          <div class="col offset-s3">
+            <input class="boolean" id="resume_data_can_contact" name="resume_data_can_contact" type="checkbox">
+            <label class="" for="resume_data_can_contact" id="resume_data_can_contact__label">Contact me for Job opportunities</label>
+          </div>
+        </div>
+
+        <div class="row center valign-wrapper">
+          <div class="input-field col offset-s3 s6">
+            <input type="submit" value="Save" class="btn btn-default">
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
