@@ -89,8 +89,7 @@
         addEventListener('#open-side-nav', 'Open Side Navbar', false);
         addEventListener('#job-profile-cta', 'StopStalk Job profile CTA', false);
 
-        addEventListener('#recent-announcements-todo-onboarding-already-using', 'Onboarding ToDo - Already using', false);
-        addEventListener('#recent-announcements-todo-onboarding-will-start-using', 'Onboarding ToDo - Will start using', false);
+        addEventListener('#recent-announcements-update-job-profile-now', 'Onboarding StopStalk Job Profile', false);
     };
 
     var addProblemPageButtonsToGA = function() {
