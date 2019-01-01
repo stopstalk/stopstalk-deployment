@@ -987,9 +987,9 @@ def add_to_refresh_now():
     for site in current.SITES:
         update_params[site.lower() + "_delay"] = 1
     if custom:
-        db(nrtable.custom_user_id == user_id).update_record(**update_params)
+        db(nrtable.custom_user_id == user_id).update(**update_params)
     else:
-        db(nrtable.user_id == user_id).update_record(**update_params)
+        db(nrtable.user_id == user_id).update(**update_params)
 
     return "Successfully submitted request"
 
