@@ -2,6 +2,8 @@
     "use strict";
 
     var initFieldsWithRecordValues = function() {
+        if(!Object.keys(resumeDataRecord).length) return;
+
         $('#resume_data_opportunity_type').val(resumeDataRecord.fulltime_or_internship);
         $('#resume_data_github_profile').val(resumeDataRecord.github_profile);
         $('#resume_data_linkedin_profile').val(resumeDataRecord.linkedin_profile);
