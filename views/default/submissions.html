@@ -5,7 +5,7 @@
 {{end}}
 <script type="text/javascript">
     var pageURL = '{{=URL("default", "submissions")}}';
-    var announcementValue = '{{=recent_announcements.has_key("todo_onboarding") and recent_announcements["todo_onboarding"]}}';
+    var announcementValue = '{{=recent_announcements.has_key("job_profile") and recent_announcements["job_profile"]}}';
 
     $(document).ready(function() {
         if ('{{=country}}' === 'not-available') {
@@ -19,7 +19,7 @@
                 complete: function() {
                     $.ajax({
                         url: '{{=URL("user", "mark_read")}}',
-                        data: {key: "todo_onboarding"}
+                        data: {key: "job_profile"}
                     });
                 }
             });
@@ -37,12 +37,10 @@
 
 <div id="recent_announcements" class="modal" style="max-height: 80%; width: 60%;">
   <div class="modal-content center">
-    <h4>Did you know ?</h4>
-    <p>You can add problems to a unified ToDo list across CodeChef, Codeforces, Spoj, HackerEarth, HackerRank, UVa and Timus.</p>
-    <img src="{{=get_static_url('images/todo_onboarding.gif')}}" style="width:80%; height: 50%;">
+    <h4>Introducing StopStalk Job Profile</h4>
+    <p>You can now complete your StopStalk Job Profile and we will match you up with interesting Job or Internship opportunities. Make sure you enter all the details for best match along with as many profiles you could have on Competitive programming websites.</p>
     <div class="modal-footer">
-        <a href="#" id="recent-announcements-todo-onboarding-already-using" class="modal-action modal-close waves-effect blue lighten-5 waves-orange btn-flat">Already using</a>
-        <a href="#" id="recent-announcements-todo-onboarding-will-start-using" class="modal-action modal-close waves-effect blue lighten-5 waves-green btn-flat">Will start using</a>
+        <a href="{{=URL('default', 'job_profile')}}" id="recent-announcements-update-job-profile-now" class="modal-action modal-close waves-effect blue lighten-5 waves-green btn-flat">Update now</a>
     </div>
   </div>
 </div>
