@@ -15,6 +15,7 @@ js/appjs/default/search.js
 js/appjs/default/friends.js
 js/appjs/default/leaderboard.js
 js/appjs/default/submissions.js
+js/appjs/default/job_profile.js
 js/appjs/default/todo.js
 js/appjs/default/get_started.js
 js/appjs/testimonials/index.js
