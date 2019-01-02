@@ -583,6 +583,9 @@ def get_activity():
 def mark_read():
     ratable = db.recent_announcements
     rarecord = db(ratable.user_id == session.user_id).select().first()
+    if rarecord is None:
+        ratable.insert(user_id=session.user_id)
+        rarecord = db(ratable.user_id == session.user_id).select().first()
     data = json.loads(rarecord.data)
     data[request.vars.key] = True
     rarecord.update_record(data=json.dumps(data, separators=(",", ":")))
