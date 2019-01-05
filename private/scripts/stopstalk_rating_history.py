@@ -36,6 +36,7 @@ stable = db.submission
 atable = db.auth_user
 cftable = db.custom_friend
 BATCH_SIZE = 500
+commit_to_db_counter = 0
 
 def get_sql_result(start_id, end_id, custom):
     column_name = "custom_user_id" if custom else "user_id"
@@ -57,6 +58,8 @@ def get_submission_dict_from_row(submission_row):
             "site": submission_row[4]}
 
 def update_stopstalk_rating(user_id, user_submissions, custom):
+    global commit_to_db_counter
+
     final_rating = utilities.get_stopstalk_rating_history_dict(user_submissions)
     if final_rating == {}:
         print user_id, custom, "No submissions"
@@ -75,6 +78,13 @@ def update_stopstalk_rating(user_id, user_submissions, custom):
         cftable(user_id).update_record(**update_params)
     else:
         atable(user_id).update_record(**update_params)
+
+    commit_to_db_counter += 1
+    if commit_to_db_counter > 10:
+        # Don't hold the records in memory, keep commiting after every 10 records
+        # to avoid the lock wait timeouts
+        db.commit()
+        commit_to_db_counter = 0
 
 def compute_group_ratings(last_id, custom):
     column_name = "custom_user_id" if custom else "user_id"
