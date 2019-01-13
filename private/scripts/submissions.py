@@ -427,6 +427,9 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
                                                                 "NULL",
                                                                 site))
 
+    # Keep committing the updates to the db to avoid lock wait timeouts
+    db.commit()
+
 # ----------------------------------------------------------------------------
 def new_users():
     """
