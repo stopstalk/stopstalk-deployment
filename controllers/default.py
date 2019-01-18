@@ -239,7 +239,7 @@ def remove_todo():
 def job_profile():
     from json import dumps
 
-    s3_key = "resumes/" + str(session.user_id) + ".pdf"
+    s3_key = "resumes/%0.6d.pdf" % session.user_id
 
     def _get_response_from_record(record):
         """
