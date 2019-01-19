@@ -236,4 +236,7 @@
     <div id="friend" class="col s12"></div>
     <div id="global" class="col s12"></div>
 </div>
+{{if submission_type == "global" and submission_length != 0:}}
+    <p style="font-size: 12px;">Note: This the list of submissions in last 90 days</p>
+{{pass}}
 {{=table}}
