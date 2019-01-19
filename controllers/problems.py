@@ -802,8 +802,7 @@ def search():
         return dict(total_pages=total_pages)
 
     if orderby and orderby.__contains__("solved-count"):
-        all_problems = db(query).select(cache=(cache.ram, 3600),
-                                        cacheable=True).as_list()
+        all_problems = db(query).select().as_list()
         all_problems.sort(key=lambda x: x["user_count"] + \
                                         x["custom_user_count"],
                           reverse=kwargs["reverse"])
