@@ -65,6 +65,11 @@ def pie_chart_helper():
                 query &= (stable.user_id == session.user_id)
         else:
             return dict(row=[])
+    else:
+        # For global submissions only query for last 90 days
+        query &= (stable.time_stamp > (datetime.datetime.now() - \
+                                       datetime.timedelta(days=3 * 30)))
+
     row = db(query).select(stable.status,
                            count,
                            groupby=stable.status)
@@ -234,6 +239,10 @@ def index():
                 query &= (stable.user_id == session.user_id)
         else:
             response.flash = T("Login to view your/friends' submissions")
+    else:
+        # For global submissions only query for last 90 days
+        query &= (stable.time_stamp > (datetime.datetime.now() - \
+                                       datetime.timedelta(days=3 * 30)))
 
     submissions = db(query).select(orderby=~stable.time_stamp)
     problem_record = db(ptable.link == problem_link).select().first()
@@ -322,13 +331,20 @@ def index():
     if len(submissions):
         table = utilities.render_table(submissions, cusfriends, session.user_id)
     else:
-        table = DIV(T("No submissions found"))
+        if submission_type == "global":
+            table = DIV(T("No submissions in last 90 days! Use "),
+                        A(T("Filters page"),
+                          _href=URL("default", "filters")),
+                        T(" page to get all the submissions"))
+        else:
+            table = DIV(T("No submissions found"))
 
     return dict(site=site,
                 problem_details=problem_details,
                 problem_name=problem_name,
                 problem_link=problem_link,
                 submission_type=submission_type,
+                submission_length=len(submissions),
                 table=table)
 
 # ----------------------------------------------------------------------------
