@@ -969,7 +969,7 @@ def add_to_refresh_now():
 
     authorized = False
     user_id = row.id
-    if custom == "True":
+    if custom:
         authorized |= row.user_id == session.user_id
         user_id = row.duplicate_cu if row.duplicate_cu else row.id
     else:
