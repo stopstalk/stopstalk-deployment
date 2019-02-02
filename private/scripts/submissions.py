@@ -42,21 +42,40 @@ SERVER_FAILURE = "SERVER_FAILURE"
 NOT_FOUND = "NOT_FOUND"
 OTHER_FAILURE = "OTHER_FAILURE"
 
+TIME_CONVERSION = "%Y-%m-%d %H:%M:%S"
 INVALID_HANDLES = None
 failed_user_retrievals = []
 retrieval_type = None
 plink_to_id = {}
 
-# -----------------------------------------------------------------------------
-def _debug(stopstalk_handle, site, custom=False):
+# ==============================================================================
+class Logger:
     """
-        Advanced logging of submissions
+        Logger class to print the retrieval status of a user site wise
     """
 
-    debug_string = stopstalk_handle + " " + site
-    if custom:
-        debug_string += " CUS"
-    print debug_string,
+    # --------------------------------------------------------------------------
+    def __init__(self, stopstalk_handle, custom):
+        """
+            @param stopstalk_handle (String): stopstalk_handle of the user
+            @param custom (Boolean): If the user is a custom user or not
+        """
+        self.stopstalk_handle = stopstalk_handle
+        self.custom_str = "CUS" if custom else ""
+
+    # --------------------------------------------------------------------------
+    def log(self, site, message):
+        """
+            Print the log message with the given message for the site
+
+            @param site (String): Site name of the current logline
+            @param message (String): Actual message to be logged
+        """
+        print "%s %s %s %s %s" % (str(datetime.datetime.now()),
+                                  self.stopstalk_handle,
+                                  self.custom_str,
+                                  site,
+                                  message)
 
 # -----------------------------------------------------------------------------
 def insert_this_batch():
@@ -215,7 +234,8 @@ def get_submissions(user_id,
                     stopstalk_handle,
                     submissions,
                     site,
-                    custom=False):
+                    custom,
+                    logger):
     """
         Get the submissions and populate the database
     """
@@ -224,7 +244,7 @@ def get_submissions(user_id,
     count = 0
 
     if submissions == {}:
-        print "0"
+        logger.log(site, "0")
         return 0
 
     global rows
@@ -279,9 +299,10 @@ def get_submissions(user_id,
             rows = []
 
     if count != 0:
-        print str(count)
+        logger.log(site, str(count))
     else:
-        print "0"
+        logger.log(site, "0")
+
     return count
 
 # ----------------------------------------------------------------------------
@@ -305,13 +326,15 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
     global failed_user_retrievals
     global plink_to_id
 
-    time_conversion = "%Y-%m-%d %H:%M:%S"
     list_of_submissions = []
     retrieval_failures = []
     nrtable = db.next_retrieval
     user_column_name = "custom_user_id" if custom else "user_id"
     nrtable_record = db(nrtable[user_column_name] == record.id).select().first()
     skipped_retrieval = set([])
+
+    logger = Logger(record.stopstalk_handle, custom)
+
     if nrtable_record is None:
         print "Record not found", user_column_name, record.id
         nrtable.insert(**{user_column_name: record.id})
@@ -333,14 +356,14 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
         if retrieval_type == "daily_retrieve" and \
            datetime.timedelta(days=nrtable_record[site_delay] / 5 + 1) + \
            last_retrieved.date() > datetime.datetime.today().date():
-            print "Skipping " + site + " for " + record.stopstalk_handle
+            logger.log(site, "skipped")
             skipped_retrieval.add(site)
             continue
 
-        last_retrieved = time.strptime(str(last_retrieved), time_conversion)
+        last_retrieved = time.strptime(str(last_retrieved), TIME_CONVERSION)
 
         if (site_handle, site) in INVALID_HANDLES:
-            print "Not found %s %s" % (site_handle, site)
+            logger.log(site, "not found:" + site_handle)
             record.update({site_lr: datetime.datetime.now()})
             continue
 
@@ -355,12 +378,13 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
             else:
                 submissions = site_method(last_retrieved)
             if submissions in (SERVER_FAILURE, OTHER_FAILURE):
-                print "%s %s %s" % (submissions, site, record.stopstalk_handle)
+                logger.log(site, submissions)
+
                 # Add the failure sites for inserting data into failed_retrieval
                 retrieval_failures.append(site)
                 current.REDIS_CLIENT.sadd("website_down_" + site.lower(), record.stopstalk_handle)
             elif submissions == NOT_FOUND:
-                print "New invalid handle %s %s" % (site_handle, site)
+                logger.log(site, "new invalid handle:" + site_handle)
                 handle_not_found(site, site_handle)
                 # Update the last retrieved of an invalid handle as we don't
                 # want new_user script to pick this user again and again
@@ -380,14 +404,14 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
     total_submissions_retrieved = 0
     for submissions in list_of_submissions:
         site = submissions[0]
-        _debug(record.stopstalk_handle, site, custom)
         site_delay = site.lower() + "_delay"
         submissions_count = get_submissions(record.id,
                                             record[site.lower() + "_handle"],
                                             record.stopstalk_handle,
                                             submissions[1],
                                             site,
-                                            custom)
+                                            custom,
+                                            logger)
         total_submissions_retrieved += submissions_count
         if retrieval_type == "daily_retrieve" and \
            site not in skipped_retrieval and \
