@@ -47,6 +47,7 @@ INVALID_HANDLES = None
 failed_user_retrievals = []
 retrieval_type = None
 plink_to_id = {}
+todays_date = datetime.datetime.today().date()
 
 # ==============================================================================
 class Logger:
@@ -79,6 +80,7 @@ class Logger:
 
 # -----------------------------------------------------------------------------
 def insert_this_batch():
+    print "insert_this_batch start " + str(datetime.datetime.now())
     global rows
 
     columns = "(`user_id`, `custom_user_id`, `stopstalk_handle`, " + \
@@ -90,10 +92,12 @@ def insert_this_batch():
                     columns + """ VALUES """ + \
                     ",".join(rows) + """;"""
         db.executesql(sql_query)
+    print "insert_this_batch end " + str(datetime.datetime.now())
 
 # -----------------------------------------------------------------------------
 def flush_problem_stats():
 
+    print "flush_problem_stats start " + str(datetime.datetime.now())
     global problem_solved_stats
 
     def _stringify(given_set):
@@ -101,6 +105,7 @@ def flush_problem_stats():
 
     if len(problem_solved_stats) == 0:
         # No processing required
+        print "flush_problem_stats end " + str(datetime.datetime.now())
         return
 
     # Get the existing user_ids and custom_user_ids for taking union
@@ -212,6 +217,7 @@ VALUES %s
 
     # Flush the actual dict
     problem_solved_stats = {}
+    print "flush_problem_stats end " + str(datetime.datetime.now())
 
 # -----------------------------------------------------------------------------
 def process_solved_counts(problem_link, problem_name, status, user_id, custom):
@@ -234,23 +240,20 @@ def get_submissions(user_id,
                     stopstalk_handle,
                     submissions,
                     site,
-                    custom,
-                    logger):
+                    custom):
     """
         Get the submissions and populate the database
     """
 
     db = current.db
-    count = 0
+    submission_count = len(submissions)
 
-    if submissions == {}:
-        logger.log(site, "0")
-        return 0
+    if submission_count == 0:
+        return submission_count
 
     global rows
 
     for submission in submissions:
-        count += 1
         row = []
         if custom:
             row.extend(["--", user_id])
@@ -298,12 +301,7 @@ def get_submissions(user_id,
             insert_this_batch()
             rows = []
 
-    if count != 0:
-        logger.log(site, str(count))
-    else:
-        logger.log(site, "0")
-
-    return count
+    return submission_count
 
 # ----------------------------------------------------------------------------
 def handle_not_found(site, site_handle):
@@ -325,6 +323,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
     global INVALID_HANDLES
     global failed_user_retrievals
     global plink_to_id
+    global todays_date
 
     list_of_submissions = []
     retrieval_failures = []
@@ -355,7 +354,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
         # Rocked it totally ! ;)
         if retrieval_type == "daily_retrieve" and \
            datetime.timedelta(days=nrtable_record[site_delay] / 5 + 1) + \
-           last_retrieved.date() > datetime.datetime.today().date():
+           last_retrieved.date() > todays_date:
             logger.log(site, "skipped")
             skipped_retrieval.add(site)
             continue
@@ -390,6 +389,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
                 # want new_user script to pick this user again and again
                 record.update({site_lr: datetime.datetime.now()})
             else:
+                logger.log(site, len(submissions))
                 list_of_submissions.append((site, submissions))
                 # Immediately update the last_retrieved of the record
                 # Note: Only the record object is updated & not reflected in DB
@@ -405,13 +405,14 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
     for submissions in list_of_submissions:
         site = submissions[0]
         site_delay = site.lower() + "_delay"
+        logger.log(site, "get_submissions start")
         submissions_count = get_submissions(record.id,
                                             record[site.lower() + "_handle"],
                                             record.stopstalk_handle,
                                             submissions[1],
                                             site,
-                                            custom,
-                                            logger)
+                                            custom)
+        logger.log(site, "get_submissions end")
         total_submissions_retrieved += submissions_count
         if retrieval_type == "daily_retrieve" and \
            site not in skipped_retrieval and \
