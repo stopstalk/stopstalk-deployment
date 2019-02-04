@@ -72,7 +72,7 @@ def get_request(url, headers={}, timeout=current.TIMEOUT, params={}):
             # 401 is raised when a newer access token is generated
             print response.status_code
             if url.__contains__("codechef.com") and response.status_code == 401:
-                current.REDIS_CLIENT.del("codechef_access_token")
+                current.REDIS_CLIENT.delete("codechef_access_token")
             return OTHER_FAILURE
         i += 1
 
