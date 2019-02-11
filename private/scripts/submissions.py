@@ -353,7 +353,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
 
         # Rocked it totally ! ;)
         if retrieval_type == "daily_retrieve" and \
-           datetime.timedelta(days=nrtable_record[site_delay] / 5 + 1) + \
+           datetime.timedelta(days=nrtable_record[site_delay] / 3 + 1) + \
            last_retrieved.date() > todays_date:
             logger.log(site, "skipped")
             skipped_retrieval.add(site)
