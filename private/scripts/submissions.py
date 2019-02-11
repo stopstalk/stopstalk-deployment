@@ -80,7 +80,6 @@ class Logger:
 
 # -----------------------------------------------------------------------------
 def insert_this_batch():
-    print "insert_this_batch start " + str(datetime.datetime.now())
     global rows
 
     columns = "(`user_id`, `custom_user_id`, `stopstalk_handle`, " + \
@@ -92,12 +91,10 @@ def insert_this_batch():
                     columns + """ VALUES """ + \
                     ",".join(rows) + """;"""
         db.executesql(sql_query)
-    print "insert_this_batch end " + str(datetime.datetime.now())
 
 # -----------------------------------------------------------------------------
 def flush_problem_stats():
 
-    print "flush_problem_stats start " + str(datetime.datetime.now())
     global problem_solved_stats
 
     def _stringify(given_set):
@@ -105,7 +102,6 @@ def flush_problem_stats():
 
     if len(problem_solved_stats) == 0:
         # No processing required
-        print "flush_problem_stats end " + str(datetime.datetime.now())
         return
 
     # Get the existing user_ids and custom_user_ids for taking union
@@ -217,7 +213,6 @@ VALUES %s
 
     # Flush the actual dict
     problem_solved_stats = {}
-    print "flush_problem_stats end " + str(datetime.datetime.now())
 
 # -----------------------------------------------------------------------------
 def process_solved_counts(problem_link, problem_name, status, user_id, custom):
@@ -597,7 +592,6 @@ def refreshed_users():
 
 # ----------------------------------------------------------------------------
 def codechef_new_retrievals():
-    print datetime.datetime.now()
     query = (cftable.codechef_handle != "") & \
             (cftable.codechef_lr == current.INITIAL_DATE)
     custom_friend = db(query).select(orderby="<random>").first()
