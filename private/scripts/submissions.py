@@ -28,6 +28,8 @@ import datetime
 import utilities
 import sites
 from gevent import monkey
+from health_metrics import MetricHandler
+
 gevent.monkey.patch_all(thread=False)
 
 rows = []
@@ -48,6 +50,8 @@ failed_user_retrievals = []
 retrieval_type = None
 plink_to_id = {}
 todays_date = datetime.datetime.today().date()
+
+metric_handlers = {}
 
 # ==============================================================================
 class Logger:
@@ -77,6 +81,33 @@ class Logger:
                                   self.custom_str,
                                   site,
                                   message)
+
+# -----------------------------------------------------------------------------
+def init_metric_handlers():
+    global metric_handlers
+
+    genre_to_kind = {"submission_count": "just_count",
+                     "retrieval_count": "success_failure",
+                     "skipped_retrievals": "just_count",
+                     "handle_not_found": "just_count",
+                     "new_invalid_handle": "just_count",
+                     "retrieval_times": "average"}
+
+    # This should only log if the retrieval type is the daily retrieval
+    log_to_redis = (retrieval_type == "daily_retrieve")
+    for site in current.SITES:
+        lower_site = site.lower()
+        metric_handlers[lower_site] = {}
+        for genre in genre_to_kind:
+            metric_handlers[lower_site][genre] = MetricHandler(genre,
+                                                               genre_to_kind[genre],
+                                                               lower_site,
+                                                               log_to_redis)
+
+    # for site in current.SITES:
+    #     lower_site = site.lower()
+    #     for key in metric_handlers[lower_site]:
+    #         metric_handlers[lower_site][key].flush_keys()
 
 # -----------------------------------------------------------------------------
 def insert_this_batch():
@@ -299,7 +330,7 @@ def get_submissions(user_id,
     return submission_count
 
 # ----------------------------------------------------------------------------
-def handle_not_found(site, site_handle):
+def new_handle_not_found(site, site_handle):
     """
         Add this handle to the invalid_handle table
 
@@ -307,6 +338,7 @@ def handle_not_found(site, site_handle):
         @param site_handle (String): Site handle which returned 404
     """
 
+    metric_handlers[site.lower()]["new_invalid_handle"].increment_count("total", 1)
     db.invalid_handle.insert(site=site, handle=site_handle)
 
 # ----------------------------------------------------------------------------
@@ -319,6 +351,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
     global failed_user_retrievals
     global plink_to_id
     global todays_date
+    global metric_handlers
 
     list_of_submissions = []
     retrieval_failures = []
@@ -341,9 +374,10 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
 
     for site in all_sites:
 
-        site_handle = record[site.lower() + "_handle"]
-        site_lr = site.lower() + "_lr"
-        site_delay = site.lower() + "_delay"
+        lower_site = site.lower()
+        site_handle = record[lower_site + "_handle"]
+        site_lr = lower_site + "_lr"
+        site_delay = lower_site + "_delay"
         last_retrieved = record[site_lr]
 
         # Rocked it totally ! ;)
@@ -351,6 +385,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
            datetime.timedelta(days=nrtable_record[site_delay] / 3 + 1) + \
            last_retrieved.date() > todays_date:
             logger.log(site, "skipped")
+            metric_handlers[lower_site]["skipped_retrievals"].increment_count("total", 1)
             skipped_retrieval.add(site)
             continue
 
@@ -358,6 +393,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
 
         if (site_handle, site) in INVALID_HANDLES:
             logger.log(site, "not found:" + site_handle)
+            metric_handlers[lower_site]["handle_not_found"].increment_count("total", 1)
             record.update({site_lr: datetime.datetime.now()})
             continue
 
@@ -367,24 +403,32 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
 
             # Retrieve submissions from the profile site
             site_method = P.get_submissions
+            start_retrieval_time = time.time()
             if site == "CodeForces":
                 submissions = site_method(last_retrieved, plink_to_id)
             else:
                 submissions = site_method(last_retrieved)
+            total_retrieval_time = time.time() - start_retrieval_time
+            metric_handlers[lower_site]["retrieval_times"].add_to_list("list", total_retrieval_time)
             if submissions in (SERVER_FAILURE, OTHER_FAILURE):
                 logger.log(site, submissions)
 
+                metric_handlers[lower_site]["retrieval_count"].increment_count("failure", 1)
                 # Add the failure sites for inserting data into failed_retrieval
                 retrieval_failures.append(site)
                 current.REDIS_CLIENT.sadd("website_down_" + site.lower(), record.stopstalk_handle)
             elif submissions == NOT_FOUND:
                 logger.log(site, "new invalid handle:" + site_handle)
-                handle_not_found(site, site_handle)
+                new_handle_not_found(site, site_handle)
                 # Update the last retrieved of an invalid handle as we don't
                 # want new_user script to pick this user again and again
                 record.update({site_lr: datetime.datetime.now()})
             else:
-                logger.log(site, len(submissions))
+                submission_len = len(submissions)
+                metric_handlers[lower_site]["retrieval_count"].increment_count("success", 1)
+                metric_handlers[lower_site]["submission_count"].increment_count("total", submission_len)
+
+                logger.log(site, submission_len)
                 list_of_submissions.append((site, submissions))
                 # Immediately update the last_retrieved of the record
                 # Note: Only the record object is updated & not reflected in DB
@@ -399,15 +443,14 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
     total_submissions_retrieved = 0
     for submissions in list_of_submissions:
         site = submissions[0]
-        site_delay = site.lower() + "_delay"
-        logger.log(site, "get_submissions start")
+        lower_site = site.lower()
+        site_delay = lower_site + "_delay"
         submissions_count = get_submissions(record.id,
-                                            record[site.lower() + "_handle"],
+                                            record[lower_site + "_handle"],
                                             record.stopstalk_handle,
                                             submissions[1],
                                             site,
                                             custom)
-        logger.log(site, "get_submissions end")
         total_submissions_retrieved += submissions_count
         if retrieval_type == "daily_retrieve" and \
            site not in skipped_retrieval and \
@@ -610,6 +653,7 @@ if __name__ == "__main__":
 
     retrieval_type = sys.argv[1]
 
+    init_metric_handlers()
     if retrieval_type == "new_users":
         users, custom_users = new_users()
     elif retrieval_type == "daily_retrieve":
