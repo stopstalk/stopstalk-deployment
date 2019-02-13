@@ -144,11 +144,12 @@ def urltosite(url):
         @param url (String): Site URL
         @return url (String): Site
     """
-
-    if url.__contains__("uva.onlinejudge.org"):
+    if url.__contains__("uva.onlinejudge.org") or url.__contains__("uhunt.felix-halim.net"):
         return "uva"
     if url.__contains__("acm.timus.ru"):
         return "timus"
+    if url.__contains__("codechef.com"):
+        return "codechef"
     # Note: try/except is not added because this function is not to
     #       be called for invalid problem urls
     site = re.search(r"www\..*?\.com", url).group()

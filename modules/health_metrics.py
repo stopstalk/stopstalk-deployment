@@ -22,6 +22,12 @@
 
 from gluon import current
 
+kind_mapping = {
+    "just_count": ["total"],
+    "success_failure": ["success", "failure"],
+    "average": ["list"]
+}
+
 # ==============================================================================
 def get_redis_int_value(key_name):
     value = current.REDIS_CLIENT.get(key_name)
@@ -45,6 +51,8 @@ class MetricHandler(object):
 
         # Kind of tracking that we need to do
         self.genre = genre
+        # The label to print in the health report
+        self.label = " ".join([x.capitalize() for x in self.genre.split("_")])
         # Just count or percentage
         self.kind = kind
         # Submission site
@@ -55,19 +63,11 @@ class MetricHandler(object):
         # The redis keys which will be used
         self.redis_keys = {}
 
-        # grep the code before changing any of these values
-        if self.kind == "just_count":
-            things = ["total"]
-        elif self.kind == "success_failure":
-            things = ["success", "failure"]
-        elif self.kind == "average":
-            things = ["list"]
-
         print "------------------\nKeys\n"
-        for type_of_key in things:
-            self.redis_keys[type_of_key] = "%s__%s__%s" % (self.genre,
-                                                           self.site,
-                                                           type_of_key)
+        for type_of_key in kind_mapping[self.kind]:
+            self.redis_keys[type_of_key] = "health_metrics:%s__%s__%s" % (self.genre,
+                                                                          self.site,
+                                                                          type_of_key)
             print self.redis_keys[type_of_key]
 
 
@@ -118,25 +118,23 @@ class MetricHandler(object):
         self.redis_client.lpush(self.redis_keys[type_of_key], value)
 
     # --------------------------------------------------------------------------
-#     def __str__(self):
-#         """
-#             Representation of the MetricHandler
-#         """
-#         success_number = get_redis_int_value(self.redis_keys["success"])
-#         failure_number = get_redis_int_value(self.redis_keys["failure"])
-#         total_number = success_number + failure_number
-#         percentage = "-" if total_number == 0 else str(success_number * 100.0 / total_number) + "%"
-#         return """
-# %s - %s - %s
-# _______________
-# Success: %d
-# Failure: %d
-# Total: %d
-# Percentage: %s
-#         """ % (self.genre,
-#                self.kind,
-#                self.site,
-#                success_number,
-#                failure_number,
-#                total_number,
-#                percentage)
+    def __str__(self):
+        """
+            Representation of the MetricHandler
+        """
+        return_str = self.label + ": "
+        if self.kind == "just_count":
+            return_str += str(get_redis_int_value(self.redis_keys["total"]))
+        elif self.kind == "success_failure":
+            return_str += str(get_redis_int_value(self.redis_keys["success"])) + " " + \
+                          str(get_redis_int_value(self.redis_keys["failure"]))
+        elif self.kind == "average":
+            all_values = self.redis_client.lrange(self.redis_keys["list"], 0, -1)
+            if len(all_values):
+                all_values = [float(x) for x in all_values]
+                average = sum(all_values) * 1.0 / len(all_values)
+                return_str += str(average)
+            else:
+                return_str += "-"
+
+        return return_str

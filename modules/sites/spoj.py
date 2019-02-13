@@ -104,7 +104,9 @@ class Profile(object):
                   str(start)
 
             start += 20
-            t = get_request(url, timeout=10)
+            t = get_request(url,
+                            timeout=10,
+                            is_daily_retrieval=self.is_daily_retrieval)
             if t in REQUEST_FAILURES:
                 return t
 
@@ -229,7 +231,8 @@ class Profile(object):
             try:
                 response = get_request(current.spoj_lambda_url,
                                        params=lambda_params,
-                                       timeout=30)
+                                       timeout=30,
+                                       is_daily_retrieval=self.is_daily_retrieval)
                 if response in REQUEST_FAILURES:
                     self.retrieval_failure = response
                     return
@@ -264,7 +267,7 @@ class Profile(object):
             time.sleep(1)
 
     # -------------------------------------------------------------------------
-    def get_submissions(self, last_retrieved):
+    def get_submissions(self, last_retrieved, is_daily_retrieval):
         """
             Retrieve Spoj submissions after last retrieved timestamp
 
@@ -274,13 +277,16 @@ class Profile(object):
         """
 
         handle = self.handle
+        self.is_daily_retrieval = is_daily_retrieval
         self.submissions = []
         str_init_time = time.strptime(str(current.INITIAL_DATE),
                                       "%Y-%m-%d %H:%M:%S")
         # Test for invalid handles
         if  last_retrieved == str_init_time:
             url = current.SITES[self.site] + "users/" + handle
-            first_response = get_request(url, timeout=10)
+            first_response = get_request(url,
+                                         timeout=10,
+                                         is_daily_retrieval=self.is_daily_retrieval)
 
             if first_response in REQUEST_FAILURES:
                 return first_response

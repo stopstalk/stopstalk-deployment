@@ -91,7 +91,9 @@ def init_metric_handlers():
                      "skipped_retrievals": "just_count",
                      "handle_not_found": "just_count",
                      "new_invalid_handle": "just_count",
-                     "retrieval_times": "average"}
+                     "retrieval_times": "average",
+                     "request_stats": "success_failure",
+                     "request_times": "average"}
 
     # This should only log if the retrieval type is the daily retrieval
     log_to_redis = (retrieval_type == "daily_retrieve")
@@ -360,6 +362,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
     nrtable_record = db(nrtable[user_column_name] == record.id).select().first()
     skipped_retrieval = set([])
 
+    is_daily_retrieval = (retrieval_type == "daily_retrieve")
     logger = Logger(record.stopstalk_handle, custom)
 
     if nrtable_record is None:
@@ -381,7 +384,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
         last_retrieved = record[site_lr]
 
         # Rocked it totally ! ;)
-        if retrieval_type == "daily_retrieve" and \
+        if is_daily_retrieval and \
            datetime.timedelta(days=nrtable_record[site_delay] / 3 + 1) + \
            last_retrieved.date() > todays_date:
             logger.log(site, "skipped")
@@ -405,9 +408,9 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
             site_method = P.get_submissions
             start_retrieval_time = time.time()
             if site == "CodeForces":
-                submissions = site_method(last_retrieved, plink_to_id)
+                submissions = site_method(last_retrieved, plink_to_id, is_daily_retrieval)
             else:
-                submissions = site_method(last_retrieved)
+                submissions = site_method(last_retrieved, is_daily_retrieval)
             total_retrieval_time = time.time() - start_retrieval_time
             metric_handlers[lower_site]["retrieval_times"].add_to_list("list", total_retrieval_time)
             if submissions in (SERVER_FAILURE, OTHER_FAILURE):
@@ -711,5 +714,16 @@ if __name__ == "__main__":
     if len(failed_user_retrievals):
         sql_query = "%s %s;" % (insert_query, ",".join(failed_user_retrievals))
         db.executesql(sql_query)
+
+    for site in current.SITES:
+        lower_site = site.lower()
+        print site
+        print "----------"
+        for key in metric_handlers[lower_site]:
+            print str(metric_handlers[lower_site][key])
+            metric_handlers[lower_site][key].flush_keys()
+
+        print "______________________________________"
+
 
 # END =========================================================================
