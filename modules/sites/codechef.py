@@ -53,6 +53,7 @@ class Profile(object):
         self.handle = handle
         self.submissions = []
         self.access_token = None
+        self.is_daily_retrieval = False
 
     # --------------------------------------------------------------------------
     @staticmethod
@@ -135,7 +136,8 @@ class Profile(object):
         response = get_request("%s/users/%s" % (CODECHEF_API_URL, self.handle),
                                headers={"User-Agent": user_agent,
                                         "Authorization": "Bearer %s" % self.access_token},
-                               timeout=10)
+                               timeout=10,
+                               is_daily_retrieval=self.is_daily_retrieval)
         if response in REQUEST_FAILURES:
             return response
 
@@ -202,7 +204,8 @@ class Profile(object):
             response = get_request("%s/submissions" % CODECHEF_API_URL,
                                    headers={"Authorization": "Bearer %s" % self.access_token},
                                    params=SUBMISSION_REQUEST_PARAMS,
-                                   timeout=10)
+                                   timeout=10,
+                                   is_daily_retrieval=self.is_daily_retrieval)
             if response in REQUEST_FAILURES:
                 return response
 
@@ -252,11 +255,12 @@ class Profile(object):
         return submissions
 
     # --------------------------------------------------------------------------
-    def get_submissions(self, last_retrieved):
+    def get_submissions(self, last_retrieved, is_daily_retrieval):
         """
             Retrieve CodeChef submissions after last retrieved timestamp
 
             @param last_retrieved (DateTime): Last retrieved timestamp for the user
+            @param is_daily_retrieval (Boolean): If this call is from daily retrieval cron
             @return (Dict): Dictionary of submissions containing all the
                             information about the submissions
         """
@@ -266,6 +270,7 @@ class Profile(object):
             # there is no other fallback method which can be used for retrieval
             return SERVER_FAILURE
 
+        self.is_daily_retrieval = is_daily_retrieval
         try:
             # If the handle is a URL return NOT_FOUND
             re.match("https?://.*\.com", self.handle).group()

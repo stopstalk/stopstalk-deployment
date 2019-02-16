@@ -102,11 +102,13 @@ class Profile(object):
         return False
 
     # -------------------------------------------------------------------------
-    def get_submissions(self, last_retrieved, plink_to_id):
+    def get_submissions(self, last_retrieved, plink_to_id, is_daily_retrieval):
         """
             Retrieve CodeForces submissions after last retrieved timestamp
 
             @param last_retrieved (DateTime): Last retrieved timestamp for the user
+            @param is_daily_retrieval (Boolean): If this call is from daily retrieval cron
+
             @return (Dict): Dictionary of submissions containing all the
                             information about the submissions
         """
@@ -127,7 +129,8 @@ class Profile(object):
 
         tmp = get_request(url,
                           headers={"User-Agent": user_agent},
-                          timeout=timeout)
+                          timeout=timeout,
+                          is_daily_retrieval=is_daily_retrieval)
 
         if tmp in REQUEST_FAILURES:
             return tmp

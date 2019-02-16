@@ -82,16 +82,18 @@ class Profile(object):
     @staticmethod
     def is_invalid_handle(handle):
         url = "https://www.hackerearth.com/submissions/" + handle
-        response = get_request(url)
+        response = get_request(url, log_metrics=True)
         if response in REQUEST_FAILURES:
             return True
         return False
 
     # -------------------------------------------------------------------------
-    def get_submissions(self, last_retrieved):
+    def get_submissions(self, last_retrieved, is_daily_retrieval):
         """
             Retrieve HackerEarth submissions after last retrieved timestamp
             @param last_retrieved (DateTime): Last retrieved timestamp for the user
+            @param is_daily_retrieval (Boolean): If this call is from daily retrieval cron
+
             @return (Dict): Dictionary of submissions containing all the
                             information about the submissions
         """
@@ -99,7 +101,7 @@ class Profile(object):
         handle = self.handle
 
         url = "https://www.hackerearth.com/submissions/" + handle
-        t = get_request(url)
+        t = get_request(url, is_daily_retrieval=is_daily_retrieval)
 
         if t in REQUEST_FAILURES:
             return t
@@ -125,7 +127,7 @@ class Profile(object):
         for page_number in xrange(1, 1000):
             url = "https://www.hackerearth.com/AJAX/feed/newsfeed/submission/user/" + handle + "/?page=" + str(page_number)
 
-            tmp = get_request(url, headers=headers, timeout=20)
+            tmp = get_request(url, headers=headers, timeout=20, is_daily_retrieval=is_daily_retrieval)
 
             if tmp in REQUEST_FAILURES:
                 return tmp

@@ -116,11 +116,13 @@ class Profile(object):
         return False
 
     # -------------------------------------------------------------------------
-    def get_submissions(self, last_retrieved):
+    def get_submissions(self, last_retrieved, is_daily_retrieval):
         """
             Retrieve HackerRank submissions after last retrieved timestamp
 
             @param last_retrieved (DateTime): Last retrieved timestamp for the user
+            @param is_daily_retrieval (Boolean): If this call is from daily retrieval cron
+
             @return (Dict): Dictionary of submissions containing all the
                             information about the submissions
         """
@@ -137,7 +139,9 @@ class Profile(object):
         for i in xrange(1000):
 
             request_params["cursor"] = next_cursor
-            response = get_request(url, params=request_params)
+            response = get_request(url,
+                                   params=request_params,
+                                   is_daily_retrieval=is_daily_retrieval)
 
             if response in REQUEST_FAILURES:
                 return response
