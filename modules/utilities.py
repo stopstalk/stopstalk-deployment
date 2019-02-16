@@ -177,6 +177,8 @@ def urltosite(url):
         return "timus"
     if url.__contains__("codechef.com"):
         return "codechef"
+    if url == current.spoj_lambda_url:
+        return "spoj"
     # Note: try/except is not added because this function is not to
     #       be called for invalid problem urls
     site = re.search(r"www\..*?\.com", url).group()
