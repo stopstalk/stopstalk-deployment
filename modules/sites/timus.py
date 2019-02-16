@@ -81,11 +81,13 @@ class Profile(object):
         return True
 
     # -------------------------------------------------------------------------
-    def get_submissions(self, last_retrieved):
+    def get_submissions(self, last_retrieved, is_daily_retrieval):
         """
             Retrieve Timus submissions after last retrieved timestamp
 
             @param last_retrieved (DateTime): Last retrieved timestamp for the user
+            @param is_daily_retrieval (Boolean): If this call is from daily retrieval cron
+
             @return (Dict): Dictionary of submissions containing all the
                             information about the submissions
         """
@@ -102,7 +104,7 @@ class Profile(object):
             else:
                 url = initial_url + "&from=" + str(from_id)
 
-            response = get_request(url)
+            response = get_request(url, is_daily_retrieval=is_daily_retrieval)
             if response in REQUEST_FAILURES:
                 return response
 

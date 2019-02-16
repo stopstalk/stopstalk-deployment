@@ -47,11 +47,13 @@ class Profile(object):
         return False
 
     # -------------------------------------------------------------------------
-    def get_submissions(self, last_retrieved):
+    def get_submissions(self, last_retrieved, is_daily_retrieval):
         """
             Retrieve UVa submissions after last retrieved timestamp
 
             @param last_retrieved (DateTime): Last retrieved timestamp for the user
+            @param is_daily_retrieval (Boolean): If this call is from daily retrieval cron
+
             @return (Dict): Dictionary of submissions containing all the
                             information about the submissions
         """
@@ -64,7 +66,7 @@ class Profile(object):
             uva_id = str(row.uva_id)
         else:
             url = "http://uhunt.felix-halim.net/api/uname2uid/" + handle
-            response = get_request(url)
+            response = get_request(url, is_daily_retrieval=is_daily_retrieval)
 
             if response in (SERVER_FAILURE, OTHER_FAILURE):
                 return response
@@ -73,7 +75,7 @@ class Profile(object):
             uva_id = response.text
 
         url = "http://uhunt.felix-halim.net/api/subs-user/" + uva_id
-        response = get_request(url)
+        response = get_request(url, is_daily_retrieval=is_daily_retrieval)
         if response in REQUEST_FAILURES:
             return response
 
