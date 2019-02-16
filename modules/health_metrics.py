@@ -118,6 +118,35 @@ class MetricHandler(object):
         self.redis_client.lpush(self.redis_keys[type_of_key], value)
 
     # --------------------------------------------------------------------------
+    def _get_average_string(self):
+        all_values = self.redis_client.lrange(self.redis_keys["list"], 0, -1)
+        return_str = None
+        if len(all_values):
+            all_values = [float(x) for x in all_values]
+            average = sum(all_values) * 1.0 / len(all_values)
+            return_str = str(average)
+        else:
+            return_str = "-"
+        return return_str
+
+    # --------------------------------------------------------------------------
+    def get_html(self):
+        html_body = "<tr><td><b>%s</b></td>" % self.label
+        if self.kind == "just_count":
+            html_body += "<td colspan='2'>Total: %d</td>" % get_redis_int_value(self.redis_keys["total"])
+        elif self.kind == "success_failure":
+            html_body += """
+<td>Success: %d</td><td>Failure: %d</td>
+            """ % (get_redis_int_value(self.redis_keys["success"]),
+                   get_redis_int_value(self.redis_keys["failure"]))
+        elif self.kind == "average":
+            html_body += "<td colspan='2'>Average: %s</td>" % self._get_average_string()
+        else:
+            html_body += "<td colspane='2'>Unknown kind</td>"
+        html_body += "</tr>"
+        return html_body
+
+    # --------------------------------------------------------------------------
     def __str__(self):
         """
             Representation of the MetricHandler
@@ -129,12 +158,7 @@ class MetricHandler(object):
             return_str += str(get_redis_int_value(self.redis_keys["success"])) + " " + \
                           str(get_redis_int_value(self.redis_keys["failure"]))
         elif self.kind == "average":
-            all_values = self.redis_client.lrange(self.redis_keys["list"], 0, -1)
-            if len(all_values):
-                all_values = [float(x) for x in all_values]
-                average = sum(all_values) * 1.0 / len(all_values)
-                return_str += str(average)
-            else:
-                return_str += "-"
+            return_str += self._get_average_string()
 
         return return_str
+

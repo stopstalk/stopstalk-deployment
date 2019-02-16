@@ -24,9 +24,36 @@ import re
 import datetime
 import json
 from boto3 import client
+from health_metrics import MetricHandler
 from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, I, \
                   TEXTAREA, SELECT, OPTION, URL, BUTTON
+
+# -----------------------------------------------------------------------------
+def init_metric_handlers(log_to_redis):
+
+    metric_handlers = {}
+    genre_to_kind = {"submission_count": "just_count",
+                     "retrieval_count": "success_failure",
+                     "skipped_retrievals": "just_count",
+                     "handle_not_found": "just_count",
+                     "new_invalid_handle": "just_count",
+                     "retrieval_times": "average",
+                     "request_stats": "success_failure",
+                     "request_times": "average"}
+
+    # This should only log if the retrieval type is the daily retrieval
+    for site in current.SITES:
+        lower_site = site.lower()
+        metric_handlers[lower_site] = {}
+        for genre in genre_to_kind:
+            metric_handlers[lower_site][genre] = MetricHandler(genre,
+                                                               genre_to_kind[genre],
+                                                               lower_site,
+                                                               log_to_redis)
+
+    return metric_handlers
+
 
 # -----------------------------------------------------------------------------
 def get_boto3_client():
