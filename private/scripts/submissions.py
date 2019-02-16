@@ -28,7 +28,6 @@ import datetime
 import utilities
 import sites
 from gevent import monkey
-from health_metrics import MetricHandler
 
 gevent.monkey.patch_all(thread=False)
 
@@ -81,35 +80,6 @@ class Logger:
                                   self.custom_str,
                                   site,
                                   message)
-
-# -----------------------------------------------------------------------------
-def init_metric_handlers():
-    global metric_handlers
-
-    genre_to_kind = {"submission_count": "just_count",
-                     "retrieval_count": "success_failure",
-                     "skipped_retrievals": "just_count",
-                     "handle_not_found": "just_count",
-                     "new_invalid_handle": "just_count",
-                     "retrieval_times": "average",
-                     "request_stats": "success_failure",
-                     "request_times": "average"}
-
-    # This should only log if the retrieval type is the daily retrieval
-    log_to_redis = (retrieval_type == "daily_retrieve")
-    for site in current.SITES:
-        lower_site = site.lower()
-        metric_handlers[lower_site] = {}
-        for genre in genre_to_kind:
-            metric_handlers[lower_site][genre] = MetricHandler(genre,
-                                                               genre_to_kind[genre],
-                                                               lower_site,
-                                                               log_to_redis)
-
-    # for site in current.SITES:
-    #     lower_site = site.lower()
-    #     for key in metric_handlers[lower_site]:
-    #         metric_handlers[lower_site][key].flush_keys()
 
 # -----------------------------------------------------------------------------
 def insert_this_batch():
@@ -654,9 +624,10 @@ def codechef_new_retrievals():
 
 if __name__ == "__main__":
 
+    global metric_handlers
     retrieval_type = sys.argv[1]
 
-    init_metric_handlers()
+    metric_handlers = utilities.init_metric_handlers((retrieval_type == "daily_retrieve"))
     if retrieval_type == "new_users":
         users, custom_users = new_users()
     elif retrieval_type == "daily_retrieve":
@@ -714,16 +685,5 @@ if __name__ == "__main__":
     if len(failed_user_retrievals):
         sql_query = "%s %s;" % (insert_query, ",".join(failed_user_retrievals))
         db.executesql(sql_query)
-
-    for site in current.SITES:
-        lower_site = site.lower()
-        print site
-        print "----------"
-        for key in metric_handlers[lower_site]:
-            print str(metric_handlers[lower_site][key])
-            metric_handlers[lower_site][key].flush_keys()
-
-        print "______________________________________"
-
 
 # END =========================================================================
