@@ -126,18 +126,25 @@ class MetricHandler(object):
 
     # --------------------------------------------------------------------------
     def get_html(self):
-        html_body = "<tr><td><b>%s</b></td>" % self.label
+        html_body = "<tr><td style='background-color: lavender;'><b>%s</b></td>" % self.label
         if self.kind == "just_count":
-            html_body += "<td colspan='2'>Total: %d</td>" % get_redis_int_value(self.redis_keys["total"])
+            html_body += "<td colspan='3'>Total: %d</td>" % get_redis_int_value(self.redis_keys["total"])
         elif self.kind == "success_failure":
+            success = get_redis_int_value(self.redis_keys["success"])
+            failure = get_redis_int_value(self.redis_keys["failure"])
+            if failure > 0:
+                failure_percentage = str(failure * 100.0 / (failure + success))
+            else:
+                failure_percentage = "-"
             html_body += """
-<td>Success: %d</td><td>Failure: %d</td>
-            """ % (get_redis_int_value(self.redis_keys["success"]),
-                   get_redis_int_value(self.redis_keys["failure"]))
+<td>Success: %d</td><td>Failure: %d</td><td>Failure per: %s</td>
+            """ % (success,
+                   failure,
+                   failure_percentage)
         elif self.kind == "average":
-            html_body += "<td colspan='2'>Average: %s</td>" % self._get_average_string()
+            html_body += "<td colspan='3'>Average: %s</td>" % self._get_average_string()
         else:
-            html_body += "<td colspane='2'>Unknown kind</td>"
+            html_body += "<td colspane='3'>Unknown kind</td>"
         html_body += "</tr>"
         return html_body
 

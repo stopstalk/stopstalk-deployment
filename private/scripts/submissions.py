@@ -624,7 +624,6 @@ def codechef_new_retrievals():
 
 if __name__ == "__main__":
 
-    global metric_handlers
     retrieval_type = sys.argv[1]
 
     metric_handlers = utilities.init_metric_handlers((retrieval_type == "daily_retrieve"))

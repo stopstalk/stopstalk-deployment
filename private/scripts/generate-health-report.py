@@ -28,8 +28,8 @@ metric_handlers = utilities.init_metric_handlers(log_to_redis=True)
 html_body = "<html><head><title>StopStalk submission retrieval</title></head><body><h2>StopStalk Submission Retrieval Report</h2>"
 for site in current.SITES:
     lower_site = site.lower()
-    html_body += "<h4>%s</h4>" % site
-    html_body += "<table border='1' cellpadding='2' cellspacing='0'>"
+    html_body += "<h3><u>%s</u></h3>" % site
+    html_body += "<table border='1' cellpadding='4' cellspacing='0'>"
     for key in metric_handlers[lower_site]:
         html_body += metric_handlers[lower_site][key].get_html()
         metric_handlers[lower_site][key].flush_keys()
