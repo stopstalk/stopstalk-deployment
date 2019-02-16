@@ -9,6 +9,7 @@
 /rating_history/users/*.txt
 /rating_history/custom_users/*.txt
 /static/minified_files/*
+/private/scripts/google_index/service-account.json
 .~lock.*.csv#
 *.log
 *.pyc
