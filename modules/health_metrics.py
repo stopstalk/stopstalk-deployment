@@ -63,13 +63,10 @@ class MetricHandler(object):
         # The redis keys which will be used
         self.redis_keys = {}
 
-        print "------------------\nKeys\n"
         for type_of_key in kind_mapping[self.kind]:
             self.redis_keys[type_of_key] = "health_metrics:%s__%s__%s" % (self.genre,
                                                                           self.site,
                                                                           type_of_key)
-            print self.redis_keys[type_of_key]
-
 
     # --------------------------------------------------------------------------
     def flush_keys(self):
@@ -93,7 +90,6 @@ class MetricHandler(object):
         if self.log_to_redis is False:
             return
 
-        print "increment_count %s %s %s %s" % (self.site, self.genre, type_of_key, increment_amount)
         redis_key = self.redis_keys[type_of_key]
         value = self.redis_client.get(redis_key)
         if value is None:
@@ -114,7 +110,6 @@ class MetricHandler(object):
         if self.log_to_redis is False:
             return
 
-        print "add_to_list %s %s %s" % (self.site, self.genre, value)
         self.redis_client.lpush(self.redis_keys[type_of_key], value)
 
     # --------------------------------------------------------------------------
