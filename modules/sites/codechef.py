@@ -54,6 +54,7 @@ class Profile(object):
         self.submissions = []
         self.access_token = None
         self.is_daily_retrieval = False
+        self.last_retrieved_reached = False
 
     # --------------------------------------------------------------------------
     @staticmethod
@@ -218,6 +219,7 @@ class Profile(object):
                 curr = time.strptime(submission["date"],
                                      TIME_CONVERSION_STRING)
                 if curr <= last_retrieved:
+                    self.last_retrieved_reached = True
                     return submissions
 
                 problem_link = self.__get_problem_link(submission["contestCode"],
@@ -306,6 +308,8 @@ class Profile(object):
                 return result
             else:
                 self.submissions.extend(result)
+                if self.last_retrieved_reached:
+                    return self.submissions
 
         return self.submissions
 
