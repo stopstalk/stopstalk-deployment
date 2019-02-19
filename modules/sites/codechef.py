@@ -280,7 +280,7 @@ class Profile(object):
         except AttributeError:
             pass
 
-        start_year = int(current.INITIAL_DATE.split("-")[0])
+        start_year = last_retrieved.tm_year
         current_year = datetime.datetime.now().year
         str_init_time = time.strptime(str(current.INITIAL_DATE),
                                       "%Y-%m-%d %H:%M:%S")
@@ -299,7 +299,9 @@ class Profile(object):
         SUBMISSION_REQUEST_PARAMS["username"] = self.handle
         self.submissions = []
 
+        print start_year, current_year
         for year in xrange(current_year, start_year - 1, -1):
+            print year
             # Years processed in the reverse order to break out when
             # last_retrieved time_stamp is matched
 
