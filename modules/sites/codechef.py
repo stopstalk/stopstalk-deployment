@@ -299,9 +299,7 @@ class Profile(object):
         SUBMISSION_REQUEST_PARAMS["username"] = self.handle
         self.submissions = []
 
-        print start_year, current_year
         for year in xrange(current_year, start_year - 1, -1):
-            print year
             # Years processed in the reverse order to break out when
             # last_retrieved time_stamp is matched
 
