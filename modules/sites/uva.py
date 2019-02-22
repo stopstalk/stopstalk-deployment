@@ -47,11 +47,12 @@ class Profile(object):
         return False
 
     # -------------------------------------------------------------------------
-    def get_submissions(self, last_retrieved, is_daily_retrieval):
+    def get_submissions(self, last_retrieved, uva_problem_dict, is_daily_retrieval):
         """
             Retrieve UVa submissions after last retrieved timestamp
 
             @param last_retrieved (DateTime): Last retrieved timestamp for the user
+            @param uva_problem_dict (Dict): problem_id to problem_name mapping
             @param is_daily_retrieval (Boolean): If this call is from daily retrieval cron
 
             @return (Dict): Dictionary of submissions containing all the
@@ -79,10 +80,6 @@ class Profile(object):
         if response in REQUEST_FAILURES:
             return response
 
-        uvadb = current.uvadb
-        ptable = uvadb.problem
-        uvaproblems = uvadb(ptable).select(ptable.problem_id, ptable.title)
-        uvaproblems = dict([(x.problem_id, x.title) for x in uvaproblems])
         submission_statuses = {90: "AC",
                                70: "WA",
                                30: "CE",
@@ -102,7 +99,7 @@ class Profile(object):
 
         for row in all_submissions:
             try:
-                problem_name = uvaproblems[row[1]]
+                problem_name = uva_problem_dict[row[1]]
             except KeyError:
                 print "Problem name not found in uva problem list: " + str(row[1])
                 continue
