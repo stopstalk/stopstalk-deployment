@@ -45,11 +45,12 @@ OTHER_FAILURE = "OTHER_FAILURE"
 
 TIME_CONVERSION = "%Y-%m-%d %H:%M:%S"
 INVALID_HANDLES = None
+
 failed_user_retrievals = []
 retrieval_type = None
 plink_to_id = {}
 todays_date = datetime.datetime.today().date()
-
+uva_problem_dict = {}
 metric_handlers = {}
 
 # ==============================================================================
@@ -80,6 +81,14 @@ class Logger:
                                   self.custom_str,
                                   site,
                                   message)
+
+# -----------------------------------------------------------------------------
+def populate_uva_problems():
+    global uva_problem_dict
+
+    ptable = uvadb.problem
+    uvaproblems = uvadb(ptable).select(ptable.problem_id, ptable.title)
+    uva_problem_dict = dict([(x.problem_id, x.title) for x in uvaproblems])
 
 # -----------------------------------------------------------------------------
 def insert_this_batch():
@@ -379,6 +388,8 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
             start_retrieval_time = time.time()
             if site == "CodeForces":
                 submissions = site_method(last_retrieved, plink_to_id, is_daily_retrieval)
+            elif site == "UVa":
+                submissions = site_method(last_retrieved, uva_problem_dict, is_daily_retrieval)
             else:
                 submissions = site_method(last_retrieved, is_daily_retrieval)
             total_retrieval_time = time.time() - start_retrieval_time
@@ -625,8 +636,8 @@ def codechef_new_retrievals():
 if __name__ == "__main__":
 
     retrieval_type = sys.argv[1]
-
     metric_handlers = utilities.init_metric_handlers((retrieval_type == "daily_retrieve"))
+
     if retrieval_type == "new_users":
         users, custom_users = new_users()
     elif retrieval_type == "daily_retrieve":
@@ -642,6 +653,8 @@ if __name__ == "__main__":
     else:
         print "Invalid arguments"
         sys.exit()
+
+    populate_uva_problems()
 
     query = ptable.link.contains("codeforces")
     problem_records = db(query).select(ptable.id,
