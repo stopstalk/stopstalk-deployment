@@ -147,24 +147,41 @@ def user_editorials():
     atable = db.auth_user
     ptable = db.problem
 
+    # Get all the problems which do not have an official editorial
     query = (ptable.editorial_link == None) | (ptable.editorial_link == "")
     pids = db(query).select(ptable.id)
     pids = [x.id for x in pids]
+
+    # Get list of all the accepted editorials
     query = (uetable.verification == "accepted")
     rows = db(query).select(orderby=~uetable.id)
+
+    # Rows to show on the leaderboard
     table_rows = []
+
+    # To handle multiple accepted editorials of same user on same problem
     user_id_pid_map = {}
+
+    # To store the user objects who have atleast one accepted editorial
     user_object_map = {}
+
     for row in rows:
-        user_object_map[row.user_id] = atable(row.user_id)
+
+        if user_object_map.has_key(row.user_id) is False:
+            # Store the user object for later usage
+            user_object_map[row.user_id] = atable(row.user_id)
+
         if row.problem_id not in pids:
             # This problem has an official editorial - don't count in leaderboard
             continue
+
         if user_id_pid_map.has_key((row.user_id, row.problem_id)):
+            # This is to handle multiple accepted editorials of same user on same problem
             continue
 
         user_id_pid_map[(row.user_id, row.problem_id)] = row
 
+    # The dictionary to store the count mapping of editorials
     editorial_count_dict = {}
     for key in user_id_pid_map:
         value = user_id_pid_map[key]
@@ -186,6 +203,9 @@ def user_editorials():
 
     table_rows = sorted(table_rows, key=lambda x: (x[0], x[1]), reverse=True)
 
+    # Get all editorials table
+    # ----------------------------
+
     table = TABLE(_class="centered")
     thead = THEAD(TR(TH(T("Problem")),
                      TH(T("Editorial By")),
@@ -194,6 +214,7 @@ def user_editorials():
                      TH(T("Action"))))
     tbody = TBODY()
 
+    # Get the pid, plink and pname for creating links
     query = (ptable.id.belongs([x.problem_id for x in rows]))
     problem_records = db(query).select(ptable.id, ptable.name, ptable.link)
     precords = {}
@@ -201,9 +222,12 @@ def user_editorials():
         precords[precord.id] = {"name": precord.name, "link": precord.link}
 
     for editorial in rows:
+
         user = user_object_map[editorial.user_id]
         record = precords[editorial.problem_id]
+
         number_of_votes = len(editorial.votes.split(",")) if editorial.votes else 0
+
         tr = TR(TD(A(record["name"],
                      _href=URL("problems",
                                "index",
