@@ -65,6 +65,11 @@ def add_custom_friend():
     current_row = json.loads(post_vars["row"])
     original_handle = current_row["stopstalk_handle"]
 
+    if not utilities.is_valid_stopstalk_handle(original_handle):
+        session.flash = T("Expected alphanumeric (Underscore allowed)")
+        redirect(URL("user", "profile", args=original_handle))
+        return
+
     stopstalk_handles = []
     rows = db(atable).select(atable.stopstalk_handle)
     rows = [x.stopstalk_handle for x in rows]

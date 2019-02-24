@@ -77,7 +77,7 @@ response.form_label_separator = myconf.take('forms.separator')
 
 from gluon.tools import Auth, Service, PluginManager
 from datetime import datetime, timedelta
-from utilities import materialize_form
+import utilities
 
 auth = Auth(db)
 service = Service()
@@ -239,7 +239,7 @@ current.send_mail = send_mail
 ## configure auth policy
 auth.settings.registration_requires_verification = True
 auth.settings.reset_password_requires_verification = True
-auth.settings.formstyle = materialize_form
+auth.settings.formstyle = utilities.materialize_form
 auth.settings.login_next = URL("default", "index")
 
 auth.messages.email_sent = T("Verification Email sent")
@@ -321,13 +321,8 @@ def sanitize_fields(form):
 
     if form.vars.stopstalk_handle:
         # 8.
-        stopstalk_handle_error = T("Expected alphanumeric (Underscore allowed)")
-        try:
-            group = match("[0-9a-zA-Z_]*", form.vars.stopstalk_handle).group()
-            if group != form.vars.stopstalk_handle:
-                form.errors.stopstalk_handle = stopstalk_handle_error
-        except AttributeError:
-            form.errors.stopstalk_handle = stopstalk_handle_error
+        if not utilities.is_valid_stopstalk_handle(form.vars.stopstalk_handle):
+            form.errors.stopstalk_handle = T("Expected alphanumeric (Underscore allowed)")
 
     def _remove_at_symbol(site_name):
         if site_name in current.SITES:
@@ -475,7 +470,7 @@ auth.settings.verify_email_onaccept.extend([notify_institute_users,
                                             create_next_retrieval_record,
                                             append_user_to_refreshed_users])
 current.auth = auth
-current.response.formstyle = materialize_form
+current.response.formstyle = utilities.materialize_form
 current.sanitize_fields = sanitize_fields
 current.create_next_retrieval_record = create_next_retrieval_record
 

@@ -30,6 +30,14 @@ from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, \
                   TEXTAREA, SELECT, OPTION, URL, BUTTON
 
 # -----------------------------------------------------------------------------
+def is_valid_stopstalk_handle(handle):
+    try:
+        group = re.match("[0-9a-zA-Z_]*", handle).group()
+        return group == handle
+    except AttributeError:
+        return False
+
+# -----------------------------------------------------------------------------
 def init_metric_handlers(log_to_redis):
 
     metric_handlers = {}
