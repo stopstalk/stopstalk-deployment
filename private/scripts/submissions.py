@@ -336,6 +336,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
 
     list_of_submissions = []
     retrieval_failures = []
+    should_clear_cache = False
     nrtable = db.next_retrieval
     user_column_name = "custom_user_id" if custom else "user_id"
     nrtable_record = db(nrtable[user_column_name] == record.id).select().first()
@@ -377,6 +378,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
             logger.log(site, "not found:" + site_handle)
             metric_handlers[lower_site]["handle_not_found"].increment_count("total", 1)
             record.update({site_lr: datetime.datetime.now()})
+            should_clear_cache = True
             continue
 
         if site_handle:
@@ -400,6 +402,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
                 metric_handlers[lower_site]["retrieval_count"].increment_count("failure", 1)
                 # Add the failure sites for inserting data into failed_retrieval
                 retrieval_failures.append(site)
+                should_clear_cache = True
                 current.REDIS_CLIENT.sadd("website_down_" + site.lower(), record.stopstalk_handle)
             elif submissions == NOT_FOUND:
                 logger.log(site, "new invalid handle:" + site_handle)
@@ -407,6 +410,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
                 # Update the last retrieved of an invalid handle as we don't
                 # want new_user script to pick this user again and again
                 record.update({site_lr: datetime.datetime.now()})
+                should_clear_cache = True
             else:
                 submission_len = len(submissions)
                 metric_handlers[lower_site]["retrieval_count"].increment_count("success", 1)
@@ -417,10 +421,12 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
                 # Immediately update the last_retrieved of the record
                 # Note: Only the record object is updated & not reflected in DB
                 record.update({site_lr: datetime.datetime.now()})
+                should_clear_cache = True
         else:
             # Update this time so that this user is not picked
             # up again and again by new_user cron
             record.update({site_lr: datetime.datetime.now()})
+            should_clear_cache = True
             if retrieval_type == "daily_retrieve":
                 nrtable_record.update({site_delay: 100000})
 
@@ -449,7 +455,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
             nrtable_record.update({site_delay: 0})
 
     # Clear the profile page cache in case there is atleast one submission retrieved
-    if total_submissions_retrieved != 0:
+    if should_clear_cache:
         utilities.clear_profile_page_cache(record.stopstalk_handle)
 
     # To reflect all the updates to record into DB

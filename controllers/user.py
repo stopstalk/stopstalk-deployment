@@ -61,9 +61,8 @@ def add_custom_friend():
     cftable = db.custom_friend
 
     stopstalk_handle = post_vars["stopstalk_handle"]
-    # Modify(Prepare) this dictionary for inserting it again
-    # @ToDo: Need a better method. Major security flaw
-    current_row = eval(post_vars["row"])
+    # Modify (Prepare) this dictionary for inserting it again
+    current_row = json.loads(post_vars["row"])
     original_handle = current_row["stopstalk_handle"]
 
     stopstalk_handles = []
@@ -806,7 +805,9 @@ def profile():
             redirect(URL("user", "profile", args=str(session.handle)))
             return
         else:
-            redirect(URL("default", "user", "login", vars={"_next": URL("user", "profile")}))
+            redirect(URL("default", "user", "login",
+                         vars={"_next": URL("user", "profile")}))
+            return
     else:
         handle = str(request.args[0])
     http_referer = request.env.http_referer
