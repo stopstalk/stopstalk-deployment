@@ -36,6 +36,7 @@
         var clickedButton = {"heart_button": false, "onboarding_button": false};
         var isLoggedIn = ("{{=auth.is_logged_in()}}" === "True");
         var markReadURL = "{{=URL('user', 'mark_read')}}";
+        var loveEditorialURL = "{{=URL('problems', 'love_editorial', extension='json')}}";
     </script>
     {{block head}}{{end}}
     {{

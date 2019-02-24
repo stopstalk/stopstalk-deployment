@@ -521,6 +521,6 @@ nav ul a:hover {
     padding-bottom: 0px;
 }
 
-.profile-page-site-profile-url {
+.profile-page-site-profile-url, #show-info-contributions-leaderboard {
     cursor: pointer;
 }
