@@ -63,6 +63,10 @@
 
         handleSubmissionTabs();
 
+        setTimeout(function() {
+            $('#problem-page-editorial-button').removeClass('pulse');
+        }, 10 * 1000);
+
         var $pieThrobber = $("#view-submission-preloader").clone();
         $pieThrobber.attr('id', 'problemsPagePieThrobber');
         $('#chart_div').html($pieThrobber);
