@@ -46,15 +46,11 @@ def get_menu_tuple(icon_class, tooltip, button_label, url, new_item=False):
     return item_tuple
 
 if session.user_id:
-    response.menu += [get_menu_tuple("fa-bell-o",
-                                     T("Notifications"),
-                                     "Nav Notifications",
-                                     URL("default", "notifications")),
-                      get_menu_tuple("fa-user-secret",
+    response.menu += [get_menu_tuple("fa-user-secret",
                                      T("Custom Friend"),
                                      "Nav Custom Friend",
                                      URL("user", "custom_friend")),
-                      get_menu_tuple("fa-users",
+                      get_menu_tuple("fa-user-plus",
                                      T("Your Friends"),
                                      "Nav Friends",
                                      URL("default", "friends")),
@@ -63,7 +59,12 @@ if session.user_id:
                                      "Nav Todo",
                                      URL("default", "todo"))]
 
-response.menu += [get_menu_tuple("fa-search",
+response.menu += [get_menu_tuple("fa-users",
+                                 T("User Editorials"),
+                                 "Nav User editorials",
+                                 URL("default", "user_editorials"),
+                                 True),
+                  get_menu_tuple("fa-search",
                                  T("Search Friends"),
                                  "Nav Search",
                                  URL("default", "search")),
