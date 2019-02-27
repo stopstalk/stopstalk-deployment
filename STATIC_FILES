@@ -1,1 +1,6 @@
-ALL
+css/stopstalk.css
+images/write-editorials.gif
+js/appjs/default/user_editorials.js
+js/appjs/default/user_wise_editorials.js
+js/appjs/default/layout.js
+js/appjs/problems/index.js
