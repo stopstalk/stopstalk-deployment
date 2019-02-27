@@ -38,7 +38,7 @@ can result into great learning.<br/><br/>
 
 We support writing editorials on StopStalk for various problems on 7 Competitive Programming websites.<br/>
 Contribute to the community and help people with the problems that you have solved.<br/>
-Top 3 winners by the end of March will receive Amazon Gift cards from StopStalk - <a style='color: blue;' href="https://www.stopstalk.com/user_editorials?utm_source=newsletter&utm_medium=email&utm_campaign=user-editorials&utm_content=user-editorials-page">Know more.</a><br/><br/>
+Top 3 contributors by the end of March will receive Amazon Gift cards from StopStalk - <a style='color: blue;' href="https://www.stopstalk.com/user_editorials?utm_source=newsletter&utm_medium=email&utm_campaign=user-editorials&utm_content=user-editorials-page">Know more.</a><br/><br/>
 
 Cheers,<br/>
 Team StopStalk<br/><br/>
