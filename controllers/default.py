@@ -171,7 +171,8 @@ def user_editorials():
             # Store the user object for later usage
             user_object_map[row.user_id] = atable(row.user_id)
 
-        if row.added_on < datetime.datetime.strptime("2019-01-01", "%Y-%m-%d"):
+        if row.added_on < datetime.datetime.strptime("2019-01-01", "%Y-%m-%d") and \
+           row.added_on > datetime.datetime.strptime("2019-03-31", "%Y-%m-%d"):
             continue
 
         if row.problem_id not in pids:
@@ -214,7 +215,7 @@ def user_editorials():
                      TH(T("Editorial By")),
                      TH(T("Added on")),
                      TH(T("Votes")),
-                     TH(T("Action"))))
+                     TH()))
     tbody = TBODY()
 
     # Get the pid, plink and pname for creating links
@@ -238,9 +239,9 @@ def user_editorials():
                                      "plink": record["link"]},
                                extension=False))))
         tr.append(TD(A(user.first_name + " " + user.last_name,
-                     _href=URL("user",
-                               "profile",
-                               args=user.stopstalk_handle))))
+                       _href=URL("user",
+                                 "profile",
+                                 args=user.stopstalk_handle))))
 
         tr.append(TD(editorial.added_on))
         vote_class = ""
@@ -257,8 +258,8 @@ def user_editorials():
 
         tr.append(TD(A(I(_class="fa fa-eye fa-2x"),
                        _href=URL("problems",
-                                  "read_editorial",
-                                  args=editorial.id),
+                                 "read_editorial",
+                                 args=editorial.id),
                        _class="btn btn-primary tooltipped",
                        _style="background-color: #13AA5F;",
                        data={"position": "bottom",
@@ -292,14 +293,14 @@ def user_wise_editorials():
 
     query = (uetable.user_id == row.id) & \
             (uetable.verification == "accepted")
-    user_editorials = db(query).select(orderby=~uetable.added_on)
+    user_editorials = db(query).select(orderby=~uetable.id)
 
     table = TABLE(_class="centered")
     thead = THEAD(TR(TH(T("Problem")),
                      TH(T("Editorial By")),
                      TH(T("Added on")),
                      TH(T("Votes")),
-                     TH(T("Action"))))
+                     TH()))
     tbody = TBODY()
     user = row
 
@@ -319,9 +320,9 @@ def user_wise_editorials():
                                      "plink": record["link"]},
                                extension=False))))
         tr.append(TD(A(user.first_name + " " + user.last_name,
-                     _href=URL("user",
-                               "profile",
-                               args=user.stopstalk_handle))))
+                       _href=URL("user",
+                                 "profile",
+                                 args=user.stopstalk_handle))))
 
         tr.append(TD(editorial.added_on))
         vote_class = ""
@@ -338,8 +339,8 @@ def user_wise_editorials():
 
         tr.append(TD(A(I(_class="fa fa-eye fa-2x"),
                        _href=URL("problems",
-                                  "read_editorial",
-                                  args=editorial.id),
+                                 "read_editorial",
+                                 args=editorial.id),
                        _class="btn btn-primary tooltipped",
                        _style="background-color: #13AA5F;",
                        data={"position": "bottom",
