@@ -140,6 +140,221 @@ def handle_error():
     return dict(error_message=error_message, similar_users=similar_users)
 
 # ----------------------------------------------------------------------------
+def user_editorials():
+    # @ToDo: UGLY UGLY CODE, DELIVERY (SPEED) vs QUALITY example
+
+    uetable = db.user_editorials
+    atable = db.auth_user
+    ptable = db.problem
+
+    # Get all the problems which do not have an official editorial
+    query = (ptable.editorial_link == None) | (ptable.editorial_link == "")
+    pids = db(query).select(ptable.id)
+    pids = [x.id for x in pids]
+
+    # Get list of all the accepted editorials
+    query = (uetable.verification == "accepted")
+    rows = db(query).select(orderby=~uetable.id)
+
+    # Rows to show on the leaderboard
+    table_rows = []
+
+    # To handle multiple accepted editorials of same user on same problem
+    user_id_pid_map = {}
+
+    # To store the user objects who have atleast one accepted editorial
+    user_object_map = {}
+
+    for row in rows:
+
+        if user_object_map.has_key(row.user_id) is False:
+            # Store the user object for later usage
+            user_object_map[row.user_id] = atable(row.user_id)
+
+        if row.added_on < datetime.datetime.strptime("2019-01-01", "%Y-%m-%d") and \
+           row.added_on > datetime.datetime.strptime("2019-03-31", "%Y-%m-%d"):
+            continue
+
+        if row.problem_id not in pids:
+            # This problem has an official editorial - don't count in leaderboard
+            continue
+
+        if user_id_pid_map.has_key((row.user_id, row.problem_id)):
+            # This is to handle multiple accepted editorials of same user on same problem
+            continue
+
+        user_id_pid_map[(row.user_id, row.problem_id)] = row
+
+    # The dictionary to store the count mapping of editorials
+    editorial_count_dict = {}
+    for key in user_id_pid_map:
+        value = user_id_pid_map[key]
+        vote_count = 0 if value.votes.strip() == "" else len(value.votes.split(","))
+        if editorial_count_dict.has_key(value.user_id):
+            update_value = editorial_count_dict[value.user_id]
+            update_value["count"] += 1
+            update_value["votes"] += vote_count
+        else:
+            editorial_count_dict[value.user_id] = {"count": 1,
+                                                   "votes": vote_count}
+
+    for key in editorial_count_dict:
+        user_obj = atable(key)
+        table_rows.append([editorial_count_dict[key]["count"],
+                           editorial_count_dict[key]["votes"],
+                           user_obj.stopstalk_handle,
+                           user_obj.first_name + " " + user_obj.last_name])
+
+    table_rows = sorted(table_rows, key=lambda x: (x[0], x[1]), reverse=True)
+
+    # Get all editorials table
+    # ----------------------------
+
+    table = TABLE(_class="centered")
+    thead = THEAD(TR(TH(T("Problem")),
+                     TH(T("Editorial By")),
+                     TH(T("Added on")),
+                     TH(T("Votes")),
+                     TH()))
+    tbody = TBODY()
+
+    # Get the pid, plink and pname for creating links
+    query = (ptable.id.belongs([x.problem_id for x in rows]))
+    problem_records = db(query).select(ptable.id, ptable.name, ptable.link)
+    precords = {}
+    for precord in problem_records:
+        precords[precord.id] = {"name": precord.name, "link": precord.link}
+
+    for editorial in rows:
+
+        user = user_object_map[editorial.user_id]
+        record = precords[editorial.problem_id]
+
+        number_of_votes = len(editorial.votes.split(",")) if editorial.votes else 0
+
+        tr = TR(TD(A(record["name"],
+                     _href=URL("problems",
+                               "index",
+                               vars={"pname": record["name"],
+                                     "plink": record["link"]},
+                               extension=False))))
+        tr.append(TD(A(user.first_name + " " + user.last_name,
+                       _href=URL("user",
+                                 "profile",
+                                 args=user.stopstalk_handle))))
+
+        tr.append(TD(editorial.added_on))
+        vote_class = ""
+        if auth.is_logged_in() and str(session.user_id) in set(editorial.votes.split(",")):
+            vote_class = "red-text"
+        tr.append(TD(DIV(SPAN(I(_class="fa fa-heart " + vote_class),
+                              _class="love-editorial",
+                              data={"id": editorial.id}),
+                         " ",
+                         DIV(number_of_votes,
+                             _class="love-count",
+                             _style="margin-left: 5px;"),
+                         _style="display: inline-flex;")))
+
+        tr.append(TD(A(I(_class="fa fa-eye fa-2x"),
+                       _href=URL("problems",
+                                 "read_editorial",
+                                 args=editorial.id),
+                       _class="btn btn-primary tooltipped",
+                       _style="background-color: #13AA5F;",
+                       data={"position": "bottom",
+                             "delay": 40,
+                             "tooltip": T("Read Editorial")})))
+
+        tbody.append(tr)
+
+    table.append(thead)
+    table.append(tbody)
+
+    return dict(table_rows=table_rows[:10], all_editorials_table=table)
+
+# ----------------------------------------------------------------------------
+def user_wise_editorials():
+
+    atable = db.auth_user
+    uetable = db.user_editorials
+    ptable = db.problem
+
+    if len(request.args) == 0:
+        session.flash = "Invalid StopStalk Handle"
+        redirect(URL("default", "user_editorials"))
+        return
+    else:
+        row = db(atable.stopstalk_handle == request.args[0]).select().first()
+        if row is None:
+            session.flash = "Invalid StopStalk Handle"
+            redirect(URL("default", "user_editorials"))
+            return
+
+    query = (uetable.user_id == row.id) & \
+            (uetable.verification == "accepted")
+    user_editorials = db(query).select(orderby=~uetable.id)
+
+    table = TABLE(_class="centered")
+    thead = THEAD(TR(TH(T("Problem")),
+                     TH(T("Editorial By")),
+                     TH(T("Added on")),
+                     TH(T("Votes")),
+                     TH()))
+    tbody = TBODY()
+    user = row
+
+    query = (ptable.id.belongs([x.problem_id for x in user_editorials]))
+    problem_records = db(query).select(ptable.id, ptable.name, ptable.link)
+    precords = {}
+    for precord in problem_records:
+        precords[precord.id] = {"name": precord.name, "link": precord.link}
+
+    for editorial in user_editorials:
+        record = precords[editorial.problem_id]
+        number_of_votes = len(editorial.votes.split(",")) if editorial.votes else 0
+        tr = TR(TD(A(record["name"],
+                     _href=URL("problems",
+                               "index",
+                               vars={"pname": record["name"],
+                                     "plink": record["link"]},
+                               extension=False))))
+        tr.append(TD(A(user.first_name + " " + user.last_name,
+                       _href=URL("user",
+                                 "profile",
+                                 args=user.stopstalk_handle))))
+
+        tr.append(TD(editorial.added_on))
+        vote_class = ""
+        if auth.is_logged_in() and str(session.user_id) in set(editorial.votes.split(",")):
+            vote_class = "red-text"
+        tr.append(TD(DIV(SPAN(I(_class="fa fa-heart " + vote_class),
+                              _class="love-editorial",
+                              data={"id": editorial.id}),
+                         " ",
+                         DIV(number_of_votes,
+                             _class="love-count",
+                             _style="margin-left: 5px;"),
+                         _style="display: inline-flex;")))
+
+        tr.append(TD(A(I(_class="fa fa-eye fa-2x"),
+                       _href=URL("problems",
+                                 "read_editorial",
+                                 args=editorial.id),
+                       _class="btn btn-primary tooltipped",
+                       _style="background-color: #13AA5F;",
+                       data={"position": "bottom",
+                             "delay": 40,
+                             "tooltip": T("Read Editorial")})))
+
+        tbody.append(tr)
+
+    table.append(thead)
+    table.append(tbody)
+
+    return dict(table=table, stopstalk_handle=user.stopstalk_handle)
+
+# ----------------------------------------------------------------------------
 def get_started():
     return dict()
 
@@ -336,6 +551,10 @@ def notifications():
     """
         Show friends (includes CUSTOM) of the logged-in user on day streak
     """
+
+    # Deprecate this route
+    redirect(URL("default", "index"))
+    return
 
     if not auth.is_logged_in():
         redirect(URL("default", "index"))

@@ -291,7 +291,8 @@ def index():
                            _class="problem-page-editorials",
                            _style="color: white;",
                            _target="_blank"),
-                         _class="chip deep-purple darken-1"))
+                         _class="chip deep-purple darken-1 pulse",
+                         _id="problem-page-editorial-button"))
 
     tbody.append(TR(TD(),
                     TD(STRONG(T("Links") + ":")),

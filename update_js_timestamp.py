@@ -90,7 +90,8 @@ all_image_files = ["images/favicon.ico",
                    "images/paytm-qrcode.png",
                    "images/paypal-donate-button.png",
                    "images/me.jpg",
-                   "images/todo_onboarding.gif"]
+                   "images/todo_onboarding.gif",
+                   "images/write-editorials.gif"]
 
 REDIS_CLIENT = redis.Redis(host='localhost', port=6379, db=0)
 

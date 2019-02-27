@@ -27,23 +27,25 @@ query = (atable.registration_key == "") & \
 rows = db(query).select(atable.stopstalk_handle, atable.email)
 
 for row in rows:
-    subject = "StopStalk Job Profile"
+    subject = "Get Amazon Gift cards from StopStalk"
     message = """
 <html>
 Hello %s,<br/><br/>
 
-We are here with an amazing announcement for you guys.<br/>
-You might be looking for Job or Internship opportunites while you are busy solving interesting problems.<br/>
-Let us know if you are interested in being contacted by companies looking to hire candidates like you.<br/><br/>
+Since the launch of the platform we have been excited to help you guys be good at Competitive Programming<br/>
+and in the process be great at problem solving. Just a slight push at times when you're stuck with a problem<br/>
+can result into great learning.<br/><br/>
 
-Update your <a href="https://www.stopstalk.com/job_profile?utm_source=newsletter&utm_medium=email&utm_campaign=job-profile&utm_content=job-page">StopStalk Job Profile</a> now by filling the required details on the page and we will contact you if we find a match.<br/>
-We hope we can find you an apt place for your skills to grow.<br/><br/>
+We support writing editorials on StopStalk for various problems on 7 Competitive Programming websites.<br/>
+Contribute to the community and help people with the problems that you have solved.<br/>
+Top 3 contributors by the end of March will receive Amazon Gift cards from StopStalk - <a style='color: blue;' href="https://www.stopstalk.com/user_editorials?utm_source=newsletter&utm_medium=email&utm_campaign=user-editorials&utm_content=user-editorials-page">Know more.</a><br/><br/>
 
 Cheers,<br/>
 Team StopStalk<br/><br/>
-
+<div style='font-size: 10px;color: grey;'>
 --------------------------------<br/>
-Adjust your email preferences <a href="https://www.stopstalk.com/unsubscribe?utm_source=newsletter&utm_medium=email&utm_campaign=job-profile&utm_content=unsubscribe">here</a>.<br/><br/>
+Adjust your email preferences <a style='text-decoration: none; color: grey;' href="https://www.stopstalk.com/unsubscribe?utm_source=newsletter&utm_medium=email&utm_campaign=user-editorials&utm_content=unsubscribe"><u>here</u></a>.<br/><br/>
+</div>
 </html>
               """ % row.stopstalk_handle
     current.send_mail(to=row.email,
