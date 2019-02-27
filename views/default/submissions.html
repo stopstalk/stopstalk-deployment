@@ -41,7 +41,7 @@
     <p>Write how you solved a problem on StopStalk. Climb up the leaderboard and win Amazon Gift Cards - <a href="{{=URL('default', 'user_editorials')}}">Know More</a>.</p>
     <img src="{{=get_static_url('images/write-editorials.gif')}}" style="height: 100%; width: 94%;">
     <div class="modal-footer">
-        <button class="modal-action modal-close waves-effect blue lighten-5 waves-blue btn-flat" target="_blank">Close</button>
+        <button class="modal-action modal-close waves-effect blue lighten-5 waves-blue btn-flat">Close</button>
     </div>
   </div>
 </div>
@@ -53,7 +53,7 @@
     {{if len(current.REDIS_CLIENT.smembers("disabled_retrieval")):}}
         <h7 class="red-text"> Disabled retrieval for {{=utilities.pretty_string(current.REDIS_CLIENT.smembers("disabled_retrieval"))}} due to their downtime. </h7>
     {{pass}}
-    <h6> Tag Search Page is now Problem Search Page - {{=A("Know more", _href=URL("default", "updates"), _id="know-more", _target="_blank")}}</h6>
+    <h6>Write editorials and get Amazon Gift Cards - {{=A("Know more", _href=URL("default", "user_editorials"), _id="know-more", _target="_blank")}}</h6>
     <p>Please take some time to fill out this {{=A("Survey Form", _href="http://goo.gl/oeLZHd", _target="_blank")}}</p>
 
     <div id="page-selection" class="center"></div>
