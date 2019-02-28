@@ -162,6 +162,17 @@
         addEventListener('#onboarding-page-user-profile', 'Onboarding link - User profile', false);
     };
 
+    var addUserEditorialsPageToGA = function() {
+        addEventListener('.view-user-wise-editorials', 'View userwise editorials - user editorials page', false);
+        addEventListener('.read-editorial-user-editorials-page', 'Read editorial - user editorials page', false);
+        addEventListener('#show-tc-editorials-contest', 'Show contest T & C - user editorials page', false);
+        addEventListener('#show-info-contributions-leaderboard', 'Show contributions info - user editorials page', false);
+    };
+
+    var addUserWiseEditorialsPageToGA = function() {
+        addEventListener('.read-editorial-user-wise-page', 'Read editorial - user wise editorials page');
+    };
+
     $(document).ready(function() {
         addNavItemsToGA();
         addSubmissionPageButtonsToGA();
@@ -173,6 +184,8 @@
         addLeaderboardPageButtonsToGA();
         addProblemSearchPageToGA();
         addOnboardingPageToGA();
+        addUserEditorialsPageToGA();
+        addUserWiseEditorialsPageToGA();
         addMiscellaneousToGA();
     });
 })(jQuery);
