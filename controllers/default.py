@@ -171,7 +171,7 @@ def user_editorials():
             # Store the user object for later usage
             user_object_map[row.user_id] = atable(row.user_id)
 
-        if row.added_on < datetime.datetime.strptime("2019-01-01", "%Y-%m-%d") and \
+        if row.added_on < datetime.datetime.strptime("2019-01-01", "%Y-%m-%d") or \
            row.added_on > datetime.datetime.strptime("2019-03-31", "%Y-%m-%d"):
             continue
 
