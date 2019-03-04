@@ -59,6 +59,7 @@
         {{if auth.is_logged_in():}}
             <li><a href="{{=URL('user', 'profile', args=session.handle)}}" data-analytics-label="Nav User Profile" class="nav-dropdown">{{=T("Profile")}}</a></li>
             <li><a href="{{=URL('user', 'submissions', args=session.handle)}}" data-analytics-label="Nav My Submissions" class="nav-dropdown">{{=T("My Submissions")}}</a></li>
+            <li><a href="{{=URL('default', 'user_wise_editorials', args=session.handle)}}" data-analytics-label="Nav My Editorials" class="nav-dropdown">{{=T("My Editorials")}} &nbsp;&nbsp;&nbsp;<span class="new badge pulse deep-orange"></span></a></li>
             <li><a href="{{=URL('user', 'update_details')}}" data-analytics-label="Nav Update Details" class="nav-dropdown">{{=T("Update Details")}}</a></li>
             <li><a href="{{=URL('default', 'unsubscribe')}}" data-analytics-label="Nav Unsubscribe" class="nav-dropdown">{{=T("Unsubscribe")}}</a></li>
             <li class="divider"></li>
