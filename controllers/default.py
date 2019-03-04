@@ -291,8 +291,12 @@ def user_wise_editorials():
             redirect(URL("default", "user_editorials"))
             return
 
-    query = (uetable.user_id == row.id) & \
-            (uetable.verification == "accepted")
+    if auth.is_logged_in() and \
+       session.user_id == row.id:
+        query = (uetable.user_id == row.id)
+    else:
+        query = (uetable.user_id == row.id) & \
+                (uetable.verification == "accepted")
     user_editorials = db(query).select(orderby=~uetable.id)
 
     table = TABLE(_class="centered")
@@ -303,6 +307,9 @@ def user_wise_editorials():
                      TH()))
     tbody = TBODY()
     user = row
+    color_mapping = {"accepted": "green",
+                     "rejected": "red",
+                     "pending": "blue"}
 
     query = (ptable.id.belongs([x.problem_id for x in user_editorials]))
     problem_records = db(query).select(ptable.id, ptable.name, ptable.link)
@@ -319,6 +326,22 @@ def user_wise_editorials():
                                vars={"pname": record["name"],
                                      "plink": record["link"]},
                                extension=False))))
+
+        if auth.is_logged_in() and user.id == session.user_id:
+            tr.append(TD(A(user.first_name + " " + user.last_name,
+                         _href=URL("user",
+                                   "profile",
+                                   args=user.stopstalk_handle)),
+                         " ",
+                         DIV(editorial.verification.capitalize(),
+                             _class="verification-badge " + \
+                                    color_mapping[editorial.verification])))
+        else:
+            tr.append(TD(A(user.first_name + " " + user.last_name,
+                           _href=URL("user",
+                                     "profile",
+                                     args=user.stopstalk_handle))))
+
         tr.append(TD(A(user.first_name + " " + user.last_name,
                        _href=URL("user",
                                  "profile",
@@ -352,7 +375,9 @@ def user_wise_editorials():
     table.append(thead)
     table.append(tbody)
 
-    return dict(table=table, stopstalk_handle=user.stopstalk_handle)
+    return dict(table=table,
+                stopstalk_handle=user.stopstalk_handle,
+                has_editorials=len(user_editorials) > 0)
 
 # ----------------------------------------------------------------------------
 def get_started():

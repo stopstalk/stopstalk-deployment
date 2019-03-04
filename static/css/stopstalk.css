@@ -524,3 +524,9 @@ nav ul a:hover {
 .profile-page-site-profile-url, #show-info-contributions-leaderboard, #show-tc-editorials-contest {
     cursor: pointer;
 }
+
+.preview-editor-wrapper {
+    cursor: text;
+    user-select: text;
+}
+
