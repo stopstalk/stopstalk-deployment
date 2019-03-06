@@ -36,7 +36,7 @@
 
           <tbody>
             {{for row_it in xrange(len(table_rows)):}}
-              <tr>
+              <tr style="{{='background-color: #e8f5e9' if auth.is_logged_in() and table_rows[row_it][2] == session.handle else ''}}">
                 <td>{{=row_it + 1}}.</td>
                 <td><a href="{{=URL('user', 'profile', args=table_rows[row_it][2])}}">{{=table_rows[row_it][3]}}</a></td>
                 <td>{{=table_rows[row_it][0]}}</td>
