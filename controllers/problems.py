@@ -628,17 +628,25 @@ def admin_editorial_approval():
         return
 
     uetable = db.user_editorials
+    ptable = db.problem
+    atable = db.auth_user
+
     uetable_record = uetable(request.args[1])
-    user = db.auth_user(uetable_record.user_id)
+    if uetable_record.verification != "pending":
+        return "Status is already updated"
+
+    ptable_record = ptable(uetable_record.problem_id)
+    user = atable(uetable_record.user_id)
+
     if request.args[0] == "accepted":
         current.send_mail(to=user.email,
-                          subject="Your editorial on StopStalk is Published",
+                          subject="Your editorial for %s on StopStalk is published!" % ptable_record.name,
                           message="""
 <html>
 Hello %s,<br/><br/>
 
 Your <a href="%s">editorial</a> on StopStalk is <b>Approved</b>. Thank you for your valuable contribution to the community.<br/>
-Please share your editorial link on our Official <a href="https://www.facebook.com/groups/stopstalk/">Facebook Group</a> to help other Competitive Programmers.
+Please share your editorial link on Social Media platforms or Competitive programming blogs to help other fellow friends struggling with the problem.
 <br/><br/>
 
 Cheers,<br/>
@@ -655,9 +663,11 @@ Team StopStalk
         bulk=True)
         uetable_record.update_record(verification="accepted")
         return "ACCEPTED"
-    else:
+    elif request.args[0] == "rejected":
         uetable_record.update_record(verification="rejected")
         return "REJECTED"
+    else:
+        return "INVALID_PARAMS"
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
