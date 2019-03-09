@@ -340,4 +340,5 @@
 "Solved Counts": "Solved Counts",
 "No editorials found! Please contribute to the community by writing an editorial if you've solved the problem.": "No editorials found! Please contribute to the community by writing an editorial if you've solved the problem.",
 "No editorials found! Please login if you want to write an editorial.": "No editorials found! Please login if you want to write an editorial.",
-"Get Started": "Get Started"}
+"Get Started": "Get Started",
+"Pending admin approval": "Pending admin approval"}
