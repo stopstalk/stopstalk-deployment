@@ -152,9 +152,9 @@ def user_editorials():
     pids = db(query).select(ptable.id)
     pids = [x.id for x in pids]
 
-    # Get list of all the accepted editorials
-    query = (uetable.verification == "accepted")
-    rows = db(query).select(orderby=~uetable.id)
+    pending_count = 0
+    accepted_problem_ids = set([])
+    rows = db(uetable).select(orderby=~uetable.id)
 
     # Rows to show on the leaderboard
     table_rows = []
@@ -166,6 +166,13 @@ def user_editorials():
     user_object_map = {}
 
     for row in rows:
+
+        if row.verification != "accepted":
+            if row.verification == "pending":
+                pending_count += 1
+            continue
+        else:
+            accepted_problem_ids.add(row.problem_id)
 
         if user_object_map.has_key(row.user_id) is False:
             # Store the user object for later usage
@@ -219,13 +226,15 @@ def user_editorials():
     tbody = TBODY()
 
     # Get the pid, plink and pname for creating links
-    query = (ptable.id.belongs([x.problem_id for x in rows]))
+    query = (ptable.id.belongs(accepted_problem_ids))
     problem_records = db(query).select(ptable.id, ptable.name, ptable.link)
     precords = {}
     for precord in problem_records:
         precords[precord.id] = {"name": precord.name, "link": precord.link}
 
     for editorial in rows:
+        if editorial.verification != "accepted":
+            continue
 
         user = user_object_map[editorial.user_id]
         record = precords[editorial.problem_id]
@@ -271,7 +280,9 @@ def user_editorials():
     table.append(thead)
     table.append(tbody)
 
-    return dict(table_rows=table_rows[:10], all_editorials_table=table)
+    return dict(table_rows=table_rows[:10],
+                all_editorials_table=table,
+                pending_count=pending_count)
 
 # ----------------------------------------------------------------------------
 def user_wise_editorials():
