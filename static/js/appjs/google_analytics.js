@@ -147,6 +147,7 @@
         addEventListener('#search', 'Problem Search Site Tag field', false);
         addEventListener('#generalized-tag-search', 'Problem Search Generalized Tag field', false, 'change');
         addEventListener('#include-editorials', 'Problem Search Include Editorials field', false);
+        addEventListener('.problem-search-editorial-link', 'Problem Search Editorials link', false);
     };
 
     var addOnboardingPageToGA = function() {
