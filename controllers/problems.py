@@ -709,6 +709,7 @@ def search():
                      TH(T("Site")),
                      TH(T("Accuracy")),
                      TH(T("Users solved")),
+                     TH(T("Editorial")),
                      TH(T("Tags"))))
     table.append(thead)
 
@@ -732,9 +733,6 @@ def search():
                 # No filter is applied
                 response.flash = "No filter is applied"
             return dict(table=DIV(), generalized_tags=generalized_tags)
-
-    rows = db(uetable.verification == "accepted").select(uetable.problem_id)
-    problem_with_user_editorials = [x["problem_id"] for x in rows]
 
     include_editorials = request.vars.get("include_editorials", "")
 
@@ -760,6 +758,9 @@ def search():
 
     ptable = db.problem
     query = True
+
+    rows = db(uetable.verification == "accepted").select(uetable.problem_id)
+    problem_with_user_editorials = set([x["problem_id"] for x in rows])
 
     if q is not None and not clubbed_tags:
         # Enables multiple space seperated tag search
@@ -841,6 +842,7 @@ def search():
     tbody = TBODY()
     for problem in all_problems:
         tr = TR()
+
         link_class = utilities.get_link_class(problem["link"], session.user_id)
         link_title = (" ".join(link_class.split("-"))).capitalize()
 
@@ -859,6 +861,17 @@ def search():
         tr.append(TD("%.2f" % (problem["solved_submissions"]  * 100.0 / \
                                problem["total_submissions"])))
         tr.append(TD(problem["user_count"] + problem["custom_user_count"]))
+
+        if problem["id"] in problem_with_user_editorials or \
+           problem["editorial_link"] not in ("", None):
+            tr.append(TD(A(I(_class="fa fa-book"),
+                           _href=URL("problems",
+                                     "editorials",
+                                     args=problem["id"]),
+                           _target="_blank",
+                           _class="problem-search-editorial-link")))
+        else:
+            tr.append(TD())
 
         td = TD()
         all_tags = eval(problem["tags"])
