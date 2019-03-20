@@ -27,24 +27,23 @@ query = (atable.registration_key == "") & \
 rows = db(query).select(atable.stopstalk_handle, atable.email)
 
 for row in rows:
-    subject = "Get Amazon Gift cards from StopStalk"
+    subject = "10 more days to contribute and get Amazon vouchers!"
     message = """
 <html>
 Hello %s,<br/><br/>
 
-Since the launch of the platform we have been excited to help you guys be good at Competitive Programming<br/>
-and in the process be great at problem solving. Just a slight push at times when you're stuck with a problem<br/>
-can result into great learning.<br/><br/>
+As you might know from our previous mail, we are offering Amazon Vouchers for contributing editorials<br/>
+to problems on StopStalk. We have received a great response from you guys and <a style='color: blue;' href="https://www.stopstalk.com/user_editorials?utm_source=newsletter&utm_medium=email&utm_campaign=user-editorials-10-days&utm_content=leaderboard">Leaderboard</a> is already<br/>
+heated up. Keep getting votes on your editorials too by sharing it with your friends, we will use them<br/>
+for a tiebreaker. The contest ends on 31st March midnight.<br/><br/>
 
-We support writing editorials on StopStalk for various problems on 7 Competitive Programming websites.<br/>
-Contribute to the community and help people with the problems that you have solved.<br/>
-Top 3 contributors by the end of March will receive Amazon Gift cards from StopStalk - <a style='color: blue;' href="https://www.stopstalk.com/user_editorials?utm_source=newsletter&utm_medium=email&utm_campaign=user-editorials&utm_content=user-editorials-page">Know more.</a><br/><br/>
+Happy StopStalking!! <br/><br/>
 
 Cheers,<br/>
 Team StopStalk<br/><br/>
 <div style='font-size: 10px;color: grey;'>
 --------------------------------<br/>
-Adjust your email preferences <a style='text-decoration: none; color: grey;' href="https://www.stopstalk.com/unsubscribe?utm_source=newsletter&utm_medium=email&utm_campaign=user-editorials&utm_content=unsubscribe"><u>here</u></a>.<br/><br/>
+Adjust your email preferences <a style='text-decoration: none; color: grey;' href="https://www.stopstalk.com/unsubscribe?utm_source=newsletter&utm_medium=email&utm_campaign=user-editorials-10-days&utm_content=unsubscribe"><u>here</u></a>.<br/><br/>
 </div>
 </html>
               """ % row.stopstalk_handle
