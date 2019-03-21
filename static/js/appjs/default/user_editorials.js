@@ -1,6 +1,12 @@
 (function($) {
     "use strict";
 
+    function pluralizeIfRequired(number, unit) {
+      var returnVal = number + " " + unit;
+      if (number != 1) returnVal += "s";
+      return returnVal;
+    }
+
     function contestCountDownHandler() {
       var countDownDate = 1554056999000; // March 31st 23:59:59 IST
 
@@ -19,8 +25,10 @@
         var seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
         // Output the result in an element with id="demo"
-        document.getElementById("march-contest-countdown").innerHTML = days + " days, " + hours + " hours, "
-        + minutes + " minutes, " + seconds + " seconds left";
+        document.getElementById("march-contest-countdown").innerHTML = pluralizeIfRequired(days, "day") + ", " +
+                                                                       pluralizeIfRequired(hours, "hour") + ", " +
+                                                                       pluralizeIfRequired(minutes, "minute") + ", " +
+                                                                       pluralizeIfRequired(seconds, "second");
 
         // If the count down is over, write some text
         if (distance < 0) {
