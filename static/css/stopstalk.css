@@ -530,3 +530,8 @@ nav ul a:hover {
     user-select: text;
 }
 
+#march-contest-countdown {
+    color: lavender;
+    font-weight: bold;
+    font-size: x-large;
+}
