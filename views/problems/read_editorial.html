@@ -10,6 +10,16 @@
 
 <h2><a href="{{=URL('problems', 'index', vars={'pname': problem_name, 'plink': problem_link})}}">{{=problem_name}}</a> | Editorial by <a href="{{=URL('user', 'profile', args=stopstalk_handle)}}">{{=stopstalk_handle}}</a></h2>
 <a id="all-editorials-button" class="btn btn-primary purple accent-4" href="{{=all_editorials_link}}">All Editorials</a>
+{{if auth.is_logged_in() and session.user_id == 1:}}
+  {{if ue_record.verification == "pending":}}
+    <br/><br/>
+    <a href="{{=URL('problems', 'admin_editorial_approval', args=['accepted', ue_record.id])}}" class="btn btn-primary green white-text">Accept</a>
+    <a href="{{=URL('problems', 'admin_editorial_approval', args=['rejected', ue_record.id])}}" class="btn btn-primary red white-text">Reject</a>
+  {{else:}}
+    <p>Already {{=ue_record.verification}}</p>
+  {{pass}}
+{{pass}}
+<br/>
 <div class="row left-align preview-editor-wrapper">
   <div class="col offset-s1 s10">
     <textarea id="preview-textarea">{{=content}}</textarea>
