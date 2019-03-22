@@ -545,7 +545,8 @@ def read_editorial():
                 content=content,
                 all_editorials_link=URL("problems",
                                         "editorials",
-                                        args=problem.id))
+                                        args=problem.id),
+                ue_record=ue_record)
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
