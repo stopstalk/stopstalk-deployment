@@ -353,11 +353,6 @@ def user_wise_editorials():
                                      "profile",
                                      args=user.stopstalk_handle))))
 
-        tr.append(TD(A(user.first_name + " " + user.last_name,
-                       _href=URL("user",
-                                 "profile",
-                                 args=user.stopstalk_handle))))
-
         tr.append(TD(editorial.added_on))
         vote_class = ""
         if auth.is_logged_in() and str(session.user_id) in set(editorial.votes.split(",")):
