@@ -302,87 +302,14 @@ def user_wise_editorials():
             redirect(URL("default", "user_editorials"))
             return
 
-    if auth.is_logged_in() and \
-       session.user_id == row.id:
-        query = (uetable.user_id == row.id)
-    else:
-        query = (uetable.user_id == row.id) & \
-                (uetable.verification == "accepted")
-    user_editorials = db(query).select(orderby=~uetable.id)
+    user_editorials = db(uetable.user_id == row.id).select(orderby=~uetable.id)
 
-    table = TABLE(_class="centered")
-    thead = THEAD(TR(TH(T("Problem")),
-                     TH(T("Editorial By")),
-                     TH(T("Added on")),
-                     TH(T("Votes")),
-                     TH()))
-    tbody = TBODY()
-    user = row
-    color_mapping = {"accepted": "green",
-                     "rejected": "red",
-                     "pending": "blue"}
-
-    query = (ptable.id.belongs([x.problem_id for x in user_editorials]))
-    problem_records = db(query).select(ptable.id, ptable.name, ptable.link)
-    precords = {}
-    for precord in problem_records:
-        precords[precord.id] = {"name": precord.name, "link": precord.link}
-
-    for editorial in user_editorials:
-        record = precords[editorial.problem_id]
-        number_of_votes = len(editorial.votes.split(",")) if editorial.votes else 0
-        tr = TR(TD(A(record["name"],
-                     _href=URL("problems",
-                               "index",
-                               vars={"pname": record["name"],
-                                     "plink": record["link"]},
-                               extension=False))))
-
-        if auth.is_logged_in() and user.id == session.user_id:
-            tr.append(TD(A(user.first_name + " " + user.last_name,
-                         _href=URL("user",
-                                   "profile",
-                                   args=user.stopstalk_handle)),
-                         " ",
-                         DIV(editorial.verification.capitalize(),
-                             _class="verification-badge " + \
-                                    color_mapping[editorial.verification])))
-        else:
-            tr.append(TD(A(user.first_name + " " + user.last_name,
-                           _href=URL("user",
-                                     "profile",
-                                     args=user.stopstalk_handle))))
-
-        tr.append(TD(editorial.added_on))
-        vote_class = ""
-        if auth.is_logged_in() and str(session.user_id) in set(editorial.votes.split(",")):
-            vote_class = "red-text"
-        tr.append(TD(DIV(SPAN(I(_class="fa fa-heart " + vote_class),
-                              _class="love-editorial",
-                              data={"id": editorial.id}),
-                         " ",
-                         DIV(number_of_votes,
-                             _class="love-count",
-                             _style="margin-left: 5px;"),
-                         _style="display: inline-flex;")))
-
-        tr.append(TD(A(I(_class="fa fa-eye fa-2x"),
-                       _href=URL("problems",
-                                 "read_editorial",
-                                 args=editorial.id),
-                       _class="btn btn-primary tooltipped read-editorial-user-wise-page",
-                       _style="background-color: #13AA5F;",
-                       data={"position": "bottom",
-                             "delay": 40,
-                             "tooltip": T("Read Editorial")})))
-
-        tbody.append(tr)
-
-    table.append(thead)
-    table.append(tbody)
+    table = utilities.render_user_editorials_table(user_editorials,
+                                                   row.id,
+                                                   session.user_id if auth.is_logged_in() else None)
 
     return dict(table=table,
-                stopstalk_handle=user.stopstalk_handle,
+                stopstalk_handle=row.stopstalk_handle,
                 has_editorials=len(user_editorials) > 0)
 
 # ----------------------------------------------------------------------------
