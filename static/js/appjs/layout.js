@@ -1,5 +1,5 @@
 var setEditorialVoteEventListeners = function() {
-    $('.love-editorial').on('click', function() {
+    $(document).on('click', '.love-editorial', function() {
         var $this = $(this),
             $loveCount = $($this.siblings()[0]),
             $heartIcon = $this.children()[0];
@@ -191,6 +191,27 @@ var setEditorialVoteEventListeners = function() {
                 },
                 error: function(e) {
                     $.web2py.flash("Some error occurred");
+                }
+            });
+        });
+
+        $(document).on('click', '.delete-editorial', function() {
+            var result = confirm("Are you sure you want to DELETE the editorial ?")
+            if(!result) return;
+            var $this = $(this);
+            $.ajax({
+                url: deleteEditorialURL + '/' + $this.data('id'),
+                method: 'POST',
+                success: function(response) {
+                    if (response === "SUCCESS") {
+                        $this.parent().parent().fadeOut();
+                        $.web2py.flash("Editorial deleted successfully!");
+                    } else {
+                        $.web2py.flash("Can't delete accepted Editorial!");
+                    }
+                },
+                error: function(err) {
+                    $.web2py.flash("Something went wrong!");
                 }
             });
         });
