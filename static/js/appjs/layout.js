@@ -1,5 +1,5 @@
 var setEditorialVoteEventListeners = function() {
-    $('.love-editorial').click(function() {
+    $('.love-editorial').on('click', function() {
         var $this = $(this),
             $loveCount = $($this.siblings()[0]),
             $heartIcon = $this.children()[0];
@@ -164,12 +164,12 @@ var setEditorialVoteEventListeners = function() {
             document.activeElement.blur();
         }
 
-        $(document).on('mouseenter', '.submissions-table tr', function() {
+        $(document).on('mouseenter', '.submissions-table tr, .user-editorials-table tr', function() {
             var todoIcon = $(this).find('.add-to-todo-list');
             todoIcon.show();
         });
 
-        $(document).on('mouseleave', '.submissions-table tr', function() {
+        $(document).on('mouseleave', '.submissions-table tr, .user-editorials-table tr', function() {
             var todoIcon = $(this).find('.add-to-todo-list');
             todoIcon.hide();
         });
