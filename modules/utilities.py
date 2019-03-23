@@ -1028,7 +1028,8 @@ def render_user_editorials_table(user_editorials, user_id=None, logged_in_user_i
         actions_td = TD(A(I(_class="fa fa-eye fa-2x"),
                           _href=URL("problems",
                                     "read_editorial",
-                                    args=editorial.id),
+                                    args=editorial.id,
+                                    extension=False),
                           _class="btn btn-primary tooltipped",
                           _style="background-color: #13AA5F;",
                           data={"position": "bottom",
@@ -1039,7 +1040,7 @@ def render_user_editorials_table(user_editorials, user_id=None, logged_in_user_i
            editorial.verification != "accepted":
             actions_td.append(BUTTON(I(_class="fa fa-trash fa-2x"),
                                      _style="margin-left: 2%;",
-                                     _class="red tooltipped delete-editorial",
+                                     _class="btn btn-primary red tooltipped delete-editorial",
                                      data={"position": "bottom",
                                            "delay": 40,
                                            "tooltip": T("Delete Editorial"),
