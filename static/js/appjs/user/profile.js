@@ -202,12 +202,13 @@
         if(onlyGreen) {
             return val.count;
         }
-        var accepted = val.AC, partiallyAccepted = val.PS;
+        var accepted = val.AC, partiallyAccepted = val.PS, editorials = val.EAC;
         if(accepted === undefined) accepted = 0;
         if(partiallyAccepted === undefined) partiallyAccepted = 0;
+        if(editorials === undefined) editorials = 0;
         // Math = Accepted - Not Accepted
         //      = (accepted + partiallyAccepted) - [total - (accepted + partiallyAccepted)]
-        return 2 * (accepted + partiallyAccepted) - val.count;
+        return 2 * (accepted + partiallyAccepted + editorials) - val.count;
     }
 
     // ---------------------------------------------------------------------------------
