@@ -453,6 +453,24 @@ def get_dates():
     if prev is None or (today - prev).days > 1:
         streak = 0
 
+    if custom is False:
+        uetable = db.user_editorials
+        query = (uetable.user_id == user_id) & \
+                (uetable.verification == "accepted")
+        user_editorials = db(query).select()
+
+        for editorial in user_editorials:
+            this_date = str(editorial.added_on).split()[0]
+            if total_submissions.has_key(this_date):
+                if total_submissions[this_date].has_key("EAC"):
+                    total_submissions[this_date]["EAC"] += 1
+                else:
+                    total_submissions[this_date]["EAC"] = 1
+                total_submissions[this_date]["count"] += 1
+            else:
+                total_submissions[this_date] = {"count": 1}
+                total_submissions[this_date]["EAC"] = 1
+
     data = dict(total=total_submissions,
                 max_streak=max_streak,
                 curr_streak=streak,
@@ -558,6 +576,8 @@ def get_activity():
     custom = (request.vars.custom == "True")
 
     stable = db.submission
+    uetable = db.user_editorials
+
     post_vars = request.post_vars
     date = post_vars["date"]
     if date is None:
@@ -568,19 +588,40 @@ def get_activity():
     query = (stable.time_stamp >= start_time) & \
             (stable.time_stamp <= end_time)
 
+    ue_query = (uetable.added_on >= start_time) & \
+               (uetable.added_on <= end_time)
+
+    if custom is False and auth.is_logged_in() and session.user_id == user_id:
+        ue_query &= True
+    else:
+        ue_query &= (uetable.verification == "accepted")
+
     if custom:
         query &= (stable.custom_user_id == user_id)
+        ue_query &= False
     else:
         query &= (stable.user_id == user_id)
+        ue_query &= (uetable.user_id == user_id)
+
     submissions = db(query).select(orderby=~stable.time_stamp)
+    user_editorials = db(ue_query).select(orderby=~uetable.id)
+    editorials_table = utilities.render_user_editorials_table(user_editorials, user_id, session.user_id if auth.is_logged_in() else None)
 
-    if len(submissions) > 0:
-        table = utilities.render_table(submissions, [], session.user_id)
-        table = DIV(H3(T("Activity on") + " " + date), table)
+    if len(submissions) > 0 or len(user_editorials):
+        div_element = DIV(H3(T("Activity on") + " " + date))
+        if len(submissions) > 0:
+            table = utilities.render_table(submissions, [], session.user_id)
+            div_element.append(table)
+
+            if len(user_editorials) > 0:
+                div_element.append(BR())
+
+        if len(user_editorials) > 0:
+            div_element.append(editorials_table)
     else:
-        table = H5(T("No activity on") + " " + date)
+        div_element = H5(T("No activity on") + " " + date)
 
-    return dict(table=table)
+    return dict(table=div_element)
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()
