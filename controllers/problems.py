@@ -588,6 +588,7 @@ Team StopStalk
         mail_type="admin",
         bulk=True)
         uetable_record.update_record(verification="accepted")
+        current.REDIS_CLIENT.delete("get_dates_" + user.stopstalk_handle)
         return "ACCEPTED"
     elif request.args[0] == "rejected":
         uetable_record.update_record(verification="rejected")
