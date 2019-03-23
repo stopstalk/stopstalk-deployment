@@ -225,7 +225,10 @@ def user_editorials():
     tbody = TBODY()
 
     user_id = session.user_id if auth.is_logged_in() else None
-    table = utilities.render_user_editorials_table(rows, user_id, user_id)
+    table = utilities.render_user_editorials_table(rows,
+                                                   user_id,
+                                                   user_id,
+                                                   "read-editorial-user-editorials-page")
 
     return dict(table_rows=table_rows[:10],
                 all_editorials_table=table,
@@ -253,7 +256,8 @@ def user_wise_editorials():
 
     table = utilities.render_user_editorials_table(user_editorials,
                                                    row.id,
-                                                   session.user_id if auth.is_logged_in() else None)
+                                                   session.user_id if auth.is_logged_in() else None,
+                                                   "read-editorial-user-wise-page")
 
     return dict(table=table,
                 stopstalk_handle=row.stopstalk_handle,

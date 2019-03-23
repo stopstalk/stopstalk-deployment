@@ -605,7 +605,10 @@ def get_activity():
 
     submissions = db(query).select(orderby=~stable.time_stamp)
     user_editorials = db(ue_query).select(orderby=~uetable.id)
-    editorials_table = utilities.render_user_editorials_table(user_editorials, user_id, session.user_id if auth.is_logged_in() else None)
+    editorials_table = utilities.render_user_editorials_table(user_editorials,
+                                                              user_id,
+                                                              session.user_id if auth.is_logged_in() else None,
+                                                              "read-editorial-user-profile-page")
 
     if len(submissions) > 0 or len(user_editorials):
         div_element = DIV(H3(T("Activity on") + " " + date))
