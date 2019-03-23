@@ -64,6 +64,7 @@
         addEventListener('.custom-user-count-profile-page', 'Custom user count on User Profile', false);
         addEventListener('#update-my-submissions', 'Refresh my submissions', false);
         addEventListener('#disabled-update-my-submissions', 'Disabled refresh my submissions', false);
+        addEventListener('.read-editorial-user-profile-page', 'Read editorial - user profile page', false);
     };
 
     var addMiscellaneousToGA = function() {
@@ -171,7 +172,11 @@
     };
 
     var addUserWiseEditorialsPageToGA = function() {
-        addEventListener('.read-editorial-user-wise-page', 'Read editorial - user wise editorials page');
+        addEventListener('.read-editorial-user-wise-page', 'Read editorial - user wise editorials page', false);
+    };
+
+    var addProblemEditorialsPageToGA = function() {
+        addEventListener('.read-editorial-problem-editorials-page', 'Read editorial - problem editorials page', false);
     };
 
     $(document).ready(function() {
@@ -187,6 +192,7 @@
         addOnboardingPageToGA();
         addUserEditorialsPageToGA();
         addUserWiseEditorialsPageToGA();
+        addProblemEditorialsPageToGA();
         addMiscellaneousToGA();
     });
 })(jQuery);

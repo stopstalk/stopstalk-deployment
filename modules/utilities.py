@@ -941,4 +941,121 @@ def get_profile_url(site, handle):
     else:
         return "%s%s%s" % (current.SITES[site], url_mappings[site], handle)
 
+# ----------------------------------------------------------------------------
+def render_user_editorials_table(user_editorials,
+                                 user_id=None,
+                                 logged_in_user_id=None,
+                                 read_editorial_class=""):
+    """
+        Render User editorials table
+
+        @param user_editorials (Rows): Rows object of the editorials
+        @param user_id (Number): For which user is the listing happening
+        @param logged_in_user_id (Number): Which use is logged in
+        @param read_editorial_class (String): HTML class for GA tracking
+
+        @return (HTML): HTML table representing the user editorials
+    """
+
+    db = current.db
+    atable = db.auth_user
+    ptable = db.problem
+    T = current.T
+
+    user_ids = set([x.user_id for x in user_editorials])
+    users = db(atable.id.belongs(user_ids)).select()
+    user_mappings = {}
+    for user in users:
+        user_mappings[user.id] = user
+
+    query = (ptable.id.belongs([x.problem_id for x in user_editorials]))
+    problem_records = db(query).select(ptable.id, ptable.name, ptable.link)
+    precords = {}
+    for precord in problem_records:
+        precords[precord.id] = {"name": precord.name, "link": precord.link}
+
+    table = TABLE(_class="centered user-editorials-table")
+    thead = THEAD(TR(TH(T("Problem")),
+                     TH(T("Editorial By")),
+                     TH(T("Added on")),
+                     TH(T("Votes")),
+                     TH()))
+    tbody = TBODY()
+    color_mapping = {"accepted": "green",
+                     "rejected": "red",
+                     "pending": "blue"}
+
+    for editorial in user_editorials:
+        if user_id != editorial.user_id and editorial.verification != "accepted":
+            continue
+
+        user = user_mappings[editorial.user_id]
+        record = precords[editorial.problem_id]
+        number_of_votes = len(editorial.votes.split(",")) if editorial.votes else 0
+        link_class = get_link_class(record["link"], logged_in_user_id)
+        link_title = (" ".join(link_class.split("-"))).capitalize()
+        tr = TR(TD(problem_widget(record["name"],
+                                  record["link"],
+                                  link_class,
+                                  link_title)))
+
+        if logged_in_user_id is not None and \
+           editorial.user_id == logged_in_user_id:
+            tr.append(TD(A(user.first_name + " " + user.last_name,
+                         _href=URL("user",
+                                   "profile",
+                                   args=user.stopstalk_handle)),
+                         " ",
+                         DIV(editorial.verification.capitalize(),
+                             _class="verification-badge " + \
+                                    color_mapping[editorial.verification])))
+        else:
+            tr.append(TD(A(user.first_name + " " + user.last_name,
+                           _href=URL("user",
+                                     "profile",
+                                     args=user.stopstalk_handle))))
+
+        tr.append(TD(editorial.added_on))
+        vote_class = ""
+        if logged_in_user_id is not None and \
+           str(logged_in_user_id) in set(editorial.votes.split(",")):
+            vote_class = "red-text"
+        tr.append(TD(DIV(SPAN(I(_class="fa fa-heart " + vote_class),
+                              _class="love-editorial",
+                              data={"id": editorial.id}),
+                         " ",
+                         DIV(number_of_votes,
+                             _class="love-count",
+                             _style="margin-left: 5px;"),
+                         _style="display: inline-flex;")))
+
+        actions_td = TD(A(I(_class="fa fa-eye fa-2x"),
+                          _href=URL("problems",
+                                    "read_editorial",
+                                    args=editorial.id,
+                                    extension=False),
+                          _class="btn btn-primary tooltipped " + read_editorial_class,
+                          _style="background-color: #13AA5F;",
+                          data={"position": "bottom",
+                                "delay": 40,
+                                "tooltip": T("Read Editorial")}))
+        if logged_in_user_id is not None and \
+           user.id == logged_in_user_id and \
+           editorial.verification != "accepted":
+            actions_td.append(BUTTON(I(_class="fa fa-trash fa-2x"),
+                                     _style="margin-left: 2%;",
+                                     _class="btn btn-primary red tooltipped delete-editorial",
+                                     data={"position": "bottom",
+                                           "delay": 40,
+                                           "tooltip": T("Delete Editorial"),
+                                           "id": editorial.id}))
+        tr.append(actions_td)
+
+        tbody.append(tr)
+
+    table.append(thead)
+    table.append(tbody)
+
+    return table
+
 # =============================================================================
