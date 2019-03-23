@@ -261,7 +261,7 @@
                             values: [-5, 0, 5],
                             maxValue: 5,
                             minValue: -5},
-            submissionTitle = "Submission Graph",
+            submissionTitle = "Contribution Graph",
             acceptanceTitle = "Acceptance Graph";
         if (onlyGreen) {
             graphTitle = submissionTitle;
@@ -602,6 +602,8 @@
         });
 
         getSolvedUnsolvedProblems();
+
+        setEditorialVoteEventListeners();
 
         /* Color the handles accordingly */
         $.ajax({

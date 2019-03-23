@@ -359,16 +359,9 @@ def editorials():
     uetable = db.user_editorials
     atable = db.auth_user
     query = (uetable.problem_id == record.id)
-    if auth.is_logged_in():
-        # Show only accepted editorials not made by the logged-in user and
-        # all the editorials submitted by the logged-in user
-        query &= (((uetable.verification == "accepted") & \
-                   (uetable.user_id != session.user_id)) | \
-                  (uetable.user_id == session.user_id))
-    else:
-        query &= (uetable.verification == "accepted")
     user_editorials = db(query).select(orderby=~uetable.added_on)
-    if len(user_editorials) == 0:
+    accepted_count = len(filter(lambda x: (x.verification == "accepted" or (auth.is_logged_in() and x.user_id == session.user_id)), user_editorials))
+    if accepted_count == 0:
         if auth.is_logged_in():
             table_contents = T("No editorials found! Please contribute to the community by writing an editorial if you've solved the problem.")
         else:
@@ -381,78 +374,11 @@ def editorials():
                     problem_id=record.id,
                     site=utilities.urltosite(record.link))
 
-    table = TABLE(_class="centered")
-    thead = THEAD(TR(TH(T("Problem")),
-                     TH(T("Editorial By")),
-                     TH(T("Added on")),
-                     TH(T("Votes")),
-                     TH(T("Actions"))))
-    color_mapping = {"accepted": "green",
-                     "rejected": "red",
-                     "pending": "blue"}
-
-    tbody = TBODY()
-    for editorial in user_editorials:
-        user = atable(editorial.user_id)
-        number_of_votes = len(editorial.votes.split(",")) if editorial.votes else 0
-        tr = TR(TD(A(record.name,
-                     _href=URL("problems",
-                               "index",
-                               vars={"pname": record.name,
-                                     "plink": record.link},
-                               extension=False))))
-        if auth.is_logged_in() and user.id == session.user_id:
-            tr.append(TD(A(user.first_name + " " + user.last_name,
-                         _href=URL("user",
-                                   "profile",
-                                   args=user.stopstalk_handle)),
-                         " ",
-                         DIV(editorial.verification.capitalize(),
-                             _class="verification-badge " + \
-                                    color_mapping[editorial.verification])))
-        else:
-            tr.append(TD(A(user.first_name + " " + user.last_name,
-                           _href=URL("user",
-                                     "profile",
-                                     args=user.stopstalk_handle))))
-
-        tr.append(TD(editorial.added_on))
-        vote_class = ""
-        if auth.is_logged_in() and str(session.user_id) in set(editorial.votes.split(",")):
-            vote_class = "red-text"
-        tr.append(TD(DIV(SPAN(I(_class="fa fa-heart " + vote_class),
-                              _class="love-editorial",
-                              data={"id": editorial.id}),
-                         " ",
-                         DIV(number_of_votes,
-                             _class="love-count",
-                             _style="margin-left: 5px;"),
-                         _style="display: inline-flex;")))
-
-        actions_td = TD(A(I(_class="fa fa-eye fa-2x"),
-                          _href=URL("problems",
-                                    "read_editorial",
-                                    args=editorial.id),
-                          _class="btn btn-primary tooltipped",
-                          _style="background-color: #13AA5F;",
-                          data={"position": "bottom",
-                                "delay": 40,
-                                "tooltip": T("Read Editorial")}))
-        if auth.is_logged_in() and \
-           user.id == session.user_id and \
-           editorial.verification != "accepted":
-            actions_td.append(BUTTON(I(_class="fa fa-trash fa-2x"),
-                                     _style="margin-left: 2%;",
-                                     _class="red tooltipped delete-editorial",
-                                     data={"position": "bottom",
-                                           "delay": 40,
-                                           "tooltip": T("Delete Editorial"),
-                                           "id": editorial.id}))
-        tr.append(actions_td)
-        tbody.append(tr)
-
-    table.append(thead)
-    table.append(tbody)
+    user_id = session.user_id if auth.is_logged_in() else None
+    table = utilities.render_user_editorials_table(user_editorials,
+                                                   user_id,
+                                                   user_id,
+                                                   "read-editorial-problem-editorials-page")
 
     return dict(name=record.name,
                 link=record.link,
@@ -663,6 +589,7 @@ Team StopStalk
         mail_type="admin",
         bulk=True)
         uetable_record.update_record(verification="accepted")
+        current.REDIS_CLIENT.delete("get_dates_" + user.stopstalk_handle)
         return "ACCEPTED"
     elif request.args[0] == "rejected":
         uetable_record.update_record(verification="rejected")
