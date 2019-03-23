@@ -377,7 +377,8 @@ def editorials():
     user_id = session.user_id if auth.is_logged_in() else None
     table = utilities.render_user_editorials_table(user_editorials,
                                                    user_id,
-                                                   user_id)
+                                                   user_id,
+                                                   "read-editorial-problem-editorials-page")
 
     return dict(name=record.name,
                 link=record.link,

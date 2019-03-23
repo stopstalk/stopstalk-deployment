@@ -942,13 +942,17 @@ def get_profile_url(site, handle):
         return "%s%s%s" % (current.SITES[site], url_mappings[site], handle)
 
 # ----------------------------------------------------------------------------
-def render_user_editorials_table(user_editorials, user_id=None, logged_in_user_id=None):
+def render_user_editorials_table(user_editorials,
+                                 user_id=None,
+                                 logged_in_user_id=None,
+                                 read_editorial_class=""):
     """
         Render User editorials table
 
         @param user_editorials (Rows): Rows object of the editorials
         @param user_id (Number): For which user is the listing happening
         @param logged_in_user_id (Number): Which use is logged in
+        @param read_editorial_class (String): HTML class for GA tracking
 
         @return (HTML): HTML table representing the user editorials
     """
@@ -1030,7 +1034,7 @@ def render_user_editorials_table(user_editorials, user_id=None, logged_in_user_i
                                     "read_editorial",
                                     args=editorial.id,
                                     extension=False),
-                          _class="btn btn-primary tooltipped",
+                          _class="btn btn-primary tooltipped " + read_editorial_class,
                           _style="background-color: #13AA5F;",
                           data={"position": "bottom",
                                 "delay": 40,
