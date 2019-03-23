@@ -37,6 +37,7 @@
         var isLoggedIn = ("{{=auth.is_logged_in()}}" === "True");
         var markReadURL = "{{=URL('user', 'mark_read')}}";
         var loveEditorialURL = "{{=URL('problems', 'love_editorial', extension='json')}}";
+        var deleteEditorialURL = "{{=URL('problems', 'delete_editorial')}}";
     </script>
     {{block head}}{{end}}
     {{

@@ -603,6 +603,8 @@
 
         getSolvedUnsolvedProblems();
 
+        setEditorialVoteEventListeners();
+
         /* Color the handles accordingly */
         $.ajax({
             url: handleDetailsURL,
