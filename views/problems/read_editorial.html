@@ -13,8 +13,8 @@
 {{if auth.is_logged_in() and session.user_id == 1:}}
   {{if ue_record.verification == "pending":}}
     <br/><br/>
-    <a href="{{=URL('problems', 'admin_editorial_approval', args=['accepted', ue_record.id])}}" class="btn btn-primary green white-text">Accept</a>
-    <a href="{{=URL('problems', 'admin_editorial_approval', args=['rejected', ue_record.id])}}" class="btn btn-primary red white-text">Reject</a>
+    <button id="accept-user-editorial" data-editorial-id="{{=ue_record.id}}" class="btn btn-primary green white-text">Accept</button>
+    <button id="reject-user-editorial" data-editorial-id="{{=ue_record.id}}" class="btn btn-primary red white-text">Reject</button>
   {{else:}}
     <p>Already {{=ue_record.verification}}</p>
   {{pass}}
@@ -43,4 +43,27 @@
     toolbar: false,
     status: false
   }).togglePreview();
+
+  var updateEditorialStatus = function(status, recordId) {
+    var updateStatusURL = "{{=URL('problems', 'admin_editorial_approval')}}";
+    $.ajax({
+      url: updateStatusURL + "/" + status + "/" + recordId,
+      success: function(response) {
+        $.web2py.flash(response);
+      },
+      error: function(err) {
+        $.web2py.flash(err);
+      }
+    })
+  };
+
+  $(document).ready(function() {
+    $('#accept-user-editorial').on('click', function() {
+      updateEditorialStatus('accepted', $(this).data('editorialId'));
+    });
+
+    $('#reject-user-editorial').on('click', function() {
+      updateEditorialStatus('rejected', $(this).data('editorialId'));
+    });
+  });
 </script>
