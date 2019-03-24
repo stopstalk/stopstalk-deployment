@@ -127,7 +127,7 @@ class User:
         if response in REQUEST_FAILURES:
             if response != NOT_FOUND:
                 self.retrieval_failed = True
-            log_line("Request ERROR: CodeChef " + url + " " + response)
+            log_line(self.get_debug_statement() + "Request ERROR: CodeChef " + url + " " + response)
             return
 
         def zero_pad(string):
@@ -172,7 +172,7 @@ class User:
         if response in REQUEST_FAILURES:
             if response != NOT_FOUND:
                 self.retrieval_failed = True
-            log_line("Request ERROR: Codeforces " + url + " " + response)
+            log_line(self.get_debug_statement() + "Request ERROR: Codeforces " + url + " " + response)
             return
 
         contest_list = response.json()["result"]
@@ -185,14 +185,14 @@ class User:
 
         response = get_request(url)
         if response in REQUEST_FAILURES:
-            log_line("Request ERROR: Codeforces " + url + " " + response)
+            log_line(self.get_debug_statement() + "Request ERROR: Codeforces " + url + " " + response)
             return
 
         soup = BeautifulSoup(response.text, "lxml")
         try:
             tbody = soup.find("table", class_="tablesorter").find("tbody")
         except AttributeError:
-            log_line("Cannot find CodeForces user " + handle)
+            log_line(self.get_debug_statement() + "Cannot find CodeForces user " + handle)
             return
 
         contest_data = {}
@@ -230,7 +230,7 @@ class User:
         if response in REQUEST_FAILURES:
             if response != NOT_FOUND:
                 self.retrieval_failed = True
-            log_line("Request ERROR: HackerRank " + url + " " + response)
+            log_line(self.get_debug_statement() + "Request ERROR: HackerRank " + url + " " + response)
             return
         response = response.json()["models"]
 
@@ -265,10 +265,10 @@ class User:
         if response in REQUEST_FAILURES:
             if response != NOT_FOUND:
                 self.retrieval_failed = True
-            log_line("Request ERROR: HackerEarth " + url + " " + response)
+            log_line(self.get_debug_statement() + "Request ERROR: HackerEarth " + url + " " + response)
             return
         if response.text == "":
-            log_line("Request ERROR: HackerEarth " + url + " " + NOT_FOUND)
+            log_line(self.get_debug_statement() + "Request ERROR: HackerEarth " + url + " " + NOT_FOUND)
             return
         contest_data = eval(re.findall(r"var dataset = \[.*?\]", response.text)[0][14:])
         if len(contest_data) == 0:
@@ -293,7 +293,7 @@ class User:
 
     def write_to_filesystem(self):
         if self.previous_graph_data == self.graph_data:
-            log_line("No update in graph data")
+            log_line(self.get_debug_statement() + "No update in graph data")
             return
 
         if self.previous_graph_data is not None:
@@ -314,7 +314,7 @@ class User:
             www_data = getpwnam("www-data")
             os.chown(self.pickle_file_path, www_data.pw_uid, www_data.pw_gid)
 
-        log_line("Writing to filesystem done")
+        log_line(self.get_debug_statement() + "Writing to filesystem done")
 
     def update_graph_data(self, sites):
         threads = []
@@ -328,7 +328,7 @@ class User:
             self.write_to_filesystem()
             self.user_record.update_record(graph_data_retrieved=True)
         else:
-            log_line("Writing to file skipped")
+            log_line(self.get_debug_statement() + "Writing to file skipped")
 
 def get_user_objects(aquery=None, cquery=None, sites=None):
     user_objects = []
@@ -384,7 +384,6 @@ if __name__ == "__main__":
         log_line("Invalid Arguments")
 
     for user_object in user_objects:
-        log_line(user_object.get_debug_statement())
         user_object.update_graph_data(sites)
 
     if getuser() == "root":
