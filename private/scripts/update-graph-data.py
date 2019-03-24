@@ -53,6 +53,10 @@ DIR_PATH = "./applications/stopstalk/graph_data/"
 user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36"
 
 # -----------------------------------------------------------------------------
+def log_line(message):
+    print str(datetime.now()) + " " + message
+
+# -----------------------------------------------------------------------------
 def get_request(url, headers={}, timeout=current.TIMEOUT, params={}):
     """
         Make a HTTP GET request to a url
@@ -73,7 +77,7 @@ def get_request(url, headers={}, timeout=current.TIMEOUT, params={}):
                                     proxies=current.PROXY,
                                     timeout=timeout)
         except Exception as e:
-            print e, url
+            log_line(str(e) + " " + str(url))
             return SERVER_FAILURE
 
         if response.status_code == 200:
@@ -123,7 +127,7 @@ class User:
         if response in REQUEST_FAILURES:
             if response != NOT_FOUND:
                 self.retrieval_failed = True
-            print "Request ERROR: CodeChef " + url + " " + response
+            log_line("Request ERROR: CodeChef " + url + " " + response)
             return
 
         def zero_pad(string):
@@ -168,7 +172,7 @@ class User:
         if response in REQUEST_FAILURES:
             if response != NOT_FOUND:
                 self.retrieval_failed = True
-            print "Request ERROR: Codeforces " + url + " " + response
+            log_line("Request ERROR: Codeforces " + url + " " + response)
             return
 
         contest_list = response.json()["result"]
@@ -181,14 +185,14 @@ class User:
 
         response = get_request(url)
         if response in REQUEST_FAILURES:
-            print "Request ERROR: Codeforces " + url + " " + response
+            log_line("Request ERROR: Codeforces " + url + " " + response)
             return
 
         soup = BeautifulSoup(response.text, "lxml")
         try:
             tbody = soup.find("table", class_="tablesorter").find("tbody")
         except AttributeError:
-            print "Cannot find CodeForces user " + handle
+            log_line("Cannot find CodeForces user " + handle)
             return
 
         contest_data = {}
@@ -226,7 +230,7 @@ class User:
         if response in REQUEST_FAILURES:
             if response != NOT_FOUND:
                 self.retrieval_failed = True
-            print "Request ERROR: HackerRank " + url + " " + response
+            log_line("Request ERROR: HackerRank " + url + " " + response)
             return
         response = response.json()["models"]
 
@@ -261,10 +265,10 @@ class User:
         if response in REQUEST_FAILURES:
             if response != NOT_FOUND:
                 self.retrieval_failed = True
-            print "Request ERROR: HackerEarth " + url + " " + response
+            log_line("Request ERROR: HackerEarth " + url + " " + response)
             return
         if response.text == "":
-            print "Request ERROR: HackerEarth " + url + " " + NOT_FOUND
+            log_line("Request ERROR: HackerEarth " + url + " " + NOT_FOUND)
             return
         contest_data = eval(re.findall(r"var dataset = \[.*?\]", response.text)[0][14:])
         if len(contest_data) == 0:
@@ -289,7 +293,7 @@ class User:
 
     def write_to_filesystem(self):
         if self.previous_graph_data == self.graph_data:
-            print "No update in graph data"
+            log_line("No update in graph data")
             return
 
         if self.previous_graph_data is not None:
@@ -310,7 +314,7 @@ class User:
             www_data = getpwnam("www-data")
             os.chown(self.pickle_file_path, www_data.pw_uid, www_data.pw_gid)
 
-        print "Writing to filesystem done"
+        log_line("Writing to filesystem done")
 
     def update_graph_data(self, sites):
         threads = []
@@ -324,7 +328,7 @@ class User:
             self.write_to_filesystem()
             self.user_record.update_record(graph_data_retrieved=True)
         else:
-            print "Writing to file skipped"
+            log_line("Writing to file skipped")
 
 def get_user_objects(aquery=None, cquery=None, sites=None):
     user_objects = []
@@ -377,10 +381,10 @@ if __name__ == "__main__":
                                         cquery=(cftable.graph_data_retrieved != True),
                                         sites=sites)
     else:
-        print "Invalid Arguments"
+        log_line("Invalid Arguments")
 
     for user_object in user_objects:
-        print user_object.get_debug_statement(),
+        log_line(user_object.get_debug_statement())
         user_object.update_graph_data(sites)
 
     if getuser() == "root":
@@ -388,5 +392,5 @@ if __name__ == "__main__":
         www_data = getpwnam("www-data")
         if dir_stats.st_uid != www_data.pw_uid or \
            dir_stats.st_gid != www_data.pw_gid:
-            print "Changing user and group for", DIR_PATH
+            log_line("Changing user and group for " + " " + DIR_PATH)
             os.chown(DIR_PATH, www_data.pw_uid, www_data.pw_gid)
