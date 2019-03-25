@@ -986,7 +986,7 @@ def render_user_editorials_table(user_editorials,
                      "pending": "blue"}
 
     for editorial in user_editorials:
-        if user_id != editorial.user_id and editorial.verification != "accepted":
+        if logged_in_user_id != 1 and user_id != editorial.user_id and editorial.verification != "accepted":
             continue
 
         user = user_mappings[editorial.user_id]
@@ -1000,7 +1000,8 @@ def render_user_editorials_table(user_editorials,
                                   link_title)))
 
         if logged_in_user_id is not None and \
-           editorial.user_id == logged_in_user_id:
+           (editorial.user_id == logged_in_user_id or
+            logged_in_user_id == 1):
             tr.append(TD(A(user.first_name + " " + user.last_name,
                          _href=URL("user",
                                    "profile",
@@ -1040,7 +1041,7 @@ def render_user_editorials_table(user_editorials,
                                 "delay": 40,
                                 "tooltip": T("Read Editorial")}))
         if logged_in_user_id is not None and \
-           user.id == logged_in_user_id and \
+           (user.id == logged_in_user_id or logged_in_user_id == 1) and \
            editorial.verification != "accepted":
             actions_td.append(BUTTON(I(_class="fa fa-trash fa-2x"),
                                      _style="margin-left: 2%;",
