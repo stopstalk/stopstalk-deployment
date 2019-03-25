@@ -360,7 +360,7 @@ def editorials():
     atable = db.auth_user
     query = (uetable.problem_id == record.id)
     user_editorials = db(query).select(orderby=~uetable.added_on)
-    accepted_count = len(filter(lambda x: (x.verification == "accepted" or (auth.is_logged_in() and x.user_id == session.user_id)), user_editorials))
+    accepted_count = len(filter(lambda x: (x.verification == "accepted" or (auth.is_logged_in() and (x.user_id == session.user_id or session.user_id == 1))), user_editorials))
     if accepted_count == 0:
         if auth.is_logged_in():
             table_contents = T("No editorials found! Please contribute to the community by writing an editorial if you've solved the problem.")
