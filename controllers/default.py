@@ -213,7 +213,7 @@ def user_editorials():
 
     table_rows = sorted(table_rows, key=lambda x: (x[0], x[1]), reverse=True)
 
-    # Get all editorials table
+    # Get recent editorials table
     # ----------------------------
 
     table = TABLE(_class="centered")
@@ -225,13 +225,13 @@ def user_editorials():
     tbody = TBODY()
 
     user_id = session.user_id if auth.is_logged_in() else None
-    table = utilities.render_user_editorials_table(rows,
+    table = utilities.render_user_editorials_table(rows[:200],
                                                    user_id,
                                                    user_id,
                                                    "read-editorial-user-editorials-page")
 
     return dict(table_rows=table_rows[:10],
-                all_editorials_table=table,
+                recent_editorials_table=table,
                 pending_count=pending_count)
 
 # ----------------------------------------------------------------------------
