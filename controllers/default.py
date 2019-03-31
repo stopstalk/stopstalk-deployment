@@ -177,10 +177,6 @@ def user_editorials():
             # Store the user object for later usage
             user_object_map[row.user_id] = atable(row.user_id)
 
-        if row.added_on < datetime.datetime.strptime("2019-01-01 00:00:00", "%Y-%m-%d %H:%M:%S") or \
-           row.added_on > datetime.datetime.strptime("2019-03-31 23:59:59", "%Y-%m-%d %H:%M:%S"):
-            continue
-
         if row.problem_id not in pids:
             # This problem has an official editorial - don't count in leaderboard
             continue
@@ -225,7 +221,7 @@ def user_editorials():
     tbody = TBODY()
 
     user_id = session.user_id if auth.is_logged_in() else None
-    table = utilities.render_user_editorials_table(rows[:200],
+    table = utilities.render_user_editorials_table(rows[:300],
                                                    user_id,
                                                    user_id,
                                                    "read-editorial-user-editorials-page")
