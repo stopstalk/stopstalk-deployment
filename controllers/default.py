@@ -177,8 +177,8 @@ def user_editorials():
             # Store the user object for later usage
             user_object_map[row.user_id] = atable(row.user_id)
 
-        if row.added_on < datetime.datetime.strptime("2019-01-01", "%Y-%m-%d") or \
-           row.added_on > datetime.datetime.strptime("2019-03-31", "%Y-%m-%d"):
+        if row.added_on < datetime.datetime.strptime("2019-01-01 00:00:00", "%Y-%m-%d %H:%M:%S") or \
+           row.added_on > datetime.datetime.strptime("2019-03-31 23:59:59", "%Y-%m-%d %H:%M:%S"):
             continue
 
         if row.problem_id not in pids:
