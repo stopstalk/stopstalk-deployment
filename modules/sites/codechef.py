@@ -99,21 +99,29 @@ class Profile(object):
             @return (String/None): Editorial URL
         """
         editorial_link = None
-        response = get_request(problem_link, headers={"User-Agent": user_agent})
+        api_link = problem_link.replace("https://www.codechef.com/", "https://www.codechef.com/api/contests/")
+        response = get_request(api_link + "?v=1554915627060",
+                               headers={"User-Agent": user_agent})
         if response in REQUEST_FAILURES:
             return None
+        response = response.json()
+        try:
+            editorial_link = response["editorial_url"]
+        except KeyError:
+            editorial_link = None
 
-        soup = BeautifulSoup(response.text, "lxml")
-        all_as = soup.find_all("a")
-
-        for link in all_as:
-            try:
-                url = link.contents[0]
-            except IndexError:
-                continue
-            if url.__contains__("discuss.codechef.com"):
-                editorial_link = url
-                break
+        try:
+            tags = BeautifulSoup(response["tags"], "lxml").text
+            tags = tags.split(" ")
+            db = current.db
+            ptable = db.problem
+            row = db(ptable.link == problem_link).select().first()
+            today = datetime.datetime.now().strftime("%Y-%m-%d")
+            if row:
+                row.update_record(tags=str(tags),
+                                  tags_added_on=today)
+        except Exception as e:
+            pass
 
         return editorial_link
 
