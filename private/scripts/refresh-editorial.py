@@ -47,23 +47,24 @@ def refresh_editorials():
 
     # Problems that are in submission table
     updated_problem_list = db(stable).select(stable.problem_link,
-                                             distinct=True)
-    current_problem_list = [x.link for x in current_problem_list]
-    updated_problem_list = [x.problem_link for x in updated_problem_list]
+                                             limitby=(0, 50000))
+    current_problem_list = set([x.link for x in current_problem_list])
+    updated_problem_list = set([x.problem_link for x in updated_problem_list])
 
     today = datetime.datetime.now().strftime("%Y-%m-%d")
-    before_15 = (datetime.datetime.now() - \
-                 datetime.timedelta(15)).strftime("%Y-%m-%d")
+    before_30 = (datetime.datetime.now() - \
+                 datetime.timedelta(30)).strftime("%Y-%m-%d")
 
     query = ((ptable.editorial_added_on == None) |
-             (ptable.editorial_added_on >= before_15)) & \
-            (ptable.editorial_link == None)
+             (ptable.editorial_added_on >= before_30)) & \
+            ((ptable.editorial_link == None) | \
+             (ptable.editorial_link == ""))
     no_editorial = db(query).select(ptable.link)
     no_editorial = [x.link for x in no_editorial]
 
     # Compute difference between the lists
-    difference_list = list((set(updated_problem_list) - \
-                            set(current_problem_list)).union(no_editorial))
+    difference_list = list((updated_problem_list - \
+                            current_problem_list).union(no_editorial))
 
     today = datetime.datetime.now().strftime("%Y-%m-%d")
 
