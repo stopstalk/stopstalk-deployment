@@ -624,11 +624,11 @@
 
         handleRefreshNow();
 
-        $(document).on('click', '.profile-page-site-profile-url', function() {
-            var $thisChip = $(this),
-                site = $thisChip.data()['tooltip'];
-
-            window.open(profileURLs[site], '_blank');
+        $(document).on('click', '.profile-page-site-profile-url', function(e) {
+            var $this = $(this),
+                profileURL = $this[0]["href"];
+            window.open(profileURL, '_blank');
+            e.preventDefault();
         });
 
         $('.friends-button').click(function() {
