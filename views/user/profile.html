@@ -195,7 +195,6 @@
                         <div class="row center">
                             <h6><strong>{{=T("Accuracy")}}</strong></h6>
                             {{for site in current.SITES:}}
-                            {{print profile_urls}}
                                 {{if profile_urls[site] != "NA":}}
                                     <a id="{{=site.lower()}}-profile-url" class="tooltipped profile-page-site-profile-url" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank" href="{{=profile_urls[site]}}">
                                         <div class="chip" id="{{=site.lower()}}_chip">
