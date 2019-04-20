@@ -614,12 +614,12 @@
             var mapping = {"invalid-handle": "Invalid handle",
                            "pending-retrieval": "Pending retrieval",
                            "not-provided": "Not provided"};
-
             $.each(response, function(key, val) {
                 var $siteChip = $('#' + key + '_chip');
                 $siteChip.addClass(val);
                 $siteChip.parent().attr("data-tooltip", mapping[val]);
             });
+            $('.tooltipped').tooltip({delay: 50});
         });
 
         handleRefreshNow();
