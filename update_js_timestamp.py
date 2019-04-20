@@ -24,9 +24,6 @@
 import sys, redis
 import datetime
 
-with open('static_files_list.txt', 'r') as fp:
-    all_js_css_files = fp.readlines()
-fp.close()
 
 def convert_to_min(filename):
     filename = filename.strip()
@@ -36,8 +33,6 @@ def convert_to_min(filename):
         filename = filename[:-4] + ".min.css"
     return filename
 
-all_js_css_files = map(lambda filename: convert_to_min(filename),
-                       all_js_css_files)
 
 all_image_files = ["images/favicon.ico",
                    "images/favicon.png",
@@ -112,7 +107,13 @@ if __name__ == "__main__":
     else:
         files = sys.argv[1:]
         if files[0] == "ALL":
+            with open("static_files_list.txt", "r") as fp:
+                all_js_css_files = fp.readlines()
+
             files = all_js_css_files + all_image_files
+
+        files = map(convert_to_min, files)
+
     if len(files):
         current_timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         for filename in files:
