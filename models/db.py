@@ -313,6 +313,7 @@ def sanitize_fields(form):
         8.  stopstalk_handle is alphanumeric
         9.  Country field is compulsory
         10. Only positive ints allowed in Timus field
+        11. HackerRank handle should not be containing hr_r=1
 
         @param form (FORM): Registration / Add Custom friend form
     """
@@ -339,7 +340,7 @@ def sanitize_fields(form):
     handle_fields = ["stopstalk"]
     handle_fields.extend([x.lower() for x in current.SITES.keys()])
 
-    # 1. and 6.
+    # 1, 6 and 11
     for field in handle_fields:
         field_handle = field + "_handle"
         if form.vars[field_handle]:
@@ -347,6 +348,8 @@ def sanitize_fields(form):
                 form.errors[field_handle] = T("White spaces not allowed")
             elif IS_EMAIL(error_message="check")(form.vars[field_handle])[1] != "check":
                 form.errors[field_handle] = T("Email address instead of handle")
+            elif field == "hackerrank" and form.vars[field_handle].__contains__("hr_r=1"):
+                form.errors[field_handle] = T("Please enter only the handle")
 
     # 2.
     _remove_at_symbol("HackerEarth")
