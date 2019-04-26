@@ -95,7 +95,7 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def is_invalid_handle(handle):
-        response = get_request("http://codeforces.com/api/user.status?handle=" + \
+        response = get_request("http://www.codeforces.com/api/user.status?handle=" + \
                                handle + "&from=1&count=2")
         if response in REQUEST_FAILURES:
             return True
