@@ -82,7 +82,7 @@ class Profile(object):
     @staticmethod
     def is_invalid_handle(handle):
         url = "https://www.hackerearth.com/submissions/" + handle
-        response = get_request(url, log_metrics=True)
+        response = get_request(url)
         if response in REQUEST_FAILURES:
             return True
         return False
