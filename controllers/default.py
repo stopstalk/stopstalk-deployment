@@ -902,12 +902,12 @@ def leaderboard():
         users.append(this_row)
         leaderboard_rank += 1
 
-    # if global_leaderboard == True and \
-    #    specific_institute == False and \
-    #    specific_country == False:
-    #     current.REDIS_CLIENT.set("global_leaderboard_cache",
-    #                              json.dumps(users),
-    #                              ex=5 * 60 * 60)
+    if global_leaderboard == True and \
+       specific_institute == False and \
+       specific_country == False:
+        current.REDIS_CLIENT.set("global_leaderboard_cache",
+                                 json.dumps(users),
+                                 ex=5 * 60 * 60)
 
     return dict(users=users, logged_in_row=logged_in_row)
 
