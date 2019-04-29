@@ -861,7 +861,13 @@ def leaderboard():
        specific_country == False:
         user_ratings = current.REDIS_CLIENT.get("global_leaderboard_cache")
         if user_ratings:
-            return dict(users=json.loads(user_ratings), logged_in_row=None)
+            users = json.loads(user_ratings)
+            logged_in_row = None
+            if auth.is_logged_in():
+                logged_in_row = filter(lambda x: x[1] == session.handle, users)
+                logged_in_row = None if len(logged_in_row) == 0 else logged_in_row[0]
+
+            return dict(users=users, logged_in_row=logged_in_row)
 
     reg_users = db(aquery).select(*afields, orderby=~atable.stopstalk_rating)
 
