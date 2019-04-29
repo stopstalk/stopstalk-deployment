@@ -856,7 +856,6 @@ def leaderboard():
         return dict(heading=heading,
                     global_leaderboard=global_leaderboard)
 
-    import json
     if global_leaderboard == True and \
        specific_institute == False and \
        specific_country == False:
@@ -877,6 +876,8 @@ def leaderboard():
                                   x["_extra"]["COUNT(custom_friend.id)"]) for x in custom_friends_count])
 
     users = []
+    leaderboard_rank = 1
+    logged_in_row = None
     for user in reg_users:
         cf_count = 0
         if user.id in custom_friends_count:
@@ -886,23 +887,29 @@ def leaderboard():
         if user.country in current.all_countries:
             country_details = [current.all_countries[user.country], user.country]
 
-        users.append((user.first_name + " " + user.last_name,
-                      user.stopstalk_handle,
-                      user.institute,
-                      user.stopstalk_rating,
-                      float(user.per_day_change),
-                      # user.stopstalk_rating - user.stopstalk_prev_rating,
-                      country_details,
-                      cf_count))
+        this_row = (user.first_name + " " + user.last_name,
+                    user.stopstalk_handle,
+                    user.institute,
+                    user.stopstalk_rating,
+                    float(user.per_day_change),
+                    country_details,
+                    cf_count,
+                    leaderboard_rank)
 
-    if global_leaderboard == True and \
-       specific_institute == False and \
-       specific_country == False:
-        current.REDIS_CLIENT.set("global_leaderboard_cache",
-                                 json.dumps(users),
-                                 ex=5 * 60 * 60)
+        if auth.is_logged_in() and session.user_id == user.id:
+            logged_in_row = this_row
 
-    return dict(users=users)
+        users.append(this_row)
+        leaderboard_rank += 1
+
+    # if global_leaderboard == True and \
+    #    specific_institute == False and \
+    #    specific_country == False:
+    #     current.REDIS_CLIENT.set("global_leaderboard_cache",
+    #                              json.dumps(users),
+    #                              ex=5 * 60 * 60)
+
+    return dict(users=users, logged_in_row=logged_in_row)
 
 # ----------------------------------------------------------------------------
 def user():
