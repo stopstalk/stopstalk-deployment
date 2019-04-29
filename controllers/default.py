@@ -25,6 +25,7 @@ import datetime
 import parsedatetime as pdt
 import requests
 import utilities
+import json
 
 user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36"
 
@@ -357,8 +358,6 @@ def remove_todo():
 # ----------------------------------------------------------------------------
 @auth.requires_login()
 def job_profile():
-    from json import dumps
-
     s3_key = "resumes/%0.9d.pdf" % session.user_id
 
     def _get_response_from_record(record):
@@ -367,7 +366,7 @@ def job_profile():
 
             @return (String): JSON dump of the record
         """
-        return dict(resume_data_record=dumps(dict(
+        return dict(resume_data_record=json.dumps(dict(
                         can_contact=record.can_contact,
                         contact_number=record.contact_number,
                         expected_salary=record.expected_salary,
@@ -815,8 +814,9 @@ def leaderboard():
             global_leaderboard = True
         else:
             if not auth.is_logged_in():
-                response.flash = T("Login to see Friends Leaderboard")
                 global_leaderboard = True
+                if request.extension == "html":
+                    response.flash = T("Login to see Friends Leaderboard")
     else:
         if not auth.is_logged_in():
             global_leaderboard = True
@@ -856,13 +856,12 @@ def leaderboard():
         return dict(heading=heading,
                     global_leaderboard=global_leaderboard)
 
-    import json
     if global_leaderboard == True and \
        specific_institute == False and \
        specific_country == False:
         user_ratings = current.REDIS_CLIENT.get("global_leaderboard_cache")
         if user_ratings:
-            return dict(users=json.loads(user_ratings))
+            return dict(users=json.loads(user_ratings), logged_in_row=None)
 
     reg_users = db(aquery).select(*afields, orderby=~atable.stopstalk_rating)
 
@@ -877,6 +876,8 @@ def leaderboard():
                                   x["_extra"]["COUNT(custom_friend.id)"]) for x in custom_friends_count])
 
     users = []
+    leaderboard_rank = 1
+    logged_in_row = None
     for user in reg_users:
         cf_count = 0
         if user.id in custom_friends_count:
@@ -886,14 +887,20 @@ def leaderboard():
         if user.country in current.all_countries:
             country_details = [current.all_countries[user.country], user.country]
 
-        users.append((user.first_name + " " + user.last_name,
-                      user.stopstalk_handle,
-                      user.institute,
-                      user.stopstalk_rating,
-                      float(user.per_day_change),
-                      # user.stopstalk_rating - user.stopstalk_prev_rating,
-                      country_details,
-                      cf_count))
+        this_row = (user.first_name + " " + user.last_name,
+                    user.stopstalk_handle,
+                    user.institute,
+                    user.stopstalk_rating,
+                    float(user.per_day_change),
+                    country_details,
+                    cf_count,
+                    leaderboard_rank)
+
+        if auth.is_logged_in() and session.user_id == user.id:
+            logged_in_row = this_row
+
+        users.append(this_row)
+        leaderboard_rank += 1
 
     if global_leaderboard == True and \
        specific_institute == False and \
@@ -902,7 +909,7 @@ def leaderboard():
                                  json.dumps(users),
                                  ex=5 * 60 * 60)
 
-    return dict(users=users)
+    return dict(users=users, logged_in_row=logged_in_row)
 
 # ----------------------------------------------------------------------------
 def user():
@@ -1629,7 +1636,6 @@ def submissions():
         return dict(count=count,
                     total_rows=1)
 
-    from json import loads
     rarecord = db(ratable.user_id == session.user_id).select().first()
     if rarecord is None:
         ratable.insert(user_id=session.user_id)
@@ -1671,7 +1677,7 @@ def submissions():
                 country=country,
                 country_form=country_form,
                 utilities=utilities,
-                recent_announcements=loads(rarecord.data))
+                recent_announcements=json.loads(rarecord.data))
 
 # ----------------------------------------------------------------------------
 def faq():
