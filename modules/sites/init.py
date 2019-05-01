@@ -24,15 +24,12 @@ import re, requests, ast, time
 import parsedatetime as pdt
 import datetime
 import bs4
-import gevent
 import utilities
-from gevent import monkey
 from gluon import current
 from bs4 import BeautifulSoup
 from health_metrics import MetricHandler
 
 user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36"
-gevent.monkey.patch_all(thread=False)
 
 # Constants to be used in case of request failures
 SERVER_FAILURE = "SERVER_FAILURE"
