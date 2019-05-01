@@ -57,6 +57,9 @@ def get_request(url, headers={}, timeout=current.TIMEOUT, params={}, is_daily_re
         @return: Response object or one of REQUEST_FAILURES
     """
 
+    if current.environment == "test":
+        timeout = 20
+
     site = utilities.urltosite(url).lower()
     request_metric_handler = MetricHandler("request_stats",
                                            "success_failure",
