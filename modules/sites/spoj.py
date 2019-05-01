@@ -193,6 +193,7 @@ class Profile(object):
                             information
         """
         from gevent.coros import BoundedSemaphore
+        import gevent
 
         # Send requests to AWS API gateway in batches of size AWS_LAMBDA_CONCURRENCY
         AWS_LAMBDA_CONCURRENCY = 200
