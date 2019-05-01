@@ -1457,93 +1457,14 @@ def download_submission():
         Return the downloaded submission as a string
     """
 
-    from bs4 import BeautifulSoup
-
-    def _handle_retrieve_error(download_url,
-                               status_code,
-                               error=None,
-                               message_body=None):
-
-        """
-            Error logging for Download submissions
-
-            @param download_url (String): Download URL which failed
-            @param status_code (Number): Status code of response
-            @param error (String): Exception message
-            @param message_body (String): response.text in case of errors
-
-            @return Number: -1 (To signify failure to JS)
-        """
-
-        subject = "Download submission failed: %d" % status_code
-        message = """
-User handle: %s
-Download URL: %s
-Error: %s
-Response text: %s
-                  """ % (session.handle, download_url, error, message_body)
-
-        # current.send_mail(to="raj454raj@gmail.com",
-        #                   subject=subject,
-        #                   message=message,
-        #                   mail_type="admin",
-        #                   bulk=True)
-        return -1
-
-    def _response_handler(download_url, response):
-        """
-            Handle the request response
-
-            @param response (Response): Response object after request to the
-                                        view submission link
-            @return Number (-1) / String (Submission code)
-        """
-
-        if response.status_code != 200:
-            return _handle_retrieve_error(download_url,
-                                          response.status_code)
-
-        try:
-            return BeautifulSoup(response.text, "lxml").find("pre").text
-        except Exception as e:
-            return _handle_retrieve_error(download_url,
-                                          response.status_code,
-                                          e,
-                                          response.text)
-
-    # @ToDo: Need to move this to profile site class
-    def _retrieve_codechef_submission(view_link):
-        """
-            Get CodeChef submission from view_link
-
-            @param view_link (String): View link of the submission
-            @return _response_handler (Method): Handler for the response
-        """
-
-        problem_id = view_link.strip("/").split("/")[-1]
-        download_url = "https://www.codechef.com/viewplaintext/" + \
-                       str(problem_id)
-        response = requests.get(download_url,
-                                headers={"User-Agent": user_agent})
-        return _response_handler(download_url, response)
-
-    def _retrieve_codeforces_submission(view_link):
-        """
-            Get Codeforces submission from view_link
-
-            @param view_link (String): View link of the submission
-            @return _response_handler (Method): Handler for the response
-        """
-
-        response = requests.get(view_link)
-        return _response_handler(view_link, response)
+    import sites
 
     site = request.get_vars["site"]
     view_link = request.get_vars["viewLink"]
     if site == "CodeChef":
-        return _retrieve_codechef_submission(view_link)
+        return getattr(sites, "codechef").Profile.download_submission(view_link)
     elif site == "CodeForces":
-        return _retrieve_codeforces_submission(view_link)
+        return getattr(sites, "codeforces").Profile.download_submission(view_link)
     else:
         return -1
 

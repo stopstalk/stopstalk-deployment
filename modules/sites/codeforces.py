@@ -102,6 +102,18 @@ class Profile(object):
         return False
 
     # -------------------------------------------------------------------------
+    @staticmethod
+    def download_submission(view_link):
+        response = requests.get(view_link)
+        if response in REQUEST_FAILURES:
+            return -1
+
+        try:
+            return BeautifulSoup(response.text, "lxml").find("pre").text
+        except:
+            return -1
+
+    # -------------------------------------------------------------------------
     def get_submissions(self, last_retrieved, plink_to_id, is_daily_retrieval):
         """
             Retrieve CodeForces submissions after last retrieved timestamp
