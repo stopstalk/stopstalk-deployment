@@ -20,6 +20,8 @@
     THE SOFTWARE.
 """
 
+import time
+import requests
 import sites
 
 current.environment = "test"
@@ -76,11 +78,13 @@ class RetrievalTest:
         for site in sites_with_tags_functionality:
             tags_func = self.profile_site[site].get_tags
             tags_val = tags_func(assertion_hash["with_tags"][site]["plink"])
-            assert(set(tags_val) == set(assertion_hash["with_tags"][site]["tags"]))
+            if set(tags_val) != set(assertion_hash["with_tags"][site]["tags"]):
+                raise RuntimeError(site + " with tags failure")
 
             if site in assertion_hash["without_tags"]:
                 tags_val = tags_func(assertion_hash["without_tags"][site])
-                assert(tags_val in ([u"-"], []))
+                if tags_val not in ([u"-"], []):
+                    raise RuntimeError(site + " without tags failure")
 
     # --------------------------------------------------------------------------
     def test_editorial_retrieval(self):
@@ -112,19 +116,45 @@ class RetrievalTest:
         for site in sites_with_editorial_functionality:
             editorial_func = self.profile_site[site].get_editorial_link
             editorial_link = editorial_func(assertion_hash["with_editorial"][site]["plink"])
-            assert(editorial_link == assertion_hash["with_editorial"][site]["editorial_link"])
+            if editorial_link != assertion_hash["with_editorial"][site]["editorial_link"]:
+                raise RuntimeError(site + " with editorial failure")
 
             if site in assertion_hash["without_editorial"]:
                 editorial_link = editorial_func(assertion_hash["without_editorial"][site])
-                assert(editorial_link == None)
+                if editorial_link is not None:
+                    raise RuntimeError(site + " without editorial failure")
 
     # --------------------------------------------------------------------------
     def test_invalid_handle(self):
         handle = "thisreallycantbeahandle308"
-        assert(all(map(lambda site: self.profile_site.is_invalid_handle(handle), current.SITES.keys())))
+        assert(all(map(lambda site: self.profile_site[site].is_invalid_handle(handle), current.SITES.keys())))
+
+# ------------------------------------------------------------------------------
+def test_retrieval(retrieval_object, method_name):
+    error_message = ""
+    for i in xrange(5):
+        try:
+            getattr(retrieval_object, method_name)()
+            return "Success"
+        except Exception as e:
+            error_message = e.message
+        time.sleep(2)
+
+    return error_message
 
 rt = RetrievalTest()
-rt.test_tag_retrieval()
-rt.test_editorial_retrieval()
-rt.test_invalid_handle()
+pushover_message = ""
+
+for method_name in ["test_tag_retrieval", "test_editorial_retrieval", "test_invalid_handle"]:
+    res = test_retrieval(rt, method_name)
+    if res != "Success":
+        pushover_message += res + "\n"
+
+if pushover_message != "":
+    response = requests.post("https://api.pushover.net/1/messages.json",
+                             data={"token": current.pushover_api_token,
+                                   "user": current.pushover_user_token,
+                                   "message": pushover_message.strip(),
+                                   "title": "Extras retrieval failure",
+                                   "priority": 1}).json()
 
