@@ -1511,6 +1511,7 @@ Response text: %s
                                           e,
                                           response.text)
 
+    # @ToDo: Need to move this to profile site class
     def _retrieve_codechef_submission(view_link):
         """
             Get CodeChef submission from view_link
