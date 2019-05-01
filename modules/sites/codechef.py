@@ -136,6 +136,21 @@ class Profile(object):
             return True
         return False
 
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def download_submission(view_link):
+        problem_id = view_link.strip("/").split("/")[-1]
+        download_url = "https://www.codechef.com/viewplaintext/" + \
+                       str(problem_id)
+        response = requests.get(download_url,
+                                headers={"User-Agent": user_agent})
+        if response in REQUEST_FAILURES:
+            return -1
+        try:
+            return BeautifulSoup(response.text, "lxml").find("pre").text
+        except:
+            return -1
+
     # --------------------------------------------------------------------------
     def __validate_handle(self):
         """
