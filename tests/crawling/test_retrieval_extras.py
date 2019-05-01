@@ -127,7 +127,14 @@ class RetrievalTest:
     # --------------------------------------------------------------------------
     def test_invalid_handle(self):
         handle = "thisreallycantbeahandle308"
-        assert(all(map(lambda site: self.profile_site[site].is_invalid_handle(handle), current.SITES.keys())))
+        result = map(lambda site: (site, self.profile_site[site].is_invalid_handle(handle)), current.SITES.keys())
+        failure_sites = []
+        for site, res in result:
+            if not res:
+                failure_sites.append(site)
+
+        if len(failure_sites) > 0:
+            raise RuntimeError(", ".join(failure_sites) + " " + "invalid handle failure")
 
 # ------------------------------------------------------------------------------
 def test_retrieval(retrieval_object, method_name):
