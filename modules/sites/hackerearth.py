@@ -88,6 +88,33 @@ class Profile(object):
         return False
 
     # -------------------------------------------------------------------------
+    @staticmethod
+    def rating_graph_data(handle):
+        url = "https://www.hackerearth.com/ratings/AJAX/rating-graph/" + handle
+        response = get_request(url)
+        if response in REQUEST_FAILURES:
+            return response
+
+        if response.text == "":
+            return NOT_FOUND
+
+        contest_data = eval(re.findall(r"var dataset = \[.*?\]", response.text)[0][14:])
+        if len(contest_data) == 0:
+            return []
+
+        hackerearth_data = {}
+        for contest in contest_data:
+            time_stamp = str(datetime.datetime.strptime(contest["event_start"], "%d %b %Y, %I:%M %p"))
+            url = "https://www.hackerearth.com" + contest["event_url"]
+            hackerearth_data[time_stamp] = {"name": contest["event_title"],
+                                            "rating": contest["rating"],
+                                            "url": url,
+                                            "rank": contest["rank"]}
+
+        return [{"title": "HackerEarth",
+                 "data": hackerearth_data}]
+
+    # -------------------------------------------------------------------------
     def get_submissions(self, last_retrieved, is_daily_retrieval):
         """
             Retrieve HackerEarth submissions after last retrieved timestamp

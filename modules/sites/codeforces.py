@@ -114,6 +114,61 @@ class Profile(object):
             return -1
 
     # -------------------------------------------------------------------------
+    @staticmethod
+    def rating_graph_data(handle):
+        website = "http://www.codeforces.com/"
+
+        url = "%sapi/contest.list" % website
+        response = get_request(url)
+        if response in REQUEST_FAILURES:
+            return response
+
+        contest_list = response.json()["result"]
+        all_contests = {}
+
+        for contest in contest_list:
+            all_contests[contest["id"]] = contest
+
+        url = "%scontests/with/%s" % (website, handle)
+        response = get_request(url)
+        if response in REQUEST_FAILURES:
+            return response
+
+        soup = BeautifulSoup(response.text, "lxml")
+        try:
+            tbody = soup.find("table", class_="tablesorter").find("tbody")
+        except AttributeError:
+            print "AttributeError for Codeforces handle: " + handle
+            return SERVER_FAILURE
+
+        contest_data = {}
+        for tr in tbody.find_all("tr"):
+            all_tds = tr.find_all("td")
+            contest_id = int(all_tds[1].find("a")["href"].split("/")[-1])
+            if all_tds[2].find("a"):
+                # For some users there is no rank for some contests
+                # Example http://codeforces.com/contests/with/cjoa (Contest number 3)
+                rank = int(all_tds[2].find("a").contents[0].strip())
+            else:
+                # @Todo: Will this create any issues as rank is assumed to be an int
+                rank = ""
+            solved_count = int(all_tds[3].find("a").contents[0].strip())
+            rating_change = int(all_tds[4].find("span").contents[0].strip())
+            new_rating = int(all_tds[5].contents[0].strip())
+            contest = all_contests[contest_id]
+            time_stamp = str(datetime.datetime.fromtimestamp(contest["startTimeSeconds"]))
+            contest_data[time_stamp] = {"name": contest["name"],
+                                        "url": "%scontest/%d" % (website,
+                                                                 contest_id),
+                                        "rating": str(new_rating),
+                                        "ratingChange": rating_change,
+                                        "rank": rank,
+                                        "solvedCount": solved_count}
+
+        return [{"title": "Codeforces",
+                 "data": contest_data}]
+
+    # -------------------------------------------------------------------------
     def get_submissions(self, last_retrieved, plink_to_id, is_daily_retrieval):
         """
             Retrieve CodeForces submissions after last retrieved timestamp
