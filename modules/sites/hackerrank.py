@@ -116,6 +116,39 @@ class Profile(object):
         return False
 
     # -------------------------------------------------------------------------
+    @staticmethod
+    def rating_graph_data(handle):
+        website = "https://www.hackerrank.com/"
+        url = "%srest/hackers/%s/rating_histories_elo" % (website, handle)
+        response = get_request(url)
+        if response in REQUEST_FAILURES:
+            return response
+
+        response = response.json()["models"]
+
+        hackerrank_graphs = []
+        for contest_class in response:
+            final_json = {}
+            for contest in contest_class["events"]:
+                time_stamp = contest["date"][:-5].split("T")
+                time_stamp = datetime.datetime.strptime(time_stamp[0] + " " + time_stamp[1],
+                                                        "%Y-%m-%d %H:%M:%S")
+                # Convert UTC to IST
+                time_stamp += datetime.timedelta(hours=5, minutes=30)
+                time_stamp = str(time_stamp)
+                final_json[time_stamp] = {"name": contest["contest_name"],
+                                          "url": website + contest["contest_slug"],
+                                          "rating": str(contest["rating"]),
+                                          "rank": contest["rank"]}
+
+            graph_name = "HackerRank - %s" % contest_class["category"]
+            hackerrank_graphs.append({"title": graph_name,
+                                      "data": final_json})
+
+        return hackerrank_graphs
+
+
+    # -------------------------------------------------------------------------
     def get_submissions(self, last_retrieved, is_daily_retrieval):
         """
             Retrieve HackerRank submissions after last retrieved timestamp
