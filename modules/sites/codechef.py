@@ -151,6 +151,46 @@ class Profile(object):
         except:
             return -1
 
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def rating_graph_data(handle):
+        url = "https://www.codechef.com/users/" + handle
+        response = get_request(url, headers={"User-Agent": user_agent})
+
+        if response in REQUEST_FAILURES:
+            return response
+
+        ratings = eval(re.search("var all_rating = .*?;", response.text).group()[17:-1].replace("null", "None"))
+
+        long_contest_data = {}
+        cookoff_contest_data = {}
+        ltime_contest_data = {}
+
+        for contest in ratings:
+            this_obj = None
+            if contest["code"].__contains__("COOK"):
+                # Cook off contest
+                this_obj = cookoff_contest_data
+            elif contest["code"].__contains__("LTIME"):
+                # Lunchtime contest
+                this_obj = ltime_contest_data
+            else:
+                # Long contest
+                this_obj = long_contest_data
+            # getdate, getmonth and getyear give end_date only
+            time_stamp = str(datetime.datetime.strptime(contest["end_date"], "%Y-%m-%d %H:%M:%S"))
+            this_obj[time_stamp] = {"name": contest["name"],
+                                    "url": "https://www.codechef.com/" + contest["code"],
+                                    "rating": str(contest["rating"]),
+                                    "rank": contest["rank"]}
+
+        return [{"title": "CodeChef Long",
+                 "data": long_contest_data},
+                {"title": "CodeChef Cook-off",
+                 "data": cookoff_contest_data},
+                {"title": "CodeChef Lunchtime",
+                 "data": ltime_contest_data}]
+
     # --------------------------------------------------------------------------
     def __validate_handle(self):
         """
