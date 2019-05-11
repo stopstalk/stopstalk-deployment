@@ -75,6 +75,7 @@
         addEventListener('#heart-google-plus', 'Heart Google Plus', false);
         addEventListener('#heart-github', 'Heart Github', false);
         addEventListener('#onboarding-button', 'Onboarding Button', false);
+        addEventListener('#footer-media-kit', 'Footer Media Kit', false);
         addEventListener('#footer-faqs', 'Footer FAQs', false);
         addEventListener('#footer-contact-us', 'Footer Contact Us', false);
         addEventListener('#footer-license', 'Footer MIT License', false);
