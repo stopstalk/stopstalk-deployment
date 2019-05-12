@@ -113,7 +113,7 @@
 
     var setupInfiniteScrolling = function() {
         $(window).scroll(function() {
-            if ($(window).scrollTop() >= $(document).height() - $(window).height() - 100) {
+            if ($(window).scrollTop() >= $(document).height() - $(window).height() - 2000) {
                 processNextLeaderboardBatch();
             }
         });
