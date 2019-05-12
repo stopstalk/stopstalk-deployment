@@ -39,8 +39,10 @@ if not request.env.web2py_runtime_gae:
                        ':' + current.mysql_password + \
                        '@' + current.mysql_server
 
-    db = DAL(mysql_connection + '/' + current.mysql_dbname)
-    uvadb = DAL(mysql_connection + '/' + current.mysql_uvadbname)
+    db = DAL(mysql_connection + '/' + current.mysql_dbname,
+             table_hash="stopstalkdb")
+    uvadb = DAL(mysql_connection + '/' + current.mysql_uvadbname,
+                table_hash="uvajudge")
 
 #    db = DAL(myconf.take('db.uri'), pool_size=myconf.take('db.pool_size', cast=int), check_reserved=['all'])
 else:
