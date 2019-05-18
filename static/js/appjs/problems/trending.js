@@ -15,6 +15,7 @@
           success: function(response) {
             $('#friends-trending-table').css('padding', '');
             $('#friends-trending-table').html(response);
+            initTooltips();
           },
           error: function(err) {
             console.log(err);
@@ -39,6 +40,7 @@
         success: function(response) {
           $('#global-trending-table').css('padding', '');
           $('#global-trending-table').html(response);
+          initTooltips();
         },
         error: function(err) {
           console.log(err);

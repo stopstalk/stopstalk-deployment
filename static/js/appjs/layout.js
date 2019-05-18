@@ -30,6 +30,12 @@ var setEditorialVoteEventListeners = function() {
     });
 };
 
+var initTooltips = function() {
+    $('.tooltipped').tooltip({
+        delay: 50
+    });
+};
+
 (function($) {
     "use strict";
 
@@ -142,9 +148,7 @@ var setEditorialVoteEventListeners = function() {
 
         $('select').material_select();
 
-        $('.tooltipped').tooltip({
-            delay: 50
-        });
+        initTooltips();
 
         $('#open-side-nav').click(function() {
             if (typeof ga !== 'undefined') {
