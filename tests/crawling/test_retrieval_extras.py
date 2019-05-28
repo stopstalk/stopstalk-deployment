@@ -55,7 +55,7 @@ class RetrievalTest:
                 },
                 "HackerEarth": {
                     "plink": "https://www.hackerearth.com/practice/algorithms/dynamic-programming/2-dimensional/practice-problems/algorithm/candy-distribution/",
-                    "tags": [u'Dynamic Programming', u'Medium', u'Number Theory']
+                    "tags": [u'Dynamic Programming', u'Mathematics', u'Medium', u'Number Theory']
                 },
                 "HackerRank": {
                     "plink": "https://www.hackerrank.com/challenges/print-the-elements-of-a-linked-list",
