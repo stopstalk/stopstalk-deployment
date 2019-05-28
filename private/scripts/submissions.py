@@ -350,9 +350,9 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
         nrtable.insert(**{user_column_name: record.id})
         nrtable_record = db(nrtable[user_column_name] == record.id).select().first()
 
-    disabled_sites = current.REDIS_CLIENT.smembers("disabled_retrieval")
-    for site in disabled_sites:
-        if site in all_sites:
+    for site in all_sites:
+        Site = getattr(sites, site.lower())
+        if Site.Profile.is_website_down():
             all_sites.remove(site)
 
     for site in all_sites:
