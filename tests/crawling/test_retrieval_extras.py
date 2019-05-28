@@ -77,7 +77,13 @@ class RetrievalTest:
 
 
         for site in sites_with_tags_functionality:
-            tags_func = self.profile_site[site].get_tags
+            P = self.profile_site[site]
+
+            if P.is_website_down():
+                # Don't test for websites which are acked to be down
+                continue
+
+            tags_func = P.get_tags
             tags_val = tags_func(assertion_hash["with_tags"][site]["plink"])
             if set(tags_val) != set(assertion_hash["with_tags"][site]["tags"]):
                 raise RuntimeError(site + " with tags failure")
@@ -115,7 +121,13 @@ class RetrievalTest:
             }
         }
         for site in sites_with_editorial_functionality:
-            editorial_func = self.profile_site[site].get_editorial_link
+            P = self.profile_site[site]
+
+            if P.is_website_down():
+                # Don't test for websites which are acked to be down
+                continue
+
+            editorial_func = P.get_editorial_link
             editorial_link = editorial_func(assertion_hash["with_editorial"][site]["plink"])
             if editorial_link != assertion_hash["with_editorial"][site]["editorial_link"]:
                 raise RuntimeError(site + " with editorial failure")
@@ -128,7 +140,9 @@ class RetrievalTest:
     # --------------------------------------------------------------------------
     def test_invalid_handle(self):
         handle = "thisreallycantbeahandle308"
-        result = map(lambda site: (site, self.profile_site[site].is_invalid_handle(handle)), current.SITES.keys())
+        result = map(lambda site: (site, self.profile_site[site].is_invalid_handle(handle)),
+                     filter(lambda site: self.profile_site[site].is_website_down() == False,
+                            current.SITES.keys()))
         failure_sites = []
         for site, res in result:
             if not res:
@@ -155,7 +169,13 @@ class RetrievalTest:
         }
 
         for site in sites_with_download_functionality:
-            submission_content = self.profile_site[site].download_submission(assertion_hash[site]["view_link"])
+            P = self.profile_site[site]
+
+            if P.is_website_down():
+                # Don't test for websites which are acked to be down
+                continue
+
+            submission_content = P.download_submission(assertion_hash[site]["view_link"])
             if submission_content != assertion_hash[site]["submission"]:
                 raise RuntimeError(site + " download submission failed")
 
