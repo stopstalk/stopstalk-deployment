@@ -42,6 +42,7 @@ class Profile(object):
         Class containing methods for retrieving
         submissions of user
     """
+    site_name = "CodeChef"
 
     # --------------------------------------------------------------------------
     def __init__(self, handle=""):
@@ -49,12 +50,17 @@ class Profile(object):
             @param handle (String): Codechef Handle
         """
 
-        self.site = "CodeChef"
+        self.site = Profile.site_name
         self.handle = handle
         self.submissions = []
         self.access_token = None
         self.is_daily_retrieval = False
         self.last_retrieved_reached = False
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def is_website_down():
+        return (Profile.site_name in current.REDIS_CLIENT.smembers("disabled_retrieval"))
 
     # --------------------------------------------------------------------------
     @staticmethod
@@ -139,11 +145,14 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def download_submission(view_link):
+        if Profile.is_website_down():
+            return -1
+
         problem_id = view_link.strip("/").split("/")[-1]
         download_url = "https://www.codechef.com/viewplaintext/" + \
                        str(problem_id)
-        response = requests.get(download_url,
-                                headers={"User-Agent": user_agent})
+        response = get_request(download_url,
+                               headers={"User-Agent": user_agent})
         if response in REQUEST_FAILURES:
             return -1
         try:
