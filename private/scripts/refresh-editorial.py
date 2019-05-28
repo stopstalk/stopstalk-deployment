@@ -96,8 +96,12 @@ def get_editorial(link, today):
 
     try:
         Site = getattr(sites, site.lower())
-        editorial_func = Site.Profile.get_editorial_link
-        editorial_link = editorial_func(link)
+        P = Site.Profile
+        if P.is_website_down():
+            editorial_link = None
+        else:
+            editorial_func = P.get_editorial_link
+            editorial_link = editorial_func(link)
     except AttributeError:
         editorial_link = None
 

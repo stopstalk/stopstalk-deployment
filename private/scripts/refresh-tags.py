@@ -107,10 +107,14 @@ def get_tag(link, name, today):
 
     try:
         Site = getattr(sites, site.lower())
-        tags_func = Site.Profile.get_tags
-        all_tags = tags_func(link)
-        if all_tags == []:
+        P = Site.Profile
+        if P.is_website_down():
             all_tags = ["-"]
+        else:
+            tags_func = P.get_tags
+            all_tags = tags_func(link)
+            if all_tags == []:
+                all_tags = ["-"]
     except AttributeError:
         all_tags = ["-"]
 
