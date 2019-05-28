@@ -27,6 +27,7 @@ class Profile(object):
         Class containing methods for retrieving
         submissions of user
     """
+    site_name = "Spoj"
 
     # -------------------------------------------------------------------------
     def __init__(self, handle=""):
@@ -34,10 +35,15 @@ class Profile(object):
             @param handle (String): Spoj handle
         """
 
-        self.site = "Spoj"
+        self.site = Profile.site_name
         self.handle = handle
         self.submissions = []
         self.retrieval_failure = None
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def is_website_down():
+        return (Profile.site_name in current.REDIS_CLIENT.smembers("disabled_retrieval"))
 
     # -------------------------------------------------------------------------
     @staticmethod
