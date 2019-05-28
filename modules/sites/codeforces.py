@@ -27,15 +27,21 @@ class Profile(object):
         Class containing methods for retrieving
         submissions of user
     """
+    site_name = "CodeForces"
 
-    # -------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def __init__(self, handle=""):
         """
             @param handle (String): Codeforces Handle
         """
 
-        self.site = "CodeForces"
+        self.site = Profile.site_name
         self.handle = handle
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def is_website_down():
+        return (Profile.site_name in current.REDIS_CLIENT.smembers("disabled_retrieval"))
 
     # -------------------------------------------------------------------------
     @staticmethod
@@ -104,7 +110,10 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def download_submission(view_link):
-        response = requests.get(view_link)
+        if Profile.is_website_down():
+            return -1
+
+        response = get_request(view_link)
         if response in REQUEST_FAILURES:
             return -1
 

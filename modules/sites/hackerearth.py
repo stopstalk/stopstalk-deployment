@@ -27,6 +27,7 @@ class Profile(object):
         Class containing methods for retrieving
         submissions of user
     """
+    site_name = "HackerEarth"
 
     # -------------------------------------------------------------------------
     def __init__(self, handle=""):
@@ -34,8 +35,13 @@ class Profile(object):
             @param handle (String): HackerEarth Handle
         """
 
-        self.site = "HackerEarth"
+        self.site = Profile.site_name
         self.handle = handle
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def is_website_down():
+        return (Profile.site_name in current.REDIS_CLIENT.smembers("disabled_retrieval"))
 
     # -------------------------------------------------------------------------
     @staticmethod

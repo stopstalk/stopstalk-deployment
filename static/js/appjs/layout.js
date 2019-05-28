@@ -264,7 +264,7 @@ var initTooltips = function() {
                 if (response != -1) {
                     solutionText = htmlifySubmission(response);
                 } else {
-                    solutionText = "// Unable to retrieve submission from " + site + "\n" + "/* Possible reasons :-\n\t * The submission is from an ongoing contest\n\t * There was some error from our side. \n\t   Please write to us (https://www.stopstalk.com/contact_us)\n */";
+                    solutionText = "// Unable to retrieve submission from " + site + "\n" + "/* Possible reasons :-\n\t * " + site + " is down\n\t * The submission is from an ongoing contest\n\t * There was some error from our side. \n\t   Please write to us (https://www.stopstalk.com/contact_us)\n */";
                 }
 
                 $viewPre.html(solutionText);
