@@ -68,7 +68,7 @@ class RetrievalTest:
             },
             "without_tags": {
                 "CodeChef": "https://www.codechef.com/ZCOPRAC/problems/ZCO14004",
-                "CodeForces": "https://codeforces.com/problemset/gymProblem/100570/C",
+                "CodeForces": "http://www.codeforces.com/problemset/gymProblem/100570/C",
                 "Spoj": "https://www.spoj.com/problems/TOUR/",
                 "HackerEarth": "https://www.hackerearth.com/problem/algorithm/find-pairs-1/",
                 "Timus": "http://acm.timus.ru/problem.aspx?space=1&num=1559&locale=en"
@@ -117,7 +117,7 @@ class RetrievalTest:
             },
             "without_editorial": {
                 "CodeChef": "https://www.codechef.com/PRACTICE/problems/PG",
-                "CodeForces": "https://www.codeforces.com/problemset/problem/234/D"
+                "CodeForces": "http://www.codeforces.com/problemset/problem/234/D"
             }
         }
         for site in sites_with_editorial_functionality:
