@@ -1122,10 +1122,10 @@ def filters():
     # Check if multiple parameters are passed
     def _get_values_list(param_name):
 
-        values_list = None
+        values_list = []
         if get_vars.has_key(param_name):
             values_list = get_vars[param_name]
-            if isinstance(values_list, str):
+            if isinstance(values_list, str) and values_list != "":
                 values_list = [values_list]
         elif get_vars.has_key(param_name + "[]"):
             values_list = get_vars[param_name + "[]"]
