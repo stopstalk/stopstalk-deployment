@@ -535,3 +535,11 @@ nav ul a:hover {
     font-weight: bold;
     font-size: x-large;
 }
+
+.updates-page-card {
+    background-color: darkslateblue;
+}
+
+.updates-page-card a {
+    color: gold;
+}
