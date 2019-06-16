@@ -83,6 +83,22 @@ class Logger:
                                   message)
 
 # -----------------------------------------------------------------------------
+def concurrent_submission_retrieval_handler(action, user_id, custom):
+    redis_key = "ongoing_submission_retrieval_"
+    redis_key += "custom_user_" if custom else "user_"
+    redis_key += str(user_id)
+
+    if action == "GET":
+        if current.REDIS_CLIENT.get(redis_key):
+            return "ONGOING"
+        else:
+            return "COMPLETED"
+    elif action == "SET":
+        current.REDIS_CLIENT.set(redis_key, True, ex=1 * 60 * 60)
+    elif action == "DEL":
+        current.REDIS_CLIENT.delete(redis_key)
+
+# -----------------------------------------------------------------------------
 def populate_uva_problems():
     global uva_problem_dict
 
@@ -334,6 +350,12 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
     global todays_date
     global metric_handlers
 
+    if concurrent_submission_retrieval_handler("GET", record.id, custom) == "ONGOING":
+        print "Already ongoing retrieval for", record.id, custom
+        return
+    else:
+        concurrent_submission_retrieval_handler("SET", record.id, custom)
+
     list_of_submissions = []
     retrieval_failures = []
     should_clear_cache = False
@@ -482,6 +504,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
 
     # Keep committing the updates to the db to avoid lock wait timeouts
     db.commit()
+    concurrent_submission_retrieval_handler("DEL", record.id, custom)
 
 # ----------------------------------------------------------------------------
 def new_users():
