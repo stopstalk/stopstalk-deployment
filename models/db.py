@@ -559,30 +559,6 @@ db.define_table("custom_friend",
                 format="%(first_name)s %(last_name)s (%(id)s)",
                 *custom_friend_fields)
 
-db.define_table("submission",
-                Field("user_id", "reference auth_user"),
-                Field("custom_user_id", "reference custom_friend"),
-                Field("stopstalk_handle"),
-                Field("site_handle"),
-                Field("site"),
-                Field("time_stamp", "datetime"),
-                Field("problem_name"),
-                Field("problem_link"),
-                Field("lang"),
-                Field("status"),
-                Field("points"),
-                Field("view_link",
-                      default=""))
-
-db.define_table("following",
-                Field("user_id", "reference auth_user"),
-                Field("follower_id", "reference auth_user"))
-
-db.define_table("todays_requests",
-                Field("user_id", "reference auth_user"),
-                Field("follower_id", "reference auth_user"),
-                Field("transaction_type"))
-
 def _count_users_lambda(row):
     if row.problem.user_ids in (None, ""):
         return 0
@@ -611,6 +587,31 @@ db.define_table("problem",
                 Field.Virtual("user_count", _count_users_lambda),
                 Field.Virtual("custom_user_count", _count_custom_users_lambda),
                 format="%(name)s %(id)s")
+
+db.define_table("submission",
+                Field("user_id", "reference auth_user"),
+                Field("custom_user_id", "reference custom_friend"),
+                Field("stopstalk_handle"),
+                Field("site_handle"),
+                Field("site"),
+                Field("time_stamp", "datetime"),
+                Field("problem_id", "reference problem"),
+                Field("problem_name"),
+                Field("problem_link"),
+                Field("lang"),
+                Field("status"),
+                Field("points"),
+                Field("view_link",
+                      default=""))
+
+db.define_table("following",
+                Field("user_id", "reference auth_user"),
+                Field("follower_id", "reference auth_user"))
+
+db.define_table("todays_requests",
+                Field("user_id", "reference auth_user"),
+                Field("follower_id", "reference auth_user"),
+                Field("transaction_type"))
 
 db.define_table("tag",
                 Field("value"),
