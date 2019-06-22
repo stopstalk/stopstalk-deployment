@@ -48,7 +48,6 @@ INVALID_HANDLES = None
 
 failed_user_retrievals = []
 retrieval_type = None
-plink_to_id = {}
 todays_date = datetime.datetime.today().date()
 uva_problem_dict = {}
 metric_handlers = {}
@@ -346,7 +345,6 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
 
     global INVALID_HANDLES
     global failed_user_retrievals
-    global plink_to_id
     global todays_date
     global metric_handlers
 
@@ -410,9 +408,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
             # Retrieve submissions from the profile site
             site_method = P.get_submissions
             start_retrieval_time = time.time()
-            if site == "CodeForces":
-                submissions = site_method(last_retrieved, plink_to_id, is_daily_retrieval)
-            elif site == "UVa":
+            if site == "UVa":
                 submissions = site_method(last_retrieved, uva_problem_dict, is_daily_retrieval)
             else:
                 submissions = site_method(last_retrieved, is_daily_retrieval)
@@ -684,14 +680,6 @@ if __name__ == "__main__":
         sys.exit()
 
     populate_uva_problems()
-
-    query = ptable.link.contains("codeforces")
-    problem_records = db(query).select(ptable.id,
-                                       ptable.link,
-                                       ptable.tags)
-    for problem_record in problem_records:
-        plink_to_id[problem_record.link] = (problem_record.tags,
-                                            problem_record.id)
 
     # Get the handles which returned 404 before
     INVALID_HANDLES = db(db.invalid_handle).select()
