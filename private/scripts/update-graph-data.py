@@ -138,8 +138,6 @@ class User:
     def update_graph_data(self, sites):
         threads = []
         for site in sites:
-            if site == "codechef":
-                continue
             if self.handles.has_key(site + "_handle") and self.handles[site + "_handle"] != "":
                 threads.append(gevent.spawn(getattr(self,
                                                     "fetch_site_rating_history"),
