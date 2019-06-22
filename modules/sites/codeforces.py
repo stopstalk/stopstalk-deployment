@@ -178,7 +178,7 @@ class Profile(object):
                  "data": contest_data}]
 
     # -------------------------------------------------------------------------
-    def get_submissions(self, last_retrieved, plink_to_id, is_daily_retrieval):
+    def get_submissions(self, last_retrieved, is_daily_retrieval):
         """
             Retrieve CodeForces submissions after last retrieved timestamp
 
@@ -242,24 +242,6 @@ class Profile(object):
                            row["problem"]["index"]
 
             problem_name = row["problem"]["name"]
-
-            # Problem tags
-            tags = row["problem"]["tags"]
-            if tags == []:
-                tags = ["-"]
-
-            if plink_to_id.has_key(problem_link):
-                this_value = plink_to_id[problem_link]
-                if tags != ["-"] and this_value[0] == "['-']":
-                    print "Codeforces tag updated", problem_link, tags
-                    db(ptable.id == this_value[1]).update(tags=str(tags))
-            else:
-                print "Codeforces tag inserted", problem_link, tags
-                rid = ptable.insert(link=problem_link,
-                                    name=problem_name,
-                                    tags=str(tags),
-                                    tags_added_on=today)
-                plink_to_id[problem_link] = (str(tags), rid)
 
             # Problem status
             try:
