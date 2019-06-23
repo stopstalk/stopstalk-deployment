@@ -31,6 +31,7 @@ def pie_chart_helper():
     """
 
     problem_link = request.post_vars["plink"]
+    problem_id = int(request.post_vars["pid"])
     submission_type = "friends"
 
     if request.vars.has_key("submission_type"):
@@ -44,7 +45,7 @@ def pie_chart_helper():
 
     stable = db.submission
     count = stable.id.count()
-    query = (stable.problem_link == problem_link)
+    query = (stable.problem_id == problem_id)
 
     # Show stats only for friends and logged-in user
     if submission_type in ("my", "friends"):
@@ -65,10 +66,6 @@ def pie_chart_helper():
                 query &= (stable.user_id == session.user_id)
         else:
             return dict(row=[])
-    else:
-        # For global submissions only query for last 90 days
-        query &= (stable.time_stamp > (datetime.datetime.now() - \
-                                       datetime.timedelta(days=3 * 30)))
 
     row = db(query).select(stable.status,
                            count,
@@ -217,8 +214,9 @@ def index():
 
     problem_name = request.vars["pname"]
     problem_link = request.vars["plink"]
+    problem_id = request.vars["problem_id"]
 
-    query = (stable.problem_link == problem_link)
+    query = (stable.problem_id == problem_id)
     cusfriends = []
 
     if submission_type in ("my", "friends"):
@@ -239,13 +237,10 @@ def index():
                 query &= (stable.user_id == session.user_id)
         else:
             response.flash = T("Login to view your/friends' submissions")
-    else:
-        # For global submissions only query for last 90 days
-        query &= (stable.time_stamp > (datetime.datetime.now() - \
-                                       datetime.timedelta(days=3 * 30)))
 
-    submissions = db(query).select(orderby=~stable.time_stamp)
-    problem_record = db(ptable.link == problem_link).select().first()
+    submissions = db(query).select(orderby=~stable.time_stamp,
+                                   limitby=(0, 200))
+    problem_record = ptable(problem_id)
     try:
         all_tags = problem_record.tags
         if all_tags:
@@ -270,6 +265,7 @@ def index():
                                                 problem_link,
                                                 link_class,
                                                 link_title,
+                                                problem_id,
                                                 anchor=False),
                        _id="problem_name")))
     tbody.append(TR(TD(),
@@ -344,6 +340,7 @@ def index():
                 problem_details=problem_details,
                 problem_name=problem_name,
                 problem_link=problem_link,
+                problem_id=problem_id,
                 submission_type=submission_type,
                 submission_length=len(submissions),
                 table=table)

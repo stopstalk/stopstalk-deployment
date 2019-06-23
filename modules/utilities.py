@@ -201,6 +201,7 @@ def problem_widget(name,
                    link,
                    link_class,
                    link_title,
+                   problem_id,
                    disable_todo=False,
                    anchor=True):
     """
@@ -221,7 +222,8 @@ def problem_widget(name,
                              _href=URL("problems",
                                        "index",
                                        vars={"pname": name,
-                                             "plink": link},
+                                             "plink": link,
+                                             "problem_id": problem_id},
                                        extension=False),
                              _class="problem-listing " + link_class,
                              _title=link_title,
@@ -754,7 +756,8 @@ def render_table(submissions, duplicates=[], user_id=None):
         append(TD(problem_widget(submission.problem_name,
                                  submission.problem_link,
                                  link_class,
-                                 link_title)))
+                                 link_title,
+                                 submission.problem_id)))
         append(TD(submission.lang))
         append(TD(IMG(_src=current.get_static_url("images/" + submission.status + ".jpg"),
                       _title=status_dict[submission.status],
@@ -997,7 +1000,8 @@ def render_user_editorials_table(user_editorials,
         tr = TR(TD(problem_widget(record["name"],
                                   record["link"],
                                   link_class,
-                                  link_title)))
+                                  link_title,
+                                  editorial.problem_id)))
 
         if logged_in_user_id is not None and \
            (editorial.user_id == logged_in_user_id or

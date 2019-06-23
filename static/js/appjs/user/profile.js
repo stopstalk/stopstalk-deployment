@@ -450,14 +450,14 @@
             return;
         }
 
-        var getStopStalkProblemPageURL = function(problemLink, problemName) {
-            return problemIndexURL + "?" + $.param({pname: problemName, plink: problemLink});
+        var getStopStalkProblemPageURL = function(problemLink, problemName, problemId) {
+            return problemIndexURL + "?" + $.param({pname: problemName, plink: problemLink, problem_id: problemId});
         };
 
-        var getSpanElement = function(element, problemLink, problemName) {
+        var getSpanElement = function(element, problemLink, problemName, problemId) {
             var newSpanElement = element.clone(),
                 newSpanChildren = newSpanElement.children();
-            newSpanChildren[0]["href"] = getStopStalkProblemPageURL(problemLink, problemName);
+            newSpanChildren[0]["href"] = getStopStalkProblemPageURL(problemLink, problemName, problemId);
             newSpanChildren[0].innerHTML = problemName;
             if (isLoggedIn) {
                 return "<span class='todo-list-icon'>" +
@@ -496,7 +496,8 @@
                 $.each(problems, function(i, problemData) {
                     tableContent += getSpanElement(widgets[problemData[2]],
                                                    problemData[0],
-                                                   problemData[1]);
+                                                   problemData[1],
+                                                   problemData[3]);
                     tableContent += " | ";
                 });
                 tableContent += "</td></tr>";
