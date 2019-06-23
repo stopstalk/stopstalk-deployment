@@ -238,7 +238,7 @@
     <div id="friend" class="col s12"></div>
     <div id="global" class="col s12"></div>
 </div>
-{{if submission_type == "global" and submission_length != 0:}}
-    <p style="font-size: 12px;">Note: This is the list of most 300 recent submissions</p>
+{{if submission_type == "global" and submission_length >= 300:}}
+    <p style="font-size: 12px;">Note: This is the list of 300 recent submissions</p>
 {{pass}}
 {{=table}}
