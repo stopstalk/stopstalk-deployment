@@ -719,7 +719,7 @@ def get_solved_unsolved():
     all_tags = db(ttable).select()
     all_tags = dict([(tag.id, tag.value) for tag in all_tags])
 
-    query = ptable.link.belongs(solved_problems.union(unsolved_problems))
+    query = ptable.id.belongs(solved_problems.union(unsolved_problems))
     # id => [problem_link, problem_name, problem_class]
     # problem_class =>
     #    0 (Logged in user has solved the problem)
@@ -731,16 +731,16 @@ def get_solved_unsolved():
         pids.append(problem.id)
 
         problem_status = 2
-        if problem.link in user_unsolved_problems:
+        if problem.id in user_unsolved_problems:
             # Checking for unsolved first because most of the problem links
             # would be found here instead of a failed lookup in solved_problems
             problem_status = 1
-        elif problem.link in user_solved_problems:
+        elif problem.id in user_solved_problems:
             problem_status = 0
 
         problem_details[problem.id] = [problem.link, problem.name, problem_status, problem.id]
 
-        if problem.link in solved_problems:
+        if problem.id in solved_problems:
             solved_ids.append(problem.id)
         else:
             unsolved_ids.append(problem.id)
