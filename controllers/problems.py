@@ -108,15 +108,12 @@ def add_suggested_tags():
     ptable = db.problem
     ttable = db.tag
 
-    plink = request.vars["plink"]
-    pname = request.vars["pname"]
+    problem_id = int(request.vars["problem_id"])
     tags = request.vars["tags"]
 
     today = datetime.datetime.now().strftime("%Y-%m-%d")
-    problem = db(ptable.link == plink).select().first()
-    if problem:
-        problem_id = problem.id
-    else:
+    problem = ptable(problem_id)
+    if not problem:
         return T("Problem not found")
 
     # Delete previously added tags for the same problem by the user
@@ -454,6 +451,7 @@ def read_editorial():
 
     return dict(problem_name=problem.name,
                 problem_link=problem.link,
+                problem_id=problem.id,
                 stopstalk_handle=user.stopstalk_handle,
                 content=content,
                 all_editorials_link=URL("problems",

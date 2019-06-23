@@ -8,7 +8,7 @@
   <meta name="description" content="{{=problem_name}} editorial by {{=stopstalk_handle}}">
 {{end}}
 
-<h2><a href="{{=URL('problems', 'index', vars={'pname': problem_name, 'plink': problem_link})}}">{{=problem_name}}</a> | Editorial by <a href="{{=URL('user', 'profile', args=stopstalk_handle)}}">{{=stopstalk_handle}}</a></h2>
+<h2><a href="{{=URL('problems', 'index', vars={'problem_id': problem_id})}}">{{=problem_name}}</a> | Editorial by <a href="{{=URL('user', 'profile', args=stopstalk_handle)}}">{{=stopstalk_handle}}</a></h2>
 <a id="all-editorials-button" class="btn btn-primary purple accent-4" href="{{=all_editorials_link}}">All Editorials</a>
 {{if auth.is_logged_in() and session.user_id == 1:}}
   {{if ue_record.verification == "pending":}}
