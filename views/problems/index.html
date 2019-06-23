@@ -10,11 +10,12 @@
     <script src="{{=get_static_url('js/bloodhound.js')}}" type="text/javascript"></script>
     <script type="text/javascript">
         var problemName = '{{=problem_name}}';
+        var problemId = '{{=problem_id}}';
         var problemLink = '{{=problem_link}}'.replace(/&amp;/g, '&');
         var submissionType = '{{=submission_type}}';
-        var globalSubmissionURL = '{{=URL("problems", "index", vars={"pname": problem_name, "plink": problem_link, "submission_type": "global"})}}'.replace(/&amp;/g, '&');
-        var friendsSubmissionURL = '{{=URL("problems", "index", vars={"pname": problem_name, "plink": problem_link, "submission_type": "friends"})}}'.replace(/&amp;/g, '&');
-        var mySubmissionURL = '{{=URL("problems", "index", vars={"pname": problem_name, "plink": problem_link, "submission_type": "my"})}}'.replace(/&amp;/g, '&');
+        var globalSubmissionURL = '{{=URL("problems", "index", vars={"submission_type": "global", "problem_id": problem_id})}}'.replace(/&amp;/g, '&');
+        var friendsSubmissionURL = '{{=URL("problems", "index", vars={"submission_type": "friends", "problem_id": problem_id})}}'.replace(/&amp;/g, '&');
+        var mySubmissionURL = '{{=URL("problems", "index", vars={"submission_type": "my", "problem_id": problem_id})}}'.replace(/&amp;/g, '&');
         var openModal = ('{{=request.vars.open_modal}}' === 'True');
     </script>
     <script type="text/javascript">
@@ -41,7 +42,7 @@
                 method: 'POST',
                 url: '/problems/pie_chart_helper.json',
                 data: {
-                    'plink': problemLink,
+                    'pid': problemId,
                     'submission_type': submissionType
                 }
             }).done(function(data) {
@@ -236,7 +237,7 @@
     <div id="friend" class="col s12"></div>
     <div id="global" class="col s12"></div>
 </div>
-{{if submission_type == "global" and submission_length != 0:}}
-    <p style="font-size: 12px;">Note: This the list of submissions in last 90 days</p>
+{{if submission_type == "global" and submission_length >= 300:}}
+    <p style="font-size: 12px;">Note: This is the list of 300 recent submissions</p>
 {{pass}}
 {{=table}}
