@@ -738,7 +738,7 @@ def get_solved_unsolved():
         elif problem.link in user_solved_problems:
             problem_status = 0
 
-        problem_details[problem.id] = [problem.link, problem.name, problem_status]
+        problem_details[problem.id] = [problem.link, problem.name, problem_status, problem.id]
 
         if problem.link in solved_problems:
             solved_ids.append(problem.id)
@@ -796,7 +796,7 @@ def get_solved_unsolved():
                 if not category_found:
                     this_category = "Miscellaneous"
             pdetails = problem_details[pid]
-            plink, pname, _ = pdetails
+            plink, pname, _, _ = pdetails
             psite = utilities.urltosite(plink)
             if (pname, psite) not in displayed_problems:
                 displayed_problems.add((pname, psite))
@@ -805,9 +805,9 @@ def get_solved_unsolved():
 
     return dict(solved_problems=_get_categorized_json(solved_ids),
                 unsolved_problems=_get_categorized_json(unsolved_ids),
-                solved_html_widget=str(utilities.problem_widget("", "", "solved-problem", "Solved problem")),
-                unsolved_html_widget=str(utilities.problem_widget("", "", "unsolved-problem", "Unsolved problem")),
-                unattempted_html_widget=str(utilities.problem_widget("", "", "unattempted-problem", "Unattempted problem")))
+                solved_html_widget=str(utilities.problem_widget("", "", "solved-problem", "Solved problem", None)),
+                unsolved_html_widget=str(utilities.problem_widget("", "", "unsolved-problem", "Unsolved problem", None)),
+                unattempted_html_widget=str(utilities.problem_widget("", "", "unattempted-problem", "Unattempted problem", None)))
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()

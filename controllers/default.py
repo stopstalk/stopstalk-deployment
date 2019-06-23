@@ -324,6 +324,7 @@ def todo():
                                                     row.link,
                                                     link_class,
                                                     link_title,
+                                                    row.id,
                                                     disable_todo=True)),
                         TD(IMG(_src=get_static_url("images/" + \
                                                    utilities.urltosite(row.link) + \
