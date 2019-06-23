@@ -30,7 +30,6 @@ def pie_chart_helper():
         submission status of a problem
     """
 
-    problem_link = request.post_vars["plink"]
     problem_id = int(request.post_vars["pid"])
     submission_type = "friends"
 
