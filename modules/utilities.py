@@ -216,7 +216,7 @@ def problem_widget(name,
         @return (DIV)
     """
 
-    problem_div = SPAN(data={"pid": problem_id})
+    problem_div = SPAN()
     if anchor:
         problem_div.append(A(name,
                              _href=URL("problems",
@@ -237,7 +237,8 @@ def problem_widget(name,
                              _style="padding-left: 10px; display: none; cursor: pointer;",
                              data={"position": "right",
                                    "delay": "10",
-                                   "tooltip": "Add problem to Todo List"}))
+                                   "tooltip": "Add problem to Todo List",
+                                   "pid": problem_id}))
 
     return problem_div
 
