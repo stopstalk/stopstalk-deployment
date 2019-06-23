@@ -42,15 +42,6 @@ def refresh_editorials():
     ptable = db.problem
     stable = db.submission
 
-    # Problems that are in problem table
-    current_problem_list = db(ptable).select(ptable.link)
-
-    # Problems that are in submission table
-    updated_problem_list = db(stable).select(stable.problem_link,
-                                             limitby=(0, 50000))
-    current_problem_list = set([x.link for x in current_problem_list])
-    updated_problem_list = set([x.problem_link for x in updated_problem_list])
-
     today = datetime.datetime.now().strftime("%Y-%m-%d")
     before_30 = (datetime.datetime.now() - \
                  datetime.timedelta(30)).strftime("%Y-%m-%d")
@@ -59,12 +50,8 @@ def refresh_editorials():
              (ptable.editorial_added_on >= before_30)) & \
             ((ptable.editorial_link == None) | \
              (ptable.editorial_link == ""))
-    no_editorial = db(query).select(ptable.link)
-    no_editorial = [x.link for x in no_editorial]
-
-    # Compute difference between the lists
-    difference_list = list((updated_problem_list - \
-                            current_problem_list).union(no_editorial))
+    no_editorial = db(query).select(ptable.id)
+    no_editorial = [x.id for x in no_editorial]
 
     today = datetime.datetime.now().strftime("%Y-%m-%d")
 
@@ -73,11 +60,11 @@ def refresh_editorials():
 
     # Start retrieving tags for the problems
     # that are not in problem table
-    for i in xrange(0, len(difference_list), workers):
+    for i in xrange(0, len(no_editorial), workers):
         threads = []
         # O God I am so smart !!
-        for plink in difference_list[i : i + workers]:
-            threads.append(gevent.spawn(get_editorial, plink, today))
+        for problem_id in no_editorial[i : i + workers]:
+            threads.append(gevent.spawn(get_editorial, problem_id, today))
 
         gevent.joinall(threads)
 
@@ -85,13 +72,15 @@ def refresh_editorials():
     print "Total Updated: [%d]" % (total_updated)
     print "Total Not-changed: [%d]" % (not_updated)
 
-def get_editorial(link, today):
+def get_editorial(problem_id, today):
 
     global total_inserted
     global total_updated
     global not_updated
 
     ptable = db.problem
+    row = ptable(problem_id)
+    link = row.link
     site = utilities.urltosite(link)
 
     try:
@@ -105,7 +94,6 @@ def get_editorial(link, today):
     except AttributeError:
         editorial_link = None
 
-    row = db(ptable.link == link).select().first()
     if row:
         if editorial_link:
             row.update_record(editorial_link=editorial_link,
