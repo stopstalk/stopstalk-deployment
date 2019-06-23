@@ -180,10 +180,10 @@ var initTooltips = function() {
 
         $(document).on('click', '.add-to-todo-list', function() {
             var stopstalkLink = this.parentElement.firstChild["href"],
-                problemId = $(this.parentElement).data()["pid"],
                 problemLink = getParameterByName("plink", stopstalkLink),
                 thisElement = this,
-                $thisElement = $(this);
+                $thisElement = $(this),
+                problemId = $thisElement.data()["pid"];
             $.ajax({
                 url: addTodoURL,
                 method: 'POST',

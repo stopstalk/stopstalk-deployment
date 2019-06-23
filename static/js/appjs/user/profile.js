@@ -460,6 +460,7 @@
             newSpanChildren[0]["href"] = getStopStalkProblemPageURL(problemLink, problemName, problemId);
             newSpanChildren[0].innerHTML = problemName;
             if (isLoggedIn) {
+                $(newSpanChildren[1]).attr("data-pid", problemId);
                 return "<span class='todo-list-icon'>" +
                        newSpanChildren[0].outerHTML +
                        newSpanChildren[1].outerHTML +
