@@ -976,8 +976,8 @@ def filters():
     # If nothing is filled in the form
     # these fields should be passed in
     # the URL with empty value
-    compulsary_keys = ["pname", "name", "end_date", "start_date"]
-    if set(compulsary_keys).issubset(get_vars.keys()) is False:
+    compulsory_keys = ["pname", "name", "end_date", "start_date"]
+    if set(compulsory_keys).issubset(get_vars.keys()) is False:
         session.flash = T("Invalid URL parameters")
         redirect(URL("default", "filters"))
 
@@ -985,6 +985,7 @@ def filters():
     cftable = db.custom_friend
     atable = db.auth_user
     ftable = db.following
+    ptable = db.problem
     duplicates = []
 
     switch = DIV(LABEL(H6(T("Friends' Submissions"),
@@ -1117,9 +1118,9 @@ def filters():
     pname = get_vars["pname"]
     # Submissions with problem name containing pname
     if pname != "":
-        pname = pname.split()
-        for token in pname:
-            query &= (stable.problem_name.contains(token))
+        pids = db(ptable.name.contains(pname)).select(ptable.id)
+        pids = [x.id for x in pids]
+        query &= (stable.problem_id.belongs(pids))
 
     # Check if multiple parameters are passed
     def _get_values_list(param_name):
