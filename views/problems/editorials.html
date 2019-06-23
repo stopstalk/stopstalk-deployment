@@ -12,7 +12,7 @@
   </script>
 {{end}}
 <div id="editorial-listing">
-  <h3>Problem Editorials for <a class="problem-link-editorials-page" href="{{=URL('problems', 'index', vars={'pname': name, 'plink': link})}}" target="_blank">{{=name}}</a></h3>
+  <h3>Problem Editorials for <a class="problem-link-editorials-page" href="{{=URL('problems', 'index', vars={'problem_id': problem_id})}}" target="_blank">{{=name}}</a></h3>
   {{if editorial_link:}}
     <a id="site-editorial-link" class="btn btn-primary purple accent-4" href="{{=editorial_link}}">{{=site}} Editorial</a>
   {{pass}}

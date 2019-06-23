@@ -106,10 +106,9 @@
                 $('#suggest-tags-modal').modal('close');
                 $.ajax({
                     method: 'POST',
-                    url: '/problems/add_suggested_tags/',
+                    url: '/problems/add_suggested_tags',
                     data: {
-                        pname: problemName,
-                        plink: problemLink,
+                        problem_id: problemId,
                         tags: submittedTags
                     }
                 }).done(function(response) {
