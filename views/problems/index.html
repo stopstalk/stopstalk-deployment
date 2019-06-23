@@ -13,9 +13,9 @@
         var problemId = '{{=problem_id}}';
         var problemLink = '{{=problem_link}}'.replace(/&amp;/g, '&');
         var submissionType = '{{=submission_type}}';
-        var globalSubmissionURL = '{{=URL("problems", "index", vars={"pname": problem_name, "plink": problem_link, "submission_type": "global", "problem_id": problem_id})}}'.replace(/&amp;/g, '&');
-        var friendsSubmissionURL = '{{=URL("problems", "index", vars={"pname": problem_name, "plink": problem_link, "submission_type": "friends", "problem_id": problem_id})}}'.replace(/&amp;/g, '&');
-        var mySubmissionURL = '{{=URL("problems", "index", vars={"pname": problem_name, "plink": problem_link, "submission_type": "my", "problem_id": problem_id})}}'.replace(/&amp;/g, '&');
+        var globalSubmissionURL = '{{=URL("problems", "index", vars={"submission_type": "global", "problem_id": problem_id})}}'.replace(/&amp;/g, '&');
+        var friendsSubmissionURL = '{{=URL("problems", "index", vars={"submission_type": "friends", "problem_id": problem_id})}}'.replace(/&amp;/g, '&');
+        var mySubmissionURL = '{{=URL("problems", "index", vars={"submission_type": "my", "problem_id": problem_id})}}'.replace(/&amp;/g, '&');
         var openModal = ('{{=request.vars.open_modal}}' === 'True');
     </script>
     <script type="text/javascript">
@@ -239,6 +239,6 @@
     <div id="global" class="col s12"></div>
 </div>
 {{if submission_type == "global" and submission_length != 0:}}
-    <p style="font-size: 12px;">Note: This the list of submissions in last 90 days</p>
+    <p style="font-size: 12px;">Note: This is the list of most 300 recent submissions</p>
 {{pass}}
 {{=table}}

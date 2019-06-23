@@ -180,13 +180,14 @@ var initTooltips = function() {
 
         $(document).on('click', '.add-to-todo-list', function() {
             var stopstalkLink = this.parentElement.firstChild["href"],
+                problemId = $(this.parentElement).data()["pid"],
                 problemLink = getParameterByName("plink", stopstalkLink),
                 thisElement = this,
                 $thisElement = $(this);
             $.ajax({
                 url: addTodoURL,
                 method: 'POST',
-                data: {link: problemLink},
+                data: {pid: problemId},
                 success: function(response) {
                     var tooltipID = thisElement.getAttribute("data-tooltip-id");
                     $thisElement.remove();

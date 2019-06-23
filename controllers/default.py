@@ -305,7 +305,8 @@ def todo():
     plinks = [x.problem_link for x in res]
     tbody = TBODY()
 
-    rows = db(ptable.link.belongs(plinks)).select(ptable.name,
+    rows = db(ptable.link.belongs(plinks)).select(ptable.id,
+                                                  ptable.name,
                                                   ptable.link,
                                                   ptable.total_submissions,
                                                   ptable.user_ids,
@@ -316,7 +317,7 @@ def todo():
         return [] if ids[0] == "" else ids
 
     for row in rows:
-        link_class = utilities.get_link_class(row.link, session.user_id)
+        link_class = utilities.get_link_class(row.id, session.user_id)
         uids, cuids = _get_ids(row.user_ids), _get_ids(row.custom_user_ids)
 
         link_title = (" ".join(link_class.split("-"))).capitalize()
