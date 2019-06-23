@@ -451,7 +451,7 @@
         }
 
         var getStopStalkProblemPageURL = function(problemLink, problemName, problemId) {
-            return problemIndexURL + "?" + $.param({pname: problemName, plink: problemLink, problem_id: problemId});
+            return problemIndexURL + "?" + $.param({problem_id: problemId});
         };
 
         var getSpanElement = function(element, problemLink, problemName, problemId) {
