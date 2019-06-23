@@ -507,9 +507,11 @@ def get_solved_counts():
     stable = db.submission
     query = (stable["custom_user_id" if custom else "user_id"] == user_id)
 
-    total_problems = db(query).count(distinct=stable.problem_link)
+    total_problems = db(query).count(distinct=stable.problem_id)
     query &= (stable.status == "AC")
-    solved_problems = db(query).select(stable.problem_link, distinct=True)
+    solved_problems = db(query).select(stable.problem_id,
+                                       stable.problem_link,
+                                       distinct=True)
     site_counts = {}
     for site in current.SITES:
         site_counts[site.lower()] = 0
@@ -719,7 +721,7 @@ def get_solved_unsolved():
     all_tags = db(ttable).select()
     all_tags = dict([(tag.id, tag.value) for tag in all_tags])
 
-    query = ptable.link.belongs(solved_problems.union(unsolved_problems))
+    query = ptable.id.belongs(solved_problems.union(unsolved_problems))
     # id => [problem_link, problem_name, problem_class]
     # problem_class =>
     #    0 (Logged in user has solved the problem)
@@ -731,16 +733,16 @@ def get_solved_unsolved():
         pids.append(problem.id)
 
         problem_status = 2
-        if problem.link in user_unsolved_problems:
+        if problem.id in user_unsolved_problems:
             # Checking for unsolved first because most of the problem links
             # would be found here instead of a failed lookup in solved_problems
             problem_status = 1
-        elif problem.link in user_solved_problems:
+        elif problem.id in user_solved_problems:
             problem_status = 0
 
-        problem_details[problem.id] = [problem.link, problem.name, problem_status]
+        problem_details[problem.id] = [problem.link, problem.name, problem_status, problem.id]
 
-        if problem.link in solved_problems:
+        if problem.id in solved_problems:
             solved_ids.append(problem.id)
         else:
             unsolved_ids.append(problem.id)
@@ -796,7 +798,7 @@ def get_solved_unsolved():
                 if not category_found:
                     this_category = "Miscellaneous"
             pdetails = problem_details[pid]
-            plink, pname, _ = pdetails
+            plink, pname, _, _ = pdetails
             psite = utilities.urltosite(plink)
             if (pname, psite) not in displayed_problems:
                 displayed_problems.add((pname, psite))
@@ -805,9 +807,9 @@ def get_solved_unsolved():
 
     return dict(solved_problems=_get_categorized_json(solved_ids),
                 unsolved_problems=_get_categorized_json(unsolved_ids),
-                solved_html_widget=str(utilities.problem_widget("", "", "solved-problem", "Solved problem")),
-                unsolved_html_widget=str(utilities.problem_widget("", "", "unsolved-problem", "Unsolved problem")),
-                unattempted_html_widget=str(utilities.problem_widget("", "", "unattempted-problem", "Unattempted problem")))
+                solved_html_widget=str(utilities.problem_widget("", "", "solved-problem", "Solved problem", None)),
+                unsolved_html_widget=str(utilities.problem_widget("", "", "unsolved-problem", "Unsolved problem", None)),
+                unattempted_html_widget=str(utilities.problem_widget("", "", "unattempted-problem", "Unattempted problem", None)))
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()

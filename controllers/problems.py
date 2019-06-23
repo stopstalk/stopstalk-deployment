@@ -30,7 +30,7 @@ def pie_chart_helper():
         submission status of a problem
     """
 
-    problem_link = request.post_vars["plink"]
+    problem_id = int(request.post_vars["pid"])
     submission_type = "friends"
 
     if request.vars.has_key("submission_type"):
@@ -44,7 +44,7 @@ def pie_chart_helper():
 
     stable = db.submission
     count = stable.id.count()
-    query = (stable.problem_link == problem_link)
+    query = (stable.problem_id == problem_id)
 
     # Show stats only for friends and logged-in user
     if submission_type in ("my", "friends"):
@@ -65,10 +65,6 @@ def pie_chart_helper():
                 query &= (stable.user_id == session.user_id)
         else:
             return dict(row=[])
-    else:
-        # For global submissions only query for last 90 days
-        query &= (stable.time_stamp > (datetime.datetime.now() - \
-                                       datetime.timedelta(days=3 * 30)))
 
     row = db(query).select(stable.status,
                            count,
@@ -88,15 +84,19 @@ def get_tag_values():
 # ----------------------------------------------------------------------------
 @auth.requires_login()
 def add_todo_problem():
-    link = request.vars["link"]
+    problem_id = request.vars["pid"]
+
     tltable = db.todo_list
-    query = (tltable.problem_link == link) & \
+    ptable = db.problem
+
+    precord = ptable(problem_id)
+    query = (tltable.problem_link == precord.link) & \
             (tltable.user_id == session.user_id)
     row = db(query).select().first()
     if row:
         return T("Problem already in ToDo List")
     else:
-        tltable.insert(problem_link=link, user_id=session.user_id)
+        tltable.insert(problem_link=precord.link, user_id=session.user_id)
 
     return T("Problem added to ToDo List")
 
@@ -194,9 +194,7 @@ def index():
     """
     from json import dumps
 
-    if request.vars.has_key("pname") is False or \
-       request.vars.has_key("plink") is False:
-
+    if request.vars.has_key("problem_id") is False:
         # Disables direct entering of a URL
         session.flash = T("Please click on a Problem Link")
         redirect(URL("default", "index"))
@@ -215,10 +213,9 @@ def index():
     stable = db.submission
     ptable = db.problem
 
-    problem_name = request.vars["pname"]
-    problem_link = request.vars["plink"]
+    problem_id = request.vars["problem_id"]
 
-    query = (stable.problem_link == problem_link)
+    query = (stable.problem_id == problem_id)
     cusfriends = []
 
     if submission_type in ("my", "friends"):
@@ -239,13 +236,10 @@ def index():
                 query &= (stable.user_id == session.user_id)
         else:
             response.flash = T("Login to view your/friends' submissions")
-    else:
-        # For global submissions only query for last 90 days
-        query &= (stable.time_stamp > (datetime.datetime.now() - \
-                                       datetime.timedelta(days=3 * 30)))
 
-    submissions = db(query).select(orderby=~stable.time_stamp)
-    problem_record = db(ptable.link == problem_link).select().first()
+    submissions = db(query).select(orderby=~stable.time_stamp,
+                                   limitby=(0, 300))
+    problem_record = ptable(problem_id)
     try:
         all_tags = problem_record.tags
         if all_tags:
@@ -255,21 +249,22 @@ def index():
     except AttributeError:
         all_tags = ["-"]
 
-    site = utilities.urltosite(problem_link).capitalize()
+    site = utilities.urltosite(problem_record.link).capitalize()
     problem_details = DIV(_class="row")
     details_table = TABLE(_style="font-size: 140%; float: left; width: 50%;")
     problem_class = ""
 
-    link_class = utilities.get_link_class(problem_link, session.user_id)
+    link_class = utilities.get_link_class(problem_id, session.user_id)
     link_title = (" ".join(link_class.split("-"))).capitalize()
 
     tbody = TBODY()
     tbody.append(TR(TD(),
                     TD(STRONG(T("Problem Name") + ":")),
-                    TD(utilities.problem_widget(problem_name,
-                                                problem_link,
+                    TD(utilities.problem_widget(problem_record.name,
+                                                problem_record.link,
                                                 link_class,
                                                 link_title,
+                                                problem_id,
                                                 anchor=False),
                        _id="problem_name")))
     tbody.append(TR(TD(),
@@ -277,22 +272,19 @@ def index():
                     TD(site)))
 
     links = DIV(DIV(A(I(_class="fa fa-link"), " " + T("Problem"),
-                      _href=problem_link,
+                      _href=problem_record.link,
                       _class="problem-page-site-link",
                       _style="color: black;",
                       _target="blank"),
-                    _class="chip lime accent-3"))
-
-    row = db(ptable.link == problem_link).select().first()
-    if row:
-        links.append(" ")
-        links.append(DIV(A(I(_class="fa fa-book"), " " + T("Editorials"),
-                           _href=URL("problems", "editorials", args=row.id),
-                           _class="problem-page-editorials",
-                           _style="color: white;",
-                           _target="_blank"),
-                         _class="chip deep-purple darken-1 pulse",
-                         _id="problem-page-editorial-button"))
+                    _class="chip lime accent-3"),
+                " ",
+                DIV(A(I(_class="fa fa-book"), " " + T("Editorials"),
+                      _href=URL("problems", "editorials", args=problem_record.id),
+                      _class="problem-page-editorials",
+                      _style="color: white;",
+                      _target="_blank"),
+                    _class="chip deep-purple darken-1 pulse",
+                    _id="problem-page-editorial-button"))
 
     tbody.append(TR(TD(),
                     TD(STRONG(T("Links") + ":")),
@@ -332,18 +324,13 @@ def index():
     if len(submissions):
         table = utilities.render_table(submissions, cusfriends, session.user_id)
     else:
-        if submission_type == "global":
-            table = DIV(T("No submissions in last 90 days! Use "),
-                        A(T("Filters page"),
-                          _href=URL("default", "filters")),
-                        T(" page to get all the submissions"))
-        else:
-            table = DIV(T("No submissions found"))
+        table = DIV(T("No submissions found"))
 
     return dict(site=site,
                 problem_details=problem_details,
-                problem_name=problem_name,
-                problem_link=problem_link,
+                problem_name=problem_record.name,
+                problem_link=problem_record.link,
+                problem_id=problem_id,
                 submission_type=submission_type,
                 submission_length=len(submissions),
                 table=table)
@@ -771,13 +758,14 @@ def search():
     for problem in all_problems:
         tr = TR()
 
-        link_class = utilities.get_link_class(problem["link"], session.user_id)
+        link_class = utilities.get_link_class(problem.id, session.user_id)
         link_title = (" ".join(link_class.split("-"))).capitalize()
 
         tr.append(TD(utilities.problem_widget(problem["name"],
                                               problem["link"],
                                               link_class,
-                                              link_title)))
+                                              link_title,
+                                              problem.id)))
         tr.append(TD(A(I(_class="fa fa-link"),
                        _href=problem["link"],
                        _class="tag-problem-link",
@@ -877,6 +865,7 @@ def friends_trending():
              stable.custom_user_id.belongs(custom_friends))
     last_submissions = db(query).select(stable.problem_name,
                                         stable.problem_link,
+                                        stable.problem_id,
                                         stable.user_id,
                                         stable.custom_user_id)
 
@@ -898,6 +887,7 @@ def global_trending():
     query = (stable.time_stamp >= start_date)
     last_submissions = db(query).select(stable.problem_name,
                                         stable.problem_link,
+                                        stable.problem_id,
                                         stable.user_id,
                                         stable.custom_user_id)
     trending_table = utilities.compute_trending_table(last_submissions,

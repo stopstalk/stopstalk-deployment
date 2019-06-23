@@ -305,7 +305,8 @@ def todo():
     plinks = [x.problem_link for x in res]
     tbody = TBODY()
 
-    rows = db(ptable.link.belongs(plinks)).select(ptable.name,
+    rows = db(ptable.link.belongs(plinks)).select(ptable.id,
+                                                  ptable.name,
                                                   ptable.link,
                                                   ptable.total_submissions,
                                                   ptable.user_ids,
@@ -316,7 +317,7 @@ def todo():
         return [] if ids[0] == "" else ids
 
     for row in rows:
-        link_class = utilities.get_link_class(row.link, session.user_id)
+        link_class = utilities.get_link_class(row.id, session.user_id)
         uids, cuids = _get_ids(row.user_ids), _get_ids(row.custom_user_ids)
 
         link_title = (" ".join(link_class.split("-"))).capitalize()
@@ -324,6 +325,7 @@ def todo():
                                                     row.link,
                                                     link_class,
                                                     link_title,
+                                                    row.id,
                                                     disable_todo=True)),
                         TD(IMG(_src=get_static_url("images/" + \
                                                    utilities.urltosite(row.link) + \
@@ -974,8 +976,8 @@ def filters():
     # If nothing is filled in the form
     # these fields should be passed in
     # the URL with empty value
-    compulsary_keys = ["pname", "name", "end_date", "start_date"]
-    if set(compulsary_keys).issubset(get_vars.keys()) is False:
+    compulsory_keys = ["pname", "name", "end_date", "start_date"]
+    if set(compulsory_keys).issubset(get_vars.keys()) is False:
         session.flash = T("Invalid URL parameters")
         redirect(URL("default", "filters"))
 
@@ -983,6 +985,7 @@ def filters():
     cftable = db.custom_friend
     atable = db.auth_user
     ftable = db.following
+    ptable = db.problem
     duplicates = []
 
     switch = DIV(LABEL(H6(T("Friends' Submissions"),
@@ -1115,9 +1118,9 @@ def filters():
     pname = get_vars["pname"]
     # Submissions with problem name containing pname
     if pname != "":
-        pname = pname.split()
-        for token in pname:
-            query &= (stable.problem_name.contains(token))
+        pids = db(ptable.name.contains(pname)).select(ptable.id)
+        pids = [x.id for x in pids]
+        query &= (stable.problem_id.belongs(pids))
 
     # Check if multiple parameters are passed
     def _get_values_list(param_name):

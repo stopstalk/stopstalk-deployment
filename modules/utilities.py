@@ -92,12 +92,12 @@ def get_solved_problems(user_id, custom=False):
 
     base_query = (stable.custom_user_id == user_id) if custom else (stable.user_id == user_id)
     query = base_query & (stable.status == "AC")
-    problems = db(query).select(stable.problem_link, distinct=True)
-    solved_problems = set([x.problem_link for x in problems])
+    problems = db(query).select(stable.problem_id, distinct=True)
+    solved_problems = set([x.problem_id for x in problems])
 
     query = base_query
-    problems = db(query).select(stable.problem_link, distinct=True)
-    all_problems = set([x.problem_link for x in problems])
+    problems = db(query).select(stable.problem_id, distinct=True)
+    all_problems = set([x.problem_id for x in problems])
     unsolved_problems = all_problems - solved_problems
 
     data = [list(solved_problems), list(unsolved_problems)]
@@ -108,18 +108,18 @@ def get_solved_problems(user_id, custom=False):
     return _settify_return_value(data)
 
 # -----------------------------------------------------------------------------
-def get_link_class(problem_link, user_id):
+def get_link_class(problem_id, user_id):
     if user_id is None:
         return "unattempted-problem"
 
     solved_problems, unsolved_problems = get_solved_problems(user_id, False)
 
     link_class = ""
-    if problem_link in unsolved_problems:
+    if problem_id in unsolved_problems:
         # Checking for unsolved first because most of the problem links
         # would be found here instead of a failed lookup in solved_problems
         link_class = "unsolved-problem"
-    elif problem_link in solved_problems:
+    elif problem_id in solved_problems:
         link_class = "solved-problem"
     else:
         link_class = "unattempted-problem"
@@ -201,6 +201,7 @@ def problem_widget(name,
                    link,
                    link_class,
                    link_title,
+                   problem_id,
                    disable_todo=False,
                    anchor=True):
     """
@@ -215,13 +216,12 @@ def problem_widget(name,
         @return (DIV)
     """
 
-    problem_div = SPAN()
+    problem_div = SPAN(data={"pid": problem_id})
     if anchor:
         problem_div.append(A(name,
                              _href=URL("problems",
                                        "index",
-                                       vars={"pname": name,
-                                             "plink": link},
+                                       vars={"problem_id": problem_id},
                                        extension=False),
                              _class="problem-listing " + link_class,
                              _title=link_title,
@@ -692,7 +692,7 @@ def render_table(submissions, duplicates=[], user_id=None):
     tbody = TBODY()
     # Dictionary to optimize lookup for solved and unsolved problems
     # Multiple lookups in the main set is bad
-    plink_to_class = {}
+    pid_to_class = {}
 
     for submission in submissions:
         span = SPAN()
@@ -742,19 +742,20 @@ def render_table(submissions, duplicates=[], user_id=None):
         append(TD(submission.time_stamp, _class="stopstalk-timestamp"))
 
         link_class = ""
-        plink = submission.problem_link
-        if plink_to_class.has_key(plink):
-            link_class = plink_to_class[plink]
+        problem_id = submission.problem_id
+        if pid_to_class.has_key(problem_id):
+            link_class = pid_to_class[problem_id]
         else:
-            link_class = get_link_class(plink, user_id)
-            plink_to_class[plink] = link_class
+            link_class = get_link_class(problem_id, user_id)
+            pid_to_class[problem_id] = link_class
 
         link_title = (" ".join(link_class.split("-"))).capitalize()
 
         append(TD(problem_widget(submission.problem_name,
                                  submission.problem_link,
                                  link_class,
-                                 link_title)))
+                                 link_title,
+                                 submission.problem_id)))
         append(TD(submission.lang))
         append(TD(IMG(_src=current.get_static_url("images/" + submission.status + ".jpg"),
                       _title=status_dict[submission.status],
@@ -827,9 +828,10 @@ def render_trending_table(caption, problems, column_name, user_id):
         link_title = (" ".join(link_class.split("-"))).capitalize()
 
         tr.append(TD(problem_widget(problem[1]["name"],
-                                    problem[0],
+                                    problem[1]["link"],
                                     link_class,
-                                    link_title)))
+                                    link_title,
+                                    problem[0])))
         tr.append(TD(problem[1]["total_submissions"]))
         tr.append(TD(len(problem[1]["users"]) + \
                      len(problem[1]["custom_users"])))
@@ -879,14 +881,16 @@ def compute_trending_table(submissions_list, table_type, user_id=None):
         pname = submission.problem_name
         uid = submission.user_id
         cid = submission.custom_user_id
+        problem_id = submission.problem_id
 
         if plink not in problems_dict:
-            problems_dict[plink] = {"name": pname,
-                                    "total_submissions": 0,
-                                    "users": set([]),
-                                    "custom_users": set([])}
+            problems_dict[problem_id] = {"name": pname,
+                                         "total_submissions": 0,
+                                         "users": set([]),
+                                         "custom_users": set([]),
+                                         "link": plink}
 
-        pdict = problems_dict[plink]
+        pdict = problems_dict[problem_id]
         pdict["total_submissions"] += 1
         if uid:
             pdict["users"].add(uid)
@@ -992,12 +996,13 @@ def render_user_editorials_table(user_editorials,
         user = user_mappings[editorial.user_id]
         record = precords[editorial.problem_id]
         number_of_votes = len(editorial.votes.split(",")) if editorial.votes else 0
-        link_class = get_link_class(record["link"], logged_in_user_id)
+        link_class = get_link_class(editorial.problem_id, logged_in_user_id)
         link_title = (" ".join(link_class.split("-"))).capitalize()
         tr = TR(TD(problem_widget(record["name"],
                                   record["link"],
                                   link_class,
-                                  link_title)))
+                                  link_title,
+                                  editorial.problem_id)))
 
         if logged_in_user_id is not None and \
            (editorial.user_id == logged_in_user_id or
