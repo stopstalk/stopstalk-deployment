@@ -507,9 +507,11 @@ def get_solved_counts():
     stable = db.submission
     query = (stable["custom_user_id" if custom else "user_id"] == user_id)
 
-    total_problems = db(query).count(distinct=stable.problem_link)
+    total_problems = db(query).count(distinct=stable.problem_id)
     query &= (stable.status == "AC")
-    solved_problems = db(query).select(stable.problem_link, distinct=True)
+    solved_problems = db(query).select(stable.problem_id,
+                                       stable.problem_link,
+                                       distinct=True)
     site_counts = {}
     for site in current.SITES:
         site_counts[site.lower()] = 0
