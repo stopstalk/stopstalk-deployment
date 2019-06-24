@@ -756,14 +756,14 @@ def search():
     for problem in all_problems:
         tr = TR()
 
-        link_class = utilities.get_link_class(problem.id, session.user_id)
+        link_class = utilities.get_link_class(problem["id"], session.user_id)
         link_title = (" ".join(link_class.split("-"))).capitalize()
 
         tr.append(TD(utilities.problem_widget(problem["name"],
                                               problem["link"],
                                               link_class,
                                               link_title,
-                                              problem.id)))
+                                              problem["id"])))
         tr.append(TD(A(I(_class="fa fa-link"),
                        _href=problem["link"],
                        _class="tag-problem-link",
