@@ -823,7 +823,7 @@ def leaderboard():
         if not auth.is_logged_in():
             global_leaderboard = True
 
-    heading = T("Global Leaderboard")
+    heading = T("StopStalk Global Leaderboard")
     afields = ["id", "first_name", "last_name", "institute", "stopstalk_rating", "per_day",
                "stopstalk_handle", "stopstalk_prev_rating", "per_day_change", "country"]
 
@@ -843,14 +843,14 @@ def leaderboard():
     aquery &= (atable.registration_key == "")
 
     if request.vars.has_key("q") and request.vars["q"]:
-        heading = T("Institute Leaderboard")
         from urllib import unquote
         institute = unquote(request.vars["q"])
         specific_institute = True
+        heading = "StopStalk Leaderboard - " + institute
         aquery &= (atable.institute == institute)
 
     if request.vars.has_key("country") and request.vars["country"]:
-        heading = T("Country Leaderboard")
+        heading = "StopStalk Leaderboard - " + reverse_country_mapping[request.vars["country"]]
         specific_country = True
         aquery &= (atable.country == reverse_country_mapping[request.vars["country"]])
 
