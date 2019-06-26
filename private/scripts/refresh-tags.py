@@ -104,9 +104,7 @@ def get_tag(pid, today):
         prev_tags = row.tags
         if prev_tags != str(all_tags) and prev_tags == "['-']":
             row.update_record(tags=str(all_tags),
-                              name=name,
-                              tags_added_on=today,
-                              editorial_added_on=today)
+                              tags_added_on=today)
             print "Updated", link, prev_tags, "->", all_tags
             total_updated += 1
         else:
