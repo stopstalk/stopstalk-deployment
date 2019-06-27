@@ -406,6 +406,7 @@ def notify_institute_users(record):
     """
 
     atable = db.auth_user
+    iutable = db.institute_user
     query = (atable.institute == record.institute) & \
             (atable.email != record.email) & \
             (atable.institute != "Other") & \
@@ -414,8 +415,10 @@ def notify_institute_users(record):
 
     rows = db(query).select(atable.id)
     if len(rows):
-        query_values = ",".join([str((int(x.id), int(record.id))) for x in rows]).replace(" ", "")
-        db.executesql("INSERT INTO institute_user(send_to_id,user_registered_id) VALUES %s;" % query_values)
+        for row in rows:
+            iutable.insert(send_to_id=row.id,
+                           user_registered_id=record.id)
+            db.commit()
 
 def create_next_retrieval_record(record, custom=False):
     """
