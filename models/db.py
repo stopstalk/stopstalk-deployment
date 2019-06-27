@@ -405,7 +405,6 @@ def notify_institute_users(record):
         @param record (Row): Record having the user details
     """
 
-    return
     atable = db.auth_user
     query = (atable.institute == record.institute) & \
             (atable.email != record.email) & \
