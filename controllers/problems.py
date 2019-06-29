@@ -210,7 +210,7 @@ def index():
     stable = db.submission
     ptable = db.problem
 
-    problem_id = request.vars["problem_id"]
+    problem_id = int(request.vars["problem_id"])
 
     query = (stable.problem_id == problem_id)
     cusfriends = []
