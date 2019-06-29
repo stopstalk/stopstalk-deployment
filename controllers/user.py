@@ -1037,7 +1037,8 @@ def add_to_refresh_now():
         else:
             current.REDIS_CLIENT.rpush("next_retrieve_user", user_id)
 
-    row.update_record(refreshed_timestamp=datetime.datetime.now())
+    row.update_record(refreshed_timestamp=datetime.datetime.now(),
+                      graph_data_retrieved=False)
     update_params = {}
     for site in current.SITES:
         update_params[site.lower() + "_delay"] = 1
