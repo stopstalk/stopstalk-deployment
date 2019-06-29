@@ -145,6 +145,7 @@ class User:
 
         gevent.joinall(threads)
         if self.retrieval_failed == False:
+            current.REDIS_CLIENT.delete("get_stopstalk_rating_history_" + self.user_record.stopstalk_handle)
             self.write_to_filesystem()
             self.user_record.update_record(graph_data_retrieved=True)
         else:
