@@ -211,6 +211,10 @@ def index():
     ptable = db.problem
 
     problem_id = int(request.vars["problem_id"])
+    problem_record = ptable(problem_id)
+    if problem_record is None:
+        session.flash = T("Please click on a Problem Link")
+        redirect(URL("default", "index"))
 
     query = (stable.problem_id == problem_id)
     cusfriends = []
@@ -236,7 +240,6 @@ def index():
 
     submissions = db(query).select(orderby=~stable.time_stamp,
                                    limitby=(0, 300))
-    problem_record = ptable(problem_id)
     try:
         all_tags = problem_record.tags
         if all_tags:

@@ -279,6 +279,8 @@ def index():
     if auth.is_logged_in():
         if session.welcome_shown is None:
             session.flash = T("Welcome StopStalker!!")
+        elif response.flash is not None:
+            session.flash = response.flash
         redirect(URL("default", "submissions", args=[1]))
 
     return dict()
