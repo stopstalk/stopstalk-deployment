@@ -301,7 +301,7 @@ def clear_profile_page_cache(stopstalk_handle):
 
 # ----------------------------------------------------------------------------
 def get_stopstalk_rating_history_dict(user_submissions):
-    solved_problem_links = set([])
+    solved_problem_ids = set([])
     total_submissions = accepted_submissions = 0
     curr_streak = max_streak = rating = 0
     final_rating = {}
@@ -312,7 +312,7 @@ def get_stopstalk_rating_history_dict(user_submissions):
         if total_submissions == 0:
             return
         global rating
-        solved = len(solved_problem_links)
+        solved = len(solved_problem_ids)
         curr_per_day = total_submissions * 1.0 / ((date - INITIAL_DATE).days + 1)
         rating_components = get_stopstalk_rating(
                                 dict(
@@ -326,6 +326,9 @@ def get_stopstalk_rating_history_dict(user_submissions):
                             )["components"]
         final_rating[str(date)] = rating_components
 
+    # This stores statuses which are valid to be considered for streak
+    # non-AC and AC if not already solved
+    accumulated_status = set([])
     for row in user_submissions:
         curr_date = row["time_stamp"].date()
         number_of_dates = (curr_date - prev_date).days
@@ -340,9 +343,9 @@ def get_stopstalk_rating_history_dict(user_submissions):
                 curr_streak = 0
 
             # compute rating of prev_date
-        if row["status"] == "AC" and row["site"] != "HackerRank":
+        if row["status"] == "AC":
             accepted_submissions += 1
-            solved_problem_links.add(row["problem_link"])
+            solved_problem_ids.add(row["problem_id"])
         total_submissions += 1
         prev_date = curr_date
 
