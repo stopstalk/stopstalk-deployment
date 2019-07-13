@@ -107,7 +107,7 @@ def compute_group_ratings(last_id, custom):
             else:
                 update_stopstalk_rating(prev_user_id, user_submissions, custom)
                 user_submissions = [submission_dict]
-                prev_user_id = user_id
+                prev_user_id = submission_dict["user_id"]
         update_stopstalk_rating(prev_user_id, user_submissions, custom)
         start += BATCH_SIZE
 

@@ -305,53 +305,72 @@ def get_stopstalk_rating_history_dict(user_submissions):
     total_submissions = accepted_submissions = 0
     curr_streak = max_streak = rating = 0
     final_rating = {}
+
+    if len(user_submissions) == 0:
+        return final_rating
+
     INITIAL_DATE = datetime.datetime.strptime(current.INITIAL_DATE,
                                               "%Y-%m-%d %H:%M:%S").date()
-    prev_date = INITIAL_DATE
-    def _compute_prev_day_rating(date):
-        if total_submissions == 0:
+    current_rating_parts = {
+        "curr_streak": 0,
+        "max_streak": 0,
+        "solved": 0,
+        "total_submissions": 0,
+        "current_per_day": 0,
+        "accepted_submissions": 0
+    }
+
+    def _populate_rating(current_rating_parts, date):
+        if current_rating_parts["total_submissions"] == 0:
             return
-        global rating
-        solved = len(solved_problem_ids)
-        curr_per_day = total_submissions * 1.0 / ((date - INITIAL_DATE).days + 1)
-        rating_components = get_stopstalk_rating(
-                                dict(
-                                    curr_streak=curr_streak,
-                                    max_streak=max_streak,
-                                    solved=solved,
-                                    total_submissions=total_submissions,
-                                    curr_per_day=curr_per_day,
-                                    accepted_submissions=accepted_submissions
-                                )
-                            )["components"]
-        final_rating[str(date)] = rating_components
+        current_rating_parts["solved"] = len(solved_problem_ids)
+        current_rating_parts["curr_per_day"] = current_rating_parts["total_submissions"] * 1.0 / ((date - INITIAL_DATE).days + 1)
+        rating_components = get_stopstalk_rating(current_rating_parts)
+        final_rating[str(date)] = rating_components["components"]
 
     # This stores statuses which are valid to be considered for streak
     # non-AC and AC if not already solved
     accumulated_status = set([])
-    for row in user_submissions:
-        curr_date = row["time_stamp"].date()
-        number_of_dates = (curr_date - prev_date).days
-        for cnt in xrange(number_of_dates):
-            _compute_prev_day_rating(prev_date + datetime.timedelta(days=cnt))
-        if prev_date != curr_date:
-            if prev_date is not None and (curr_date - prev_date).days == 1:
-                curr_streak += 1
-                if curr_streak > max_streak:
-                    max_streak = curr_streak
-            else:
-                curr_streak = 0
+    first_date = user_submissions[0]["time_stamp"].date()
+    date_iterator = INITIAL_DATE
+    end_date = datetime.datetime.today().date()
+    one_day_delta = datetime.timedelta(days=1)
+    submission_iterator = 0
+    while date_iterator <= end_date:
+        valid_date_for_streak = False
+        day_submission_count = 0
 
-            # compute rating of prev_date
-        if row["status"] == "AC":
-            accepted_submissions += 1
-            solved_problem_ids.add(row["problem_id"])
-        total_submissions += 1
-        prev_date = curr_date
+        while submission_iterator < len(user_submissions) and \
+              user_submissions[submission_iterator]["time_stamp"].date() == date_iterator:
 
-    number_of_dates = (datetime.datetime.now().date() - prev_date).days + 1
-    for cnt in xrange(number_of_dates):
-        _compute_prev_day_rating(prev_date + datetime.timedelta(days=cnt))
+            submission = user_submissions[submission_iterator]
+            current_rating_parts["total_submissions"] += 1
+
+            if submission["status"] == "AC" and \
+               submission["problem_id"] not in solved_problem_ids:
+                solved_problem_ids.add(submission["problem_id"])
+                valid_date_for_streak = True
+            elif submission["status"] == "AC":
+                current_rating_parts["accepted_submissions"] += 1
+            elif submission["status"] != "AC":
+                valid_date_for_streak = True
+
+            submission_iterator += 1
+            day_submission_count += 1
+
+        if (day_submission_count == 0 or \
+            valid_date_for_streak == False) and \
+           current_rating_parts["curr_streak"] > 0:
+            # Reset streak if no submissions
+            current_rating_parts["curr_streak"] = 0
+        if valid_date_for_streak:
+            current_rating_parts["curr_streak"] += 1
+            current_rating_parts["max_streak"] = max(current_rating_parts["curr_streak"],
+                                                     current_rating_parts["max_streak"])
+
+
+        _populate_rating(current_rating_parts, date_iterator)
+        date_iterator += one_day_delta
 
     return final_rating
 
