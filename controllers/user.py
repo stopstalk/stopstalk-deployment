@@ -837,7 +837,7 @@ def get_stopstalk_rating_history():
                             stable.site,
                             orderby=stable.time_stamp)
 
-    final_rating = utilities.get_stopstalk_rating_history_dict(rows)
+    final_rating = utilities.get_stopstalk_rating_history_dict(rows.as_list())
 
     result = dict(final_rating=sorted(final_rating.items()))
     current.REDIS_CLIENT.set(redis_cache_key,

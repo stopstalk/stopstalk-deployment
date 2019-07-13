@@ -767,8 +767,8 @@ current.db = db
 current.uvadb = uvadb
 
 current.WEIGHTING_FACTORS = {
-    "curr_streak": 100 * 10,
-    "max_streak": 80 * 10,
+    "curr_streak": 40 * 10,
+    "max_streak": 20 * 10,
     "solved": 1 * 23,
     "accuracy": 5 * 35,
     "attempted": 2 * 2,
