@@ -644,6 +644,17 @@ def get_stopstalk_user_stats():
     user_id = int(user_id)
     custom = (custom == "True")
     stopstalk_handle = utilities.get_stopstalk_handle(user_id, custom)
+    redis_cache_key = "profile_page:user_stats_" + stopstalk_handle
+
+    # Check if data is present in REDIS
+    data = current.REDIS_CLIENT.get(redis_cache_key)
+    if data:
+        result = json.loads(data)
+        if not auth.is_logged_in():
+            del result["rating_history"]
+        return result
+
+
     stable = db.submission
 
     query = (stable["custom_user_id" if custom else "user_id"] == user_id)
@@ -657,7 +668,11 @@ def get_stopstalk_user_stats():
     # Returns rating history, accepted & max streak (day and accepted),
     result = utilities.get_stopstalk_user_stats(rows.as_list())
 
-    if not auth.is_logged_in():
+    if auth.is_logged_in():
+        current.REDIS_CLIENT.set(redis_cache_key,
+                                 json.dumps(result, separators=(",", ":")),
+                                 ex=1 * 60 * 60)
+    else:
         del result["rating_history"]
 
     return result
