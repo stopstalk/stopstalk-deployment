@@ -291,13 +291,10 @@ def clear_profile_page_cache(stopstalk_handle):
     """
         Clear all the data in REDIS corresponding to stopstalk_handle
     """
-    current.REDIS_CLIENT.delete("get_stats_" + stopstalk_handle)
     current.REDIS_CLIENT.delete("handle_details_" + stopstalk_handle)
     current.REDIS_CLIENT.delete("solved_unsolved_" + stopstalk_handle)
-    current.REDIS_CLIENT.delete("get_stopstalk_rating_history_" + stopstalk_handle)
     current.REDIS_CLIENT.delete("get_graph_data_" + stopstalk_handle)
-    current.REDIS_CLIENT.delete("get_dates_" + stopstalk_handle)
-    current.REDIS_CLIENT.delete("get_solved_counts_" + stopstalk_handle)
+    current.REDIS_CLIENT.delete("profile_page:user_stats_" + stopstalk_handle)
 
 # ----------------------------------------------------------------------------
 def get_stopstalk_user_stats(user_submissions):
