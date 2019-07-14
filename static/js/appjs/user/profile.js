@@ -1,6 +1,8 @@
 (function($) {
     "use strict";
 
+    var StopStalk = {userStats: {}};
+
     // ---------------------------------------------------------------------------------
     var getStopStalkUserStats = function() {
         return new Promise(function(resolve, reject) {
@@ -31,22 +33,11 @@
         if (linechartAvailable === 'True') {
             drawLineChart();
         }
-        getStopStalkUserStats().then(function(data) {
-            populateSolvedCounts(data['solved_counts']);
-            $('#solved-problems').html(data['solved_problems_count']);
-            $('#total-problems').html(data['total_problems_count']);
-            $('#curr-streak').html(data['curr_day_streak']);
-            $('#max-streak').html(data['max_day_streak']);
-            $('#curr-accepted-streak').html(data['curr_accepted_streak']);
-            $('#max-accepted-streak').html(data['max_accepted_streak']);
-            populateSiteAccuracy(data['site_accuracies']);
-
-            drawPieChart(data['status_percentages']);
-            drawCalendar(data['calendar_data']);
-            if (totalSubmissions !== '0' && isLoggedIn) {
-                drawStopStalkRatingChart(data['rating_history']);
-            }
-        });
+        drawPieChart(StopStalk.userStats['status_percentages']);
+        drawCalendar(StopStalk.userStats['calendar_data']);
+        if (totalSubmissions !== '0' && isLoggedIn) {
+            drawStopStalkRatingChart(StopStalk.userStats['rating_history']);
+        }
     }
 
     function drawStopStalkRatingChart(ratingHistoryData) {
@@ -565,8 +556,22 @@
 
         if (totalSubmissions !== "0") {
             // Load the Visualization API and the piechart package.
-            google.load('visualization', '1.1', {'packages': ['corechart', 'calendar', 'bar'],
-                                                 'callback': drawCharts});
+            getStopStalkUserStats().then(function(data) {
+                populateSolvedCounts(data['solved_counts']);
+                $('#solved-problems').html(data['solved_problems_count']);
+                $('#total-problems').html(data['total_problems_count']);
+                $('#curr-streak').html(data['curr_day_streak']);
+                $('#max-streak').html(data['max_day_streak']);
+                $('#curr-accepted-streak').html(data['curr_accepted_streak']);
+                $('#max-accepted-streak').html(data['max_accepted_streak']);
+                populateSiteAccuracy(data['site_accuracies']);
+                StopStalk.userStats.rating_history = data['rating_history'];
+                StopStalk.userStats.calendar_data = data['calendar_data'];
+                StopStalk.userStats.status_percentages = data['status_percentages'];
+                google.load('visualization', '1.1', {'packages': ['corechart', 'calendar', 'bar'],
+                                                     'callback': drawCharts});
+
+            });
         } else {
             $('#user-details').css('margin-left', '32%');
         }
