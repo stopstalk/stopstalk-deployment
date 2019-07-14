@@ -633,9 +633,11 @@ def get_stopstalk_user_stats():
         curr_day_streak=0,
         max_day_streak=0,
         solved_counts={},
-        status_percentages={},
-        accuracies={},
-        solved_problems_count=0
+        status_percentages=[],
+        site_accuracies={},
+        solved_problems_count=0,
+        total_problems_count=0,
+        calendar_data={}
     )
 
     if user_id is None or custom is None:
@@ -653,7 +655,6 @@ def get_stopstalk_user_stats():
         if not auth.is_logged_in():
             del result["rating_history"]
         return result
-
 
     stable = db.submission
 
