@@ -314,6 +314,7 @@ def get_stopstalk_user_stats(user_submissions):
 
     status_percentages = {}
     final_rating = {}
+    calendar_data = {}
     curr_day_streak = max_day_streak = 0
     curr_accepted_streak = max_accepted_streak = 0
 
@@ -357,6 +358,7 @@ def get_stopstalk_user_stats(user_submissions):
         # AC submission on a not-solved problem
         valid_date_for_day_streak = False
         day_submission_count = 0
+        statuses_count = {}
 
         # Iterate over submissions from that day
         while submission_iterator < len(user_submissions) and \
@@ -373,6 +375,11 @@ def get_stopstalk_user_stats(user_submissions):
                 status_percentages[submission["status"]] += 1
             else:
                 status_percentages[submission["status"]] = 1
+
+            if submission["status"] in statuses_count:
+                statuses_count[submission["status"]] += 1
+            else:
+                statuses_count[submission["status"]] = 1
 
             # Update the total number of submissions per site
             site_accuracies[submission["site"]]["total"] += 1
@@ -412,6 +419,10 @@ def get_stopstalk_user_stats(user_submissions):
             # Reset streak if no submissions
             current_rating_parts["curr_day_streak"] = 0
 
+        if day_submission_count > 0:
+            statuses_count.update({"count": day_submission_count})
+            calendar_data[str(date_iterator)] = statuses_count
+
         if valid_date_for_day_streak:
             current_rating_parts["curr_day_streak"] += 1
             current_rating_parts["max_day_streak"] = max(current_rating_parts["curr_day_streak"],
@@ -431,9 +442,14 @@ def get_stopstalk_user_stats(user_submissions):
     for site in current.SITES:
         sites_solved_count[site] = len(sites_solved_count[site])
         if site_accuracies[site]["total"] != 0:
-            site_accuracies[site] = site_accuracies[site]["accepted"] * 100.0 / site_accuracies[site]["total"]
+            accepted = site_accuracies[site]["accepted"]
+            if accepted == 0:
+                site_accuracies[site] = "0"
+            else:
+                val = (accepted * 100.0 / site_accuracies[site]["total"])
+                site_accuracies[site] = str(int(val)) if val == int(val) else "%.2f" % val
         else:
-            site_accuracies[site] = 0
+            site_accuracies[site] = "-"
 
     return dict(
         rating_history=sorted(final_rating.items()),
@@ -442,128 +458,13 @@ def get_stopstalk_user_stats(user_submissions):
         curr_day_streak=curr_day_streak,
         max_day_streak=max_day_streak,
         solved_counts=sites_solved_count,
-        status_percentages=status_percentages,
-        accuracies=site_accuracies,
+        status_percentages=map(lambda x: (x[1], x[0]),
+                               status_percentages.items()),
+        site_accuracies=site_accuracies,
         solved_problems_count=len(solved_problem_ids),
-        total_problems_count=len(all_attempted_pids)
+        total_problems_count=len(all_attempted_pids),
+        calendar_data=calendar_data
     )
-
-# ----------------------------------------------------------------------------
-def get_accepted_streak(user_id, custom):
-    """
-        Function that returns current streak of accepted solutions
-
-        @param user_id (Integer): user_id or custom_user_id
-        @param custom (Boolean): custom user or not
-
-        @return (Integer): Accepted Streak of the user
-    """
-
-    if custom:
-        attribute = "submission.custom_user_id"
-    else:
-        attribute = "submission.user_id"
-
-    db = current.db
-    sql_query = """
-                    SELECT COUNT( * )
-                    FROM  `submission`
-                    WHERE %s=%d
-                    AND time_stamp > (SELECT time_stamp
-                                        FROM  `submission`
-                                        WHERE %s=%d
-                                          AND STATUS <>  'AC'
-                                        ORDER BY time_stamp DESC
-                                        LIMIT 1);
-                """ % (attribute, user_id, attribute, user_id)
-
-    streak = db.executesql(sql_query)
-    return streak[0][0]
-
-# ----------------------------------------------------------------------------
-def get_max_accepted_streak(user_id, custom):
-    """
-        Return the max accepted solution streak
-
-        @param user_id (Integer): user_id or custom_user_id
-        @param custom (Boolean): custom user or not
-
-        @return (Integer): Maximum Accepted Streak of the user
-    """
-
-    if custom:
-        attribute = "submission.custom_user_id"
-    else:
-        attribute = "submission.user_id"
-
-    db = current.db
-    sql_query = """
-                    SELECT status
-                    FROM `submission`
-                    WHERE %s=%d
-                    ORDER BY time_stamp;
-                """ % (attribute, user_id)
-    rows = db.executesql(sql_query)
-
-    prev = None
-    streak = max_streak = 0
-
-    for status in rows:
-        if prev is None:
-            streak = 1 if status[0] == "AC" else 0
-        elif prev == "AC" and status[0] == "AC":
-            streak += 1
-        elif prev != "AC" and status[0] == "AC":
-            streak = 1
-        elif prev == "AC" and status[0] != "AC":
-            max_streak = max(max_streak, streak)
-            streak = 0
-        prev = status[0]
-
-    return max(max_streak, streak)
-
-# ----------------------------------------------------------------------------
-def get_max_streak(submissions):
-    """
-        Get the maximum of all streaks
-
-        @param submissions (List of tuples): [(DateTime object, count)...]
-        @return (Tuple): Returns streaks of the user
-    """
-
-    streak = 0
-    max_streak = 0
-    prev = curr = None
-    total_submissions = 0
-
-    for i in submissions:
-        total_submissions += i[1]
-        if prev is None and streak == 0:
-            prev = i[0]
-            streak = 1
-        else:
-            curr = i[0]
-            if (curr - prev).days == 1:
-                streak += 1
-            elif curr != prev:
-                streak = 1
-
-            prev = curr
-
-        if streak > max_streak:
-            max_streak = streak
-
-    today = datetime.datetime.today().date()
-
-    # There are no submissions in the database for this user
-    if prev is None:
-        return (0,) * 4
-
-    # Check if the last streak is continued till today
-    if (today - prev).days > 1:
-        streak = 0
-
-    return max_streak, total_submissions, streak, len(submissions)
 
 # -----------------------------------------------------------------------------
 def materialize_form(form, fields):
