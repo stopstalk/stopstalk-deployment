@@ -67,15 +67,11 @@
         {{import json}}
         var handleDetailsURL = "{{=URL('user', 'handle_details', extension='json')}}";
         var handle = "{{=handle}}";
-        var getSolvedCountsURL = "{{=URL('user', 'get_solved_counts', extension='json')}}";
-        var getStopStalkRatingHistoryURL = "{{=URL('user', 'get_stopstalk_rating_history', extension='json')}}";
         var custom = "{{=custom}}";
         var userID = "{{=user_id}}";
         var onlyGreen = false;
-        var getStatsURL = '{{=URL("user", "get_stats", extension="json")}}';
         var userRowID = '{{=row.id}}';
         var getActivityURL = '{{=URL("user", "get_activity", extension="json")}}';
-        var getDatesURL = '{{=URL("user", "get_dates", extension="json")}}';
         var getGraphDataURL = '{{=URL("user", "get_graph_data", extension="json")}}';
         var contestGraphData = null;
         var linechartAvailable = '{{=row.graph_data_retrieved}}';
@@ -86,6 +82,7 @@
         var canUpdate = ("{{=can_update}}" === "True");
         var problemIndexURL = "{{=URL('problems', 'index')}}";
         var totalSubmissions = "{{=total_submissions}}";
+        var stopStalkStatsUrl = "{{=URL('user', 'get_stopstalk_user_stats', extension='json')}}";
     </script>
     <script src="{{=get_static_url('js/appjs/user/profile.js')}}" type="text/javascript"></script>
   {{end}}
@@ -199,14 +196,14 @@
                                     <a id="{{=site.lower()}}-profile-url" class="tooltipped profile-page-site-profile-url" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank" href="{{=profile_urls[site]}}">
                                         <div class="chip" id="{{=site.lower()}}_chip">
                                             <img src="{{=get_static_url('images/' + site.lower() + '_logo.png')}}" alt="{{=site}}"/>
-                                            {{=efficiency[site]}}
+                                            <b id="site-accuracy-{{=site.lower()}}">-</b>
                                         </div>
                                     </a>
                                 {{else:}}
                                     <a id="{{=site.lower()}}-profile-url" href="{{=current.SITES[site]}}" class="tooltipped" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank">
                                         <div class="chip" id="{{=site.lower()}}_chip">
                                             <img src="{{=get_static_url('images/' + site.lower() + '_logo.png')}}" alt="{{=site}}"/>
-                                            {{=efficiency[site]}}
+                                            <b id="site-accuracy-{{=site.lower()}}">-</b>
                                         </div>
                                     </a>
                                 {{pass}}

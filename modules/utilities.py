@@ -276,8 +276,8 @@ def get_friends(user_id, custom_list=True):
 def get_stopstalk_rating(parts):
     WEIGHTING_FACTORS = current.WEIGHTING_FACTORS
     rating_components = [
-        parts["curr_streak"] * WEIGHTING_FACTORS["curr_streak"],
-        parts["max_streak"] * WEIGHTING_FACTORS["max_streak"],
+        parts["curr_day_streak"] * WEIGHTING_FACTORS["curr_day_streak"],
+        parts["max_day_streak"] * WEIGHTING_FACTORS["max_day_streak"],
         parts["solved"] * WEIGHTING_FACTORS["solved"],
         float("%.2f" % ((parts["accepted_submissions"] * 100.0 / parts["total_submissions"]) * WEIGHTING_FACTORS["accuracy"])),
         (parts["total_submissions"] - parts["accepted_submissions"]) * WEIGHTING_FACTORS["attempted"],
@@ -300,261 +300,171 @@ def clear_profile_page_cache(stopstalk_handle):
     current.REDIS_CLIENT.delete("get_solved_counts_" + stopstalk_handle)
 
 # ----------------------------------------------------------------------------
-def get_stopstalk_rating_history_dict(user_submissions):
-    solved_problem_links = set([])
-    total_submissions = accepted_submissions = 0
-    curr_streak = max_streak = rating = 0
+def get_stopstalk_user_stats(user_submissions):
+
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # Initializations
+    solved_problem_ids = set([])
+    all_attempted_pids = set([])
+    sites_solved_count = {}
+    site_accuracies = {}
+    for site in current.SITES:
+        sites_solved_count[site] = set([])
+        site_accuracies[site] = {"accepted": 0, "total": 0}
+
+    status_percentages = {}
     final_rating = {}
+    calendar_data = {}
+    curr_day_streak = max_day_streak = 0
+    curr_accepted_streak = max_accepted_streak = 0
+
+    if len(user_submissions) == 0:
+        return final_rating
+
     INITIAL_DATE = datetime.datetime.strptime(current.INITIAL_DATE,
                                               "%Y-%m-%d %H:%M:%S").date()
-    prev_date = INITIAL_DATE
-    def _compute_prev_day_rating(date):
-        if total_submissions == 0:
+    current_rating_parts = {
+        "curr_day_streak": 0,
+        "max_day_streak": 0,
+        "curr_accepted_streak": 0,
+        "max_accepted_streak": 0,
+        "solved": 0,
+        "total_submissions": 0,
+        "current_per_day": 0,
+        "accepted_submissions": 0
+    }
+
+    first_date = user_submissions[0]["time_stamp"].date()
+    date_iterator = INITIAL_DATE
+    end_date = datetime.datetime.today().date()
+    one_day_delta = datetime.timedelta(days=1)
+    submission_iterator = 0
+
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # Populate rating
+    def _populate_rating(current_rating_parts, date):
+        if current_rating_parts["total_submissions"] == 0:
             return
-        global rating
-        solved = len(solved_problem_links)
-        curr_per_day = total_submissions * 1.0 / ((date - INITIAL_DATE).days + 1)
-        rating_components = get_stopstalk_rating(
-                                dict(
-                                    curr_streak=curr_streak,
-                                    max_streak=max_streak,
-                                    solved=solved,
-                                    total_submissions=total_submissions,
-                                    curr_per_day=curr_per_day,
-                                    accepted_submissions=accepted_submissions
-                                )
-                            )["components"]
-        final_rating[str(date)] = rating_components
+        current_rating_parts["solved"] = len(solved_problem_ids)
+        current_rating_parts["curr_per_day"] = current_rating_parts["total_submissions"] * 1.0 / ((date - INITIAL_DATE).days + 1)
+        rating_components = get_stopstalk_rating(current_rating_parts)
+        final_rating[str(date)] = rating_components["components"]
 
-    for row in user_submissions:
-        curr_date = row["time_stamp"].date()
-        number_of_dates = (curr_date - prev_date).days
-        for cnt in xrange(number_of_dates):
-            _compute_prev_day_rating(prev_date + datetime.timedelta(days=cnt))
-        if prev_date != curr_date:
-            if prev_date is not None and (curr_date - prev_date).days == 1:
-                curr_streak += 1
-                if curr_streak > max_streak:
-                    max_streak = curr_streak
+    # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # Iterate over the submissions and populate the values
+    while date_iterator <= end_date:
+
+        # A day is valid for streak if any non-AC submission on a problem or
+        # AC submission on a not-solved problem
+        valid_date_for_day_streak = False
+        day_submission_count = 0
+        statuses_count = {}
+
+        # Iterate over submissions from that day
+        while submission_iterator < len(user_submissions) and \
+              user_submissions[submission_iterator]["time_stamp"].date() == date_iterator:
+
+            submission = user_submissions[submission_iterator]
+
+            # Count total number of problems with this
+            if submission["problem_id"] not in all_attempted_pids:
+                all_attempted_pids.add(submission["problem_id"])
+
+            # Count the percentages of each status of the user
+            if submission["status"] in status_percentages:
+                status_percentages[submission["status"]] += 1
             else:
-                curr_streak = 0
+                status_percentages[submission["status"]] = 1
 
-            # compute rating of prev_date
-        if row["status"] == "AC" and row["site"] != "HackerRank":
-            accepted_submissions += 1
-            solved_problem_links.add(row["problem_link"])
-        total_submissions += 1
-        prev_date = curr_date
+            if submission["status"] in statuses_count:
+                statuses_count[submission["status"]] += 1
+            else:
+                statuses_count[submission["status"]] = 1
 
-    number_of_dates = (datetime.datetime.now().date() - prev_date).days + 1
-    for cnt in xrange(number_of_dates):
-        _compute_prev_day_rating(prev_date + datetime.timedelta(days=cnt))
+            # Update the total number of submissions per site
+            site_accuracies[submission["site"]]["total"] += 1
 
-    return final_rating
+            # Update total submissions
+            current_rating_parts["total_submissions"] += 1
 
-# ----------------------------------------------------------------------------
-def get_accepted_streak(user_id, custom):
-    """
-        Function that returns current streak of accepted solutions
+            if submission["status"] == "AC":
+                # Update the accepted submissions site-wise
+                site_accuracies[submission["site"]]["accepted"] += 1
 
-        @param user_id (Integer): user_id or custom_user_id
-        @param custom (Boolean): custom user or not
+                # Update the site wise solved count
+                sites_solved_count[submission["site"]].add(submission["problem_id"])
 
-        @return (Integer): Accepted Streak of the user
-    """
+                # Update the accepted submissions count and the streak
+                current_rating_parts["accepted_submissions"] += 1
+                current_rating_parts["curr_accepted_streak"] += 1
+                current_rating_parts["max_accepted_streak"] = max(current_rating_parts["curr_accepted_streak"],
+                                                                  current_rating_parts["max_accepted_streak"])
 
-    if custom:
-        attribute = "submission.custom_user_id"
-    else:
-        attribute = "submission.user_id"
+                # Reset the day streak if just accepted status on already solved problem
+                if submission["problem_id"] not in solved_problem_ids:
+                    solved_problem_ids.add(submission["problem_id"])
+                    valid_date_for_day_streak |= True
+                else:
+                    valid_date_for_day_streak |= False
+            else:
+                valid_date_for_day_streak |= True
+                current_rating_parts["curr_accepted_streak"] = 0
 
-    db = current.db
-    sql_query = """
-                    SELECT COUNT( * )
-                    FROM  `submission`
-                    WHERE %s=%d
-                    AND time_stamp > (SELECT time_stamp
-                                        FROM  `submission`
-                                        WHERE %s=%d
-                                          AND STATUS <>  'AC'
-                                        ORDER BY time_stamp DESC
-                                        LIMIT 1);
-                """ % (attribute, user_id, attribute, user_id)
+            submission_iterator += 1
+            day_submission_count += 1
 
-    streak = db.executesql(sql_query)
-    return streak[0][0]
+        if (day_submission_count == 0 or \
+            valid_date_for_day_streak == False) and \
+           current_rating_parts["curr_day_streak"] > 0:
+            # Reset streak if no submissions
+            current_rating_parts["curr_day_streak"] = 0
 
-# ----------------------------------------------------------------------------
-def get_max_accepted_streak(user_id, custom):
-    """
-        Return the max accepted solution streak
+        if day_submission_count > 0:
+            statuses_count.update({"count": day_submission_count})
+            calendar_data[str(date_iterator)] = statuses_count
 
-        @param user_id (Integer): user_id or custom_user_id
-        @param custom (Boolean): custom user or not
+        if valid_date_for_day_streak:
+            current_rating_parts["curr_day_streak"] += 1
+            current_rating_parts["max_day_streak"] = max(current_rating_parts["curr_day_streak"],
+                                                         current_rating_parts["max_day_streak"])
 
-        @return (Integer): Maximum Accepted Streak of the user
-    """
+        # Update the current and max day streaks
+        curr_day_streak = current_rating_parts["curr_day_streak"]
+        max_day_streak = current_rating_parts["max_day_streak"]
 
-    if custom:
-        attribute = "submission.custom_user_id"
-    else:
-        attribute = "submission.user_id"
+        # Update the current and max accepted streaks
+        curr_accepted_streak = current_rating_parts["curr_accepted_streak"]
+        max_accepted_streak = current_rating_parts["max_accepted_streak"]
 
-    db = current.db
-    sql_query = """
-                    SELECT status
-                    FROM `submission`
-                    WHERE %s=%d
-                    ORDER BY time_stamp;
-                """ % (attribute, user_id)
-    rows = db.executesql(sql_query)
+        _populate_rating(current_rating_parts, date_iterator)
+        date_iterator += one_day_delta
 
-    prev = None
-    streak = max_streak = 0
-
-    for status in rows:
-        if prev is None:
-            streak = 1 if status[0] == "AC" else 0
-        elif prev == "AC" and status[0] == "AC":
-            streak += 1
-        elif prev != "AC" and status[0] == "AC":
-            streak = 1
-        elif prev == "AC" and status[0] != "AC":
-            max_streak = max(max_streak, streak)
-            streak = 0
-        prev = status[0]
-
-    return max(max_streak, streak)
-
-# ----------------------------------------------------------------------------
-def get_max_streak(submissions):
-    """
-        Get the maximum of all streaks
-
-        @param submissions (List of tuples): [(DateTime object, count)...]
-        @return (Tuple): Returns streaks of the user
-    """
-
-    streak = 0
-    max_streak = 0
-    prev = curr = None
-    total_submissions = 0
-
-    for i in submissions:
-        total_submissions += i[1]
-        if prev is None and streak == 0:
-            prev = i[0]
-            streak = 1
+    for site in current.SITES:
+        sites_solved_count[site] = len(sites_solved_count[site])
+        if site_accuracies[site]["total"] != 0:
+            accepted = site_accuracies[site]["accepted"]
+            if accepted == 0:
+                site_accuracies[site] = "0"
+            else:
+                val = (accepted * 100.0 / site_accuracies[site]["total"])
+                site_accuracies[site] = str(int(val)) if val == int(val) else "%.2f" % val
         else:
-            curr = i[0]
-            if (curr - prev).days == 1:
-                streak += 1
-            elif curr != prev:
-                streak = 1
+            site_accuracies[site] = "-"
 
-            prev = curr
-
-        if streak > max_streak:
-            max_streak = streak
-
-    today = datetime.datetime.today().date()
-
-    # There are no submissions in the database for this user
-    if prev is None:
-        return (0,) * 4
-
-    # Check if the last streak is continued till today
-    if (today - prev).days > 1:
-        streak = 0
-
-    return max_streak, total_submissions, streak, len(submissions)
-
-# ----------------------------------------------------------------------------
-def compute_row(record,
-                complete_dict,
-                solved,
-                custom=False,
-                update_flag=False):
-    """
-        Computes rating and retrieves other
-        information of the specified user
-
-        @param record (Row): User record
-        @param complete_dict (Dict): Dict containing daywise count of submissions
-        @param solved (Integer): Count of problems solved
-        @param custom (Boolean): Custom user or not
-        @param update_flag (Boolean): Update db rating
-
-        @return (Tuple): Tuple of details required for leaderboard
-    """
-
-    db = current.db
-    cftable = db.custom_friend
-
-    stopstalk_handle = record.stopstalk_handle
-    if custom:
-        if record.duplicate_cu:
-            stopstalk_handle = cftable(record.duplicate_cu).stopstalk_handle
-
-    try:
-        tup = get_max_streak(complete_dict[stopstalk_handle])
-    except KeyError:
-        # No submissions corresponding to that user
-        tup = get_max_streak([])
-    max_streak = tup[0]
-    total_submissions = tup[1]
-
-    today = datetime.datetime.today().date()
-    start = datetime.datetime.strptime(current.INITIAL_DATE,
-                                       "%Y-%m-%d %H:%M:%S").date()
-
-    if record.per_day is None or record.per_day == 0.0:
-        per_day = total_submissions * 1.0 / (today - start).days
-    else:
-        per_day = record.per_day
-
-    curr_per_day = total_submissions * 1.0 / (today - start).days
-    diff = "%0.5f" % (curr_per_day - per_day)
-    diff = float(diff)
-
-    # I am not crazy. This is to solve the problem
-    # if diff is -0.0
-    if diff == 0.0:
-        diff = 0.0
-
-    if total_submissions == 0:
-        rating = 0
-    else:
-        # Unique rating formula
-        # @ToDo: Improvement is always better
-        rating = max_streak * 50 + \
-                 solved * 100 + \
-                 (solved * 100.0 / total_submissions) * 80 + \
-                 (total_submissions - solved) * 20 + \
-                 per_day * 2000
-    rating = int(rating)
-
-    if update_flag:
-        record.update_record(stopstalk_prev_rating=record.stopstalk_rating)
-    if record.stopstalk_rating != rating:
-        rating_diff = rating - record.stopstalk_rating
-        table = db.custom_friend if custom else db.auth_user
-        # Update the rating ONLY when the function
-        # is called by update-leaderboard.py
-        query = (table.stopstalk_handle == record.stopstalk_handle)
-        db(query).update(per_day=per_day,
-                         stopstalk_rating=rating,
-                         per_day_change=str(diff))
-    else:
-        rating_diff = 0
-
-    return (record.first_name + " " + record.last_name,
-            record.stopstalk_handle,
-            record.institute,
-            rating,
-            diff,
-            custom,
-            rating_diff)
+    return dict(
+        rating_history=sorted(final_rating.items()),
+        curr_accepted_streak=curr_accepted_streak,
+        max_accepted_streak=max_accepted_streak,
+        curr_day_streak=curr_day_streak,
+        max_day_streak=max_day_streak,
+        solved_counts=sites_solved_count,
+        status_percentages=map(lambda x: (x[1], x[0]),
+                               status_percentages.items()),
+        site_accuracies=site_accuracies,
+        solved_problems_count=len(solved_problem_ids),
+        total_problems_count=len(all_attempted_pids),
+        calendar_data=calendar_data
+    )
 
 # -----------------------------------------------------------------------------
 def materialize_form(form, fields):
