@@ -1,58 +1,77 @@
 (function($) {
     "use strict";
 
+    var StopStalk = {userStats: {}};
+
+    // ---------------------------------------------------------------------------------
+    var getStopStalkUserStats = function() {
+        return new Promise(function(resolve, reject) {
+            $.ajax({
+                method: 'GET',
+                url: stopStalkStatsUrl,
+                data: {user_id: userRowID, custom: custom}
+            }).done(function(data) {
+                resolve(data);
+            });
+        });
+    };
+
+    var populateSolvedCounts = function(data) {
+        $.each(data, function(key, val) {
+            $('#' + key.toLowerCase() + '-solved-count').html(val);
+        });
+    };
+
+    var populateSiteAccuracy = function(data) {
+        $.each(data, function(key, val) {
+            $('#site-accuracy-' + key.toLowerCase()).html(val);
+        });
+    };
+
     function drawCharts() {
         // Set a callback to run when the Google Visualization API is loaded.
-        drawPieChart();
-        drawCalendar();
         if (linechartAvailable === 'True') {
             drawLineChart();
         }
+        drawPieChart(StopStalk.userStats['status_percentages']);
+        drawCalendar(StopStalk.userStats['calendar_data']);
         if (totalSubmissions !== '0' && isLoggedIn) {
-            drawStopStalkRatingChart();
+            drawStopStalkRatingChart(StopStalk.userStats['rating_history']);
         }
     }
 
-    function drawStopStalkRatingChart() {
-        $.ajax({
-            url: getStopStalkRatingHistoryURL,
-            method: 'GET',
-            data: {user_id: userID, custom: custom},
-            success: function(response) {
-                var dataTable = new google.visualization.DataTable();
-                var dataValues = [['Date', 'Current Streak', 'Maximum Streak', 'Solved', 'Accuracy', 'Attempted', 'Per-Day']];
-                $.each(response['final_rating'], function(key, val) {
-                    dataValues.push([
-                        new Date(val[0]),
-                        val[1][0],
-                        val[1][1],
-                        val[1][2],
-                        val[1][3],
-                        val[1][4],
-                        val[1][5]]);
-                });
-                var options = {
-                        width: 1000,
-                        height: 500,
-                        legend: { position: 'right', maxLines: 3 },
-                        bar: { groupWidth: '100%' },
-                        isStacked: true,
-                        focusTarget: 'category',
-                        explorer: {
-                            keepInBounds: true,
-                            maxZoomOut: 1.0,
-                            maxZoomIn: 0.1,
-                        }
-                      };
-                var data = google.visualization.arrayToDataTable(dataValues);
-                var view = new google.visualization.DataView(data);
-                var chart = new google.visualization.ColumnChart(document.getElementById("stopstalk-rating-graph"));
-                chart.draw(view, options);
-            },
-            error: function(err) {
-                console.log(err);
-            }
+    function drawStopStalkRatingChart(ratingHistoryData) {
+        var dataTable = new google.visualization.DataTable();
+        var dataValues = [['Date', 'Current Streak', 'Maximum Streak', 'Solved', 'Accuracy', 'Attempted', 'Per-Day']];
+        $.each(ratingHistoryData, function(key, val) {
+            dataValues.push([
+                new Date(val[0]),
+                val[1][0],
+                val[1][1],
+                val[1][2],
+                val[1][3],
+                val[1][4],
+                val[1][5]
+            ]);
         });
+
+        var options = {
+            width: 1000,
+            height: 500,
+            legend: { position: 'right', maxLines: 3 },
+            bar: { groupWidth: '100%' },
+            isStacked: true,
+            focusTarget: 'category',
+            explorer: {
+                keepInBounds: true,
+                maxZoomOut: 1.0,
+                maxZoomIn: 0.1,
+            }
+        };
+        var data = google.visualization.arrayToDataTable(dataValues);
+        var view = new google.visualization.DataView(data);
+        var chart = new google.visualization.ColumnChart(document.getElementById("stopstalk-rating-graph"));
+        chart.draw(view, options);
     }
 
     function drawLineChart() {
@@ -328,24 +347,12 @@
     }
 
     // ---------------------------------------------------------------------------------
-    function drawCalendar() {
+    function drawCalendar(calendarData) {
         var calendarChart = new google.visualization.Calendar(document.getElementById('calendar_submission'));
         google.visualization.events.addListener(calendarChart, 'select', function () {
             selectHandler(calendarChart);
         });
-        $.ajax({
-            method: 'GET',
-            url: getDatesURL,
-            data: {user_id: userRowID,
-                   custom: custom}
-        }).done(function(total) {
-            // Update html for the streaks
-            $('#max-streak').html(total['max_streak']);
-            $('#curr-streak').html(total['curr_streak']);
-            $('#max-accepted-streak').html(total['max_accepted_streak']);
-            $('#curr-accepted-streak').html(total['curr_accepted_streak']);
-            drawCalendarFromData(calendarChart, total['total']);
-        });
+        drawCalendarFromData(calendarChart, calendarData);
     }
 
     // Callback that creates and polates a data table,
@@ -353,7 +360,8 @@
     // draws it.
 
     // ---------------------------------------------------------------------------------
-    function drawPieChart() {
+    function drawPieChart(statuses) {
+        console.log(statuses);
         var numJSON = {'AC': 0,
                        'WA': 0,
                        'TLE': 0,
@@ -365,54 +373,49 @@
                        'HCK': 0,
                        'OTH': 0
                        };
-        $.ajax({
-            method: 'GET',
-            url: getStatsURL,
-            data: {user_id: userRowID, custom: custom}
-        }).done(function(data) {
-
-            var statuses = data['row'];
-            $.each(statuses, function(i) {
-                numJSON[statuses[i][1]] = statuses[i][0];
-            });
-            // Create the data table.
-            var data = new google.visualization.DataTable();
-            data.addColumn('string', 'resultType');
-            data.addColumn('number', 'numberOfSubmissions');
-            data.addRows([
-                ['Accepted', numJSON['AC']],
-                ['Partially Solved', numJSON['PS']],
-                ['Wrong Answer', numJSON['WA']],
-                ['Time Limit Exceeded', numJSON['TLE']],
-                ['Memory Limit Exceeded', numJSON['MLE']],
-                ['Runtime Error', numJSON['RE']],
-                ['Compile Error', numJSON['CE']],
-                ['Hacked', numJSON['HCK']],
-                ['Skipped', numJSON['SK']],
-                ['Others', numJSON['OTH']]
-            ]);
-            // Set chart options
-            var options = {'title':'Total Submissions',
-                           'width':600,
-                           'height':500,
-                           'pieHole': 0.5,
-                           'slices': {0: {color: '#4CAF50'},
-                                      1: {color: '#8BC34A'},
-                                      2: {color: '#F44336'},
-                                      3: {color: '#3F51B5'},
-                                      4: {color: '#03A9F4'},
-                                      5: {color: '#9C27B0'},
-                                      6: {color: '#FF9800'},
-                                      7: {color: '#795548'},
-                                      8: {color: '#FFEB3B'},
-                                      9: {color: '#9E9E9E'}},
-                           'pieResidueSliceLabel': '',
-                           'pieResidueSliceColor': 'transparent'
-                           };
-            // Instantiate and draw our chart, passing in some options.
-            var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
-            chart.draw(data, options);
+        $.each(statuses, function(i) {
+            numJSON[statuses[i][1]] = statuses[i][0];
         });
+
+        // Create the data table.
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'resultType');
+        data.addColumn('number', 'numberOfSubmissions');
+        data.addRows([
+            ['Accepted', numJSON['AC']],
+            ['Partially Solved', numJSON['PS']],
+            ['Wrong Answer', numJSON['WA']],
+            ['Time Limit Exceeded', numJSON['TLE']],
+            ['Memory Limit Exceeded', numJSON['MLE']],
+            ['Runtime Error', numJSON['RE']],
+            ['Compile Error', numJSON['CE']],
+            ['Hacked', numJSON['HCK']],
+            ['Skipped', numJSON['SK']],
+            ['Others', numJSON['OTH']]
+        ]);
+
+        // Set chart options
+        var options = {'title':'Total Submissions',
+                       'width':600,
+                       'height':500,
+                       'pieHole': 0.5,
+                       'slices': {0: {color: '#4CAF50'},
+                                  1: {color: '#8BC34A'},
+                                  2: {color: '#F44336'},
+                                  3: {color: '#3F51B5'},
+                                  4: {color: '#03A9F4'},
+                                  5: {color: '#9C27B0'},
+                                  6: {color: '#FF9800'},
+                                  7: {color: '#795548'},
+                                  8: {color: '#FFEB3B'},
+                                  9: {color: '#9E9E9E'}},
+                       'pieResidueSliceLabel': '',
+                       'pieResidueSliceColor': 'transparent'
+                       };
+
+        // Instantiate and draw our chart, passing in some options.
+        var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
     }
 
     var handleRefreshNow = function() {
@@ -553,25 +556,21 @@
 
         if (totalSubmissions !== "0") {
             // Load the Visualization API and the piechart package.
-            google.load('visualization', '1.1', {'packages': ['corechart', 'calendar', 'bar'],
-                                                 'callback': drawCharts});
+            getStopStalkUserStats().then(function(data) {
+                populateSolvedCounts(data['solved_counts']);
+                $('#solved-problems').html(data['solved_problems_count']);
+                $('#total-problems').html(data['total_problems_count']);
+                $('#curr-streak').html(data['curr_day_streak']);
+                $('#max-streak').html(data['max_day_streak']);
+                $('#curr-accepted-streak').html(data['curr_accepted_streak']);
+                $('#max-accepted-streak').html(data['max_accepted_streak']);
+                populateSiteAccuracy(data['site_accuracies']);
+                StopStalk.userStats.rating_history = data['rating_history'];
+                StopStalk.userStats.calendar_data = data['calendar_data'];
+                StopStalk.userStats.status_percentages = data['status_percentages'];
+                google.load('visualization', '1.1', {'packages': ['corechart', 'calendar', 'bar'],
+                                                     'callback': drawCharts});
 
-            /* Get the details about the solved/unsolved problems */
-            $.ajax({
-                url: getSolvedCountsURL,
-                method: "GET",
-                data: {user_id: userID,
-                       custom: custom},
-                success: function(response) {
-                    $('#solved-problems').html(response['solved_problems']);
-                    $('#total-problems').html(response['total_problems']);
-                    $.each(response['site_counts'], function(key, val) {
-                        $('#' + key + '-solved-count').html(val);
-                    })
-                },
-                error: function(response) {
-                    $.web2py.flash('Error getting solved problems');
-                }
             });
         } else {
             $('#user-details').css('margin-left', '32%');
