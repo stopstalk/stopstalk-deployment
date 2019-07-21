@@ -223,8 +223,12 @@ def update_details():
         if updated_sites != []:
             utilities.clear_profile_page_cache(record.stopstalk_handle)
             site_lrs = {}
+            nrtable = db.next_retrieval
             submission_query = (stable.user_id == session.user_id)
-            nrtable_record = db(db.next_retrieval.user_id == session.user_id).select().first()
+            nrtable_record = db(nrtable.user_id == session.user_id).select().first()
+            if nrtable_record is None:
+                nid = nrtable.insert(user_id=session.user_id)
+                nrtable_record = nrtable(nid)
             for site in updated_sites:
                 site_lrs[site.lower() + "_lr"] = current.INITIAL_DATE
                 nrtable_record.update({site.lower() + "_delay": 0})
@@ -341,7 +345,11 @@ def update_friend():
                 submission_query = (stable.custom_user_id == int(request.args[0]))
                 reset_sites = current.SITES if record.duplicate_cu else updated_sites
 
+                nrtable = db.next_retrieval
                 nrtable_record = db(db.next_retrieval.custom_user_id == int(request.args[0])).select().first()
+                if nrtable_record is None:
+                    nid = nrtable.insert(custom_user_id=int(request.args[0]))
+                    nrtable_record = nrtable(nid)
                 for site in reset_sites:
                     form.vars[site.lower() + "_lr"] = current.INITIAL_DATE
                     nrtable_record.update({site.lower() + "_delay": 0})
