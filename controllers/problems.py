@@ -195,6 +195,14 @@ def index():
         # Disables direct entering of a URL
         session.flash = T("Please click on a Problem Link")
         redirect(URL("default", "index"))
+        return
+
+    try:
+        problem_id = int(request.vars["problem_id"])
+    except ValueError:
+        session.flash = T("Invalid problem!")
+        redirect(URL("default", "index"))
+        return
 
     submission_type = "friends"
     if request.vars.has_key("submission_type"):
@@ -210,7 +218,6 @@ def index():
     stable = db.submission
     ptable = db.problem
 
-    problem_id = int(request.vars["problem_id"])
     problem_record = ptable(problem_id)
     if problem_record is None:
         session.flash = T("Please click on a Problem Link")
