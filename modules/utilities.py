@@ -108,6 +108,28 @@ def get_solved_problems(user_id, custom=False):
     return _settify_return_value(data)
 
 # -----------------------------------------------------------------------------
+def get_next_problem_to_suggest(user_id):
+    import random
+    db = current.db
+    pdtable = db.problem_difficulty
+    ptable = db.problem
+
+    solved_problems, unsolved_problems = get_solved_problems(user_id, False)
+
+    query = (pdtable.user_id == user_id)
+    existing_pids = db(query).select(pdtable.problem_id,
+                                     distinct=True)
+    existing_pids = [x.problem_id for x in existing_pids]
+
+    final_set = solved_problems.union(unsolved_problems) - set(existing_pids)
+    next_problem_id = random.sample(final_set, 1)[0]
+    precord = ptable(next_problem_id)
+
+    return dict(problem_id=next_problem_id,
+                pname=precord.name,
+                plink=precord.link)
+
+# -----------------------------------------------------------------------------
 def get_link_class(problem_id, user_id):
     if user_id is None:
         return "unattempted-problem"

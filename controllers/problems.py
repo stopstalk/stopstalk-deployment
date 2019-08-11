@@ -138,6 +138,39 @@ def add_suggested_tags():
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
+def problem_difficulty():
+    # if request.env.request_method != "POST" or request.extension != "json":
+    #     raise(HTTP(405, "Method not allowed"))
+    #     return dict()
+
+    problem_id = int(request.vars["problem_id"])
+    score = int(request.vars["score"])
+    pdtable = db.problem_difficulty
+    ptable = db.problem
+
+    query = (pdtable.user_id == session.user_id) & \
+            (pdtable.problem_id == problem_id)
+    pdrecord = db(query).select().first()
+    if pdrecord is None:
+        print "inserting"
+        pdtable.insert(problem_id=problem_id,
+                       score=score,
+                       user_id=session.user_id)
+    else:
+        print "updating"
+        pdrecord.update_record(score=score)
+
+    problem_details = utilities.get_next_problem_to_suggest(session.user_id)
+
+    return problem_details
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
+def get_next_problem_to_suggest():
+    return utilities.get_next_problem_to_suggest(session.user_id)
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
 def get_suggested_tags():
 
     empty_response = dict(user_tags=[], tag_counts=[])
