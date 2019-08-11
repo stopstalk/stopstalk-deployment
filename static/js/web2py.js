@@ -507,9 +507,9 @@
         /* set to disabled state*/
         el[method](el.data('w2p_disable_with'));
 
-        el.bind('click.w2pDisable', function(e) { /* prevent further clicking*/
-          return web2py.stopEverything(e);
-        });
+        // el.bind('click.w2pDisable', function(e) {  // prevent further clicking
+        //   return web2py.stopEverything(e);
+        // });
       },
 
       /* restore element to its original state which was disabled by 'disableElement' above*/

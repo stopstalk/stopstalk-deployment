@@ -1,7 +1,7 @@
 (function($) {
     "use strict";
 
-    $(document).ready(function() {
+    var handleSubmissionsPagination = function() {
         $.ajax({
             method: 'GET',
             url: pageURL + '.json'
@@ -24,5 +24,9 @@
                 window.location.href = pageURL + '/' + num.toString();
             });
         });
+    };
+
+    $(document).ready(function() {
+        handleSubmissionsPagination();
     });
 })(jQuery);

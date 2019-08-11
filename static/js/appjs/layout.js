@@ -125,6 +125,74 @@ var initTooltips = function() {
         }
     };
 
+    var openProblemDifficultyModal = function() {
+        if (window.localStorage["lastShowedProblemDifficulty"] &&
+            Date.now() - window.localStorage["lastShowedProblemDifficulty"] < 24 * 60 * 60 * 100) {
+            // Modal showed less than 24 hours before;
+            return;
+        }
+
+        $.ajax({
+            url: getNextProblemURL,
+            method: 'GET',
+            success: function(response) {
+                $('#problem-difficulty-title').html("How difficult is <a href='" + response["plink"] + "' target='_blank'>" + response["pname"] + "</a>?");
+                $('#problem-difficulty-modal').modal('open');
+                problemDifficultyModalOpen = true;
+            },
+            error: function(e) {
+                console.log("Failed to get the next problem", e);
+            }
+        });
+
+    };
+
+    var initProblemDifficultySubmitHandler = function() {
+        $('#problem-difficulty-modal-form').on('submit', function(e) {
+            var $thisForm = $('#problem-difficulty-modal-form'),
+                $thisTitle = $('#problem-difficulty-title'),
+                $thisProblemLink = $("#problem-details-link");
+
+            $.ajax({
+                method: 'GET',
+                url: problemDifficultySubmitURL + '.json',
+                data: {
+                    "score":  $("input[name='problem_difficulty_value']:checked").val(),
+                    "problem_id": $("#problem-difficulty-modal-form").attr("data-problem")
+                },
+                success: function(response) {
+                    setTimeout(function() {
+                        $thisForm.attr('data-problem', response["new_problem_id"]);
+                        $('#problem-difficulty-modal-submit-button').val('Submit');
+                        $('#problem-difficulty-modal-submit-button').removeClass('disabled');
+
+                        $thisForm.trigger('reset');
+
+                        $thisForm.fadeOut(function() {
+                            $thisForm.fadeIn();
+                        });
+
+                        $thisTitle.fadeOut(function() {
+                            // $thisTitle.html(problemTitles[Math.floor(Math.random() * problemTitles.length)].replace("___", "<a href='" + response["plink"] + "' target='_blank'>" + response["pname"] + "</a>"));
+                            $thisTitle.html("How difficult is <a href='" + response["plink"] + "' target='_blank'>" + response["pname"] + "</a>?");
+                            $thisTitle.fadeIn();
+                        });
+
+                        // $thisProblemLink.fadeOut(function() {
+                        //     $thisProblemLink.html();
+                        //     $thisProblemLink.href = response["plink"];
+                        //     $thisProblemLink.fadeIn();
+                        // });
+                    }, 100);
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
+            e.preventDefault();
+        });
+    };
+
     $(document).ready(function() {
 
         var $viewDownloadButton = $('#final-view-download-button'),
@@ -148,7 +216,19 @@ var initTooltips = function() {
 
         $('select').material_select();
 
+        $('#problem-difficulty-modal').modal({
+            dismissible: false,
+            complete: function() {
+                window.localStorage["lastShowedProblemDifficulty"] = Date.now();
+                problemDifficultyModalOpen = false;
+            }
+        });
+
         initTooltips();
+
+        openProblemDifficultyModal();
+
+        initProblemDifficultySubmitHandler();
 
         $('#open-side-nav').click(function() {
             if (typeof ga !== 'undefined') {
