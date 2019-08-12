@@ -138,10 +138,17 @@ def get_next_problem_to_suggest(user_id, problem_id=None):
         query = (pdtable.user_id == user_id) & \
                 (pdtable.problem_id == precord.id)
         pdrecord = db(query).select().first()
+        link_class, link_title = get_link_class(precord.id, user_id)
         return dict(result=result,
                     problem_id=precord.id,
                     pname=precord.name,
-                    plink=precord.link,
+                    plink=problem_widget(precord.name,
+                                         precord.link,
+                                         link_class,
+                                         link_title,
+                                         precord.id,
+                                         True,
+                                         request_vars={"submission_type": "my"}),
                     score=pdrecord.score if pdrecord else None)
     else:
         return dict(result=result)
@@ -163,7 +170,7 @@ def get_link_class(problem_id, user_id):
     else:
         link_class = "unattempted-problem"
 
-    return link_class
+    return link_class, (" ".join(link_class.split("-"))).capitalize()
 
 # -----------------------------------------------------------------------------
 def get_stopstalk_handle(user_id, custom):
@@ -242,7 +249,8 @@ def problem_widget(name,
                    link_title,
                    problem_id,
                    disable_todo=False,
-                   anchor=True):
+                   anchor=True,
+                   request_vars={}):
     """
         Widget to display a problem in UI tables
 
@@ -260,7 +268,8 @@ def problem_widget(name,
         problem_div.append(A(name,
                              _href=URL("problems",
                                        "index",
-                                       vars={"problem_id": problem_id},
+                                       vars=dict(problem_id=problem_id,
+                                                 **request_vars),
                                        extension=False),
                              _class="problem-listing " + link_class,
                              _title=link_title,
@@ -691,12 +700,10 @@ def render_table(submissions, duplicates=[], user_id=None):
         link_class = ""
         problem_id = submission.problem_id
         if pid_to_class.has_key(problem_id):
-            link_class = pid_to_class[problem_id]
+            link_class, link_title = pid_to_class[problem_id]
         else:
-            link_class = get_link_class(problem_id, user_id)
-            pid_to_class[problem_id] = link_class
-
-        link_title = (" ".join(link_class.split("-"))).capitalize()
+            link_class, link_title = get_link_class(problem_id, user_id)
+            pid_to_class[problem_id] = (link_class, link_title)
 
         append(TD(problem_widget(submission.problem_name,
                                  submission.problem_link,
@@ -771,8 +778,7 @@ def render_trending_table(caption, problems, column_name, user_id):
 
     for problem in problems:
         tr = TR()
-        link_class = get_link_class(problem[0], user_id)
-        link_title = (" ".join(link_class.split("-"))).capitalize()
+        link_class, link_title = get_link_class(problem[0], user_id)
 
         tr.append(TD(problem_widget(problem[1]["name"],
                                     problem[1]["link"],
@@ -943,8 +949,7 @@ def render_user_editorials_table(user_editorials,
         user = user_mappings[editorial.user_id]
         record = precords[editorial.problem_id]
         number_of_votes = len(editorial.votes.split(",")) if editorial.votes else 0
-        link_class = get_link_class(editorial.problem_id, logged_in_user_id)
-        link_title = (" ".join(link_class.split("-"))).capitalize()
+        link_class, link_title = get_link_class(editorial.problem_id, logged_in_user_id)
         tr = TR(TD(problem_widget(record["name"],
                                   record["link"],
                                   link_class,

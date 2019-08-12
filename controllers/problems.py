@@ -293,8 +293,7 @@ def index():
     details_table = TABLE(_style="font-size: 140%; float: left; width: 50%;")
     problem_class = ""
 
-    link_class = utilities.get_link_class(problem_id, session.user_id)
-    link_title = (" ".join(link_class.split("-"))).capitalize()
+    link_class, link_title = utilities.get_link_class(problem_id, session.user_id)
 
     tbody = TBODY()
     tbody.append(TR(TD(),
@@ -804,8 +803,7 @@ def search():
     for problem in all_problems:
         tr = TR()
 
-        link_class = utilities.get_link_class(problem["id"], session.user_id)
-        link_title = (" ".join(link_class.split("-"))).capitalize()
+        link_class, link_title = utilities.get_link_class(problem["id"], session.user_id)
 
         tr.append(TD(utilities.problem_widget(problem["name"],
                                               problem["link"],
