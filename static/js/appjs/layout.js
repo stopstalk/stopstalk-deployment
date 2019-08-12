@@ -153,7 +153,7 @@ var initTooltips = function() {
                 } else {
                     $('#problem-difficulty-actual-content').removeClass("hide");
                     $('#problem-difficulty-all-caught-up').addClass("hide");
-                    $('#problem-difficulty-title').html("How difficult is <a href='" + response["plink"] + "' target='_blank'>" + response["pname"] + "</a>?");
+                    $('#problem-difficulty-title').html("How difficult is " + response["plink"] + "?");
                     problemDifficultyResponseHandler(response);
                 }
                 $('#problem-difficulty-modal').modal('open');
@@ -199,15 +199,8 @@ var initTooltips = function() {
                         });
 
                         $thisTitle.fadeOut(function() {
-                            // $thisTitle.html(problemTitles[Math.floor(Math.random() * problemTitles.length)].replace("___", "<a href='" + response["plink"] + "' target='_blank'>" + response["pname"] + "</a>"));
-                            $thisTitle.html("How difficult is <a href='" + response["plink"] + "' target='_blank'>" + response["pname"] + "</a>?");
+                            $thisTitle.html("How difficult is " + response["plink"] + "?");
                             $thisTitle.fadeIn();
-                        });
-
-                        $thisProblemLink.fadeOut(function() {
-                            $thisProblemLink.html();
-                            $thisProblemLink.href = response["plink"];
-                            $thisProblemLink.fadeIn();
                         });
                     }, 100);
                 },

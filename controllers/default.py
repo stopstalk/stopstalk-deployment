@@ -319,10 +319,9 @@ def todo():
         return [] if ids[0] == "" else ids
 
     for row in rows:
-        link_class = utilities.get_link_class(row.id, session.user_id)
+        link_class, link_title = utilities.get_link_class(row.id, session.user_id)
         uids, cuids = _get_ids(row.user_ids), _get_ids(row.custom_user_ids)
 
-        link_title = (" ".join(link_class.split("-"))).capitalize()
         tbody.append(TR(TD(utilities.problem_widget(row.name,
                                                     row.link,
                                                     link_class,
