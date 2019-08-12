@@ -167,7 +167,8 @@ def problem_difficulty():
 # ----------------------------------------------------------------------------
 @auth.requires_login()
 def get_next_problem_to_suggest():
-    return utilities.get_next_problem_to_suggest(session.user_id)
+    return utilities.get_next_problem_to_suggest(session.user_id,
+                                                 request.vars.get("problem_id", None))
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
@@ -323,9 +324,15 @@ def index():
                       _class="problem-page-editorials",
                       _style="color: white;",
                       _target="_blank"),
-                    _class="chip deep-purple darken-1 pulse",
+                    _class="chip deep-purple darken-1",
                     _id="problem-page-editorial-button"))
 
+    if auth.is_logged_in():
+        links.append(DIV(A(I(_class="fa fa-edit"), " " + T("Suggest Difficulty"),
+                             _style="color: white;"),
+                        _class="chip",
+                        _style="background-color: #9b4da9; cursor: pointer;",
+                         _id="problem-page-difficulty-button"))
     tbody.append(TR(TD(),
                     TD(STRONG(T("Links") + ":")),
                     links))
