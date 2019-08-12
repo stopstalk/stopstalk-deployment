@@ -125,9 +125,17 @@ var initTooltips = function() {
         }
     };
 
-    var openProblemDifficultyModal = function() {
-        if (window.localStorage["lastShowedProblemDifficulty"] &&
-            Date.now() - window.localStorage["lastShowedProblemDifficulty"] < 24 * 60 * 60 * 100) {
+    var problemDifficultyResponseHandler = function(response) {
+        if(response["score"]) $(".difficulty-list-item input[value='" + response["score"] + "']").prop("checked", true);
+        $("#problem-difficulty-modal-form").attr("data-problem", response["problem_id"]);
+    };
+
+    var openProblemDifficultyModal = function(explicitClick, problemId) {
+        explicitClick = explicitClick || false;
+        problemId = problemId || null;
+        if (!isLoggedIn ||
+            (window.localStorage["lastShowedProblemDifficulty"] &&
+             (Date.now() - window.localStorage["lastShowedProblemDifficulty"] < 24 * 60 * 60 * 100) && !explicitClick)) {
             // Modal showed less than 24 hours before;
             return;
         }
@@ -135,7 +143,9 @@ var initTooltips = function() {
         $.ajax({
             url: getNextProblemURL,
             method: 'GET',
+            data: {problem_id: problemId},
             success: function(response) {
+                problemDifficultyResponseHandler(response);
                 $('#problem-difficulty-title').html("How difficult is <a href='" + response["plink"] + "' target='_blank'>" + response["pname"] + "</a>?");
                 $('#problem-difficulty-modal').modal('open');
                 problemDifficultyModalOpen = true;
@@ -162,7 +172,7 @@ var initTooltips = function() {
                 },
                 success: function(response) {
                     setTimeout(function() {
-                        $thisForm.attr('data-problem', response["new_problem_id"]);
+                        problemDifficultyResponseHandler(response);
                         $('#problem-difficulty-modal-submit-button').val('Submit');
                         $('#problem-difficulty-modal-submit-button').removeClass('disabled');
 
@@ -178,11 +188,11 @@ var initTooltips = function() {
                             $thisTitle.fadeIn();
                         });
 
-                        // $thisProblemLink.fadeOut(function() {
-                        //     $thisProblemLink.html();
-                        //     $thisProblemLink.href = response["plink"];
-                        //     $thisProblemLink.fadeIn();
-                        // });
+                        $thisProblemLink.fadeOut(function() {
+                            $thisProblemLink.html();
+                            $thisProblemLink.href = response["plink"];
+                            $thisProblemLink.fadeIn();
+                        });
                     }, 100);
                 },
                 error: function(err) {
@@ -217,7 +227,7 @@ var initTooltips = function() {
         $('select').material_select();
 
         $('#problem-difficulty-modal').modal({
-            dismissible: false,
+            dismissible: true,
             complete: function() {
                 window.localStorage["lastShowedProblemDifficulty"] = Date.now();
                 problemDifficultyModalOpen = false;
@@ -229,6 +239,32 @@ var initTooltips = function() {
         openProblemDifficultyModal();
 
         initProblemDifficultySubmitHandler();
+
+        if (showProblemDifficultyOnboarding === "True" &&
+            window.localStorage["lastShowedProblemDifficulty"]) {
+            $('.tap-target').tapTarget('open');
+        };
+
+        $('#explain-problem-difficulty').click(function() {
+            if (!isLoggedIn) {
+                $.web2py.flash("Login to suggest problem difficulty!");
+                return;
+            } else {
+                showProblemDifficultyOnboarding = "False";
+                $('.tap-target').tapTarget('close');
+                openProblemDifficultyModal(true);
+                $.ajax({
+                    url: markReadURL,
+                    data: {key: "problem_difficulty"}
+                });
+                $('.tap-target').tapTarget('close');
+            }
+        });
+
+        $('#problem-page-difficulty-button').click(function() {
+            openProblemDifficultyModal(true, problemId);
+            $("#problem-difficulty-modal-form").attr("data-problem", problemId);
+        });
 
         $('#open-side-nav').click(function() {
             if (typeof ga !== 'undefined') {
