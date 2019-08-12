@@ -35,11 +35,13 @@
     <script type="text/javascript">
         var clickedButton = {"heart_button": false, "onboarding_button": false};
         var isLoggedIn = ("{{=auth.is_logged_in()}}" === "True");
-        var markReadURL = "{{=URL('user', 'mark_read')}}";
+        var problemDifficultySubmitURL = '{{=URL("problems", "problem_difficulty")}}';
+        var markReadURL = "{{=URL('user', 'mark_read', extension='json')}}";
         var loveEditorialURL = "{{=URL('problems', 'love_editorial', extension='json')}}";
         var deleteEditorialURL = "{{=URL('problems', 'delete_editorial')}}";
         var getNextProblemURL = "{{=URL('problems', 'get_next_problem_to_suggest', extension='json')}}";
         var problemDifficultyModalOpen = false;
+        var showProblemDifficultyOnboarding = "False";
     </script>
     {{block head}}{{end}}
     {{
@@ -154,7 +156,7 @@
     <div id="problem-difficulty-modal" class="modal" style="max-height: 80%; width: 60%;">
       <div class="modal-content center">
         <h4 id="problem-difficulty-title">How difficult is <a id="problem-details-link" href="" target="_blank"></a></h4>
-        <form id="problem-difficulty-modal-form" data-problem="18954">
+        <form id="problem-difficulty-modal-form" data-problem="">
             <div style="display: inline-flex;">
                 <div class="difficulty-list-item">
                     <input name="problem_difficulty_value" type="radio" id="difficulty-very-easy" value="1" required/>
@@ -182,8 +184,7 @@
             </div>
         </form>
         <div class="modal-footer">
-            <button class="modal-action modal-close waves-effect blue lighten-5 waves-blue btn-flat">Close</button>
-            <a class="waves-effect green lighten-4 waves-blue btn-flat" href="{{=URL('problems', 'difficulty_rating')}}" target="_blank">Add more</a>
+            <button class="modal-action modal-close waves-effect blue lighten-5 waves-blue btn-flat">Later</button>
         </div>
       </div>
     </div>
@@ -274,7 +275,7 @@
     </footer>
 
     {{db = current.db; ratable = db.recent_announcements}}
-    {{pulse_class = {"heart_button": "", "onboarding_button": ""}; clicked_button = {};}}
+    {{pulse_class = {"heart_button": "", "onboarding_button": "", "problem_difficulty": ""}; clicked_button = {};}}
     {{if auth.is_logged_in():}}
         {{announcement_record = db(ratable.user_id == session.user_id).select().first()}}
     {{else:}}
@@ -296,6 +297,8 @@
             {{for key in pulse_class.keys():}}
                 clickedButton["{{=key}}"] = "{{=clicked_button[key]}}" === "True";
             {{pass}}
+
+            showProblemDifficultyOnboarding = "{{=(not (record_data.get('problem_difficulty', None) == True))}}";
         </script>
     {{pass}}
     <div class="tap-target" data-activates="explain-problem-difficulty">
@@ -326,7 +329,7 @@
         </ul>
     </div>
     <div class="fixed-action-btn">
-        <a class="btn-floating btn-small green" id="explain-problem-difficulty" style="bottom: 70px; right: 10px;" target="_blank"><i class="fa fa-question-circle"></i></a>
+        <a class="btn-floating btn-small green {{=pulse_class['problem_difficulty']}}" id="explain-problem-difficulty" style="bottom: 70px; right: 10px;" target="_blank"><i class="fa fa-edit"></i></a>
     </div>
     <div class="fixed-action-btn">
         <a class="btn-floating btn-small orange {{=pulse_class['onboarding_button']}}" style="bottom: 26px; right: 10px;" target="_blank" href="{{=URL('default', 'get_started')}}" id="onboarding-button"><i class="fa fa-question-circle"></i></a>
