@@ -112,6 +112,7 @@ def get_next_problem_to_suggest(user_id, problem_id=None):
     db = current.db
     pdtable = db.problem_difficulty
     ptable = db.problem
+    result = "all_caught"
 
     if not problem_id:
         solved_problems, unsolved_problems = get_solved_problems(user_id, False)
@@ -121,20 +122,29 @@ def get_next_problem_to_suggest(user_id, problem_id=None):
         existing_pids = [x.problem_id for x in existing_pids]
 
         final_set = solved_problems.union(unsolved_problems) - set(existing_pids)
-        import random
-        next_problem_id = random.sample(final_set, 1)[0]
-        precord = ptable(next_problem_id)
+        if len(final_set) != 0:
+            import random
+            next_problem_id = random.sample(final_set, 1)[0]
+            precord = ptable(next_problem_id)
+            result = "success"
+        else:
+            precord = None
+            result = "all_caught"
     else:
         precord = ptable(problem_id)
+        result = "success"
 
-    query = (pdtable.user_id == user_id) & \
-            (pdtable.problem_id == precord.id)
-    pdrecord = db(query).select().first()
-
-    return dict(problem_id=precord.id,
-                pname=precord.name,
-                plink=precord.link,
-                score=pdrecord.score if pdrecord else None)
+    if precord:
+        query = (pdtable.user_id == user_id) & \
+                (pdtable.problem_id == precord.id)
+        pdrecord = db(query).select().first()
+        return dict(result=result,
+                    problem_id=precord.id,
+                    pname=precord.name,
+                    plink=precord.link,
+                    score=pdrecord.score if pdrecord else None)
+    else:
+        return dict(result=result)
 
 # -----------------------------------------------------------------------------
 def get_link_class(problem_id, user_id):
