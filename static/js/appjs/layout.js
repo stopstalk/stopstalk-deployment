@@ -173,7 +173,7 @@ var initTooltips = function() {
                 $thisProblemLink = $("#problem-details-link");
 
             $.ajax({
-                method: 'GET',
+                method: 'POST',
                 url: problemDifficultySubmitURL + '.json',
                 data: {
                     "score":  $("input[name='problem_difficulty_value']:checked").val(),

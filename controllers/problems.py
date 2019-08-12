@@ -139,9 +139,9 @@ def add_suggested_tags():
 # ----------------------------------------------------------------------------
 @auth.requires_login()
 def problem_difficulty():
-    # if request.env.request_method != "POST" or request.extension != "json":
-    #     raise(HTTP(405, "Method not allowed"))
-    #     return dict()
+    if request.env.request_method != "POST" or request.extension != "json":
+        raise(HTTP(405, "Method not allowed"))
+        return dict()
 
     problem_id = int(request.vars["problem_id"])
     score = int(request.vars["score"])
