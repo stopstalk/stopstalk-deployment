@@ -152,12 +152,10 @@ def problem_difficulty():
             (pdtable.problem_id == problem_id)
     pdrecord = db(query).select().first()
     if pdrecord is None:
-        print "inserting"
         pdtable.insert(problem_id=problem_id,
                        score=score,
                        user_id=session.user_id)
     else:
-        print "updating"
         pdrecord.update_record(score=score)
 
     problem_details = utilities.get_next_problem_to_suggest(session.user_id)
