@@ -133,13 +133,14 @@ var initTooltips = function() {
     var openProblemDifficultyModal = function(explicitClick, problemId) {
         explicitClick = explicitClick || false;
         problemId = problemId || null;
+
+        var cacheValue = localStorage.getItem("lastShowedProblemDifficulty");
         if (!isLoggedIn ||
-            (window.localStorage["lastShowedProblemDifficulty"] &&
-             (Date.now() - window.localStorage["lastShowedProblemDifficulty"] < 24 * 60 * 60 * 100) && !explicitClick)) {
+            (cacheValue &&
+             (Date.now() - cacheValue < 24 * 60 * 60 * 100) && !explicitClick)) {
             // Modal showed less than 24 hours before;
             return;
         }
-
         if(explicitClick) $('#problem-difficulty-modal-form').trigger('reset');
 
         $.ajax({
@@ -238,9 +239,13 @@ var initTooltips = function() {
         $('#problem-difficulty-modal').modal({
             dismissible: true,
             complete: function() {
-                window.localStorage["lastShowedProblemDifficulty"] = Date.now();
+                localStorage.setItem("lastShowedProblemDifficulty", Date.now());
                 problemDifficultyModalOpen = false;
             }
+        });
+
+        $(document).on('click', '#problem-difficulty-title .problem-listing', function() {
+            localStorage.setItem("lastShowedProblemDifficulty", Date.now());
         });
 
         initTooltips();
@@ -255,7 +260,7 @@ var initTooltips = function() {
             $('.tap-target').tapTarget('open');
         };
 
-        $('#explain-problem-difficulty').click(function() {
+        $(document).on('click', '#explain-problem-difficulty', function() {
             if (!isLoggedIn) {
                 $.web2py.flash("Login to suggest problem difficulty!");
                 return;
@@ -270,7 +275,7 @@ var initTooltips = function() {
             }
         });
 
-        $('#problem-page-difficulty-button').click(function() {
+        $(document).on('click', '#problem-page-difficulty-button', function() {
             openProblemDifficultyModal(true, problemId);
             $("#problem-difficulty-modal-form").attr("data-problem", problemId);
         });
