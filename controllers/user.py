@@ -215,7 +215,6 @@ def update_details():
 
     form.vars.email = record.email
     form.vars.stopstalk_handle = record.stopstalk_handle
-    form.vars.graph_data_retrieved = False
 
     if form.process(onvalidation=current.sanitize_fields).accepted:
         session.flash = T("User details updated")
@@ -304,7 +303,6 @@ def update_friend():
                    showid=False)
 
     form.vars.stopstalk_handle = record.stopstalk_handle
-    form.vars.graph_data_retrieved = False
 
     if form.validate(onvalidation=current.sanitize_fields):
         pickle_file_path = "./applications/stopstalk/graph_data/" + \
