@@ -155,8 +155,9 @@ def get_next_problem_to_suggest(user_id, problem_id=None):
 
 # -----------------------------------------------------------------------------
 def get_link_class(problem_id, user_id):
+    link_class = "unattempted-problem"
     if user_id is None:
-        return "unattempted-problem"
+        return link_class, (" ".join(link_class.split("-"))).capitalize()
 
     solved_problems, unsolved_problems = get_solved_problems(user_id, False)
 
