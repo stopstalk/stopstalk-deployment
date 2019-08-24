@@ -125,6 +125,94 @@ var initTooltips = function() {
         }
     };
 
+    var problemDifficultyResponseHandler = function(response) {
+        if(response["score"]) $(".difficulty-list-item input[value='" + response["score"] + "']").prop("checked", true);
+        $("#problem-difficulty-modal-form").attr("data-problem", response["problem_id"]);
+    };
+
+    var openProblemDifficultyModal = function(explicitClick, problemId) {
+        explicitClick = explicitClick || false;
+        problemId = problemId || null;
+
+        var cacheValue = localStorage.getItem("lastShowedProblemDifficulty");
+        if (!isLoggedIn ||
+            (cacheValue &&
+             (Date.now() - cacheValue < 24 * 60 * 60 * 100) && !explicitClick)) {
+            // Modal showed less than 24 hours before;
+            return;
+        }
+        if(explicitClick) $('#problem-difficulty-modal-form').trigger('reset');
+
+        $.ajax({
+            url: getNextProblemURL,
+            method: 'GET',
+            data: {problem_id: problemId},
+            success: function(response) {
+                if(response["result"] == "all_caught") {
+                    $('#problem-difficulty-actual-content').addClass("hide");
+                    $('#problem-difficulty-all-caught-up').removeClass("hide");
+                } else {
+                    $('#problem-difficulty-actual-content').removeClass("hide");
+                    $('#problem-difficulty-all-caught-up').addClass("hide");
+                    $('#problem-difficulty-title').html("How difficult is " + response["plink"] + "?");
+                    problemDifficultyResponseHandler(response);
+                }
+                $('#problem-difficulty-modal').modal('open');
+                problemDifficultyModalOpen = true;
+            },
+            error: function(e) {
+                console.log("Failed to get the next problem", e);
+            }
+        });
+
+    };
+
+    var initProblemDifficultySubmitHandler = function() {
+        $('#problem-difficulty-modal-form').on('submit', function(e) {
+            var $thisForm = $('#problem-difficulty-modal-form'),
+                $thisTitle = $('#problem-difficulty-title'),
+                $thisProblemLink = $("#problem-details-link");
+
+            $.ajax({
+                method: 'POST',
+                url: problemDifficultySubmitURL + '.json',
+                data: {
+                    "score":  $("input[name='problem_difficulty_value']:checked").val(),
+                    "problem_id": $("#problem-difficulty-modal-form").attr("data-problem")
+                },
+                success: function(response) {
+                    if(response["result"] == "all_caught") {
+                        $('#problem-difficulty-actual-content').addClass("hide");
+                        $('#problem-difficulty-all-caught-up').removeClass("hide");
+                        return;
+                    }
+                    setTimeout(function() {
+                        $('#problem-difficulty-actual-content').removeClass("hide");
+                        $('#problem-difficulty-all-caught-up').addClass("hide");
+                        problemDifficultyResponseHandler(response);
+                        $('#problem-difficulty-modal-submit-button').val('Submit');
+                        $('#problem-difficulty-modal-submit-button').removeClass('disabled');
+
+                        $thisForm.trigger('reset');
+
+                        $thisForm.fadeOut(function() {
+                            $thisForm.fadeIn();
+                        });
+
+                        $thisTitle.fadeOut(function() {
+                            $thisTitle.html("How difficult is " + response["plink"] + "?");
+                            $thisTitle.fadeIn();
+                        });
+                    }, 100);
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
+            e.preventDefault();
+        });
+    };
+
     $(document).ready(function() {
 
         var $viewDownloadButton = $('#final-view-download-button'),
@@ -148,7 +236,49 @@ var initTooltips = function() {
 
         $('select').material_select();
 
+        $('#problem-difficulty-modal').modal({
+            dismissible: true,
+            complete: function() {
+                localStorage.setItem("lastShowedProblemDifficulty", Date.now());
+                problemDifficultyModalOpen = false;
+            }
+        });
+
+        $(document).on('click', '#problem-difficulty-title .problem-listing', function() {
+            localStorage.setItem("lastShowedProblemDifficulty", Date.now());
+        });
+
         initTooltips();
+
+        if(loggedInUserId < 15500)  openProblemDifficultyModal();
+
+        initProblemDifficultySubmitHandler();
+
+        if (showProblemDifficultyOnboarding === "True" &&
+            window.localStorage["lastShowedProblemDifficulty"] &&
+            loggedInUserId < 15500) {
+            $('.tap-target').tapTarget('open');
+        };
+
+        $(document).on('click', '#explain-problem-difficulty', function() {
+            if (!isLoggedIn) {
+                $.web2py.flash("Login to suggest problem difficulty!");
+                return;
+            } else {
+                showProblemDifficultyOnboarding = "False";
+                $('.tap-target').tapTarget('close');
+                openProblemDifficultyModal(true);
+                $.ajax({
+                    url: markReadURL,
+                    data: {key: "problem_difficulty"}
+                });
+            }
+        });
+
+        $(document).on('click', '#problem-page-difficulty-button', function() {
+            openProblemDifficultyModal(true, problemId);
+            $("#problem-difficulty-modal-form").attr("data-problem", problemId);
+        });
 
         $('#open-side-nav').click(function() {
             if (typeof ga !== 'undefined') {
