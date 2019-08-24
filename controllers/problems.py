@@ -327,8 +327,8 @@ def index():
     if auth.is_logged_in():
         links.append(DIV(A(I(_class="fa fa-edit"), " " + T("Suggest Difficulty"),
                              _style="color: white;"),
-                        _class="chip",
-                        _style="background-color: #9b4da9; cursor: pointer;",
+                         _class="chip",
+                         _style="background-color: #9b4da9; cursor: pointer;",
                          _id="problem-page-difficulty-button"))
     tbody.append(TR(TD(),
                     TD(STRONG(T("Links") + ":")),
