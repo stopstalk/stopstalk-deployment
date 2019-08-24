@@ -256,7 +256,7 @@ var initTooltips = function() {
 
         if (showProblemDifficultyOnboarding === "True" &&
             window.localStorage["lastShowedProblemDifficulty"] &&
-            parseInt(loggedInUserId) < 15500) {
+            loggedInUserId < 15500) {
             $('.tap-target').tapTarget('open');
         };
 
