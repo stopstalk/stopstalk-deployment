@@ -74,6 +74,8 @@
         addEventListener('#heart-twitter', 'Heart Twitter', false);
         addEventListener('#heart-google-plus', 'Heart Google Plus', false);
         addEventListener('#heart-github', 'Heart Github', false);
+        addEventListener('#explain-problem-difficulty', 'Intro Problem difficulty', false);
+        addEventListener('#problem-difficulty-title a', 'Problem page from Problem difficulty modal', false);
         addEventListener('#onboarding-button', 'Onboarding Button', false);
         addEventListener('#footer-media-kit', 'Footer Media Kit', false);
         addEventListener('#footer-faqs', 'Footer FAQs', false);
@@ -103,6 +105,7 @@
         addEventListener('.suggest-tags-plus-logged-out', 'Suggest tags plus (Logged out)', false);
         addEventListener('.suggest-tags-plus', 'Suggest tags plus', false);
         addEventListener('#show-tags', 'Show tags', false);
+        addEventListener('#problem-page-difficulty-button', 'Problem page difficulty', false);
         addEventListener('.problem-page-tag', 'Problem page tag', false);
     };
 

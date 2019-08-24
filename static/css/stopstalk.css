@@ -543,3 +543,20 @@ nav ul a:hover {
 .updates-page-card a {
     color: gold;
 }
+
+.difficulty-list-item {
+    padding: 30px;
+}
+
+#problem-difficulty-modal-form label {
+    color: black;
+    font-weight: 400;
+}
+
+#problem-difficulty-modal .modal-content {
+    padding: 24px 10px 5px 10px;
+}
+
+.tap-target {
+    background-color: #f0ff03e8;
+}

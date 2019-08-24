@@ -749,6 +749,11 @@ db.define_table("resume_data",
                 Field("can_contact", "boolean"),
                 Field("expected_salary"))
 
+db.define_table("problem_difficulty",
+                Field("user_id", "reference auth_user"),
+                Field("problem_id", "reference problem"),
+                Field("score", "integer", default=0))
+
 uvadb.define_table("problem",
                    Field("problem_id", "integer"),
                    Field("problem_num", "integer"),
