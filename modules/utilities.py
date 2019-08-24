@@ -791,7 +791,7 @@ def compute_trending_table(submissions_list, table_type, user_id=None):
         cid = submission.custom_user_id
         problem_id = submission.problem_id
 
-        if plink not in problems_dict:
+        if problem_id not in problems_dict:
             problems_dict[problem_id] = {"name": pname,
                                          "total_submissions": 0,
                                          "users": set([]),
