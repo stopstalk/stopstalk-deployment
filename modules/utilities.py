@@ -123,7 +123,10 @@ def get_next_problem_to_suggest(user_id, problem_id=None):
 
         final_set = solved_problems.union(unsolved_problems) - set(existing_pids)
         if len(final_set) != 0:
-            next_problem_id = sorted(list(final_set), reverse=True)[0]
+            import random
+            next_problem_id = random.sample(sorted(list(final_set),
+                                                   reverse=True)[:30],
+                                            1)[0]
             precord = ptable(next_problem_id)
             result = "success"
         else:
