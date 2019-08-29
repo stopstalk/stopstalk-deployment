@@ -250,13 +250,13 @@ var initTooltips = function() {
 
         initTooltips();
 
-        if(loggedInUserId < 15500)  openProblemDifficultyModal();
+        if(loggedInUserId < thresholdUserId)  openProblemDifficultyModal();
 
         initProblemDifficultySubmitHandler();
 
         if (showProblemDifficultyOnboarding === "True" &&
             window.localStorage["lastShowedProblemDifficulty"] &&
-            loggedInUserId < 15500) {
+            loggedInUserId < thresholdUserId) {
             $('.tap-target').tapTarget('open');
         };
 
