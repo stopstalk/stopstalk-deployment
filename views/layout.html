@@ -33,6 +33,7 @@
     <!-- Favicons -->
     {{include 'web2py_ajax.html'}} <!-- this includes jquery.js, calendar.js/.css and web2py.js -->
     <script type="text/javascript">
+        {{last_record = db(db.auth_user).select(db.auth_user.id, orderby=~db.auth_user.id, limitby=(0, 1)).first()}}
         var clickedButton = {"heart_button": false, "onboarding_button": false};
         var isLoggedIn = ("{{=auth.is_logged_in()}}" === "True");
         var problemDifficultySubmitURL = '{{=URL("problems", "problem_difficulty")}}';
@@ -43,6 +44,8 @@
         var problemDifficultyModalOpen = false;
         var showProblemDifficultyOnboarding = "False";
         var loggedInUserId = parseInt("{{=session.user_id if auth.is_logged_in() else 100000000}}");
+        var lastUserId = parseInt("{{=last_record.id if last_record else 0}}");
+        var thresholdUserId = lastUserId - 200; // Assuming less than 200 signups per day
     </script>
     {{block head}}{{end}}
     {{
