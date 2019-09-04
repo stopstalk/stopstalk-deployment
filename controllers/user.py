@@ -905,6 +905,11 @@ def submissions():
     else:
         page = "1"
 
+    if int(page) > 10 and not auth.is_logged_in():
+        session.flash = T("Please enter a valid page")
+        redirect(URL("default", "index"))
+        return
+
     stable = db.submission
 
     query = (stable.user_id == user_id)
@@ -915,6 +920,13 @@ def submissions():
 
     if request.extension == "json":
         total_submissions = db(query).count()
+        if not auth.is_logged_in() and \
+           total_submissions > current.USER_PAGINATION_LIMIT * PER_PAGE:
+            total_submissions = current.USER_PAGINATION_LIMIT * PER_PAGE
+        else:
+            # User is logged in or total_submissions are less than our public
+            # view limit of submissions
+            pass
         page_count = total_submissions / PER_PAGE
 
         if total_submissions % PER_PAGE:
