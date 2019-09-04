@@ -949,6 +949,11 @@ def filters():
         page = int(request.args[0])
         page -= 1
 
+    if page > 10 and not auth.is_logged_in():
+        session.flash = "Log in to see more submissions"
+        redirect(URL("default", "index"))
+        return
+
     if current.REDIS_CLIENT.get("languages_updated_on") is None or \
        (datetime.datetime.now() - \
         datetime.datetime.strptime(current.REDIS_CLIENT.get("languages_updated_on"),
