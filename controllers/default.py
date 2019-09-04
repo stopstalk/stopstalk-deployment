@@ -947,7 +947,6 @@ def filters():
         page = 1
     else:
         page = int(request.args[0])
-        page -= 1
 
     if page > 10 and not auth.is_logged_in():
         session.flash = "Log in to see more submissions"
@@ -1160,14 +1159,17 @@ def filters():
 
     PER_PAGE = current.PER_PAGE
     # Apply the complex query and sort by time_stamp DESC
-    filtered = db(query).select(limitby=(page * PER_PAGE,
-                                         (page + 1) * PER_PAGE),
+    filtered = db(query).select(limitby=((page - 1) * PER_PAGE,
+                                         page * PER_PAGE),
                                 orderby=~stable.time_stamp)
 
     total_problems = db(query).count()
     total_pages = total_problems / 100
     if total_problems % 100 == 0:
         total_pages += 1
+
+    if total_pages > 10 and not auth.is_logged_in():
+        total_pages = 10
 
     table = utilities.render_table(filtered, duplicates, session.user_id)
     switch = DIV(LABEL(H6(T("Friends' Submissions"),
