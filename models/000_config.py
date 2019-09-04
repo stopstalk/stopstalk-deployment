@@ -66,4 +66,7 @@ current.PROBLEMS_PER_PAGE = 15
 # Number of days in the past that should be considered for trending problems
 current.PAST_DAYS = 10
 
+# Number of pages to show for user submissions page
+current.USER_PAGINATION_LIMIT = 10
+
 # =============================================================================
