@@ -319,6 +319,42 @@ def new_handle_not_found(site, site_handle):
     db.invalid_handle.insert(site=site, handle=site_handle)
 
 # ----------------------------------------------------------------------------
+def update_stopstalk_rating(user_id, custom):
+    atable = db.auth_user
+    cftable = db.custom_friend
+
+    column_name = "custom_user_id" if custom else "user_id"
+    query = """
+    SELECT time_stamp, problem_link, status, site, problem_id
+    FROM submission
+    WHERE %(column_name)s = %(user_id)d
+    ORDER BY time_stamp
+            """ % {"column_name": column_name, "user_id": user_id}
+    all_submissions = db.executesql(query)
+
+    user_submissions = []
+    for submission in all_submissions:
+        user_submissions.append({column_name: user_id,
+                                 "time_stamp": submission[0],
+                                 "problem_link": submission[1],
+                                 "status": submission[2],
+                                 "site": submission[3],
+                                 "problem_id": submission[4]})
+
+    final_rating = utilities.get_stopstalk_user_stats(user_submissions)["rating_history"]
+    final_rating = dict(final_rating)
+    today = str(datetime.datetime.now().date())
+    current_rating = sum(final_rating[today])
+
+    update_params = dict(stopstalk_rating=int(current_rating))
+    if custom:
+        cftable(user_id).update_record(**update_params)
+    else:
+        atable(user_id).update_record(**update_params)
+
+    db.commit()
+
+# ----------------------------------------------------------------------------
 def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codechef_retrieval=False):
     """
         Retrieve submissions that are not already in the database
@@ -430,6 +466,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
                 nrtable_record.update({site_delay: 100000})
 
     total_submissions_retrieved = 0
+    all_submissions = []
     for submissions in list_of_submissions:
         site = submissions[0]
         lower_site = site.lower()
@@ -440,6 +477,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
                                             submissions[1],
                                             site,
                                             custom)
+        all_submissions.extend(submissions[1])
         total_submissions_retrieved += submissions_count
         if retrieval_type == "daily_retrieve" and \
            site not in skipped_retrieval and \
@@ -481,6 +519,9 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
 
     # Keep committing the updates to the db to avoid lock wait timeouts
     db.commit()
+    if total_submissions_retrieved > 0:
+        update_stopstalk_rating(record.id, custom)
+
     concurrent_submission_retrieval_handler("DEL", record.id, custom)
 
 # ----------------------------------------------------------------------------
