@@ -36,6 +36,15 @@ for site in current.SITES:
     html_body += "</table><br/>"
     html_body += "________________________________________________<br/>"
 
+html_body += "<h3><u>Overall</u></h3>"
+html_body += "<table border='1' cellpadding='4' cellspacing='0'>"
+for key in metric_handlers["overall"]:
+    html_body += metric_handlers["overall"][key].get_html()
+    metric_handlers["overall"][key].flush_keys()
+
+html_body += "</table><br/>"
+html_body += "________________________________________________<br/>"
+
 html_body += "</body></html>"
 
 current.send_mail(to="contactstopstalk@gmail.com",
