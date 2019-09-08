@@ -125,7 +125,7 @@ def get_next_problem_to_suggest(user_id, problem_id=None):
         if len(final_set) != 0:
             import random
             next_problem_id = random.sample(sorted(list(final_set),
-                                                   reverse=True)[:30],
+                                                   reverse=True)[:15],
                                             1)[0]
             precord = ptable(next_problem_id)
             result = "success"
