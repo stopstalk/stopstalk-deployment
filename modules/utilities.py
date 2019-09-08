@@ -60,6 +60,11 @@ def init_metric_handlers(log_to_redis):
                                                                lower_site,
                                                                log_to_redis)
 
+    metric_handlers["overall"] = {}
+    metric_handlers["overall"]["just_stopstalk_code_time"] = MetricHandler("just_stopstalk_code_time",
+                                                                           "average",
+                                                                           "overall",
+                                                                           log_to_redis)
     return metric_handlers
 
 
