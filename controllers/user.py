@@ -703,13 +703,15 @@ def profile():
             return
     else:
         handle = str(request.args[0])
+
     http_referer = request.env.http_referer
     if auth.is_logged_in() and \
        session.welcome_shown is None and \
        http_referer is not None and \
        http_referer.__contains__("/user/login"):
-       response.flash = T("Welcome StopStalker!!")
-       session.welcome_shown = True
+
+        response.flash = T("Welcome StopStalker!!")
+        session.welcome_shown = True
 
     query = (db.auth_user.stopstalk_handle == handle)
     rows = db(query).select()
@@ -721,6 +723,7 @@ def profile():
     cf_count = 0
     cftable = db.custom_friend
     output = {}
+    output["logged_in_user_id"] = session.user_id
     output["nouser"] = False
     output["show_refresh_now"] = False
     output["can_update"] = False
@@ -1045,5 +1048,70 @@ def custom_friend():
                 table=table,
                 allowed=allowed_custom_friends,
                 total_referrals=total_referrals)
+
+# ----------------------------------------------------------------------------
+def get_friend_list():
+    """
+        Gets the friend list of a specific user and compares with the friend 
+        list of the logged in user.
+    """
+
+    profile_user_id = request.vars["user_id"]
+    user_friends, _ = utilities.get_friends(session.user_id)
+    profile_friends, _ = utilities.get_friends(profile_user_id)
+
+    atable = db.auth_user
+    cftable = db.custom_friend
+
+    table = None
+
+    if profile_friends:
+        table = TABLE(_class="bordered centered")
+        tbody = TBODY()
+
+        for friend in profile_friends:
+            query = (atable.id == friend)
+            row = db(query).select().first()
+
+            user_name = " ".join([row.first_name.capitalize(), row.last_name.capitalize()])
+            profile_url = URL("user", "profile", 
+                              args=[row.stopstalk_handle], 
+                              extension=False)
+
+            if friend == session.user_id:
+                tr = TR(TD(A(user_name + " (You)", 
+                             _href=profile_url,
+                             _target="_blank")), 
+                        TD(), 
+                        **dict(_style="height: 87px"))
+                tbody.append(tr)
+                continue
+
+            friend_button_data = {"user-id": str(friend), "position": "left", "delay": "100"}
+ 
+            if friend in user_friends:
+                button_color, fa_icon = ("black", "fa-user-times")
+                friend_button_data["tooltip"] = T("Unriend")
+                friend_button_data["type"] = "unfriend"
+            else:
+                button_color, fa_icon = ("green", "fa-user-plus")
+                friend_button_data["tooltip"] = T("Add Friend")
+                friend_button_data["type"] = "add-friend"
+
+            tr = TR(TD(A(user_name, 
+                         _href=profile_url,
+                         _target="_blank")), 
+                    TD(BUTTON(I(_class="fa fa-3x " + fa_icon), 
+                              _class="tooltipped btn-floating btn-large waves-effect " + 
+                                        "waves-light friends-button " + button_color, 
+                              data=friend_button_data)))
+            tbody.append(tr)
+
+        table.append(tbody)
+
+    else:
+        table = "No friends added yet"
+
+    return dict(table=table)
 
 # ==============================================================================
