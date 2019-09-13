@@ -183,7 +183,7 @@
                                             </button>
                                         </th>
                                     {{pass}}
-                                    {{if custom == False and user_id != logged_in_user_id:}}
+                                    {{if custom == False and user_id != session.user_id:}}
                                     <th>
                                         <div id="friend-list-modal" style="width: 30%" class="modal center">
                                             <div class="modal-content">
