@@ -371,6 +371,8 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
     else:
         concurrent_submission_retrieval_handler("SET", record.id, custom)
 
+    stopstalk_retrieval_start_time = time.time()
+    sites_retrieval_timings = 0
     list_of_submissions = []
     retrieval_failures = []
     should_clear_cache = False
@@ -430,6 +432,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
             else:
                 submissions = site_method(last_retrieved, is_daily_retrieval)
             total_retrieval_time = time.time() - start_retrieval_time
+            sites_retrieval_timings += total_retrieval_time
             metric_handlers[lower_site]["retrieval_times"].add_to_list("list", total_retrieval_time)
             if submissions in (SERVER_FAILURE, OTHER_FAILURE):
                 logger.log(site, submissions)
@@ -523,6 +526,8 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
         update_stopstalk_rating(record.id, custom)
 
     concurrent_submission_retrieval_handler("DEL", record.id, custom)
+    total_retrieval_time = time.time() - stopstalk_retrieval_start_time
+    metric_handlers["overall"]["just_stopstalk_code_time"].add_to_list("list", total_retrieval_time - sites_retrieval_timings)
 
 # ----------------------------------------------------------------------------
 def new_users():
