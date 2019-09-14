@@ -606,16 +606,15 @@
         $('#friend-list-modal').modal();
 
         $('#friend-list-button').click(function() {
-            var $this = $(this)
+            var $this = $(this);
             if (isLoggedIn) {
-                $('#friend-list-modal').modal('open');
-
                 $.ajax({
                     url: getFriendListUrl,
                     method: 'GET',
                     data: {'user_id': $this.data('user-id')},
                     success: function(response) {
                         $('#friend-list').html(response['table']);
+                        $('#friend-list-modal').modal('open');
                     },
                     error: function(err) {
                         $.web2py.flash('Something went wrong');
