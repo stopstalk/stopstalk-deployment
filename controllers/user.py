@@ -1056,7 +1056,7 @@ def get_friend_list():
         list of the logged in user.
     """
 
-    profile_user_id = request.vars["user_id"]
+    profile_user_id = int(request.vars["user_id"])
     user_friends, _ = utilities.get_friends(session.user_id)
     profile_friends, _ = utilities.get_friends(profile_user_id)
 
