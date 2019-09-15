@@ -52,6 +52,7 @@
         addEventListener('#profile-add-to-my-custom-friend-logged-out', 'Profile Add to my Custom Friend (Logged out)', false);
         addEventListener('#profile-unfriend', 'Profile Unfriend', false);
         addEventListener('#profile-custom-user-of', 'Profile Custom User of', false);
+        addEventListener('#friend-list-button', 'View Friend List', false);
         // @ToDo: Generalize this
         addEventListener('#codechef-profile-url', 'Codechef profile URL', false);
         addEventListener('#codeforces-profile-url', 'CodeForces profile URL', false);

@@ -83,6 +83,7 @@
         var problemIndexURL = "{{=URL('problems', 'index')}}";
         var totalSubmissions = "{{=total_submissions}}";
         var stopStalkStatsUrl = "{{=URL('user', 'get_stopstalk_user_stats', extension='json')}}";
+        var getFriendListUrl = "{{=URL('user', 'get_friend_list', extension='json')}}";
     </script>
     <script src="{{=get_static_url('js/appjs/user/profile.js')}}" type="text/javascript"></script>
   {{end}}
@@ -181,6 +182,19 @@
                                                 <i class="fa fa-user-times fa-3x"></i>
                                             </button>
                                         </th>
+                                    {{pass}}
+                                    {{if custom == False and user_id != session.user_id:}}
+                                    <th>
+                                        <div id="friend-list-modal" style="width: 30%" class="modal center">
+                                            <div class="modal-content">
+                                                <h5 id="friend-list-modal-header">{{=actual_handle}}{{=T("'s Friend List")}}</h5>
+                                                <div id="friend-list"></div>
+                                            </div>
+                                        </div>
+                                        <button id="friend-list-button" class="tooltipped btn-floating btn-large waves-effect waves-light purple" data-position="bottom" data-delay="50" data-tooltip="{{=T('Friend List')}}" data-user-id="{{=user_id}}">
+                                            <i class="fa fa-users fa-3x"></i>
+                                        </button>
+                                    </th>
                                     {{pass}}
                                 </tr>
                             </table>

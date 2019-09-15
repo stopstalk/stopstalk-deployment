@@ -603,6 +603,30 @@
             }
         });
 
+        $('#friend-list-modal').modal();
+
+        $('#friend-list-button').click(function() {
+            var $this = $(this);
+            if (isLoggedIn) {
+                $.ajax({
+                    url: getFriendListUrl,
+                    method: 'GET',
+                    data: {'user_id': $this.data('user-id')},
+                    success: function(response) {
+                        $('#friend-list').html(response['table']);
+                        $('#friend-list-modal').modal('open');
+                    },
+                    error: function(err) {
+                        $.web2py.flash('Something went wrong');
+                    }
+                }).done(function(response) {
+                    $('.tooltipped').tooltip();
+                })
+            } else {
+                $.web2py.flash('Log in to see friend list.');
+            }
+        });
+
         getSolvedUnsolvedProblems();
 
         setEditorialVoteEventListeners();
@@ -632,7 +656,7 @@
             e.preventDefault();
         });
 
-        $('.friends-button').click(function() {
+        $(document).on('click', '.friends-button', function() {
             var thisButton = $(this),
                 userID = thisButton.attr('data-user-id'),
                 buttonType = thisButton.attr('data-type'),
@@ -651,6 +675,7 @@
                         method: 'POST',
                         url: '/default/mark_friend/' + userID
                     }).done(function(response) {
+                        $('.tooltipped').tooltip();
                         $.web2py.flash(response);
                     }).error(function(httpObj, textStatus) {
                         thisButton.removeClass('black');
@@ -674,8 +699,7 @@
                     method: 'POST',
                     url: '/default/unfriend/' + userID
                 }).done(function(response) {
-                    child.removeClass('fa-user-times');
-                    child.addClass('fa-user-plus');
+                    $('.tooltipped').tooltip();
                     $.web2py.flash(response);
                 }).error(function(httpObj, textStatus) {
                     $.web2py.flash("[" + httpObj.status + "]: Unexpected error occurred");
