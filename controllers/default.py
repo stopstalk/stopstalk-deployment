@@ -916,7 +916,7 @@ def leaderboard():
        specific_country == False:
         current.REDIS_CLIENT.set("global_leaderboard_cache",
                                  json.dumps(users),
-                                 ex=5 * 60 * 60)
+                                 ex=1 * 60 * 60)
 
     return dict(users=users, logged_in_row=logged_in_row)
 

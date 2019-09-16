@@ -84,7 +84,7 @@ class Logger:
                                   site,
                                   message)
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def concurrent_submission_retrieval_handler(action, user_id, custom):
     redis_key = "ongoing_submission_retrieval_"
     redis_key += "custom_user_" if custom else "user_"
@@ -100,7 +100,7 @@ def concurrent_submission_retrieval_handler(action, user_id, custom):
     elif action == "DEL":
         current.REDIS_CLIENT.delete(redis_key)
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def populate_uva_problems():
     global uva_problem_dict
 
@@ -108,7 +108,7 @@ def populate_uva_problems():
     uvaproblems = uvadb(ptable).select(ptable.problem_id, ptable.title)
     uva_problem_dict = dict([(x.problem_id, x.title) for x in uvaproblems])
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def flush_problem_stats():
 
     global problem_solved_stats
@@ -230,7 +230,7 @@ VALUES %s
     # Flush the actual dict
     problem_solved_stats = {}
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def process_solved_counts(problem_link, problem_name, status, user_id, custom):
     if problem_solved_stats.has_key(problem_link) is False:
         # [solved_submissions, total_submissions, user_ids, custom_user_ids]
@@ -245,7 +245,7 @@ def process_solved_counts(problem_link, problem_name, status, user_id, custom):
     if len(problem_solved_stats) > 100:
         flush_problem_stats()
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def get_submissions(user_id,
                     handle,
                     stopstalk_handle,
@@ -306,7 +306,7 @@ def get_submissions(user_id,
 
     return submission_count
 
-# ----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def new_handle_not_found(site, site_handle):
     """
         Add this handle to the invalid_handle table
@@ -318,8 +318,32 @@ def new_handle_not_found(site, site_handle):
     metric_handlers[site.lower()]["new_invalid_handle"].increment_count("total", 1)
     db.invalid_handle.insert(site=site, handle=site_handle)
 
-# ----------------------------------------------------------------------------
-def update_stopstalk_rating(user_id, custom):
+# ------------------------------------------------------------------------------
+def reorder_leaderboard_data(data):
+    """
+        @param data (List of List): Each item represent a row in global leaderboard
+
+        @return (List of List): Re-order rows according to rating and assigned ranks
+    """
+    result = []
+    rank = 1
+
+    data = sorted(data, key=lambda x: x[3], reverse=True)
+    for row in data:
+        result.append((row[0],
+                       row[1],
+                       row[2],
+                       row[3],
+                       row[4],
+                       row[5],
+                       row[6],
+                       rank))
+        rank += 1
+
+    return result
+
+# ------------------------------------------------------------------------------
+def update_stopstalk_rating(user_id, stopstalk_handle, custom):
     atable = db.auth_user
     cftable = db.custom_friend
 
@@ -344,9 +368,8 @@ def update_stopstalk_rating(user_id, custom):
     final_rating = utilities.get_stopstalk_user_stats(user_submissions)["rating_history"]
     final_rating = dict(final_rating)
     today = str(datetime.datetime.now().date())
-    current_rating = sum(final_rating[today])
-
-    update_params = dict(stopstalk_rating=int(current_rating))
+    current_rating = int(sum(final_rating[today]))
+    update_params = dict(stopstalk_rating=current_rating)
     if custom:
         cftable(user_id).update_record(**update_params)
     else:
@@ -354,7 +377,25 @@ def update_stopstalk_rating(user_id, custom):
 
     db.commit()
 
-# ----------------------------------------------------------------------------
+    # Update global leaderboard cache
+    current_value = current.REDIS_CLIENT.get("global_leaderboard_cache")
+    if current_value is None:
+        # Global leaderboard cache not present
+        return
+
+    import json
+    current_value = json.loads(current_value)
+    for row in current_value:
+        if row[1] == stopstalk_handle:
+            row[3] = current_rating
+            current_value = reorder_leaderboard_data(current_value)
+            current.REDIS_CLIENT.set("global_leaderboard_cache",
+                                     json.dumps(current_value),
+                                     ex=1 * 60 * 60)
+            return
+
+
+# ------------------------------------------------------------------------------
 def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codechef_retrieval=False):
     """
         Retrieve submissions that are not already in the database
@@ -523,13 +564,13 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
     # Keep committing the updates to the db to avoid lock wait timeouts
     db.commit()
     if total_submissions_retrieved > 0:
-        update_stopstalk_rating(record.id, custom)
+        update_stopstalk_rating(record.id, record.stopstalk_handle, custom)
 
     concurrent_submission_retrieval_handler("DEL", record.id, custom)
     total_retrieval_time = time.time() - stopstalk_retrieval_start_time
     metric_handlers["overall"]["just_stopstalk_code_time"].add_to_list("list", total_retrieval_time - sites_retrieval_timings)
 
-# ----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def new_users():
     """
         Get the user_ids and custom_user_ids whose any of the last_retrieved
@@ -574,7 +615,7 @@ def new_users():
 
     return (users, cusers)
 
-# ----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def daily_retrieve():
     """
         Get the user_ids and custom_user_ids for daily retrieval
@@ -595,7 +636,7 @@ def daily_retrieve():
 
     return (registered_users, custom_users)
 
-# ----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def re_retrieve():
     """
         Get the user_ids and custom_user_ids whose retrieval was
@@ -625,7 +666,7 @@ def re_retrieve():
 
     return (users, custom_users)
 
-# ----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def specific_users():
     """
         Get the user_ids and custom_user_ids whose retrieval was
@@ -643,7 +684,7 @@ def specific_users():
         users.extend([atable(user_id) for user_id in user_ids])
     return (users, custom_users)
 
-# ----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def refreshed_users():
     """
         Get the user_ids and custom_user_ids who requested for updates
@@ -669,7 +710,7 @@ def refreshed_users():
 
     return (users, custom_users)
 
-# ----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def codechef_new_retrievals():
     query = (cftable.codechef_handle != "") & \
             (cftable.codechef_lr == current.INITIAL_DATE)
@@ -744,4 +785,4 @@ if __name__ == "__main__":
         sql_query = "%s %s;" % (insert_query, ",".join(failed_user_retrievals))
         db.executesql(sql_query)
 
-# END =========================================================================
+# END ==========================================================================
