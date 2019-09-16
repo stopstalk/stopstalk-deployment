@@ -1,1 +1,3 @@
-js/appjs/layout.js
+js/appjs/user/profile.js
+js/appjs/google_analytics.js
+js/appjs/default/friends.js

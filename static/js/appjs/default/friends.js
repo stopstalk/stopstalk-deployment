@@ -20,6 +20,7 @@
                     method: 'POST',
                     url: '/default/mark_friend/' + userID
                 }).done(function(response) {
+                    $('.tooltipped').tooltip();
                     $.web2py.flash(response);
                 });
             } else if (buttonType == 'unfriend') {
@@ -34,6 +35,7 @@
                     method: 'POST',
                     url: '/default/unfriend/' + userID
                 }).done(function(response) {
+                    $('.tooltipped').tooltip();
                     $.web2py.flash(response);
                 });
             }
