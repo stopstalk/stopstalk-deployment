@@ -68,7 +68,7 @@ class Logger:
             @param custom (Boolean): If the user is a custom user or not
         """
         self.stopstalk_handle = stopstalk_handle
-        self.custom_str = "CUS" if custom else ""
+        self.custom_str = " CUS" if custom else ""
 
     # --------------------------------------------------------------------------
     def log(self, site, message):
@@ -78,11 +78,23 @@ class Logger:
             @param site (String): Site name of the current logline
             @param message (String): Actual message to be logged
         """
-        print "%s %s %s %s %s" % (str(datetime.datetime.now()),
+        print "%s %s%s %s %s" % (str(datetime.datetime.now()),
                                   self.stopstalk_handle,
                                   self.custom_str,
                                   site,
                                   message)
+
+    # --------------------------------------------------------------------------
+    def generic_log(self, message):
+        """
+            Print the log message with the given message
+
+            @param message (String): Actual message to be logged
+        """
+        print "%s %s%s %s" % (str(datetime.datetime.now()),
+                               self.stopstalk_handle,
+                               self.custom_str,
+                               message)
 
 # ------------------------------------------------------------------------------
 def concurrent_submission_retrieval_handler(action, user_id, custom):
@@ -381,7 +393,7 @@ def update_stopstalk_rating(user_id, stopstalk_handle, custom):
     current_value = current.REDIS_CLIENT.get("global_leaderboard_cache")
     if current_value is None:
         # Global leaderboard cache not present
-        return
+        return current_rating
 
     import json
     current_value = json.loads(current_value)
@@ -392,7 +404,7 @@ def update_stopstalk_rating(user_id, stopstalk_handle, custom):
             current.REDIS_CLIENT.set("global_leaderboard_cache",
                                      json.dumps(current_value),
                                      ex=1 * 60 * 60)
-            return
+            return current_rating
 
 
 # ------------------------------------------------------------------------------
@@ -510,7 +522,6 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
                 nrtable_record.update({site_delay: 100000})
 
     total_submissions_retrieved = 0
-    all_submissions = []
     for submissions in list_of_submissions:
         site = submissions[0]
         lower_site = site.lower()
@@ -521,7 +532,6 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
                                             submissions[1],
                                             site,
                                             custom)
-        all_submissions.extend(submissions[1])
         total_submissions_retrieved += submissions_count
         if retrieval_type == "daily_retrieve" and \
            site not in skipped_retrieval and \
@@ -564,7 +574,12 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
     # Keep committing the updates to the db to avoid lock wait timeouts
     db.commit()
     if total_submissions_retrieved > 0:
-        update_stopstalk_rating(record.id, record.stopstalk_handle, custom)
+        log_message = "Rating updated from %f to " % record.stopstalk_rating
+        new_rating = update_stopstalk_rating(record.id,
+                                             record.stopstalk_handle,
+                                             custom)
+        log_message += str(new_rating)
+        logger.generic_log(log_message)
 
     concurrent_submission_retrieval_handler("DEL", record.id, custom)
     total_retrieval_time = time.time() - stopstalk_retrieval_start_time
