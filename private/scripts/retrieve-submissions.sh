@@ -15,7 +15,7 @@ for i in $(seq 0 $[$total_iterations - 1])
 do
     cmd="$python_path $web2py_file -S stopstalk -M -R $script_file -A daily_retrieve $total_iterations $i"
     echo $cmd
-    eval $cmd
+    /home/www-data/web2py/applications/stopstalk/exit_code_handler.sh "$cmd"
 
     if [ $i != $[$total_iterations - 1] ]
     then
