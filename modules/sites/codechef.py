@@ -118,7 +118,7 @@ class Profile(object):
 
         try:
             tags = BeautifulSoup(response["tags"], "lxml").text
-            tags = tags.split(" ")
+            tags = [x.strip(",") for x in tags.split(" ")]
             db = current.db
             ptable = db.problem
             row = db(ptable.link == problem_link).select().first()
