@@ -47,7 +47,7 @@ tags_mapping = {("Easy",): ("Easy", "easy", "simple", "Introduction", "Fundament
                 ("Constructive Algorithms",): ("constructive algorithms", "Algorithms", "algorithm", "Constructive Algorithms"),
                 ("Greedy",): ("greedy", "Greedy"),
                 ("Sorting",): ("sortings", "sorting", "Sorting"),
-                ("Math",): ("math", "maths", "Math", "simple-math", "simple-math-1", "simple-maths", "Simple-math", "ProjectEuler+", "Mathematics", "basic-math", "Algebra", "Simple-math", "basic-maths", "mathematics", "matrices", "arithmetic"),
+                ("Math",): ("math", "maths", "Math", "simple-math", "simple-math-1", "simple-maths", "Simple-math", "ProjectEuler+", "Mathematics", "basic-math", "Algebra", "basic-maths", "mathematics", "matrices", "arithmetic"),
                 ("Number Theory",): ("number theory", "number-theory", "Number Theory"),
                 ("Geometry",): ("Geometry", "geometry"),
                 ("Combinatorics",): ("Combinatorics", "combinatorics", "combinations"),
@@ -89,21 +89,23 @@ tags_mapping = {("Easy",): ("Easy", "easy", "simple", "Introduction", "Fundament
                 ("Array",): ("array", "suffix-array", "Suffix Arrays", "Arrays", "arraysum", "Subarrays", "subarray", "Arrays & Hashes"),
                 ("Artificial Intelligence",): ("Artificial Intelligence",)}
 
-problems = db(ptable).select()
-#untagged = {}
+problems = db(ptable).select(ptable.id, ptable.tags)
+untagged = {}
 
 for problem in problems:
     if problem.tags == "['-']":
         continue
+
     current_set = set([])
-#    this_tags = set(eval(problem.tags))
+    this_tags = set(eval(problem.tags))
 
     for key in tags_mapping:
         for possibility in tags_mapping[key]:
             if problem.tags.__contains__("'" + possibility + "'"):
-#                this_tags.remove(possibility)
+                this_tags.remove(possibility)
                 for final_tag in key:
                     current_set.add(final_tag)
+
     flag = False
 
     for final_tag in current_set:
@@ -115,13 +117,13 @@ for problem in problems:
     if flag:
         print problem.id, problem.tags, "-->", current_set
 
-"""
     for final_tag in this_tags:
         if untagged.has_key(final_tag):
             untagged[final_tag] += 1
         else:
             untagged[final_tag] = 1
 
+print "\n\n\n=========================== Untagged ===========================\n"
+
 for a, b in sorted(untagged.items(), key=lambda (k, v): (v, k), reverse=True):
     print a, b
-"""
