@@ -123,7 +123,9 @@ for problem in problems:
         else:
             untagged[final_tag] = 1
 
+db.commit()
+
 print "\n\n\n=========================== Untagged ===========================\n"
 
 for a, b in sorted(untagged.items(), key=lambda (k, v): (v, k), reverse=True):
-    print a, b
+    print unicode(a), unicode(b)
