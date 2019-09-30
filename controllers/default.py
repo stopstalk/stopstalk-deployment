@@ -851,9 +851,20 @@ def leaderboard():
         aquery &= (atable.institute == institute)
 
     if request.vars.has_key("country") and request.vars["country"]:
-        heading = "StopStalk Leaderboard - " + reverse_country_mapping[request.vars["country"]]
+        country = None
+        if request.vars["country"] not in reverse_country_mapping:
+            if request.vars["country"] in current.all_countries:
+                country = request.vars["country"]
+            else:
+                session.flash = "Invalid country!"
+                redirect(URL("default", "index"))
+                return
+        else:
+            country = reverse_country_mapping[request.vars["country"]]
+
+        heading = "StopStalk Leaderboard - " + country
         specific_country = True
-        aquery &= (atable.country == reverse_country_mapping[request.vars["country"]])
+        aquery &= (atable.country == country)
 
     if request.extension == "html":
         return dict(heading=heading,
