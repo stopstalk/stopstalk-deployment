@@ -1,3 +1,5 @@
+# encoding=utf8
+
 """
     Copyright (c) 2015-2019 Raj Patel(raj454raj@gmail.com), StopStalk
 
