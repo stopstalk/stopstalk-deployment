@@ -137,8 +137,8 @@ var initTooltips = function() {
         var cacheValue = localStorage.getItem("lastShowedProblemDifficulty");
         if (!isLoggedIn ||
             (cacheValue &&
-             (Date.now() - cacheValue < 24 * 60 * 60 * 1000) && !explicitClick)) {
-            // Modal showed less than 24 hours before;
+             (Date.now() - cacheValue < 48 * 60 * 60 * 1000) && !explicitClick)) {
+            // Modal showed less than 48 hours before;
             return;
         }
         if(explicitClick) $('#problem-difficulty-modal-form').trigger('reset');
