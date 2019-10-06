@@ -60,12 +60,13 @@ def add_custom_friend():
     atable = db.auth_user
     cftable = db.custom_friend
 
-    stopstalk_handle = post_vars["stopstalk_handle"]
+    stopstalk_handle = "cus_" + post_vars["stopstalk_handle"]
     # Modify (Prepare) this dictionary for inserting it again
     current_row = json.loads(post_vars["row"])
     original_handle = current_row["stopstalk_handle"]
 
     if not utilities.is_valid_stopstalk_handle(original_handle):
+        # @ToDo: Change the message when cus_ is the reason of invalid handle
         session.flash = T("Expected alphanumeric (Underscore allowed)")
         redirect(URL("user", "profile", args=original_handle))
         return
@@ -1036,7 +1037,8 @@ def custom_friend():
 
     # Set the hidden field
     form.vars.user_id = session.user_id
-    form.process(onvalidation=current.sanitize_fields)
+    form.process(onvalidation=[current.sanitize_fields,
+                               utilities.prepend_custom_identifier])
 
     if form.accepted:
         session.flash = T("Submissions will be added in some time")
