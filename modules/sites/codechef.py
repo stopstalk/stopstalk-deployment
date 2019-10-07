@@ -199,29 +199,9 @@ class Profile(object):
                  "data": cookoff_contest_data},
                 {"title": "CodeChef Lunchtime",
                  "data": ltime_contest_data}]
-
+    
     # --------------------------------------------------------------------------
-    def __validate_handle(self):
-        """
-            Make an API request to Codechef to see if a user exists
-        """
-
-        response = get_request("%s/users/%s" % (CODECHEF_API_URL, self.handle),
-                               headers={"User-Agent": user_agent,
-                                        "Authorization": "Bearer %s" % self.access_token},
-                               timeout=10,
-                               is_daily_retrieval=self.is_daily_retrieval)
-        if response in REQUEST_FAILURES:
-            return response
-
-        # User was not found in Codechef database
-        json_data = response.json()
-        if json_data["result"]["data"]["code"] == 9003:
-            return NOT_FOUND
-        else:
-            return "VALID_HANDLE"
-
-    # --------------------------------------------------------------------------
+    @staticmethod
     def __get_access_token(self):
         """
             Get CodeChef API access_token from the database
@@ -252,8 +232,30 @@ class Profile(object):
                                      ex=TTL_TIME)
             return access_token
         else:
-            print "Error requesting CodeChef API for access token"
+            print("Error requesting CodeChef API for access token")
             return
+
+    # --------------------------------------------------------------------------
+    @staticmethod
+    def __validate_handle(self):
+        """
+            Make an API request to Codechef to see if a user exists
+        """
+
+        response = get_request("%s/users/%s" % (CODECHEF_API_URL, self.handle),
+                               headers={"User-Agent": user_agent,
+                                        "Authorization": "Bearer %s" % self.access_token},
+                               timeout=10,
+                               is_daily_retrieval=self.is_daily_retrieval)
+        if response in REQUEST_FAILURES:
+            return response
+
+        # User was not found in Codechef database
+        json_data = response.json()
+        if json_data["result"]["data"]["code"] == 9003:
+            return NOT_FOUND
+        else:
+            return "VALID_HANDLE"
 
     # --------------------------------------------------------------------------
     def __get_problem_link(self, contest_code, problem_code):
@@ -309,7 +311,7 @@ class Profile(object):
                 elif status == "RTE":
                     status = "RE"
                 else:
-                    print "*****************", status
+                    print("*****************", status)
                     status = "OTH"
                 language = submission["language"]
                 view_link = "%s/viewsolution/%d" % (CODECHEF_SITE_URL,
@@ -357,14 +359,14 @@ class Profile(object):
         str_init_time = time.strptime(str(current.INITIAL_DATE),
                                       "%Y-%m-%d %H:%M:%S")
 
-        self.access_token = self.__get_access_token()
+        self.access_token = Profile.__get_access_token()
         if self.access_token is None:
-            print "Access token found none"
+            print("Access token found none")
             return SERVER_FAILURE
 
         # Test for invalid handles
         if  last_retrieved == str_init_time:
-            response = self.__validate_handle()
+            response = Profile.__validate_handle()
             if response in REQUEST_FAILURES:
                 return response
 

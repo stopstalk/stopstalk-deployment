@@ -21,3 +21,4 @@
 .sass-cache
 dump.rdb
 .DS_Store
+.vscode
