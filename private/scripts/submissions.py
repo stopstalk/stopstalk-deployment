@@ -573,7 +573,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
 
     # Keep committing the updates to the db to avoid lock wait timeouts
     db.commit()
-    if total_submissions_retrieved > 0:
+    if total_submissions_retrieved > 0 and not custom:
         log_message = "Rating updated from %f to " % record.stopstalk_rating
         new_rating = update_stopstalk_rating(record.id,
                                              record.stopstalk_handle,
