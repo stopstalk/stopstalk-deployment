@@ -126,7 +126,7 @@ if __name__ == "__main__":
         last_custom_user_id = db(cftable).select(orderby=~cftable.id,
                                                  limitby=(0, 1)).first().id
 
-        compute_group_ratings(last_custom_user_id, True)
+#        compute_group_ratings(last_custom_user_id, True)
         compute_group_ratings(last_user_id, False)
         current.REDIS_CLIENT.delete("global_leaderboard_cache")
     elif sys.argv[1] == "single":
