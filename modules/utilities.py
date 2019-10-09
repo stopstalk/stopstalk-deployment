@@ -60,6 +60,11 @@ def init_metric_handlers(log_to_redis):
                                                                lower_site,
                                                                log_to_redis)
 
+    metric_handlers["overall"] = {}
+    metric_handlers["overall"]["just_stopstalk_code_time"] = MetricHandler("just_stopstalk_code_time",
+                                                                           "average",
+                                                                           "overall",
+                                                                           log_to_redis)
     return metric_handlers
 
 
@@ -125,7 +130,7 @@ def get_next_problem_to_suggest(user_id, problem_id=None):
         if len(final_set) != 0:
             import random
             next_problem_id = random.sample(sorted(list(final_set),
-                                                   reverse=True)[:30],
+                                                   reverse=True)[:15],
                                             1)[0]
             precord = ptable(next_problem_id)
             result = "success"
