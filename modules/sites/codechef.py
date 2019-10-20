@@ -21,7 +21,10 @@
 """
 
 from urllib import urlencode
-from .init import *
+# from .modinit import *
+# from .init import *
+import requests
+from bs4 import BeautifulSoup
 
 PER_PAGE_LIMIT = 20
 CODECHEF_API_URL = "https://api.codechef.com"
@@ -63,73 +66,46 @@ class Profile(object):
         return (Profile.site_name in current.REDIS_CLIENT.smembers("disabled_retrieval"))
 
     # --------------------------------------------------------------------------
+
     @staticmethod
-    def get_tags(problem_link):
+    def get_problem_details(problem_link):
         """
-            Get tags given a problem link
-
-            @param problem_link (String): Problem URL
-            @return (List): List of tags for the Problem
+        
+        get a problem link and return editorial link and tags
+        
+        
+        :param problem_link: 
+        :return: dict
         """
-
-        url = problem_link.split("/")
-        url = url[2:]
-        url.insert(1, "api/contests")
-        if len(url) == 4:
-            url.insert(2, "PRACTICE")
-        url = "https://" + "/".join(url)
-
+        all_tags = []
+        editorial_link = None
+        url = problem_link.replace("https://www.codechef.com/", "https://www.codechef.com/api/contests/")
+        url = url + "?v=1554915627060"
         response = get_request(url, headers={"User-Agent": user_agent})
         if response in REQUEST_FAILURES:
             # @ToDo: Need to blacklist 404 urls also
             return ["-"]
-
-        t = response.json()
-        all_tags = []
+        response = response.json()
         try:
-            tags = t["tags"]
+            tags = response["tags"]
             all_as = BeautifulSoup(str(tags), "lxml").find_all("a")
             for i in all_as:
                 all_tags.append(i.contents[0].strip())
-            return all_tags
-        except KeyError:
-            return all_tags
-
-    # --------------------------------------------------------------------------
-    @staticmethod
-    def get_editorial_link(problem_link):
-        """
-            Get editorial link given a problem link
-
-            @param problem_link (String): Problem URL
-            @return (String/None): Editorial URL
-        """
-        editorial_link = None
-        api_link = problem_link.replace("https://www.codechef.com/", "https://www.codechef.com/api/contests/")
-        response = get_request(api_link + "?v=1554915627060",
-                               headers={"User-Agent": user_agent})
-        if response in REQUEST_FAILURES:
-            return None
-        response = response.json()
-        try:
-            editorial_link = response["editorial_url"]
-        except KeyError:
-            editorial_link = None
-
-        try:
-            tags = BeautifulSoup(response["tags"], "lxml").text
-            tags = [x.strip(",") for x in tags.split(" ")]
             db = current.db
             ptable = db.problem
             row = db(ptable.link == problem_link).select().first()
             today = datetime.datetime.now().strftime("%Y-%m-%d")
             if row:
-                row.update_record(tags=str(tags),
+                row.update_record(tags=str(all_tags),
                                   tags_added_on=today)
-        except Exception as e:
+        except KeyError:
             pass
+        try:
+            editorial_link = response["editorial_url"]
+        except Exception:
+            return {"tags": all_tags, "editorial_link": editorial_link}
+        return {"tags": all_tags, "editorial_link": editorial_link}
 
-        return editorial_link
 
 
     # -------------------------------------------------------------------------
@@ -386,3 +362,7 @@ class Profile(object):
         return self.submissions
 
 # =============================================================================
+if __name__ == '__main__':
+    p = Profile()
+    p.get_tags("https://www.codechef.com/problems/DEMTREE")
+    p.get_problem_details(problem_link="https://www.codechef.com/problems/DEMTREE")
