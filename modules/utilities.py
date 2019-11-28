@@ -79,6 +79,115 @@ def get_boto3_client():
                   aws_secret_access_key=current.s3_secret_access_key)
 
 # -----------------------------------------------------------------------------
+def merge_duplicate_problems(original_id, duplicate_id):
+    """
+        Merge two duplicate problems and remove the duplicate problem from database
+
+        @param original_id(Integer): problem_id of original problem
+        @param duplicate_id(Integer): problem_id of duplicate problem
+    """
+    if original_id == duplicate_id:
+        return
+
+
+    def _merge_user_ids(original_user_ids, duplicate_user_ids):
+        if original_user_ids is None:
+            original_user_ids = ""
+        if duplicate_user_ids is None:
+            duplicate_user_ids = ""
+        final_list = list(set(original_user_ids.split(","))
+                            .union(set(duplicate_user_ids.split(","))))
+        return ",".join(filter(lambda x:  x != "", final_list))
+
+    db = current.db
+    ptable = db.problem
+    stable = db.submission
+    sttable = db.suggested_tags
+    uetable = db.user_editorials
+    pdtable = db.problem_difficulty
+
+    original_row = ptable(original_id)
+    duplicate_row = ptable(duplicate_id)
+
+    # Editorial link -----------------------------------------------------------
+    print "---------------------"
+    print original_row.editorial_link, duplicate_row.editorial_link
+    if original_row.editorial_link in ["", None] and \
+       duplicate_row.editorial_link not in ["", None]:
+        original_row.update({"editorial_link": duplicate_row.editorial_link})
+    print original_row.editorial_link
+
+    # Problem tag --------------------------------------------------------------
+    print "---------------------"
+    original_tags = eval(original_row.tags) if original_row.tags != "['-']" else []
+    print "original_tags", original_tags
+    duplicate_tags = eval(duplicate_row.tags) if duplicate_row.tags != "['-']" else []
+    print "duplicate_tags", duplicate_tags
+    original_tags = list(set(original_tags).union(set(duplicate_tags)))
+    if len(original_tags) != 0:
+        original_row.update({"tags": str(original_tags)})
+    print "final_tags", original_tags
+
+    # Submission table ---------------------------------------------------------
+    print "---------------------"
+    updated = db(stable.problem_id == duplicate_id).update(problem_id=original_id)
+    print "Updated %d submission records" % updated
+
+    # Problem user_ids ---------------------------------------------------------
+    original_row.update({
+        "user_ids": _merge_user_ids(original_row.user_ids,
+                                    duplicate_row.user_ids)
+    })
+    original_row.update({
+        "custom_user_ids": _merge_user_ids(original_row.custom_user_ids,
+                                           duplicate_row.custom_user_ids)
+    })
+
+    db.commit()
+
+    # total_submissions, solved_submissions ------------------------------------
+    srows = db(stable.problem_id == original_id).select(stable.status)
+    accepted = len(filter(lambda x: x["status"] == "AC", srows))
+    print "---------------------"
+    print original_row.solved_submissions, original_row.total_submissions
+    print "accepted", accepted, "total_submissions", len(srows)
+    original_row.update({"solved_submissions": accepted,
+                         "total_submissions": len(srows)})
+
+    # suggested tags -----------------------------------------------------------
+    for strow in db(sttable.problem_id == duplicate_id).select():
+        query = (sttable.problem_id == original_id) & \
+                (sttable.user_id == strow.user_id)
+        if db(query).select().first() is None:
+            strow.update(problem_id=original_id)
+        else:
+            strow.delete_record()
+
+    # user editorials ----------------------------------------------------------
+    for uerow in db(uetable.problem_id == duplicate_id).select():
+        query = (uetable.problem_id == original_id) & \
+                (uetable.user_id == uerow.user_id)
+        if db(query).select().first() is None:
+            uerow.update(problem_id=original_id)
+        else:
+            uerow.delete_record()
+
+    # problem difficulty -------------------------------------------------------
+    for pdrow in db(pdtable.problem_id == duplicate_id).select():
+        query = (pdtable.problem_id == original_id) & \
+                (pdtable.user_id == pdrow.user_id)
+        if db(query).select().first() is None:
+            pdrow.update(problem_id=original_id)
+        else:
+            pdrow.delete_record()
+
+    original_row.update_record()
+    duplicate_row.delete_record()
+
+    db.commit()
+    return
+
+# -----------------------------------------------------------------------------
 def get_solved_problems(user_id, custom=False):
     """
         Get the solved and unsolved problems of a user
