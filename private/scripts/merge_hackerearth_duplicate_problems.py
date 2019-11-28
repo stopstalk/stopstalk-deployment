@@ -124,8 +124,3 @@ for key in similar_problems:
                 values[tmp_val] = [item]
         find_pairs(values)
         print "__________________________________________________"
-        # print key
-        # all_set.add(tuple(sorted(values.keys())))
-        # print tuple(sorted(values.keys()))
-        # print "\n".join([x.link for x in similar_problems[key]])
-        # print key, [x.link for x in similar_problems[key]]
