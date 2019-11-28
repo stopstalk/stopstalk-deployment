@@ -32,6 +32,7 @@ Cases handled -
 import re
 import requests
 import utilities
+import datetime
 
 ptable = db.problem
 
@@ -103,6 +104,8 @@ for row in rows:
     else:
         similar_problems[key] = [row]
 
+print str(datetime.datetime.now()), "Starting to clean HackerEarth duplicates"
+
 all_set = set([])
 for key in similar_problems:
     if len(similar_problems[key]) > 1:
@@ -124,3 +127,5 @@ for key in similar_problems:
                 values[tmp_val] = [item]
         find_pairs(values)
         print "__________________________________________________"
+
+print str(datetime.datetime.now()), "End cleaning HackerEarth duplicates"
