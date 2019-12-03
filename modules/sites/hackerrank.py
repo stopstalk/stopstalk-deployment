@@ -180,7 +180,6 @@ class Profile(object):
             request_params["cursor"] = next_cursor
             response = get_request(url,
                                    params=request_params,
-                                   headers={"User-Agent": user_agent},
                                    is_daily_retrieval=is_daily_retrieval)
 
             if response in REQUEST_FAILURES:

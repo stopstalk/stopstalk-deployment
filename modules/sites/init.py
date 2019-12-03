@@ -67,6 +67,8 @@ def get_request(url, headers={}, timeout=current.TIMEOUT, params={}, is_daily_re
                                                 site,
                                                 is_daily_retrieval)
 
+    headers.update({"User-Agent": user_agent})
+
     i = 0
     while i < current.MAX_TRIES_ALLOWED:
         try:
