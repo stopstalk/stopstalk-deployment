@@ -159,8 +159,8 @@ class RetrievalTest:
         sites_with_download_functionality = ["CodeChef", "CodeForces"]
         assertion_hash = {
             "CodeChef": {
-                "view_link": "https://www.codechef.com/viewsolution/4530125",
-                "submission": '#include<stdio.h>\n#include<math.h>\n#include<string.h>\n#define g getchar_unlocked\nint prime[10000];\nint notprime[100000]={0};\nint z=0,i,j;\nint readnum()\n{\n\tint n=0;\n\tchar c=g();\n\twhile(c<\'0\'||c>\'9\')c=g();\n\twhile(c>=\'0\'&&c<=\'9\')n=10*n+c-\'0\',c=g();\n\treturn n;\n}\ninline void fastWrite(int a)\n{\n\tchar snum[20];\n\tint i=0;\n\tdo\n\t{\n\t\tsnum[i++]=a+48;\n\t\ta=a/10;\n\t}while(a!=0);\n\ti=i-1;\n\twhile(i>=0)\n\t\tputchar_unlocked(snum[i--]);\n\tputchar_unlocked(\'\\n\');\n}\nvoid seive()\n{\n\tnotprime[0]=1;\n\tnotprime[1]=1;\n\tfor(i=2;i<100000;i++)\n\t{\n\t\tif(notprime[i]==0)\n\t\t{\n\t\t\tprime[z++]=i;\n\t\t\tfor(j=i+i;j<100000;j+=i)\n\t\t\t\tnotprime[j]=1;\n\t\t}\n\t}\n\t \n}\nint main()\n{\n\tseive();\n\t/* for(i=0;i<1000;i++)\n\t   printf("%d ",prime[i]);\n\t   */\tint m,n,t,i,sq,flag;\n\t//scanf("%d",&t);\n\tt=readnum();\n\twhile(t--)\n\t{\n\t\t//scanf("%d%d",&m,&n);\n\t\tm=readnum();\n\t\tn=readnum();\n\t\tif(m<=2)\n\t\t{\n\t\t\tprintf("2\\n");\n\t\t\tm=3;\n\t\t}\n\t\telse if(m%2==0)\n\t\t\tm=m+1;\n\t\tfor(i=m;i<=n;i+=2)\n\t\t{\n\t\t\tflag=0;\n\t\t\tsq=sqrt(i);\n\t\t\tfor(j=1;prime[j]<=sq;j++)\n\t\t\t{\n\t\t\t\tif(i%prime[j]==0)\n\t\t\t\t{\n\t\t\t\t\tflag=1;\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t}\n\t\t\tif(flag==0)\n\t\t\t\tfastWrite(i);\n\t\t}\n\t}\n\treturn 0;\n}\n'
+                "view_link": "https://www.codechef.com/viewsolution/7047270",
+                "submission": '#include<stdio.h>\nint main() {\n    int t, i, flag;\n    char A, B, str[1000000];\n    scanf("%d", &t);\n    while(t--) {\n        scanf("%s", str);\n        A = str[0];\n        B = str[1];\n        flag = 1;\n        if(A == B) {\n            printf("NO\\n");\n            continue;\n        }\n\n        for(i = 2 ; str[i] ; i++) {\n            if(i&1 && str[i] == B);\n            else if(!(i&1) && str[i] == A);\n            else {\n                printf("NO\\n");\n                flag = 0;\n                break;\n            }\n        }\n        if(flag)\n            printf("YES\\n");\n    }\n    return 0;\n}\n'
             },
             "CodeForces": {
                 "view_link": "http://www.codeforces.com/contest/454/submission/7375767",
@@ -176,6 +176,7 @@ class RetrievalTest:
                 continue
 
             submission_content = P.download_submission(assertion_hash[site]["view_link"])
+ 
             if submission_content != assertion_hash[site]["submission"]:
                 raise RuntimeError(site + " download submission failed")
 
