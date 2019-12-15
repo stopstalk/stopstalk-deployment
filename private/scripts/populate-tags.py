@@ -131,4 +131,7 @@ db.commit()
 print "\n\n\n=========================== Untagged ===========================\n"
 
 for a, b in sorted(untagged.items(), key=lambda (k, v): (v, k), reverse=True):
-    print unicode(a), unicode(b)
+    try:
+        print unicode(a), unicode(b)
+    except UnicodeEncodeError:
+        print "UnicodeError for", a, b
