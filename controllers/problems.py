@@ -853,39 +853,6 @@ def search():
     return dict(table=table, generalized_tags=generalized_tags)
 
 # ----------------------------------------------------------------------------
-def _get_total_users(trending_problems,
-                     friends,
-                     cusfriends,
-                     start_date,
-                     end_date):
-
-    if friends == []:
-        friends = ["-1"]
-    if cusfriends == []:
-        cusfriends = ["-1"]
-
-    for problem in trending_problems:
-        sql = """
-                 SELECT COUNT(id)
-                 FROM `submission`
-                 WHERE ((problem_link = '%s')
-                   AND ((user_id IN (%s))
-                     OR (custom_user_id IN (%s)))
-                   AND  ((time_stamp >= '%s')
-                     AND (time_stamp <= '%s')))
-                 GROUP BY user_id, custom_user_id
-              """ % (problem["submission"]["problem_link"],
-                     ", ".join(friends),
-                     ", ".join(cusfriends),
-                     start_date,
-                     end_date)
-
-        res = db.executesql(sql)
-        problem["unique"] = len(res)
-
-    return trending_problems
-
-# ----------------------------------------------------------------------------
 @auth.requires_login()
 def friends_trending():
     friends, cusfriends = utilities.get_friends(session.user_id)
@@ -907,9 +874,7 @@ def friends_trending():
     query = (stable.time_stamp >= start_date) & \
             (stable.user_id.belongs(friends) | \
              stable.custom_user_id.belongs(custom_friends))
-    last_submissions = db(query).select(stable.problem_name,
-                                        stable.problem_link,
-                                        stable.problem_id,
+    last_submissions = db(query).select(stable.problem_id,
                                         stable.user_id,
                                         stable.custom_user_id)
 
@@ -929,9 +894,7 @@ def global_trending():
     # for trending problems
     start_date = str(today - datetime.timedelta(days=current.PAST_DAYS))
     query = (stable.time_stamp >= start_date)
-    last_submissions = db(query).select(stable.problem_name,
-                                        stable.problem_link,
-                                        stable.problem_id,
+    last_submissions = db(query).select(stable.problem_id,
                                         stable.user_id,
                                         stable.custom_user_id)
     trending_table = utilities.compute_trending_table(last_submissions,

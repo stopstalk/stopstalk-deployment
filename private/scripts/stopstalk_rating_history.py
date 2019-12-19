@@ -28,6 +28,10 @@
     python web2py.py -S stopstalk -M -R applications/stopstalk/private/scripts/stopstalk_rating_history.py -A complete
 """
 
+# ==============================================================================
+# DEPRECATED
+# ==============================================================================
+
 import sys
 import datetime
 import utilities
