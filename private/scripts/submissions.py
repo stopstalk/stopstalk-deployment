@@ -164,7 +164,6 @@ def flush_problem_stats():
             total_submissions=ptable.total_submissions + val[1]
         )
 
-        print problem_id, update_params
         db(ptable.id == problem_id).update(**update_params)
 
     # Flush the actual dict
