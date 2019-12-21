@@ -734,6 +734,23 @@ def materialize_form(form, fields):
     return main_div
 
 # -----------------------------------------------------------------------------
+def get_problem_details(problem_id):
+    redis_cache_key = "problem_details::" + str(problem_id)
+    pdetails = current.REDIS_CLIENT.get(redis_cache_key)
+    result = None
+    if pdetails is None:
+        ptable = current.db.problem
+        precord = ptable(problem_id)
+        result = {"name": precord.name, "link": precord.link}
+        current.REDIS_CLIENT.set(redis_cache_key,
+                                 json.dumps(result, separators=(",", ":")),
+                                 ex=1 * 60 * 60)
+    else:
+        result = json.loads(pdetails)
+
+    return result
+
+# -----------------------------------------------------------------------------
 def render_table(submissions, duplicates=[], user_id=None):
     """
         Create the HTML table from submissions
@@ -826,8 +843,9 @@ def render_table(submissions, duplicates=[], user_id=None):
             link_class, link_title = get_link_class(problem_id, user_id)
             pid_to_class[problem_id] = (link_class, link_title)
 
-        append(TD(problem_widget(submission.problem_name,
-                                 submission.problem_link,
+        problem_details = get_problem_details(submission.problem_id)
+        append(TD(problem_widget(problem_details["name"],
+                                 problem_details["link"],
                                  link_class,
                                  link_title,
                                  submission.problem_id)))
@@ -951,8 +969,9 @@ def compute_trending_table(submissions_list, table_type, user_id=None):
 
     problems_dict = {}
     for submission in submissions_list:
-        plink = submission.problem_link
-        pname = submission.problem_name
+        problem_details = get_problem_details(submission.problem_id)
+        plink = problem_details["link"]
+        pname = problem_details["name"]
         uid = submission.user_id
         cid = submission.custom_user_id
         problem_id = submission.problem_id

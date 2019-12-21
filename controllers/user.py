@@ -669,7 +669,6 @@ def get_stopstalk_user_stats():
 
     query = (stable["custom_user_id" if custom else "user_id"] == user_id)
     rows = db(query).select(stable.time_stamp,
-                            stable.problem_link,
                             stable.problem_id,
                             stable.status,
                             stable.site,

@@ -134,8 +134,8 @@ def flush_problem_stats():
 
     # Get the existing user_ids and custom_user_ids for taking union
     ptable = db.problem
-    query = (ptable.link.belongs(problem_solved_stats.keys()))
-    existing = db(query).select(ptable.link,
+    query = (ptable.id.belongs(problem_solved_stats.keys()))
+    existing = db(query).select(ptable.id,
                                 ptable.user_ids,
                                 ptable.custom_user_ids)
 
@@ -146,109 +146,41 @@ def flush_problem_stats():
             val[0] = set([int(x) for x in row.user_ids.split(",")])
         if row.custom_user_ids:
             val[1] = set([int(x) for x in row.custom_user_ids.split(",")])
-        existing_ids[row.link] = val
+        existing_ids[row.id] = val
 
-    solved_case = ""
-    total_case = ""
-    user_ids_case = ""
-    custom_user_ids_case = ""
+    def _comma_separated(values1, values2):
+        return ",".join(_stringify(values1.union(values2)))
 
-    def _build_when(link, value, column_name=None):
-        res = ""
-        if column_name:
-            res = "WHEN '%s' THEN %s + %d\n" % (link, column_name, value)
-        else:
-            value = ",".join(_stringify(value))
-            res = "WHEN '%s' THEN '%s'\n" % (link, value)
-        return res
 
-    to_be_inserted = set([])
-    to_be_updated = set([])
-    for link in problem_solved_stats:
-        val = problem_solved_stats[link]
-        try:
-            # val[2] = user_ids who solved the problem in this retrieval
-            # existing_ids[link][0] = user_ids who have already solved the problem
-            if val[2].issubset(existing_ids[link][0]) is False:
-                user_ids_case += _build_when(link,
-                                             val[2].union(existing_ids[link][0]))
+    for problem_id in problem_solved_stats:
+        val = problem_solved_stats[problem_id]
 
-            # val[3] = custom_user_ids who solved the problem in this retrieval
-            # existing_ids[link][1] = custom_user_ids who have already solved the problem
-            if val[3].issubset(existing_ids[link][1]) is False:
-                custom_user_ids_case += _build_when(link,
-                                                    val[3].union(existing_ids[link][1]))
+        update_params = dict(
+            user_ids=_comma_separated(val[2],
+                                      existing_ids[problem_id][0]),
+            custom_user_ids=_comma_separated(val[3],
+                                             existing_ids[problem_id][1]),
+            solved_submissions=ptable.solved_submissions + val[0],
+            total_submissions=ptable.total_submissions + val[1]
+        )
 
-            # Add to the CASE statement only if there is an update
-            if val[0]:
-                solved_case += _build_when(link, val[0], "solved_submissions")
-            total_case += _build_when(link, val[1], "total_submissions")
-            to_be_updated.add(link)
-        except KeyError:
-            # Problem not in `problem` table
-            to_be_inserted.add(link)
-
-    if len(to_be_updated):
-        non_empty_components = []
-        def _build_component(column_name, value):
-            if value:
-                non_empty_components.append("""
-%s = CASE link
-%s
-     ELSE %s END""" % (column_name, value, column_name))
-
-        _build_component("solved_submissions", solved_case)
-        _build_component("total_submissions", total_case),
-        _build_component("user_ids", user_ids_case),
-        _build_component("custom_user_ids", custom_user_ids_case)
-
-        sql_query = """
-UPDATE problem
-SET
-%s
-WHERE link in (%s);
-                    """ % (",".join(non_empty_components),
-                           ",".join(["'" + x + "'" for x in to_be_updated]))
-
-        db.executesql(sql_query)
-
-    if len(to_be_inserted):
-        sql_query = ""
-        today = datetime.datetime.now().strftime("%Y-%m-%d")
-        insert_value = ""
-        value_string = "(" + ",".join(["\"%s\""] * 8) + ",%s,%s)"
-        for plink in to_be_inserted:
-            val = problem_solved_stats[plink]
-            insert_value += value_string % (plink,
-                                            val[4],
-                                            "['-']",
-                                            "",
-                                            ",".join(_stringify(val[2])),
-                                            ",".join(_stringify(val[3])),
-                                            today,
-                                            today,
-                                            val[0],
-                                            val[1])
-            insert_value += ","
-
-        insert_value = insert_value[:-1]
-        insert_query = """
-INSERT INTO problem (link, name, tags, editorial_link, user_ids, custom_user_ids, tags_added_on, editorial_added_on, solved_submissions, total_submissions)
-VALUES %s
-                       """ % (insert_value)
-
-        db.executesql(insert_query)
+        db(ptable.id == problem_id).update(**update_params)
 
     # Flush the actual dict
     problem_solved_stats = {}
 
 # ------------------------------------------------------------------------------
-def process_solved_counts(problem_link, problem_name, status, user_id, custom):
-    if problem_solved_stats.has_key(problem_link) is False:
+def process_solved_counts(problem_id,
+                          problem_link,
+                          problem_name,
+                          status,
+                          user_id,
+                          custom):
+    if problem_id not in problem_solved_stats:
         # [solved_submissions, total_submissions, user_ids, custom_user_ids]
-        problem_solved_stats[problem_link] = [0, 0, set([]), set([]), problem_name]
+        problem_solved_stats[problem_id] = [0, 0, set([]), set([]), problem_name, problem_link]
 
-    value_list = problem_solved_stats[problem_link]
+    value_list = problem_solved_stats[problem_id]
     value_list[1] += 1
     if status == "AC":
         value_list[0] += 1
@@ -297,8 +229,6 @@ def get_submissions(user_id,
         submission_insert_dict = {
             "user_id": user_id if not custom else None,
             "custom_user_id": user_id if custom else None,
-            "problem_name": pname,
-            "problem_link": plink,
             "stopstalk_handle": stopstalk_handle,
             "site_handle": handle,
             "site": site,
@@ -310,7 +240,8 @@ def get_submissions(user_id,
             "view_link": submission[6]
         }
         stable.insert(**submission_insert_dict)
-        process_solved_counts(plink,
+        process_solved_counts(pid,
+                              plink,
                               pname,
                               submission[3],
                               user_id,
