@@ -907,7 +907,7 @@ def submissions():
     else:
         page = "1"
 
-    if int(page) > 10 and not auth.is_logged_in():
+    if int(page) > current.USER_PAGINATION_LIMIT and not auth.is_logged_in():
         session.flash = T("Please enter a valid page")
         redirect(URL("default", "index"))
         return
