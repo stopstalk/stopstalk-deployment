@@ -67,6 +67,6 @@ current.PROBLEMS_PER_PAGE = 15
 current.PAST_DAYS = 10
 
 # Number of pages to show for user submissions page
-current.USER_PAGINATION_LIMIT = 10
+current.USER_PAGINATION_LIMIT = 5
 
 # =============================================================================
