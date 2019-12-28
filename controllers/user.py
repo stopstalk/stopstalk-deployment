@@ -681,7 +681,7 @@ def get_stopstalk_user_stats():
         current.REDIS_CLIENT.set(redis_cache_key,
                                  json.dumps(result, separators=(",", ":")),
                                  ex=1 * 60 * 60)
-    else:
+    elif "rating_history" in result:
         del result["rating_history"]
 
     return result
