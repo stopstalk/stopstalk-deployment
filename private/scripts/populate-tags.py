@@ -134,4 +134,5 @@ for a, b in sorted(untagged.items(), key=lambda (k, v): (v, k), reverse=True):
     try:
         print unicode(a), unicode(b)
     except UnicodeEncodeError:
-        print "UnicodeError for", a, b
+        print "Can't print this tag"
+        pass
