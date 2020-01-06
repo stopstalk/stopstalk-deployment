@@ -649,7 +649,7 @@ def get_stopstalk_user_stats():
         calendar_data={}
     )
 
-    if user_id is None or custom is None:
+    if user_id in[None, ""] or custom in [None, ""]:
         return final_data
 
     user_id = int(user_id)
