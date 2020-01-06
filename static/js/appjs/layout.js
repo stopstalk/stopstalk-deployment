@@ -254,19 +254,12 @@ var initTooltips = function() {
 
         initProblemDifficultySubmitHandler();
 
-        if (showProblemDifficultyOnboarding === "True" &&
-            window.localStorage["lastShowedProblemDifficulty"] &&
-            loggedInUserId < thresholdUserId) {
-            $('.tap-target').tapTarget('open');
-        };
-
         $(document).on('click', '#explain-problem-difficulty', function() {
             if (!isLoggedIn) {
                 $.web2py.flash("Login to suggest problem difficulty!");
                 return;
             } else {
                 showProblemDifficultyOnboarding = "False";
-                $('.tap-target').tapTarget('close');
                 openProblemDifficultyModal(true);
                 $.ajax({
                     url: markReadURL,
