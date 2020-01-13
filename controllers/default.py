@@ -1359,6 +1359,9 @@ def search():
              (atable.last_name.contains(q)) | \
              (atable.stopstalk_handle.contains(q)))
 
+    if auth.is_logged_in() and session.user_id in STOPSTALK_ADMIN_USER_IDS:
+        query |= (atable.email.contains(q))
+
     # Search by profile site handle
     for site in current.SITES:
         field_name = site.lower() + "_handle"
