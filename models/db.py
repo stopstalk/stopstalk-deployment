@@ -80,6 +80,7 @@ response.form_label_separator = myconf.take('forms.separator')
 from gluon.tools import Auth, Service, PluginManager
 from datetime import datetime, timedelta
 import utilities
+from stopstalk_constants import *
 
 auth = Auth(db)
 service = Service()

@@ -10,7 +10,7 @@
 
 <h2><a href="{{=URL('problems', 'index', vars={'problem_id': problem_id})}}">{{=problem_name}}</a> | Editorial by <a href="{{=URL('user', 'profile', args=stopstalk_handle)}}">{{=stopstalk_handle}}</a></h2>
 <a id="all-editorials-button" class="btn btn-primary purple accent-4" href="{{=all_editorials_link}}">All Editorials</a>
-{{if auth.is_logged_in() and session.user_id == 1:}}
+{{if auth.is_logged_in() and session.user_id in STOPSTALK_ADMIN_USER_IDS:}}
   {{if ue_record.verification == "pending":}}
     <br/><br/>
     <button id="accept-user-editorial" data-editorial-id="{{=ue_record.id}}" class="btn btn-primary green white-text">Accept</button>

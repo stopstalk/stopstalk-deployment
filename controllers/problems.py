@@ -391,7 +391,13 @@ def editorials():
     atable = db.auth_user
     query = (uetable.problem_id == record.id)
     user_editorials = db(query).select(orderby=~uetable.added_on)
-    accepted_count = len(filter(lambda x: (x.verification == "accepted" or (auth.is_logged_in() and (x.user_id == session.user_id or session.user_id == 1))), user_editorials))
+    accepted_count = len(filter(lambda x: (x.verification == "accepted" or \
+                                           (auth.is_logged_in() and \
+                                            (x.user_id == session.user_id or \
+                                             session.user_id in STOPSTALK_ADMIN_USER_IDS)
+                                             )
+                                            ),
+                                user_editorials))
     if accepted_count == 0:
         if auth.is_logged_in():
             table_contents = T("No editorials found! Please contribute to the community by writing an editorial if you've solved the problem.")
@@ -460,7 +466,7 @@ def read_editorial():
     if ue_record is None:
         session.flash = "Invalid editorial URL"
         redirect(URL("default", "index"))
-    elif auth.is_logged_in() and session.user_id == 1:
+    elif auth.is_logged_in() and session.user_id in STOPSTALK_ADMIN_USER_IDS:
         # Admin user
         pass
     elif auth.is_logged_in() and session.user_id != ue_record.user_id and ue_record.verification != "accepted":
