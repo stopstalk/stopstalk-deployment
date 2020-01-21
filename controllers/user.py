@@ -1070,8 +1070,11 @@ def get_friend_list():
     table = TABLE(_class="bordered centered")
     tbody = TBODY()
 
+    user_records = db(atable.id.belongs(profile_friends)).select()
+    user_records = dict([(x.id, x) for x in user_records])
+
     for friend_id in profile_friends:
-        row = atable(friend_id)
+        row = user_records[friend_id]
 
         friend_name = " ".join([row.first_name.capitalize(), row.last_name.capitalize()])
         profile_url = URL("user", "profile",

@@ -361,7 +361,6 @@
 
     // ---------------------------------------------------------------------------------
     function drawPieChart(statuses) {
-        console.log(statuses);
         var numJSON = {'AC': 0,
                        'WA': 0,
                        'TLE': 0,
@@ -552,6 +551,35 @@
         });
     };
 
+    // ---------------------------------------------------------------------------------
+    var friendListModalHandler = function() {
+        $('#friend-list-modal').modal();
+        var $throbber = $("#view-submission-preloader").clone();
+        $throbber.attr('id', 'friendsListThrobber');
+        $('#friend-list').html($throbber);
+
+        $(document).on('click', '#friend-list-button', function() {
+            var $this = $(this);
+            if (isLoggedIn) {
+                $('#friend-list-modal').modal('open');
+                $.ajax({
+                    url: getFriendListUrl,
+                    method: 'GET',
+                    data: {'user_id': $this.data('user-id')},
+                    success: function(response) {
+                        $('#friend-list').html(response['table']);
+                    },
+                    error: function(err) {
+                        $.web2py.flash('Something went wrong');
+                        $('#friend-list').html("Something went wrong!");
+                    }
+                });
+            } else {
+                $.web2py.flash('Log in to see friend list.');
+            }
+        });
+    };
+
     $(document).ready(function() {
 
         if (totalSubmissions !== "0") {
@@ -603,29 +631,7 @@
             }
         });
 
-        $('#friend-list-modal').modal();
-
-        $('#friend-list-button').click(function() {
-            var $this = $(this);
-            if (isLoggedIn) {
-                $.ajax({
-                    url: getFriendListUrl,
-                    method: 'GET',
-                    data: {'user_id': $this.data('user-id')},
-                    success: function(response) {
-                        $('#friend-list').html(response['table']);
-                        $('#friend-list-modal').modal('open');
-                    },
-                    error: function(err) {
-                        $.web2py.flash('Something went wrong');
-                    }
-                }).done(function(response) {
-                    $('.tooltipped').tooltip();
-                })
-            } else {
-                $.web2py.flash('Log in to see friend list.');
-            }
-        });
+        friendListModalHandler();
 
         getSolvedUnsolvedProblems();
 
