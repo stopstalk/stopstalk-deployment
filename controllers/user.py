@@ -199,7 +199,7 @@ def update_details():
 
     atable = db.auth_user
     stable = db.submission
-    record = utilities.get_user_records(session.user_id)[session.user_id]
+    record = utilities.get_user_records([session.user_id], "id", "id", True)
 
     # Do not allow to modify stopstalk_handle and email
     atable.stopstalk_handle.writable = False
@@ -218,6 +218,7 @@ def update_details():
     form.vars.stopstalk_handle = record.stopstalk_handle
 
     if form.process(onvalidation=current.sanitize_fields).accepted:
+        current.REDIS_CLIENT.delete(utilities.get_user_record_cache_key(session.user_id))
         session.flash = T("User details updated")
 
         updated_sites = utilities.handles_updated(record, form)

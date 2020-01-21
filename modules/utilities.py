@@ -137,7 +137,7 @@ def get_user_records(record_values,
         result[_get_result_key(val)] = val
 
     if just_one_record:
-        return result.values()[0]
+        return result.values()[0] if len(result) else None
     else:
         return result
 
