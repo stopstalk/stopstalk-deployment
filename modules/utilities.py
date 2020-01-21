@@ -28,6 +28,8 @@ from health_metrics import MetricHandler
 from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, I, \
                   TEXTAREA, SELECT, OPTION, URL, BUTTON
+from gluon.storage import Storage
+from stopstalk_constants import *
 
 # -----------------------------------------------------------------------------
 def is_valid_stopstalk_handle(handle):
@@ -72,13 +74,80 @@ def init_metric_handlers(log_to_redis):
     return metric_handlers
 
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+def get_user_record_cache_key(user_id):
+    return "auth_user_cache::user_" + str(user_id)
+
+# ------------------------------------------------------------------------------
+def get_user_records(record_values,
+                     search_key="id",
+                     dict_key="id",
+                     just_one_record=False):
+    """
+        Cache the user records requested in redis if not present and return the
+        dictionary of record details based on the dict_key passed as the key
+
+        @param record_values(List): List of values to query with
+        @param search_key(String); "id" or "stopstalk_handle"
+        @param dict_key(String): "id" or "stopstalk_handle" which will be
+                                 used as key in the return value
+        @param just_one_record(Boolean): If just return the record value instead
+                                         of the key being dict_key
+
+        @return (Storage): Storage dictionary of the record details
+    """
+
+    if search_key not in ["id", "stopstalk_handle"] or \
+       dict_key not in ["id", "stopstalk_handle"]:
+        return None
+
+    def _get_result_key(user_details):
+        return user_details[dict_key]
+
+    db = current.db
+    atable = db.auth_user
+
+    if search_key == "stopstalk_handle":
+        user_ids = db(atable.stopstalk_handle.belongs(record_values)).select(atable.id)
+        record_values = [x.id for x in user_ids]
+        search_key = "id"
+
+    result = {}
+    to_be_fetched = []
+
+    for user_id in record_values:
+        redis_key = get_user_record_cache_key(user_id)
+        val = current.REDIS_CLIENT.get(redis_key)
+        if val is None:
+            to_be_fetched.append(user_id)
+        else:
+            # User details present in redis already
+            print "========== In cache", user_id
+            val = Storage(json.loads(val))
+            result[_get_result_key(val)] = val
+
+    records = db(atable.id.belongs(to_be_fetched)).select()
+    records = dict([x.id, x.as_json()] for x in records)
+    for user_id in records.keys():
+        print "========== Populating", user_id
+        redis_key = get_user_record_cache_key(user_id)
+        val = Storage(json.loads(records[user_id]))
+        current.REDIS_CLIENT.set(redis_key, records[user_id],
+                                 ex=1 * 60 * 60)
+        result[_get_result_key(val)] = val
+
+    if just_one_record:
+        return result.values()[0]
+    else:
+        return result
+
+# ------------------------------------------------------------------------------
 def get_boto3_client():
     return client("s3",
                   aws_access_key_id=current.s3_access_key_id,
                   aws_secret_access_key=current.s3_secret_access_key)
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def merge_duplicate_problems(original_id, duplicate_id):
     """
         Merge two duplicate problems and remove the duplicate problem from database
@@ -220,7 +289,7 @@ def get_solved_problems(user_id, custom=False):
 
     data = [list(solved_problems), list(unsolved_problems)]
     current.REDIS_CLIENT.set(redis_cache_key,
-                             json.dumps(data, separators=(",", ":")),
+                             json.dumps(data, separators=JSON_DUMP_SEPARATORS),
                              ex=1 * 60 * 60)
 
     return _settify_return_value(data)
@@ -743,7 +812,7 @@ def get_problem_details(problem_id):
         precord = ptable(problem_id)
         result = {"name": precord.name, "link": precord.link}
         current.REDIS_CLIENT.set(redis_cache_key,
-                                 json.dumps(result, separators=(",", ":")),
+                                 json.dumps(result, separators=JSON_DUMP_SEPARATORS),
                                  ex=1 * 60 * 60)
     else:
         result = json.loads(pdetails)
@@ -1060,10 +1129,7 @@ def render_user_editorials_table(user_editorials,
     T = current.T
 
     user_ids = set([x.user_id for x in user_editorials])
-    users = db(atable.id.belongs(user_ids)).select()
-    user_mappings = {}
-    for user in users:
-        user_mappings[user.id] = user
+    user_mappings = get_user_records(user_ids, "id", "id", False)
 
     query = (ptable.id.belongs([x.problem_id for x in user_editorials]))
     problem_records = db(query).select(ptable.id, ptable.name, ptable.link)
