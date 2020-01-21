@@ -608,7 +608,7 @@ def get_custom_users():
     atable = db.auth_user
     cftable = db.custom_friend
 
-    utilities.get_user_records([stopstalk_handle], "stopstalk_handle", "stopstalk_handle", True)
+    row = utilities.get_user_records([stopstalk_handle], "stopstalk_handle", "stopstalk_handle", True)
     if row:
         custom_users = db(cftable.user_id == row.id).select()
         table = TABLE(THEAD(TR(TH(T("Name")),
