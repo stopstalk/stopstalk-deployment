@@ -122,14 +122,12 @@ def get_user_records(record_values,
             to_be_fetched.append(user_id)
         else:
             # User details present in redis already
-            print "========== In cache", user_id
             val = Storage(json.loads(val))
             result[_get_result_key(val)] = val
 
     records = db(atable.id.belongs(to_be_fetched)).select()
     records = dict([x.id, x.as_json()] for x in records)
     for user_id in records.keys():
-        print "========== Populating", user_id
         redis_key = get_user_record_cache_key(user_id)
         val = Storage(json.loads(records[user_id]))
         current.REDIS_CLIENT.set(redis_key, records[user_id],
