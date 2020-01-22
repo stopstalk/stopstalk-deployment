@@ -176,7 +176,7 @@ def get_graph_data():
 
     data = dict(graphs=graphs)
     current.REDIS_CLIENT.set(redis_cache_key,
-                             json.dumps(data, separators=(",", ":")),
+                             json.dumps(data, separators=JSON_DUMP_SEPARATORS),
                              ex=1 * 60 * 60)
     return data
 
@@ -199,7 +199,7 @@ def update_details():
 
     atable = db.auth_user
     stable = db.submission
-    record = atable(session.user_id)
+    record = utilities.get_user_records([session.user_id], "id", "id", True)
 
     # Do not allow to modify stopstalk_handle and email
     atable.stopstalk_handle.writable = False
@@ -218,6 +218,7 @@ def update_details():
     form.vars.stopstalk_handle = record.stopstalk_handle
 
     if form.process(onvalidation=current.sanitize_fields).accepted:
+        current.REDIS_CLIENT.delete(utilities.get_user_record_cache_key(session.user_id))
         session.flash = T("User details updated")
 
         updated_sites = utilities.handles_updated(record, form)
@@ -453,7 +454,7 @@ def mark_read():
         rarecord = db(ratable.user_id == session.user_id).select().first()
     data = json.loads(rarecord.data)
     data[request.vars.key] = True
-    rarecord.update_record(data=json.dumps(data, separators=(",", ":")))
+    rarecord.update_record(data=json.dumps(data, separators=JSON_DUMP_SEPARATORS))
     return dict()
 
 # ------------------------------------------------------------------------------
@@ -463,7 +464,7 @@ def handle_details():
     ihtable = db.invalid_handle
     handle = request.vars.handle
 
-    row = db(atable.stopstalk_handle == handle).select().first()
+    row = utilities.get_user_records([handle], "stopstalk_handle", "stopstalk_handle", True)
     if row is None:
         row = db(cftable.stopstalk_handle == handle).select().first()
         if row is None:
@@ -501,7 +502,7 @@ def handle_details():
         if row[smallsite + "_handle"] == "":
             response[smallsite] = "not-provided"
 
-    result = json.dumps(response, separators=(",", ":"))
+    result = json.dumps(response, separators=JSON_DUMP_SEPARATORS)
     current.REDIS_CLIENT.set(redis_cache_key,
                              result,
                              ex=24 * 60 * 60)
@@ -679,7 +680,7 @@ def get_stopstalk_user_stats():
 
     if auth.is_logged_in():
         current.REDIS_CLIENT.set(redis_cache_key,
-                                 json.dumps(result, separators=(",", ":")),
+                                 json.dumps(result, separators=JSON_DUMP_SEPARATORS),
                                  ex=1 * 60 * 60)
     elif "rating_history" in result:
         del result["rating_history"]
@@ -885,8 +886,7 @@ def submissions():
             redirect(URL("default", "index"))
     else:
         handle = request.args[0]
-        query = (atable.stopstalk_handle == handle)
-        row = db(query).select(atable.id, atable.first_name).first()
+        row = utilities.get_user_records([handle], "stopstalk_handle", "stopstalk_handle", True)
         if row is None:
             query = (cftable.stopstalk_handle == handle)
             row = db(query).select().first()
@@ -970,9 +970,7 @@ def custom_friend():
     total_referrals = db(query).count()
 
     # Retrieve the total allowed custom users from auth_user table
-    query = (atable.id == session.user_id)
-    row = db(query).select(atable.referrer,
-                           atable.allowed_cu).first()
+    row = utilities.get_user_records([session.user_id], "id", "id", True)
     default_allowed = row.allowed_cu
     referrer = 0
     # If a valid referral is applied then award 1 extra CU
@@ -1070,8 +1068,7 @@ def get_friend_list():
     table = TABLE(_class="bordered centered")
     tbody = TBODY()
 
-    user_records = db(atable.id.belongs(profile_friends)).select()
-    user_records = dict([(x.id, x) for x in user_records])
+    user_records = utilities.get_user_records(profile_friends, "id", "id", False)
 
     for friend_id in profile_friends:
         row = user_records[friend_id]

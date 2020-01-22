@@ -316,6 +316,7 @@ def update_stopstalk_rating(user_id, stopstalk_handle, custom):
     if custom:
         cftable(user_id).update_record(**update_params)
     else:
+        current.REDIS_CLIENT.delete(utilities.get_user_record_cache_key(user_id))
         atable(user_id).update_record(**update_params)
 
     db.commit()

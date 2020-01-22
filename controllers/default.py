@@ -176,7 +176,7 @@ def user_editorials():
 
         if user_object_map.has_key(row.user_id) is False:
             # Store the user object for later usage
-            user_object_map[row.user_id] = atable(row.user_id)
+            user_object_map[row.user_id] = utilities.get_user_records([row.user_id], "id", "id", True)
 
         if row.problem_id not in pids:
             # This problem has an official editorial - don't count in leaderboard
@@ -201,8 +201,9 @@ def user_editorials():
             editorial_count_dict[value.user_id] = {"count": 1,
                                                    "votes": vote_count}
 
+    user_objs = utilities.get_user_records(editorial_count_dict.keys(), "id", "id", False)
     for key in editorial_count_dict:
-        user_obj = atable(key)
+        user_obj = user_objs[key]
         table_rows.append([editorial_count_dict[key]["count"],
                            editorial_count_dict[key]["votes"],
                            user_obj.stopstalk_handle,
@@ -243,7 +244,7 @@ def user_wise_editorials():
         redirect(URL("default", "user_editorials"))
         return
     else:
-        row = db(atable.stopstalk_handle == request.args[0]).select().first()
+        row = utilities.get_user_records([request.args[0]], "stopstalk_handle", "stopstalk_handle", True)
         if row is None:
             session.flash = "Invalid StopStalk Handle"
             redirect(URL("default", "user_editorials"))
@@ -607,7 +608,7 @@ def get_custom_users():
     atable = db.auth_user
     cftable = db.custom_friend
 
-    row = db(atable.stopstalk_handle == stopstalk_handle).select().first()
+    row = utilities.get_user_records([stopstalk_handle], "stopstalk_handle", "stopstalk_handle", True)
     if row:
         custom_users = db(cftable.user_id == row.id).select()
         table = TABLE(THEAD(TR(TH(T("Name")),
