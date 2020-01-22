@@ -226,6 +226,8 @@ def get_submissions(user_id,
         else:
             pid = plink_to_id[plink]
 
+        utilities.add_language_to_cache(language)
+
         submission_insert_dict = {
             "user_id": user_id if not custom else None,
             "custom_user_id": user_id if custom else None,

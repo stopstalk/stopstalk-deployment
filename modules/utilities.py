@@ -40,6 +40,14 @@ def is_valid_stopstalk_handle(handle):
         return False
 
 # -----------------------------------------------------------------------------
+def add_language_to_cache(language):
+    if language in ["", "-"]:
+        return
+
+    current.REDIS_CLIENT.sadd("all_submission_languages", language)
+    return
+
+# -----------------------------------------------------------------------------
 def prepend_custom_identifier(form):
     form.vars.stopstalk_handle = "cus_" + form.vars.stopstalk_handle
 
