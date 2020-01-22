@@ -965,18 +965,13 @@ def filters():
         redirect(URL("default", "index"))
         return
 
-    if current.REDIS_CLIENT.get("languages_updated_on") is None or \
-       (datetime.datetime.now() - \
-        datetime.datetime.strptime(current.REDIS_CLIENT.get("languages_updated_on"),
-                                   "%Y-%m-%d %H:%M:%S")).days > 0: # Smart ;)
+    if current.REDIS_CLIENT.scard("all_submission_languages") == 0:
         languages = db(stable).select(stable.lang, distinct=True)
         languages = [x.lang for x in languages]
-        submission_languages = ",,".join(languages)
-        current.REDIS_CLIENT.set("languages_updated_on",
-                                 str(datetime.datetime.now())[:-7])
-        current.REDIS_CLIENT.set("submission_languages", submission_languages)
+        for language in languages:
+            utilities.add_language_to_cache(language)
     else:
-        languages = current.REDIS_CLIENT.get("submission_languages").split(",,")
+        languages = current.REDIS_CLIENT.smembers("all_submission_languages")
 
     table = None
     global_submissions = False
