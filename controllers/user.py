@@ -886,7 +886,7 @@ def submissions():
             redirect(URL("default", "index"))
     else:
         handle = request.args[0]
-        row = utilities.get_user_records([handle], "stopstalk_handle", "id", True)
+        row = utilities.get_user_records([handle], "stopstalk_handle", "stopstalk_handle", True)
         if row is None:
             query = (cftable.stopstalk_handle == handle)
             row = db(query).select().first()
