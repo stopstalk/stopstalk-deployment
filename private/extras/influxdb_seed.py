@@ -26,7 +26,7 @@ client = current.INFLUXDB_CLIENT
 # create user stopstalk_admin with password 'password' WITH ALL PRIVILEGES;
 
 client.create_database(INFLUX_DBNAME)
-client.create_retention_policy("month", "30d", 1,
+client.create_retention_policy(INFLUX_RETENTION_POLICY, "90d", 1,
                                database=INFLUX_DBNAME,
                                default=True)
 
