@@ -24,12 +24,36 @@ import re
 import datetime
 import json
 from boto3 import client
+from socket import gethostname
 from health_metrics import MetricHandler
 from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, I, \
                   TEXTAREA, SELECT, OPTION, URL, BUTTON
 from gluon.storage import Storage
 from stopstalk_constants import *
+
+# -----------------------------------------------------------------------------
+def push_influx_data(points, measurement, app_name="cron"):
+
+    def _create_points_dict(pts):
+        result = []
+        if isinstance(pts, dict):
+            # If only one point is passed
+            pts = [pts]
+        for point in pts:
+            result.append(dict(measurement=measurement,
+                               fields=point,
+                               time=datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")))
+
+        return result
+
+    points = _create_points_dict(points)
+    common_tags = dict(host=gethostname(),
+                       app_name=app_name)
+    return current.INFLUXDB_CLIENT.write_points(points,
+                                                retention_policy=INFLUX_RETENTION_POLICY,
+                                                tags=common_tags,
+                                                time_precision="s")
 
 # -----------------------------------------------------------------------------
 def is_valid_stopstalk_handle(handle):
