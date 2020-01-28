@@ -32,6 +32,13 @@ current.mysql_uvadbname = "uvajudge"
 current.redis_server = "localhost"
 current.redis_port = 6379
 
+# Configure InfluxDB server
+current.influxdb_server = "localhost"
+current.influxdb_port = 8086
+
+current.influxdb_user = "<admin_user>"
+current.influxdb_password = "<admin_password>"
+
 # Configure mail options
 current.smtp_server = "logging"
 current.sender_mail = ""
