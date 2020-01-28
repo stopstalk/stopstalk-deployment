@@ -77,7 +77,8 @@ def get_request(url, headers={}, timeout=current.TIMEOUT, params={}, is_daily_re
                                     headers=headers,
                                     params=params,
                                     proxies=current.PROXY,
-                                    timeout=timeout)
+                                    timeout=timeout,
+                                    verify=False)
         except Exception as e:
             print e, url
             request_metric_handler.increment_count("failure", 1)
