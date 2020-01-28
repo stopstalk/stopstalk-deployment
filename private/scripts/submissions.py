@@ -381,8 +381,13 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
         if Site.Profile.is_website_down():
             all_sites.remove(site)
 
+    common_influx_params = dict(stopstalk_handle=record.stopstalk_handle,
+                                retrieval_type=retrieval_type,
+                                value=1)
+
     for site in all_sites:
 
+        common_influx_params["site"] = site
         lower_site = site.lower()
         site_handle = record[lower_site + "_handle"]
         site_lr = lower_site + "_lr"
@@ -393,6 +398,9 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
         if is_daily_retrieval and \
            datetime.timedelta(days=nrtable_record[site_delay] / 3 + 1) + \
            last_retrieved.date() > todays_date:
+            utilities.push_influx_data("retrieval_stats",
+                                       dict(kind="skipped",
+                                            **common_influx_params))
             logger.log(site, "skipped")
             metric_handlers[lower_site]["skipped_retrievals"].increment_count("total", 1)
             skipped_retrieval.add(site)
@@ -402,6 +410,9 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
 
         if (site_handle, site) in INVALID_HANDLES:
             logger.log(site, "not found:" + site_handle)
+            utilities.push_influx_data("retrieval_stats",
+                                       dict(kind="not_found",
+                                            **common_influx_params))
             metric_handlers[lower_site]["handle_not_found"].increment_count("total", 1)
             record.update({site_lr: datetime.datetime.now()})
             should_clear_cache = True
@@ -422,6 +433,9 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
             sites_retrieval_timings += total_retrieval_time
             metric_handlers[lower_site]["retrieval_times"].add_to_list("list", total_retrieval_time)
             if submissions in (SERVER_FAILURE, OTHER_FAILURE):
+                utilities.push_influx_data("retrieval_stats",
+                                           dict(kind=submissions,
+                                                **common_influx_params))
                 logger.log(site, submissions)
 
                 metric_handlers[lower_site]["retrieval_count"].increment_count("failure", 1)
@@ -430,6 +444,9 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
                 should_clear_cache = True
                 current.REDIS_CLIENT.sadd("website_down_" + site.lower(), record.stopstalk_handle)
             elif submissions == NOT_FOUND:
+                utilities.push_influx_data("retrieval_stats",
+                                           dict(kind="new_invalid_handle",
+                                                **common_influx_params))
                 logger.log(site, "new invalid handle:" + site_handle)
                 new_handle_not_found(site, site_handle)
                 # Update the last retrieved of an invalid handle as we don't
@@ -437,6 +454,9 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
                 record.update({site_lr: datetime.datetime.now()})
                 should_clear_cache = True
             else:
+                utilities.push_influx_data("retrieval_stats",
+                                           dict(kind="success",
+                                                **common_influx_params))
                 submission_len = len(submissions)
                 metric_handlers[lower_site]["retrieval_count"].increment_count("success", 1)
                 metric_handlers[lower_site]["submission_count"].increment_count("total", submission_len)
