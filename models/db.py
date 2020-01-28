@@ -203,8 +203,18 @@ bulkmail.settings.sender = "Team StopStalk <" + current.bulk_sender_mail + ">"
 bulkmail.settings.login = current.bulk_sender_user + ":" + current.bulk_sender_password
 
 from redis import Redis
+from influxdb import InfluxDBClient
+
 # REDIS CLIENT
 current.REDIS_CLIENT = Redis(host=current.redis_server, port=current.redis_port, db=0)
+
+# INFLUX CLIENT
+current.INFLUXDB_CLIENT = InfluxDBClient(current.influxdb_server,
+                                         current.influxdb_port,
+                                         current.influxdb_user,
+                                         current.influxdb_password,
+                                         INFLUX_DBNAME)
+
 
 # -----------------------------------------------------------------------------
 def send_mail(to, subject, message, mail_type, bulk=False):
