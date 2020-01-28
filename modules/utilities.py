@@ -33,7 +33,7 @@ from gluon.storage import Storage
 from stopstalk_constants import *
 
 # -----------------------------------------------------------------------------
-def push_influx_data(points, measurement, app_name="cron"):
+def push_influx_data(measurement, points, app_name="cron"):
 
     def _create_points_dict(pts):
         result = []
