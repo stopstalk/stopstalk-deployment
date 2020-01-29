@@ -35,6 +35,9 @@ from stopstalk_constants import *
 # -----------------------------------------------------------------------------
 def push_influx_data(measurement, points, app_name="cron"):
 
+    if current.environment != "production":
+        return
+
     def _create_points_dict(pts):
         result = []
         if isinstance(pts, dict):
