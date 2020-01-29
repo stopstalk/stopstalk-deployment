@@ -24,6 +24,8 @@ import requests
 from requests.auth import HTTPBasicAuth
 from datetime import datetime, timedelta
 import random
+import urllib3
+urllib3.disable_warnings()
 
 attable = db.access_tokens
 tokens = [(current.neverbounce_user, current.neverbounce_password, "contactstopstalk@gmail.com"),
@@ -39,7 +41,8 @@ for i in xrange(2):
                                  auth=HTTPBasicAuth(tokens[0][0],
                                                     tokens[0][1]),
                                  data={"grant_type": "client_credentials",
-                                       "scope": "basic user"})
+                                       "scope": "basic user"},
+                                 verify=False)
         if response.status_code == 200:
             response = response.json()
             if response.has_key("access_token"):
