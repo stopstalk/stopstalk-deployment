@@ -686,6 +686,10 @@ def contests():
                     "HACKERRANK": "HackerRank",
                     "HACKEREARTH": "HackerEarth"}
     url = "https://contesttrackerapi.herokuapp.com/"
+
+    from urllib3 import disable_warnings
+    disable_warnings()
+
     response = requests.get(url, verify=False)
     if response.status_code == 200:
         response = response.json()["result"]
