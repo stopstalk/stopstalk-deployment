@@ -23,6 +23,8 @@
 import time
 import requests
 import sites
+import urllib3
+urllib3.disable_warnings()
 
 current.environment = "test"
 user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36"
@@ -283,4 +285,5 @@ if pushover_message != "":
                                    "user": current.pushover_user_token,
                                    "message": pushover_message.strip(),
                                    "title": "Extras retrieval failure",
-                                   "priority": 1}).json()
+                                   "priority": 1},
+                             verify=False).json()
