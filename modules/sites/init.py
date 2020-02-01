@@ -40,6 +40,15 @@ OTHER_FAILURE = "OTHER_FAILURE"
 REQUEST_FAILURES = (SERVER_FAILURE, NOT_FOUND, OTHER_FAILURE)
 
 # -----------------------------------------------------------------------------
+def log_time_things(request_time_metric_handler, start_request_time, site):
+    time_difference = time.time() - start_request_time
+    request_time_metric_handler.add_to_list("list", time_difference)
+    utilities.push_influx_data("crawling_response_times",
+                               dict(kind="general_for_now",
+                                    site=site,
+                                    value=time_difference))
+
+# -----------------------------------------------------------------------------
 def get_request(url, headers={}, timeout=current.TIMEOUT, params={}, is_daily_retrieval=False):
     """
         Make a HTTP GET request to a url
@@ -84,20 +93,20 @@ def get_request(url, headers={}, timeout=current.TIMEOUT, params={}, is_daily_re
         except Exception as e:
             print e, url
             request_metric_handler.increment_count("failure", 1)
-            request_time_metric_handler.add_to_list("list", time.time() - start_request_time)
+            log_time_things(request_time_metric_handler, start_request_time, site)
             return SERVER_FAILURE
 
         if response.status_code == 200:
-            request_time_metric_handler.add_to_list("list", time.time() - start_request_time)
+            log_time_things(request_time_metric_handler, start_request_time, site)
             request_metric_handler.increment_count("success", 1)
             return response
         elif response.status_code == 404 or response.status_code == 400:
-            request_time_metric_handler.add_to_list("list", time.time() - start_request_time)
+            log_time_things(request_time_metric_handler, start_request_time, site)
             # User not found
             # 400 for CodeForces users
             return NOT_FOUND
         elif response.status_code == 429 or response.status_code == 401:
-            request_time_metric_handler.add_to_list("list", time.time() - start_request_time)
+            log_time_things(request_time_metric_handler, start_request_time, site)
             request_metric_handler.increment_count("failure", 1)
             # For CodeChef API rate limiting, don't retry
             # 401 is raised when a newer access token is generated
@@ -106,7 +115,7 @@ def get_request(url, headers={}, timeout=current.TIMEOUT, params={}, is_daily_re
                 current.REDIS_CLIENT.delete("codechef_access_token")
             return OTHER_FAILURE
         else:
-            request_time_metric_handler.add_to_list("list", time.time() - start_request_time)
+            log_time_things(request_time_metric_handler, start_request_time, site)
             request_metric_handler.increment_count("failure", 1)
 
         i += 1
