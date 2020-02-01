@@ -434,7 +434,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
             metric_handlers[lower_site]["retrieval_times"].add_to_list("list", total_retrieval_time)
             if submissions in (SERVER_FAILURE, OTHER_FAILURE):
                 utilities.push_influx_data("retrieval_stats",
-                                           dict(kind=submissions,
+                                           dict(kind=submissions.lower(),
                                                 **common_influx_params))
                 logger.log(site, submissions)
 
