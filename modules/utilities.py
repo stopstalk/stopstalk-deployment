@@ -31,6 +31,7 @@ from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, \
                   TEXTAREA, SELECT, OPTION, URL, BUTTON
 from gluon.storage import Storage
 from stopstalk_constants import *
+from influxdb_wrapper import get_series_helper
 
 # -----------------------------------------------------------------------------
 def push_influx_data(measurement, points, app_name="cron"):
@@ -38,25 +39,23 @@ def push_influx_data(measurement, points, app_name="cron"):
     if current.environment != "production":
         return
 
-    def _create_points_dict(pts):
-        result = []
-        if isinstance(pts, dict):
-            # If only one point is passed
-            pts = [pts]
-        for point in pts:
-            result.append(dict(measurement=measurement,
-                               fields=point,
-                               time=datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")))
+    SeriesHelperClass = get_series_helper(
+                            measurement,
+                            INFLUX_MEASUREMENT_SCHEMAS[measurement]["fields"],
+                            INFLUX_MEASUREMENT_SCHEMAS[measurement]["tags"]
+                        )
 
-        return result
+    if isinstance(points, dict):
+        points = [points]
 
-    points = _create_points_dict(points)
-    common_tags = dict(host=gethostname(),
-                       app_name=app_name)
-    return current.INFLUXDB_CLIENT.write_points(points,
-                                                retention_policy=INFLUX_RETENTION_POLICY,
-                                                tags=common_tags,
-                                                time_precision="s")
+    for point in points:
+        point.update(host=gethostname(),
+                     app_name=app_name)
+        SeriesHelperClass(**point)
+
+    SeriesHelperClass.commit()
+
+    return
 
 # -----------------------------------------------------------------------------
 def is_valid_stopstalk_handle(handle):
