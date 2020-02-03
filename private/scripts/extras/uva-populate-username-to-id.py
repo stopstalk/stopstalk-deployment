@@ -20,6 +20,11 @@
     THE SOFTWARE.
 """
 
+import urllib3
+from sites.init import *
+
+urllib3.disable_warnings()
+
 u2idtable = uvadb.usernametoid
 atable = db.auth_user
 cftable = db.custom_friend
@@ -38,7 +43,7 @@ all_uva_handles = all_uva_handles.union(set([x.uva_handle for x in handles]))
 import requests
 
 for handle in (all_uva_handles - current_handles):
-    response = requests.get("http://uhunt.felix-halim.net/api/uname2uid/" + handle)
+    response = get_request("http://uhunt.felix-halim.net/api/uname2uid/" + handle)
     if response.status_code == 200 and response.text.strip() != "0":
         print handle, response.text, "added"
         u2idtable.insert(username=handle,

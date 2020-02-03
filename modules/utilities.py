@@ -453,6 +453,10 @@ def urltosite(url):
         return "timus"
     if url.__contains__("codechef.com"):
         return "codechef"
+    if url.__contains__("spoj.com"):
+        return "spoj"
+    if url.__contains__("codeforces.com"):
+        return "codeforces"
     if url == current.spoj_lambda_url:
         return "spoj"
     # Note: try/except is not added because this function is not to
