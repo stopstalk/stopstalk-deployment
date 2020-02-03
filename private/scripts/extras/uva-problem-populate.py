@@ -20,14 +20,17 @@
     THE SOFTWARE.
 """
 
-import requests
+import urllib3
+from sites.init import *
 
+urllib3.disable_warnings()
 ptable = uvadb.problem
 
 problems = uvadb(ptable).select(ptable.problem_id, ptable.problem_num)
 problems = set([(x.problem_id, x.problem_num) for x in problems])
 
-response = requests.get("http://uhunt.felix-halim.net/api/p")
+response = get_request("http://uhunt.felix-halim.net/api/p")
+
 for problem in response.json():
     if (problem[0], problem[1]) not in problems:
         print problem, "added"
