@@ -35,7 +35,8 @@ result = db.executesql("""
 """)
 
 print "Evaluating", len(result), "duplicate records"
-for row in result[10:15]:
+
+for row in result:
 
     problem_ids = [int(x) for x in row[1].split(",")]
     temp_records = db(ptable.id.belongs(problem_ids)).select()
@@ -55,7 +56,6 @@ for row in result[10:15]:
         response = get_request(url_value + "?v=1554915627060",
                                headers={"User-Agent": user_agent})
         response = response.json()
-
         if response["status"] != "error" and \
            (final_problem_id is None or url.__contains__("/PRACTICE/")):
 
@@ -70,6 +70,7 @@ for row in result[10:15]:
 
     if final_problem_id is not None:
         for duplicate_id in duplicates:
+            print problem_records[duplicate_id].link, "-->", final_problem_link
             utilities.merge_duplicate_problems(final_problem_id, duplicate_id)
     else:
         print problem_ids, "no original found"
