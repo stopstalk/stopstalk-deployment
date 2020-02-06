@@ -25,6 +25,7 @@ import datetime
 import json
 from boto3 import client
 from socket import gethostname
+from requests.exceptions import ConnectionError
 from health_metrics import MetricHandler
 from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, I, \
@@ -39,23 +40,25 @@ def push_influx_data(measurement, points, app_name="cron"):
     if current.environment != "production":
         return
 
-    SeriesHelperClass = get_series_helper(
-                            measurement,
-                            INFLUX_MEASUREMENT_SCHEMAS[measurement]["fields"],
-                            INFLUX_MEASUREMENT_SCHEMAS[measurement]["tags"]
-                        )
+    try:
+        SeriesHelperClass = get_series_helper(
+                                measurement,
+                                INFLUX_MEASUREMENT_SCHEMAS[measurement]["fields"],
+                                INFLUX_MEASUREMENT_SCHEMAS[measurement]["tags"]
+                            )
 
-    if isinstance(points, dict):
-        points = [points]
+        if isinstance(points, dict):
+            points = [points]
 
-    for point in points:
-        point.update(host=gethostname(),
-                     app_name=app_name)
-        SeriesHelperClass(**point)
+        for point in points:
+            point.update(host=gethostname(),
+                         app_name=app_name)
+            SeriesHelperClass(**point)
 
-    SeriesHelperClass.commit()
-
-    return
+        SeriesHelperClass.commit()
+    except ConnectionError:
+        print "Can't connect to influxdb"
+        return
 
 # -----------------------------------------------------------------------------
 def is_valid_stopstalk_handle(handle):
