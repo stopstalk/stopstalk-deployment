@@ -64,6 +64,11 @@ class Profile(object):
 
     # --------------------------------------------------------------------------
     @staticmethod
+    def get_slug(link):
+        return link.split("/")[-1]
+
+    # --------------------------------------------------------------------------
+    @staticmethod
     def get_tags(problem_link):
         """
             Get tags given a problem link

@@ -54,6 +54,7 @@ uva_problem_dict = {}
 metric_handlers = {}
 plink_to_id = {}
 todays_date_string = datetime.datetime.now().strftime("%Y-%m-%d")
+codechef_slugs = {}
 
 # ==============================================================================
 class Logger:
@@ -213,16 +214,30 @@ def get_submissions(user_id,
 
         pname = pname.replace("\"", "").replace("'", "")
         plink = submission[1]
+        pid = None
         if plink not in plink_to_id:
-            pid = ptable.insert(name=pname,
-                                link=plink,
-                                editorial_link=None,
-                                tags="['-']",
-                                editorial_added_on=todays_date_string,
-                                tags_added_on=todays_date_string,
-                                user_ids="",
-                                custom_user_ids="")
-            plink_to_id[plink] = pid
+            is_codechef_url = utilities.urltosite(plink) == "codechef"
+            if is_codechef_url:
+                slug = sites.codechef.Profile.get_slug(plink)
+                if slug in codechef_slugs:
+                    print "Codechef problem already exists", slug, plink
+                    pid = codechef_slugs[slug]
+                else:
+                    pid = None
+
+            if pid is None:
+                pid = ptable.insert(name=pname,
+                                    link=plink,
+                                    editorial_link=None,
+                                    tags="['-']",
+                                    editorial_added_on=todays_date_string,
+                                    tags_added_on=todays_date_string,
+                                    user_ids="",
+                                    custom_user_ids="")
+                plink_to_id[plink] = pid
+
+            if is_codechef_url and pid is not None:
+                codechef_slugs[slug] = pid
         else:
             pid = plink_to_id[plink]
 
@@ -719,7 +734,10 @@ if __name__ == "__main__":
     populate_uva_problems()
 
     links = db(ptable).select(ptable.id, ptable.link)
-    plink_to_id = dict([(x.link, x.id) for x in links])
+    for row in links:
+        plink_to_id[row.link] = row.id
+        if row.link.__contains__("www.codechef.com/PRACTICE"):
+            codechef_slugs[row.link.split("/")[-1]] = row.id
 
     # Get the handles which returned 404 before
     INVALID_HANDLES = db(db.invalid_handle).select()
