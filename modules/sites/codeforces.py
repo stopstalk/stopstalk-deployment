@@ -45,42 +45,24 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_tags(problem_link):
-        """
-            Get the tags of a particular problem from its URL
-
-            @param problem_link (String): Problem URL
-            @return (List): List of tags for that problem
-        """
-
-        if problem_link.__contains__("gymProblem"):
-            return ["-"]
-
-        response = get_request(problem_link)
-        if response in REQUEST_FAILURES:
-            return ["-"]
-
-        tags = BeautifulSoup(response.text, "lxml").find_all("span",
-                                                             class_="tag-box")
-
-        return map(lambda tag: tag.contents[0].strip(), tags)
-
-    # -------------------------------------------------------------------------
-    @staticmethod
-    def get_editorial_link(problem_link):
+    def get_problem_details(problem_link):
         """
             Get editorial link given a problem link
 
             @param problem_link (String): Problem URL
             @return (String/None): Editorial URL
         """
-        if problem_link.__contains__("gymProblem"):
-            return None
 
+        all_tags = []
         editorial_link = None
+        if problem_link.__contains__("gymProblem"):
+            return dict(editorial_link=editorial_link,
+                        tags=all_tags)
+
         response = get_request(problem_link)
         if response in REQUEST_FAILURES:
-            return None
+            return dict(editorial_link=editorial_link,
+                        tags=all_tags)
 
         soup = BeautifulSoup(response.text, "lxml")
         all_as = soup.find_all("a")
@@ -96,7 +78,11 @@ class Profile(object):
                     editorial_link = link["href"]
                 break
 
-        return editorial_link
+        tags = soup.find_all("span", class_="tag-box")
+        all_tags = map(lambda tag: tag.contents[0].strip(), tags)
+
+        return dict(editorial_link=editorial_link,
+                    tags=all_tags)
 
     # -------------------------------------------------------------------------
     @staticmethod

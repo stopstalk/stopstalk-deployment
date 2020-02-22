@@ -47,7 +47,7 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_tags(problem_link):
+    def get_problem_details(problem_link):
         """
             Get the tags of a particular problem from its URL
 
@@ -55,26 +55,27 @@ class Profile(object):
             @return (List): List of tags for that problem
         """
 
+        editorial_link = None
+        all_tags = []
         # Temporary hack - spoj seems to have removed their SSL cert
         problem_link = problem_link.replace("https", "http")
         response = get_request(problem_link)
         if response in REQUEST_FAILURES:
-            return ["-"]
+            return dict(tags=all_tags, editorial_link=editorial_link)
 
         tags = BeautifulSoup(response.text, "lxml").find_all("div",
                                                              id="problem-tags")
         try:
             tags = tags[0].findAll("span")
         except IndexError:
-            return ["-"]
-        all_tags = []
+            return dict(tags=all_tags, editorial_link=editorial_link)
 
         for tag in tags:
             tmp = tag.contents
             if tmp != []:
                 all_tags.append(tmp[0][1:])
 
-        return all_tags
+        return dict(tags=all_tags, editorial_link=editorial_link)
 
     # -------------------------------------------------------------------------
     @staticmethod

@@ -45,33 +45,33 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_tags(problem_link):
+    def get_problem_details(problem_link):
         """
             Get the tags of a particular problem from its URL
 
             @param problem_link (String): Problem URL
             @return (List): List of tags for that problem
         """
+        all_tags = []
+        editorial_link = None
 
-        if problem_link.__contains__("/contests/"):
-            # If the problem_link is a contest URL
-            url = problem_link.replace("https://www.hackerrank.com", "")
-            url = "https://www.hackerrank.com/rest/" + url
+        if problem_link.__contains__("contests"):
+            rest_url = problem_link.replace("contests/",
+                                            "rest/contests/")
         else:
-            # Practice problem URL
-            slug = problem_link.split("/")[-1]
-            url = "https://www.hackerrank.com/rest/contests/master/challenges/" + slug
+            rest_url = problem_link.replace("challenges/",
+                                            "rest/contests/master/challenges/")
 
-        response = get_request(url)
+        response = get_request(rest_url)
         if response in REQUEST_FAILURES:
-            return ["-"]
+            return dict(tags=all_tags,
+                        editorial_link=editorial_link)
 
         response = response.json()
 
         model = response["model"]
         track = model["track"]
         primary_contest = model["primary_contest"]
-        all_tags = ["-"]
 
         if track:
             # If the problem is a practice problem
@@ -85,30 +85,11 @@ class Profile(object):
                 # Then consider contest name as tag
                 all_tags = [primary_contest["name"]]
 
-        return all_tags
+        editorial_present = response["model"]["is_editorial_available"]
+        editorial_link = problem_link + "/editorial/" if editorial_present else None
 
-    # -------------------------------------------------------------------------
-    @staticmethod
-    def get_editorial_link(problem_link):
-        """
-            Get editorial link given a problem link
-
-            @param problem_link (String): Problem URL
-            @return (String/None): Editorial URL
-        """
-        editorial_link = None
-        if problem_link.__contains__("contests"):
-            rest_url = problem_link.replace("contests/",
-                                            "rest/contests/")
-        else:
-            rest_url = problem_link.replace("challenges/",
-                                            "rest/contests/master/challenges/")
-        response = get_request(rest_url)
-        if response in REQUEST_FAILURES:
-            return editorial_link
-
-        editorial_present = response.json()["model"]["is_editorial_available"]
-        return problem_link + "/editorial/" if editorial_present else None
+        return dict(tags=all_tags,
+                    editorial_link=editorial_link)
 
     # -------------------------------------------------------------------------
     @staticmethod
