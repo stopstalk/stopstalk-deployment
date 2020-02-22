@@ -79,6 +79,13 @@ if __name__ == "__main__":
     final_delete_query = False
     cnt = 0
     for row in db(ihtable).iterselect():
+        if row.handle and \
+           IS_URL(mode="generic",
+                  allowed_schemes=["http",
+                                   "https"])(row.handle)[1] is None:
+            # print "Skipping invalid check for", row.handle, row.site
+            continue
+
         # If not an invalid handle anymore
         if handle_to_row[row.site].has_key(row.handle) and mapping[row.site](row.handle) is False:
             cnt += 1
