@@ -45,24 +45,26 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_tags(problem_link):
+    def get_problem_details(problem_link):
         """
             Get the tags of a particular problem from its URL
 
             @param problem_link (String): Problem URL
             @return (List): List of tags for that problem
         """
+        all_tags = []
         response = get_request(problem_link)
         if response in REQUEST_FAILURES:
-            return ["-"]
+            return dict(tags=all_tags, editorial_link=None)
 
         soup = BeautifulSoup(response.text, "lxml")
         div = soup.find("div", class_="problem_links").previous_sibling
         all_as = div.find_all("a")[:-1]
         if len(all_as):
-            return [x.text for x in all_as]
+            return dict(tags=[x.text for x in all_as],
+                        editorial_link=None)
         else:
-            return ["-"]
+            return dict(tags=all_tags, editorial_link=None)
 
     # -------------------------------------------------------------------------
     @staticmethod

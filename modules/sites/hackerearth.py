@@ -75,14 +75,36 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_editorial_link(problem_link):
+    def get_problem_details(problem_link):
         """
             Get editorial link given a problem link
 
             @param problem_link (String): Problem URL
             @return (String/None): Editorial URL
         """
-        return problem_link + "editorial/"
+        all_tags = []
+        editorial_link = problem_link + "editorial/"
+
+        response = get_request(problem_link)
+        if response in REQUEST_FAILURES:
+            return dict(tags=all_tags,
+                        editorial_link=editorial_link)
+
+        soup = BeautifulSoup(response.text, "lxml")
+        try:
+            tags = soup.find_all("div", class_="problem-tags")[0]
+        except IndexError:
+            return dict(tags=all_tags,
+                        editorial_link=editorial_link)
+
+        lis = tags.find_all("span")[1:]
+        all_tags = []
+        for li in lis:
+            if li.contents[0] != "No tags":
+                all_tags.append(li.contents[0].strip(", "))
+
+        return dict(tags=all_tags,
+                    editorial_link=editorial_link)
 
     # -------------------------------------------------------------------------
     @staticmethod
