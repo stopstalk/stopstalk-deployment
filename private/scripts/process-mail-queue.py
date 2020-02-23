@@ -20,6 +20,8 @@
     THE SOFTWARE.
 """
 
+import datetime
+
 atable = db.auth_user
 query = (atable.registration_key != "") & \
         (atable.blacklisted == False)
@@ -40,13 +42,14 @@ for row in rows:
                      subject=row.subject,
                      message=row.message):
         row.update_record(status="sent")
-        print "Sent to %s %s" % (row.email, row.subject)
+        print str(datetime.datetime.now()), "Sent to %s %s" % (row.email, row.subject)
     else:
         print "ERROR: " + str(bulkmail.error)
         if str(bulkmail.error).__contains__("Mail rate exceeded limit") is False:
             # Email sending failed with some other reason
             row.update_record(status="failed")
-            print "Email sending to %s failed with: %s" % (row.email,
+            print str(datetime.datetime.now()),
+                  "Email sending to %s failed with: %s" % (row.email,
                                                            bulkmail.error)
         else:
             # Email sending failed due to Mail rate

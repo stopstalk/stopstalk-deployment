@@ -95,7 +95,10 @@ Team StopStalk
                       bulk=True)
 
 for row in res:
-    send_message(id_to_record[row[0]],
-                 [id_to_record[int(x)] for x in row[1].split(",")])
+    to_id = row[0]
+    from_ids = [int(x) for x in row[1].split(",")]
+    print to_id, from_ids
+    send_message(id_to_record[to_id],
+                 [id_to_record[x] for x in from_ids])
 
 iutable.truncate()
