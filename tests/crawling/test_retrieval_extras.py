@@ -271,10 +271,10 @@ pushover_message = ""
 for method_name in [
                     "test_tag_retrieval",
                     "test_editorial_retrieval",
-                    # "test_invalid_handle",
-                    # "test_download_submission",
-                    # "test_rating_graph",
-                    # "test_submissions"
+                    "test_invalid_handle",
+                    "test_download_submission",
+                    "test_rating_graph",
+                    "test_submissions"
                     ]:
     res = test_retrieval(rt, method_name)
     if res != "Success":
@@ -282,10 +282,10 @@ for method_name in [
 
 if pushover_message != "":
     print pushover_message
-    # response = requests.post("https://api.pushover.net/1/messages.json",
-    #                          data={"token": current.pushover_api_token,
-    #                                "user": current.pushover_user_token,
-    #                                "message": pushover_message.strip(),
-    #                                "title": "Extras retrieval failure",
-    #                                "priority": 1},
-    #                          verify=False).json()
+    response = requests.post("https://api.pushover.net/1/messages.json",
+                             data={"token": current.pushover_api_token,
+                                   "user": current.pushover_user_token,
+                                   "message": pushover_message.strip(),
+                                   "title": "Extras retrieval failure",
+                                   "priority": 1},
+                             verify=False).json()

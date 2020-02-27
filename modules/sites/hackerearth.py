@@ -45,42 +45,12 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_tags(problem_link):
-        """
-            Get tags given a problem link
-
-            @param problem_link (String): Problem URL
-            @return (List): List of tags for the Problem
-        """
-
-        response = get_request(problem_link)
-        if response in REQUEST_FAILURES:
-            return ["-"]
-
-        b = BeautifulSoup(response.text, "lxml")
-        try:
-            tags = b.find_all("div", class_="problem-tags")[0]
-        except IndexError:
-            return ["-"]
-        lis = tags.find_all("span")[1:]
-        all_tags = []
-        for li in lis:
-            if li.contents[0] != "No tags":
-                all_tags.append(li.contents[0].strip(", "))
-
-        if all_tags == []:
-            all_tags = ["-"]
-
-        return all_tags
-
-    # -------------------------------------------------------------------------
-    @staticmethod
     def get_problem_details(problem_link):
         """
-            Get editorial link given a problem link
+            Get problem_details given a problem link
 
             @param problem_link (String): Problem URL
-            @return (String/None): Editorial URL
+            @return (Dict): Details of the problem returned in a dictionary
         """
         all_tags = []
         editorial_link = problem_link + "editorial/"
