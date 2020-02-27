@@ -85,13 +85,13 @@ class RetrievalTest:
                 # Don't test for websites which are acked to be down
                 continue
 
-            tags_func = P.get_tags
-            tags_val = tags_func(assertion_hash["with_tags"][site]["plink"])
+            tags_func = P.get_problem_details
+            tags_val = tags_func(assertion_hash["with_tags"][site]["plink"])["tags"]
             if set(tags_val) != set(assertion_hash["with_tags"][site]["tags"]):
                 raise RuntimeError(site + " with tags failure")
 
             if site in assertion_hash["without_tags"]:
-                tags_val = tags_func(assertion_hash["without_tags"][site])
+                tags_val = tags_func(assertion_hash["without_tags"][site])["tags"]
                 if tags_val not in ([u"-"], []):
                     raise RuntimeError(site + " without tags failure")
 
@@ -129,13 +129,13 @@ class RetrievalTest:
                 # Don't test for websites which are acked to be down
                 continue
 
-            editorial_func = P.get_editorial_link
-            editorial_link = editorial_func(assertion_hash["with_editorial"][site]["plink"])
+            editorial_func = P.get_problem_details
+            editorial_link = editorial_func(assertion_hash["with_editorial"][site]["plink"])["editorial_link"]
             if editorial_link != assertion_hash["with_editorial"][site]["editorial_link"]:
                 raise RuntimeError(site + " with editorial failure")
 
             if site in assertion_hash["without_editorial"]:
-                editorial_link = editorial_func(assertion_hash["without_editorial"][site])
+                editorial_link = editorial_func(assertion_hash["without_editorial"][site])["editorial_link"]
                 if editorial_link is not None:
                     raise RuntimeError(site + " without editorial failure")
 
@@ -178,7 +178,7 @@ class RetrievalTest:
                 continue
 
             submission_content = P.download_submission(assertion_hash[site]["view_link"])
- 
+
             if submission_content != assertion_hash[site]["submission"]:
                 raise RuntimeError(site + " download submission failed")
 
@@ -268,12 +268,14 @@ def test_retrieval(retrieval_object, method_name):
 rt = RetrievalTest()
 pushover_message = ""
 
-for method_name in ["test_tag_retrieval",
+for method_name in [
+                    "test_tag_retrieval",
                     "test_editorial_retrieval",
                     "test_invalid_handle",
                     "test_download_submission",
                     "test_rating_graph",
-                    "test_submissions"]:
+                    "test_submissions"
+                    ]:
     res = test_retrieval(rt, method_name)
     if res != "Success":
         pushover_message += res + "\n"
