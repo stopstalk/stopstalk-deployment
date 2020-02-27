@@ -78,7 +78,7 @@ response.form_label_separator = myconf.take('forms.separator')
 #########################################################################
 
 from gluon.tools import Auth, Service, PluginManager
-from datetime import datetime, timedelta
+import datetime
 import utilities
 from stopstalk_constants import *
 
@@ -97,7 +97,7 @@ country_name_list.sort()
 # http://www.web2py.com/books/default/chapter/29/04#Translating-variables
 T.is_writable = False
 
-initial_date = datetime.strptime(current.INITIAL_DATE, "%Y-%m-%d %H:%M:%S")
+initial_date = datetime.datetime.strptime(current.INITIAL_DATE, "%Y-%m-%d %H:%M:%S")
 
 db.define_table("institutes",
                 Field("name", label=T("Name")))
