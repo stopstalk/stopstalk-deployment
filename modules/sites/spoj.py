@@ -49,10 +49,10 @@ class Profile(object):
     @staticmethod
     def get_problem_details(problem_link):
         """
-            Get the tags of a particular problem from its URL
+            Get problem_details given a problem link
 
             @param problem_link (String): Problem URL
-            @return (List): List of tags for that problem
+            @return (Dict): Details of the problem returned in a dictionary
         """
 
         editorial_link = None

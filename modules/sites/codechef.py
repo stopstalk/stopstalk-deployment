@@ -71,10 +71,10 @@ class Profile(object):
     @staticmethod
     def get_problem_details(problem_link):
         """
-            Get editorial link given a problem link
+            Get problem_details given a problem link
 
             @param problem_link (String): Problem URL
-            @return (String/None): Editorial URL
+            @return (Dict): Details of the problem returned in a dictionary
         """
         editorial_link = None
         all_tags = []
