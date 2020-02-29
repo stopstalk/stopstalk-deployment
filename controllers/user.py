@@ -43,6 +43,32 @@ def uva_handle():
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()
+def blacklist_user():
+    if session.user_id not in STOPSTALK_ADMIN_USER_IDS:
+        return "Don't be here"
+
+    stopstalk_handle = request.vars.stopstalk_handle
+
+    if stopstalk_handle is None:
+        return "Please pass stopstalk_handle"
+
+    stable = db.submission
+    atable = db.auth_user
+
+    row = db(atable.stopstalk_handle == stopstalk_handle).select().first()
+    if row is None:
+        return "Stopstalk handle not found"
+
+    row.update_record(stopstalk_rating=0,
+                      per_day=0,
+                      per_day_change=0.0,
+                      blacklisted=True)
+
+    srecords = db(stable.user_id == row.id).delete()
+    return "Deleted %d submission records" % srecords
+
+# ------------------------------------------------------------------------------
+@auth.requires_login()
 def friend_requests():
     """
         Just to avoid too many 404s
