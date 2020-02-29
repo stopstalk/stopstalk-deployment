@@ -113,7 +113,18 @@
                                     <th>
                                         <h4>
                                             <span>{{if row.country:}} {{=SPAN(_class="flag-icon flag-icon-" + current.all_countries[row.country].lower(), _title=row.country)}}  &nbsp; {{pass}}</span>
-                                            <strong><b>{{=name}}</b></strong>
+                                            {{if custom == False and row.blacklisted:}}
+                                                <strong class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="Account blacklisted" style="cursor: pointer;"><b><del>{{=name}}</del></b></strong>
+                                            {{else:}}
+                                                <strong>
+                                                    <b>{{=name}}</b>
+                                                    {{if auth.is_logged_in() and session.handle != row.stopstalk_handle:}}
+                                                        <a class="btn btn-floating user-blacklist-button tooltipped" data-position="bottom" data-delay="50" data-tooltip="Report user" href="{{=URL('default', 'contact_us', vars={'report_user': row.stopstalk_handle})}}" target="_blank">
+                                                            <i class="fa fa-flag red-text" style="margin-top: -9px; font-size: 12px;"></i>
+                                                        </a>
+                                                    {{pass}}
+                                                </strong>
+                                            {{pass}}
                                             {{if cf_count:}}
                                                 <button class="custom-user-count-profile-page btn-floating cuser-count-button tooltipped" data-position="right" data-delay="50" data-tooltip="{{=T('Number of custom users')}}" data-stopstalk-handle="{{=row.stopstalk_handle}}">{{=cf_count}}</button>
                                             {{pass}}

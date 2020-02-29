@@ -1661,12 +1661,17 @@ def contact_us():
     """
 
     ctable = db.contact_us
-
+    reported_handle = request.vars.get("report_user", None)
     form = SQLFORM(ctable)
-
     if auth.is_logged_in():
         user = session.auth.user
         ctable.email.default = user.email
+        form.vars.name = user.first_name + " " + user.last_name
+        form.vars.email = user.email
+
+    if reported_handle is not None:
+        form.vars.subject = "Report a user"
+        form.vars.text_message = "I would like to report %s because ..." % reported_handle
 
     if form.process().accepted:
         session.flash = T("We will get back to you!")
