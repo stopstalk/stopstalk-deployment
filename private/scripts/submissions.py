@@ -220,7 +220,6 @@ def get_submissions(user_id,
             if is_codechef_url:
                 slug = sites.codechef.Profile.get_slug(plink)
                 if slug in codechef_slugs:
-                    print "Codechef problem already exists", slug, plink
                     pid = codechef_slugs[slug]
                 else:
                     pid = None
