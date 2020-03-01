@@ -78,6 +78,8 @@ class Profile(object):
         """
         editorial_link = None
         all_tags = []
+        problem_setter = None
+
         api_link = problem_link.replace("https://www.codechef.com/", "https://www.codechef.com/api/contests/")
         response = get_request(api_link + "?v=1554915627060",
                                headers={"User-Agent": user_agent})
@@ -87,21 +89,19 @@ class Profile(object):
                         editorial_link=editorial_link)
 
         response = response.json()
-        try:
-            editorial_link = response["editorial_url"]
-        except KeyError:
-            editorial_link = None
 
-        try:
-            tags = response["tags"]
+        editorial_link = utilities.get_key_from_dict(response, "editorial_url", None)
+        problem_setter = utilities.get_key_from_dict(response, "problem_author", None)
+        tags = utilities.get_key_from_dict(response, "tags", None)
+
+        if tags is not None:
             all_as = BeautifulSoup(str(tags), "lxml").find_all("a")
             for i in all_as:
                 all_tags.append(i.contents[0].strip())
-        except KeyError:
-            pass
 
         return dict(tags=all_tags,
-                    editorial_link=editorial_link)
+                    editorial_link=editorial_link,
+                    problem_setters=[problem_setter])
 
     # -------------------------------------------------------------------------
     @staticmethod
