@@ -86,7 +86,8 @@ class Profile(object):
 
         if response in REQUEST_FAILURES:
             return dict(tags=all_tags,
-                        editorial_link=editorial_link)
+                        editorial_link=editorial_link,
+                        problem_setters=None)
 
         response = response.json()
 
