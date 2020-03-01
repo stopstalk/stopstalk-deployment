@@ -45,6 +45,43 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
+    def get_contest_id(problem_link):
+        """
+            Get contest ID from a problem_link
+
+            @param problem_link (String): Problem URL
+            @return (Integer): Contest ID from the URL
+        """
+        return problem_link.split("/")[-2]
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_problem_setters(problem_link):
+        import json
+        mappings = current.REDIS_CLIENT.get(CODEFORCES_PROBLEM_SETTERS_KEY)
+        if mappings is None:
+            file_path = "./applications/stopstalk/problem_setters/codeforces_metadata.json"
+            try:
+                file_obj = open(file_path, "r")
+            except IOError:
+                return None
+
+            mappings = json.loads(file_obj.read())
+            current.REDIS_CLIENT.set(CODEFORCES_PROBLEM_SETTERS_KEY,
+                                     json.dumps(mappings))
+            file_obj.close()
+
+        mappings = json.loads(mappings)
+        contest_id = Profile.get_contest_id(problem_link)
+        if contest_id in mappings["normal"]:
+            return mappings["normal"][contest_id]
+        elif contest_id in mappings["gym"]:
+            return mappings["gym"][contest_id]
+        else:
+            return None
+
+    # -------------------------------------------------------------------------
+    @staticmethod
     def get_problem_details(problem_link):
         """
             Get problem_details given a problem link
@@ -55,14 +92,18 @@ class Profile(object):
 
         all_tags = []
         editorial_link = None
+        problem_setters = Profile.get_problem_setters(problem_link)
+
         if problem_link.__contains__("gymProblem"):
             return dict(editorial_link=editorial_link,
-                        tags=all_tags)
+                        tags=all_tags,
+                        problem_setters=problem_setters)
 
         response = get_request(problem_link)
         if response in REQUEST_FAILURES:
             return dict(editorial_link=editorial_link,
-                        tags=all_tags)
+                        tags=all_tags,
+                        problem_setters=problem_setters)
 
         soup = BeautifulSoup(response.text, "lxml")
         all_as = soup.find_all("a")
@@ -82,7 +123,8 @@ class Profile(object):
         all_tags = map(lambda tag: tag.contents[0].strip(), tags)
 
         return dict(editorial_link=editorial_link,
-                    tags=all_tags)
+                    tags=all_tags,
+                    problem_setters=problem_setters)
 
     # -------------------------------------------------------------------------
     @staticmethod

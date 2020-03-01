@@ -29,6 +29,7 @@ import utilities
 from gluon import current
 from bs4 import BeautifulSoup
 from health_metrics import MetricHandler
+from stopstalk_constants import *
 
 user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36"
 urllib3.disable_warnings()
