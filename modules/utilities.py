@@ -61,6 +61,13 @@ def push_influx_data(measurement, points, app_name="cron"):
         return
 
 # -----------------------------------------------------------------------------
+def get_key_from_dict(actual_dict, key, no_key_value):
+    try:
+        return actual_dict[key]
+    except KeyError:
+        return no_key_value
+
+# -----------------------------------------------------------------------------
 def is_valid_stopstalk_handle(handle):
     try:
         group = re.match("[0-9a-zA-Z_]*", handle).group()
