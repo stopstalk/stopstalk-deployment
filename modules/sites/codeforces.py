@@ -82,16 +82,17 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_problem_details(problem_link):
+    def get_problem_details(**args):
         """
             Get problem_details given a problem link
 
-            @param problem_link (String): Problem URL
+            @param args (Dict): Dict containing problem_link
             @return (Dict): Details of the problem returned in a dictionary
         """
 
         all_tags = []
         editorial_link = None
+        problem_link = args["problem_link"]
         problem_setters = Profile.get_problem_setters(problem_link)
 
         if problem_link.__contains__("gymProblem"):

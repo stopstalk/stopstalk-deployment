@@ -155,7 +155,7 @@ def get_problem_details(problem_record):
     site = utilities.urltosite(link)
     Site = getattr(sites, site.lower()).Profile
     try:
-        details = Site.get_problem_details(problem_record.link)
+        details = Site.get_problem_details(problem_link=problem_record.link)
     except AttributeError:
         # get_problem_details not implemented for this site
         print "get_problem_details not implemented for", link

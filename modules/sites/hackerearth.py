@@ -45,14 +45,15 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_problem_details(problem_link):
+    def get_problem_details(**args):
         """
             Get problem_details given a problem link
 
-            @param problem_link (String): Problem URL
+            @param args (Dict): Dict containing problem link
             @return (Dict): Details of the problem returned in a dictionary
         """
         all_tags = []
+        problem_link = args["problem_link"]
         editorial_link = problem_link + "editorial/"
 
         response = get_request(problem_link)

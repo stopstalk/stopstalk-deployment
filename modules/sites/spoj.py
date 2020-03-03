@@ -47,18 +47,18 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_problem_details(problem_link):
+    def get_problem_details(**args):
         """
             Get problem_details given a problem link
 
-            @param problem_link (String): Problem URL
+            @param args (Dict): Dict containing problem_link
             @return (Dict): Details of the problem returned in a dictionary
         """
 
         editorial_link = None
         all_tags = []
         # Temporary hack - spoj seems to have removed their SSL cert
-        problem_link = problem_link.replace("https", "http")
+        problem_link = args["problem_link"].replace("https", "http")
         response = get_request(problem_link)
         if response in REQUEST_FAILURES:
             return dict(tags=all_tags, editorial_link=editorial_link)
