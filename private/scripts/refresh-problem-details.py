@@ -20,6 +20,7 @@
     THE SOFTWARE.
 """
 import utilities
+import pydal.objects
 import sites
 import gevent
 from gevent import monkey
@@ -33,8 +34,27 @@ before_30 = (now_time - \
 change_counts = {}
 
 # ==============================================================================
-def _get_date_as_string(value):
-    return str(value) if isinstance(value, datetime.date) else value
+class SpecialOps:
+    def __init__(self, record):
+        self.record_type = "row" if isinstance(record, pydal.objects.Row) else "table"
+
+    # --------------------------------------------------------------------------
+    def date_op(self, value):
+        return str(value) if self.record_type == "row" else value
+
+    # --------------------------------------------------------------------------
+    def contains_op(self, column, contains_value):
+        if self.record_type == "row":
+            return column.__contains__(contains_value)
+        else:
+            return column.contains(contains_value)
+
+    # --------------------------------------------------------------------------
+    def not_op(self, value):
+        if self.record_type == "row":
+            return not value
+        else:
+            return ~value
 
 # ==============================================================================
 class TagHandler():
@@ -49,8 +69,11 @@ class TagHandler():
         """
             @params dal_object (DAL relation or Record object): Object on which the conditions should be applied
         """
-        return (_get_date_as_string(dal_object.tags_added_on) >= before_30) & \
-               (dal_object.tags == "['-']")
+        special_ops = SpecialOps(dal_object)
+        return (special_ops.date_op(dal_object.tags_added_on) >= before_30) & \
+               (dal_object.tags == "['-']") & \
+               (special_ops.not_op(special_ops.contains_op(dal_object.link,
+                                                           "gymProblem/")))
 
     # --------------------------------------------------------------------------
     @staticmethod
@@ -77,10 +100,23 @@ class EditorialHandler():
         """
             @params dal_object (DAL relation or Record object): Object on which the conditions should be applied
         """
-        return ((dal_object.editorial_added_on == None) |
-                (_get_date_as_string(dal_object.editorial_added_on) >= before_30)) & \
-               ((dal_object.editorial_link == None) | \
-                (dal_object.editorial_link == ""))
+        special_ops = SpecialOps(dal_object)
+        return (
+                (
+                    (dal_object.editorial_added_on == None) |
+                    (special_ops.date_op(dal_object.editorial_added_on) >= before_30)
+                ) & \
+                (
+                    (dal_object.editorial_link == None) | \
+                    (dal_object.editorial_link == "")
+                )
+               ) & \
+               (
+                    special_ops.not_op(
+                        special_ops.contains_op(dal_object.link,
+                                                "gymProblem/")
+                    )
+               )
 
     # --------------------------------------------------------------------------
     @staticmethod
@@ -109,9 +145,9 @@ def refresh_problem_details():
     #   => The problem is from a contest and they'll be
     #      updating tags shortly(assuming 15 days)
     #   => Page was not reachable due to some reason
-    tags_query = tag_conditional(ptable)
+    tags_query = TagHandler.conditional(ptable)
 
-    editorial_query = editorial_conditional(ptable)
+    editorial_query = EditorialHandler.conditional(ptable)
 
     # If tag or editorial retrieval is required
     query = tags_query | editorial_query
@@ -131,48 +167,36 @@ def refresh_problem_details():
     return
 
 # ------------------------------------------------------------------------------
-def tag_conditional(dal_object):
-    """
-        @params dal_object (DAL relation or Record object): Object on which the conditions should be applied
-    """
-    return (_get_date_as_string(dal_object.tags_added_on) >= before_30) & \
-           (dal_object.tags == "['-']")
-
-# ------------------------------------------------------------------------------
-def editorial_conditional(dal_object):
-    """
-        @params dal_object (DAL relation or Record object): Object on which the conditions should be applied
-    """
-    return ((dal_object.editorial_added_on == None) |
-            (_get_date_as_string(dal_object.editorial_added_on) >= before_30)) & \
-           ((dal_object.editorial_link == None) | \
-            (dal_object.editorial_link == ""))
-
-# ------------------------------------------------------------------------------
 def get_problem_details(problem_record):
     update_params = dict()
     link = problem_record.link
+
+    update_things = []
+    for genre in genre_classes:
+        this_class = genre_classes[genre]
+        if this_class.conditional(problem_record):
+            update_things.append(this_class.column_value())
+
     site = utilities.urltosite(link)
     Site = getattr(sites, site.lower()).Profile
+
     try:
-        details = Site.get_problem_details(problem_link=problem_record.link)
+        details = Site.get_problem_details(problem_link=link,
+                                           update_things=update_things)
     except AttributeError:
         # get_problem_details not implemented for this site
         print "get_problem_details not implemented for", link
         return
 
-    for genre in genre_classes:
-        this_class = genre_classes[genre]
-        column_value = this_class.column_value()
-        if this_class.conditional(problem_record):
-            curr_update_params = this_class.update_params(
-                                    problem_record.link,
-                                    problem_record[column_value],
-                                    details[column_value]
-                                 )
-            if len(curr_update_params):
-                update_params.update(curr_update_params)
-                change_counts[column_value]["updated"] += 1
+    for column_value in update_things:
+        curr_update_params = this_class.update_params(
+                                problem_record.link,
+                                problem_record[column_value],
+                                details[column_value]
+                             )
+        if len(curr_update_params):
+            update_params.update(curr_update_params)
+            change_counts[column_value]["updated"] += 1
 
         change_counts[column_value]["total"] += 1
 
