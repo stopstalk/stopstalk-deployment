@@ -56,6 +56,31 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
+    def get_editorial_link(soup):
+        editorial_link = None
+        all_as = soup.find_all("a")
+
+        for link in all_as:
+            url = link.contents[0]
+            if url.__contains__("Tutorial"):
+                # Some problems have complete url -_-
+                # Example: http://codeforces.com/problemset/problem/358/C
+                if link["href"][0] == "/":
+                    editorial_link = "http://www.codeforces.com" + link["href"]
+                else:
+                    editorial_link = link["href"]
+                break
+
+        return editorial_link
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_tags(soup):
+        tags = soup.find_all("span", class_="tag-box")
+        return map(lambda tag: tag.contents[0].strip(), tags)
+
+    # -------------------------------------------------------------------------
+    @staticmethod
     def get_problem_setters(problem_link):
         import json
         mappings = current.REDIS_CLIENT.get(CODEFORCES_PROBLEM_SETTERS_KEY)
@@ -107,24 +132,9 @@ class Profile(object):
                         problem_setters=problem_setters)
 
         soup = BeautifulSoup(response.text, "lxml")
-        all_as = soup.find_all("a")
 
-        for link in all_as:
-            url = link.contents[0]
-            if url.__contains__("Tutorial"):
-                # Some problems have complete url -_-
-                # Example: http://codeforces.com/problemset/problem/358/C
-                if link["href"][0] == "/":
-                    editorial_link = "http://www.codeforces.com" + link["href"]
-                else:
-                    editorial_link = link["href"]
-                break
-
-        tags = soup.find_all("span", class_="tag-box")
-        all_tags = map(lambda tag: tag.contents[0].strip(), tags)
-
-        return dict(editorial_link=editorial_link,
-                    tags=all_tags,
+        return dict(editorial_link=Profile.get_editorial_link(soup),
+                    tags=Profile.get_tags(soup),
                     problem_setters=problem_setters)
 
     # -------------------------------------------------------------------------
