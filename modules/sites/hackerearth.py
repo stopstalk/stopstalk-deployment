@@ -45,6 +45,51 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
+    def get_tags(problem_link):
+        all_tags = []
+        response = get_request(problem_link)
+        if response in REQUEST_FAILURES:
+            return all_tags
+
+        soup = BeautifulSoup(response.text, "lxml")
+        try:
+            tags = soup.find_all("div", class_="problem-tags")[0]
+        except IndexError:
+            return all_tags
+
+        lis = tags.find_all("span")[1:]
+        for li in lis:
+            if li.contents[0] != "No tags":
+                all_tags.append(li.contents[0].strip(", "))
+
+        return all_tags
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_editorial_link(problem_link):
+        return problem_link + "editorial/"
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_problem_setters(problem_link):
+        problem_setters = None
+        url = "https://www.hackerearth.com/pagelets/problem-author-tester/" + \
+              "/".join(problem_link.split("/")[-3:])
+        response = get_request(url)
+        if response in REQUEST_FAILURES:
+            return problem_setters
+
+        try:
+            author = BeautifulSoup(response.text,
+                                   "lxml").find_all("a")[0]["href"].split("@")[1]
+        except:
+            print "HackerEarth Author is none", problem_link, url
+            author = None
+
+        return author if author is None else [author]
+
+    # -------------------------------------------------------------------------
+    @staticmethod
     def get_problem_details(**args):
         """
             Get problem_details given a problem link
@@ -52,30 +97,11 @@ class Profile(object):
             @param args (Dict): Dict containing problem link
             @return (Dict): Details of the problem returned in a dictionary
         """
-        all_tags = []
         problem_link = args["problem_link"]
-        editorial_link = problem_link + "editorial/"
 
-        response = get_request(problem_link)
-        if response in REQUEST_FAILURES:
-            return dict(tags=all_tags,
-                        editorial_link=editorial_link)
-
-        soup = BeautifulSoup(response.text, "lxml")
-        try:
-            tags = soup.find_all("div", class_="problem-tags")[0]
-        except IndexError:
-            return dict(tags=all_tags,
-                        editorial_link=editorial_link)
-
-        lis = tags.find_all("span")[1:]
-        all_tags = []
-        for li in lis:
-            if li.contents[0] != "No tags":
-                all_tags.append(li.contents[0].strip(", "))
-
-        return dict(tags=all_tags,
-                    editorial_link=editorial_link)
+        return dict(tags=Profile.get_tags(problem_link),
+                    editorial_link=Profile.get_editorial_link(problem_link),
+                    problem_setters=Profile.get_problem_setters(problem_link))
 
     # -------------------------------------------------------------------------
     @staticmethod
