@@ -69,6 +69,32 @@ class Profile(object):
 
     # --------------------------------------------------------------------------
     @staticmethod
+    def get_tags(response):
+        all_tags = []
+        tags = utilities.get_key_from_dict(response, "tags", None)
+
+        if tags is not None:
+            all_as = BeautifulSoup(str(tags), "lxml").find_all("a")
+            for i in all_as:
+                all_tags.append(i.contents[0].strip())
+
+        return all_tags
+
+    # --------------------------------------------------------------------------
+    @staticmethod
+    def get_editorial_link(response):
+        return utilities.get_key_from_dict(response, "editorial_url", None)
+
+    # --------------------------------------------------------------------------
+    @staticmethod
+    def get_problem_setters(response):
+        problem_author =  utilities.get_key_from_dict(response,
+                                                      "problem_author",
+                                                      None)
+        return None if problem_author is None else [problem_author]
+
+    # --------------------------------------------------------------------------
+    @staticmethod
     def get_problem_details(**args):
         """
             Get problem_details given a problem link
@@ -92,18 +118,9 @@ class Profile(object):
 
         response = response.json()
 
-        editorial_link = utilities.get_key_from_dict(response, "editorial_url", None)
-        problem_setter = utilities.get_key_from_dict(response, "problem_author", None)
-        tags = utilities.get_key_from_dict(response, "tags", None)
-
-        if tags is not None:
-            all_as = BeautifulSoup(str(tags), "lxml").find_all("a")
-            for i in all_as:
-                all_tags.append(i.contents[0].strip())
-
-        return dict(tags=all_tags,
-                    editorial_link=editorial_link,
-                    problem_setters=[problem_setter])
+        return dict(tags=Profile.get_tags(response),
+                    editorial_link=Profile.get_editorial_link(response),
+                    problem_setters=Profile.get_problem_setters(response))
 
     # -------------------------------------------------------------------------
     @staticmethod
