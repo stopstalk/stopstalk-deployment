@@ -69,18 +69,19 @@ class Profile(object):
 
     # --------------------------------------------------------------------------
     @staticmethod
-    def get_problem_details(problem_link):
+    def get_problem_details(**args):
         """
             Get problem_details given a problem link
 
-            @param problem_link (String): Problem URL
+            @param args (Dict): Dict containing problem_link
             @return (Dict): Details of the problem returned in a dictionary
         """
         editorial_link = None
         all_tags = []
         problem_setter = None
 
-        api_link = problem_link.replace("https://www.codechef.com/", "https://www.codechef.com/api/contests/")
+        api_link = args["problem_link"].replace("https://www.codechef.com/",
+                                                "https://www.codechef.com/api/contests/")
         response = get_request(api_link + "?v=1554915627060",
                                headers={"User-Agent": user_agent})
 
