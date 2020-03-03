@@ -45,31 +45,8 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_problem_details(**args):
-        """
-            Get problem_details given a problem link
-
-            @param args (Dict): Dict containing problem_link
-            @return (Dict): Details of the problem returned in a dictionary
-        """
+    def get_tags(response):
         all_tags = []
-        editorial_link = None
-        problem_link = args["problem_link"]
-
-        if problem_link.__contains__("contests"):
-            rest_url = problem_link.replace("contests/",
-                                            "rest/contests/")
-        else:
-            rest_url = problem_link.replace("challenges/",
-                                            "rest/contests/master/challenges/")
-
-        response = get_request(rest_url)
-        if response in REQUEST_FAILURES:
-            return dict(tags=all_tags,
-                        editorial_link=editorial_link)
-
-        response = response.json()
-
         model = response["model"]
         track = model["track"]
         primary_contest = model["primary_contest"]
@@ -86,11 +63,55 @@ class Profile(object):
                 # Then consider contest name as tag
                 all_tags = [primary_contest["name"]]
 
+        return all_tags
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_editorial_link(response, problem_link):
         editorial_present = response["model"]["is_editorial_available"]
         editorial_link = problem_link + "/editorial/" if editorial_present else None
+        return editorial_link
 
-        return dict(tags=all_tags,
-                    editorial_link=editorial_link)
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_problem_setters(response):
+        author = utilities.get_key_from_dict(response["model"],
+                                             "author_name",
+                                             None)
+        return None if author is None else [author]
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_problem_details(**args):
+        """
+            Get problem_details given a problem link
+
+            @param args (Dict): Dict containing problem_link
+            @return (Dict): Details of the problem returned in a dictionary
+        """
+        all_tags = []
+        editorial_link = None
+        problem_link = args["problem_link"]
+        problem_setters = None
+
+        if problem_link.__contains__("contests"):
+            rest_url = problem_link.replace("contests/",
+                                            "rest/contests/")
+        else:
+            rest_url = problem_link.replace("challenges/",
+                                            "rest/contests/master/challenges/")
+
+        response = get_request(rest_url)
+        if response in REQUEST_FAILURES:
+            return dict(tags=all_tags,
+                        editorial_link=editorial_link,
+                        problem_setters=problem_setters)
+
+        response = response.json()
+
+        return dict(tags=Profile.get_tags(response),
+                    editorial_link=Profile.get_editorial_link(response, problem_link),
+                    problem_setters=Profile.get_problem_setters(response))
 
     # -------------------------------------------------------------------------
     @staticmethod
