@@ -47,6 +47,41 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
+    def get_problem_setters(soup, problem_link):
+        try:
+            author = soup.find("table",
+                               id="problem-meta").find_all("a")[0]["href"].replace("/users/", "")
+        except:
+            print "Error occurred while getting problem setters", problem_link
+            return None
+
+        return None if author is None else [author]
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_editorial_link():
+        return None
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_tags(soup):
+        all_tags = []
+        tags = soup.find_all("div",
+                             id="problem-tags")
+        try:
+            tags = tags[0].findAll("span")
+        except IndexError:
+            return []
+
+        for tag in tags:
+            tmp = tag.contents
+            if tmp != []:
+                all_tags.append(tmp[0][1:])
+
+        return all_tags
+
+    # -------------------------------------------------------------------------
+    @staticmethod
     def get_problem_details(**args):
         """
             Get problem_details given a problem link
@@ -55,27 +90,23 @@ class Profile(object):
             @return (Dict): Details of the problem returned in a dictionary
         """
 
-        editorial_link = None
+        editorial_link = Profile.get_editorial_link()
         all_tags = []
+        problem_setters = None
+
         # Temporary hack - spoj seems to have removed their SSL cert
         problem_link = args["problem_link"].replace("https", "http")
         response = get_request(problem_link)
         if response in REQUEST_FAILURES:
-            return dict(tags=all_tags, editorial_link=editorial_link)
+            return dict(tags=all_tags,
+                        editorial_link=editorial_link,
+                        problem_setters=problem_setters)
 
-        tags = BeautifulSoup(response.text, "lxml").find_all("div",
-                                                             id="problem-tags")
-        try:
-            tags = tags[0].findAll("span")
-        except IndexError:
-            return dict(tags=all_tags, editorial_link=editorial_link)
-
-        for tag in tags:
-            tmp = tag.contents
-            if tmp != []:
-                all_tags.append(tmp[0][1:])
-
-        return dict(tags=all_tags, editorial_link=editorial_link)
+        soup = BeautifulSoup(response.text, "lxml")
+        return dict(tags=Profile.get_tags(soup),
+                    editorial_link=editorial_link,
+                    problem_setters=Profile.get_problem_setters(soup,
+                                                                problem_link))
 
     # -------------------------------------------------------------------------
     @staticmethod
