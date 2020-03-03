@@ -27,8 +27,8 @@ atable = db.auth_user
 cftable = db.custom_friend
 
 today = datetime.datetime.today().date()
-start = datetime.strptime(current.INITIAL_DATE,
-                          "%Y-%m-%d %H:%M:%S").date()
+start = datetime.datetime.strptime(current.INITIAL_DATE,
+                                   "%Y-%m-%d %H:%M:%S").date()
 total_days = (today - start).days
 
 sql_query = """
