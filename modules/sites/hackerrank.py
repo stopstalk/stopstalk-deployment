@@ -41,11 +41,19 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def is_website_down():
+        """
+            @return (Boolean): If the website is down
+        """
         return (Profile.site_name in current.REDIS_CLIENT.smembers("disabled_retrieval"))
 
     # -------------------------------------------------------------------------
     @staticmethod
     def get_tags(response):
+        """
+            @param response(Dict): Response json from the API
+
+            @return (List): List of tags
+        """
         all_tags = []
         model = response["model"]
         track = model["track"]
@@ -68,6 +76,12 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def get_editorial_link(response, problem_link):
+        """
+            @param response(Dict): Response json from the API
+            @param problem_link(String): Problem link
+
+            @return (String/None): Editorial link
+        """
         editorial_present = response["model"]["is_editorial_available"]
         editorial_link = problem_link + "/editorial/" if editorial_present else None
         return editorial_link
@@ -75,6 +89,11 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def get_problem_setters(response):
+        """
+            @param response(Dict): Response json from the API
+
+            @return (List/None): Problem authors or None
+        """
         author = utilities.get_key_from_dict(response["model"],
                                              "author_name",
                                              None)

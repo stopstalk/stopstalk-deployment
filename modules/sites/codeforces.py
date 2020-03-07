@@ -41,6 +41,9 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def is_website_down():
+        """
+            @return (Boolean): If the website is down
+        """
         return (Profile.site_name in current.REDIS_CLIENT.smembers("disabled_retrieval"))
 
     # -------------------------------------------------------------------------
@@ -57,6 +60,11 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def get_editorial_link(soup):
+        """
+            @param soup(BeautifulSoup): BeautifulSoup object of problem page
+
+            @return (String/None): Editorial link
+        """
         editorial_link = None
         all_as = soup.find_all("a")
 
@@ -76,12 +84,22 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def get_tags(soup):
+        """
+            @param soup(BeautifulSoup): BeautifulSoup object of problem page
+
+            @return (List): List of tags
+        """
         tags = soup.find_all("span", class_="tag-box")
         return map(lambda tag: tag.contents[0].strip(), tags)
 
     # -------------------------------------------------------------------------
     @staticmethod
     def get_problem_setters(problem_link):
+        """
+            @param problem_link(String): Problem link of the page
+
+            @return (List/None): Problem authors or None
+        """
         import json
         mappings = current.REDIS_CLIENT.get(CODEFORCES_PROBLEM_SETTERS_KEY)
         if mappings is None:
