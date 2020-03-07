@@ -185,10 +185,10 @@ def refresh_problem_details():
 
     # If tag or editorial retrieval is required
     query = tags_query | editorial_query
-    results = db(query).select()
+    results = db(query).select(orderby="<random>", limitby=(0, 2000))
 
     threads = []
-    workers = 49
+    workers = 10
     for i in xrange(0, len(results), workers):
         threads = []
         # O God I am so smart !!
