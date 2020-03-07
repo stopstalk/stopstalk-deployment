@@ -31,6 +31,10 @@ today = now_time.strftime("%Y-%m-%d")
 before_30 = (now_time - \
              datetime.timedelta(30)).strftime("%Y-%m-%d")
 
+pstable = db.problem_setters
+pstable_problem_ids = db(pstable.problem_id).select(distinct=True)
+pstable_problem_ids = [x.problem_id for x in pstable_problem_ids]
+
 change_counts = {}
 
 # ==============================================================================
@@ -56,6 +60,13 @@ class SpecialOps:
         else:
             return ~value
 
+    # --------------------------------------------------------------------------
+    def belongs_op(self, column, search_space):
+        if self.record_type == "row":
+            return column in search_space
+        else:
+            return column.belongs(search_space)
+
 # ==============================================================================
 class TagHandler():
     # --------------------------------------------------------------------------
@@ -78,6 +89,13 @@ class TagHandler():
     # --------------------------------------------------------------------------
     @staticmethod
     def update_params(link, prev_value, curr_value):
+        # Problems having tags = ["-"]
+        # Possibilities of such case -
+        #   => There are actually no tags for the problem
+        #   => The problem is from a contest and they'll be
+        #      updating tags shortly(assuming 15 days)
+        #   => Page was not reachable due to some reason
+
         curr_value = "['-']" if curr_value == [] else str(curr_value)
         if prev_value != curr_value and prev_value == "['-']":
             print "Updated tags", link, prev_value, "->", curr_value
@@ -162,29 +180,71 @@ class EditorialHandler():
 
         change_counts[column_value]["total"] += 1
 
+# ==============================================================================
+class ProblemSetterHandler():
+    # --------------------------------------------------------------------------
+    @staticmethod
+    def column_value():
+        return "problem_setters"
+
+    # --------------------------------------------------------------------------
+    @staticmethod
+    def conditional(dal_object):
+        special_ops = SpecialOps(dal_object)
+        return (special_ops.date_op(dal_object.tags_added_on) >= before_30) & \
+               (special_ops.not_op(special_ops.belongs_op(dal_object.id,
+                                                          pstable_problem_ids)))
+
+    # --------------------------------------------------------------------------
+    @staticmethod
+    def update_database(problem_record, new_value):
+        column_value = ProblemSetterHandler.column_value()
+        change_counts[column_value]["total"] += 1
+
+        problem_link = problem_record.link
+        problem_id = problem_record.id
+
+        if new_value is None:
+            print "No-change problem_setters", problem_link
+            return
+
+        records = db(pstable.problem_id == problem_id).select()
+        existing_records = set([(x.problem_id, x.handle) for x in records])
+        prev_value = [x[1] for x in existing_records]
+
+        updated_database = False
+        for value in new_value:
+            if (problem_id, value) not in existing_records:
+                pstable.insert(problem_id=problem_id,
+                               handle=value)
+                updated_database = True
+            else:
+                print (problem_id, value), "already exists"
+
+        if updated_database:
+            change_counts[column_value]["updated"] += 1
+            print "Updated problem_setters", problem_link, prev_value, "->", new_value
+        else:
+            print "No-change problem_setters", problem_link
+        return
 
 # ==============================================================================
 genre_classes = {
     "tags": TagHandler,
-    "editorial_link": EditorialHandler
+    "editorial_link": EditorialHandler,
+    "problem_setters": ProblemSetterHandler
 }
 
 # ------------------------------------------------------------------------------
 def refresh_problem_details():
     ptable = db.problem
 
-    # Problems having tags = ["-"]
-    # Possibilities of such case -
-    #   => There are actually no tags for the problem
-    #   => The problem is from a contest and they'll be
-    #      updating tags shortly(assuming 15 days)
-    #   => Page was not reachable due to some reason
-    tags_query = TagHandler.conditional(ptable)
-
-    editorial_query = EditorialHandler.conditional(ptable)
-
     # If tag or editorial retrieval is required
-    query = tags_query | editorial_query
+    query = False
+
+    for genre in genre_classes:
+        query |= genre_classes[genre].conditional(ptable)
+
     results = db(query).select(orderby="<random>", limitby=(0, 2000))
 
     threads = []
