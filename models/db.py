@@ -765,6 +765,10 @@ db.define_table("problem_difficulty",
                 Field("problem_id", "reference problem"),
                 Field("score", "integer", default=0))
 
+db.define_table("problem_setters",
+                Field("problem_id", "reference problem"),
+                Field("handle"))
+
 uvadb.define_table("problem",
                    Field("problem_id", "integer"),
                    Field("problem_num", "integer"),
