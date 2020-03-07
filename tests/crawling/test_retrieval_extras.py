@@ -86,12 +86,14 @@ class RetrievalTest:
                 continue
 
             tags_func = P.get_problem_details
-            tags_val = tags_func(assertion_hash["with_tags"][site]["plink"])["tags"]
+            tags_val = tags_func(problem_link=assertion_hash["with_tags"][site]["plink"],
+                                 update_things=["tags"])["tags"]
             if set(tags_val) != set(assertion_hash["with_tags"][site]["tags"]):
                 raise RuntimeError(site + " with tags failure")
 
             if site in assertion_hash["without_tags"]:
-                tags_val = tags_func(assertion_hash["without_tags"][site])["tags"]
+                tags_val = tags_func(problem_link=assertion_hash["without_tags"][site],
+                                     update_things=["tags"])["tags"]
                 if tags_val not in ([u"-"], []):
                     raise RuntimeError(site + " without tags failure")
 
@@ -130,12 +132,14 @@ class RetrievalTest:
                 continue
 
             editorial_func = P.get_problem_details
-            editorial_link = editorial_func(assertion_hash["with_editorial"][site]["plink"])["editorial_link"]
+            editorial_link = editorial_func(problem_link=assertion_hash["with_editorial"][site]["plink"],
+                                            update_things=["editorial_link"])["editorial_link"]
             if editorial_link != assertion_hash["with_editorial"][site]["editorial_link"]:
                 raise RuntimeError(site + " with editorial failure")
 
             if site in assertion_hash["without_editorial"]:
-                editorial_link = editorial_func(assertion_hash["without_editorial"][site])["editorial_link"]
+                editorial_link = editorial_func(problem_link=assertion_hash["without_editorial"][site],
+                                                update_things=["editorial_link"])["editorial_link"]
                 if editorial_link is not None:
                     raise RuntimeError(site + " without editorial failure")
 
