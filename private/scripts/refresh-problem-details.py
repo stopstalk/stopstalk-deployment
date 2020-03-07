@@ -87,6 +87,22 @@ class TagHandler():
             print "No-change in tags", link
             return dict()
 
+    # --------------------------------------------------------------------------
+    @staticmethod
+    def update_database(problem_record, new_value):
+        column_value = TagHandler.column_value()
+        curr_update_params = TagHandler.update_params(
+                                problem_record.link,
+                                problem_record[column_value],
+                                new_value
+                             )
+
+        if len(curr_update_params):
+            problem_record.update_record(**curr_update_params)
+            change_counts[column_value]["updated"] += 1
+
+        change_counts[column_value]["total"] += 1
+
 # ==============================================================================
 class EditorialHandler():
     # --------------------------------------------------------------------------
@@ -129,6 +145,24 @@ class EditorialHandler():
             print "No-change in editorial_link", link
             return dict()
 
+
+    # --------------------------------------------------------------------------
+    @staticmethod
+    def update_database(problem_record, new_value):
+        column_value = EditorialHandler.column_value()
+        curr_update_params = EditorialHandler.update_params(
+                                problem_record.link,
+                                problem_record[column_value],
+                                new_value
+                             )
+
+        if len(curr_update_params):
+            problem_record.update_record(**curr_update_params)
+            change_counts[column_value]["updated"] += 1
+
+        change_counts[column_value]["total"] += 1
+
+
 # ==============================================================================
 genre_classes = {
     "tags": TagHandler,
@@ -168,7 +202,6 @@ def refresh_problem_details():
 
 # ------------------------------------------------------------------------------
 def get_problem_details(problem_record):
-    update_params = dict()
     link = problem_record.link
 
     update_things = []
@@ -190,19 +223,7 @@ def get_problem_details(problem_record):
 
     for column_value in update_things:
         this_class = genre_classes[column_value]
-        curr_update_params = this_class.update_params(
-                                problem_record.link,
-                                problem_record[column_value],
-                                details[column_value]
-                             )
-        if len(curr_update_params):
-            update_params.update(curr_update_params)
-            change_counts[column_value]["updated"] += 1
-
-        change_counts[column_value]["total"] += 1
-
-    if len(update_params) > 0:
-        problem_record.update_record(**update_params)
+        this_class.update_database(problem_record, details[column_value])
 
     return
 
