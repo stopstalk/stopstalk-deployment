@@ -45,6 +45,21 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
+    def get_tags(soup):
+        div = soup.find("div", class_="problem_links").previous_sibling
+        all_as = div.find_all("a")[:-1]
+        if len(all_as):
+            return [x.text for x in all_as]
+        else:
+            return []
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_editorial_link():
+        return None
+
+    # -------------------------------------------------------------------------
+    @staticmethod
     def get_problem_details(**args):
         """
             Get problem_details given a problem link
@@ -53,18 +68,16 @@ class Profile(object):
             @return (Dict): Details of the problem returned in a dictionary
         """
         all_tags = []
+        editorial_link = Profile.get_editorial_link()
+
         response = get_request(args["problem_link"])
         if response in REQUEST_FAILURES:
-            return dict(tags=all_tags, editorial_link=None)
+            return dict(tags=all_tags, editorial_link=editorial_link)
 
         soup = BeautifulSoup(response.text, "lxml")
-        div = soup.find("div", class_="problem_links").previous_sibling
-        all_as = div.find_all("a")[:-1]
-        if len(all_as):
-            return dict(tags=[x.text for x in all_as],
-                        editorial_link=None)
-        else:
-            return dict(tags=all_tags, editorial_link=None)
+
+        return dict(tags=Profile.get_tags(soup),
+                    editorial_link=editorial_link)
 
     # -------------------------------------------------------------------------
     @staticmethod
