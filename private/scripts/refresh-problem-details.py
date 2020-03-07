@@ -132,7 +132,7 @@ class EditorialHandler():
 # ==============================================================================
 genre_classes = {
     "tags": TagHandler,
-    "editorials": EditorialHandler
+    "editorial_link": EditorialHandler
 }
 
 # ------------------------------------------------------------------------------
@@ -189,6 +189,7 @@ def get_problem_details(problem_record):
         return
 
     for column_value in update_things:
+        this_class = genre_classes[column_value]
         curr_update_params = this_class.update_params(
                                 problem_record.link,
                                 problem_record[column_value],
