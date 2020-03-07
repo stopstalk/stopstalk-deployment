@@ -52,7 +52,7 @@ def get_gym_problem_authors():
     for row in response["result"]:
         if row["id"] not in contest_to_authors["gym"] and \
            "preparedBy" in row:
-            contest_to_authors["gym"][int(row["id"])] = row["preparedBy"]
+            contest_to_authors["gym"][int(row["id"])] = [row["preparedBy"]]
     return
 
 # ------------------------------------------------------------------------------
