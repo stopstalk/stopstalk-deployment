@@ -71,7 +71,10 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_problem_setters(problem_link):
+    def get_problem_setters(problem_link, should_update):
+        if should_update is False:
+            return None
+
         problem_setters = None
         url = "https://www.hackerearth.com/pagelets/problem-author-tester/" + \
               "/".join(problem_link.split("/")[-3:])
@@ -101,7 +104,10 @@ class Profile(object):
 
         return dict(tags=Profile.get_tags(problem_link),
                     editorial_link=Profile.get_editorial_link(problem_link),
-                    problem_setters=Profile.get_problem_setters(problem_link))
+                    problem_setters=Profile.get_problem_setters(
+                                        problem_link,
+                                        "problem_setters" in args["update_things"]
+                                    ))
 
     # -------------------------------------------------------------------------
     @staticmethod
