@@ -205,7 +205,7 @@ class ProblemSetterHandler():
         problem_id = problem_record.id
 
         if new_value is None:
-            print "No-change problem_setters", problem_link
+            print "No-change in problem_setters", problem_link
             return
 
         records = db(pstable.problem_id == problem_id).select()
@@ -225,7 +225,7 @@ class ProblemSetterHandler():
             change_counts[column_value]["updated"] += 1
             print "Updated problem_setters", problem_link, prev_value, "->", new_value
         else:
-            print "No-change problem_setters", problem_link
+            print "No-change in problem_setters", problem_link
         return
 
 # ==============================================================================
