@@ -60,6 +60,12 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
+    def get_problem_setters(soup):
+        setter = soup.find("div", class_="problem_source").contents[1]
+        return [setter]
+
+    # -------------------------------------------------------------------------
+    @staticmethod
     def get_problem_details(**args):
         """
             Get problem_details given a problem link
@@ -69,15 +75,19 @@ class Profile(object):
         """
         all_tags = []
         editorial_link = Profile.get_editorial_link()
+        problem_setters = None
 
         response = get_request(args["problem_link"])
         if response in REQUEST_FAILURES:
-            return dict(tags=all_tags, editorial_link=editorial_link)
+            return dict(tags=all_tags,
+                        editorial_link=editorial_link,
+                        problem_setters=problem_setters)
 
         soup = BeautifulSoup(response.text, "lxml")
 
         return dict(tags=Profile.get_tags(soup),
-                    editorial_link=editorial_link)
+                    editorial_link=editorial_link,
+                    problem_setters=Profile.get_problem_setters(soup))
 
     # -------------------------------------------------------------------------
     @staticmethod
