@@ -41,11 +41,19 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def is_website_down():
+        """
+            @return (Boolean): If the website is down
+        """
         return (Profile.site_name in current.REDIS_CLIENT.smembers("disabled_retrieval"))
 
     # -------------------------------------------------------------------------
     @staticmethod
     def get_tags(soup):
+        """
+            @param soup(BeautifulSoup): BeautifulSoup object of problem page
+
+            @return (List): List of tags
+        """
         div = soup.find("div", class_="problem_links").previous_sibling
         all_as = div.find_all("a")[:-1]
         if len(all_as):
@@ -56,11 +64,19 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def get_editorial_link():
+        """
+            No editorials for Timus
+        """
         return None
 
     # -------------------------------------------------------------------------
     @staticmethod
     def get_problem_setters(soup):
+        """
+            @param soup(BeautifulSoup): BeautifulSoup object of problem page
+
+            @return (List/None): Problem authors or None
+        """
         setter = soup.find("div", class_="problem_source").contents[1]
         return [setter]
 

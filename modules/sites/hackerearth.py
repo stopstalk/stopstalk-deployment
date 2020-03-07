@@ -41,11 +41,19 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def is_website_down():
+        """
+            @return (Boolean): If the website is down
+        """
         return (Profile.site_name in current.REDIS_CLIENT.smembers("disabled_retrieval"))
 
     # -------------------------------------------------------------------------
     @staticmethod
     def get_tags(problem_link):
+        """
+            @param problem_link(String): Problem link
+
+            @return (List): List of tags
+        """
         all_tags = []
         response = get_request(problem_link)
         if response in REQUEST_FAILURES:
@@ -67,11 +75,22 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def get_editorial_link(problem_link):
+        """
+            @param problem_link(String): Problem link
+
+            @return (String): Editorial link
+        """
         return problem_link + "editorial/"
 
     # -------------------------------------------------------------------------
     @staticmethod
     def get_problem_setters(problem_link, should_update):
+        """
+            @param problem_link(String): Problem link
+            @param should_update(Boolean): If should call the API to get problem_setters
+
+            @return (List/None): Problem authors or None
+        """
         if should_update is False:
             return None
 

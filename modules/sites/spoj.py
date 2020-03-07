@@ -43,11 +43,20 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def is_website_down():
+        """
+            @return (Boolean): If the website is down
+        """
         return (Profile.site_name in current.REDIS_CLIENT.smembers("disabled_retrieval"))
 
     # -------------------------------------------------------------------------
     @staticmethod
     def get_problem_setters(soup, problem_link):
+        """
+            @param soup(BeautifulSoup): BeautifulSoup object of problem page
+            @param problem_link(String): Problem link
+
+            @return (List/None): Problem authors or None
+        """
         try:
             author = soup.find("table",
                                id="problem-meta").find_all("a")[0]["href"].replace("/users/", "")
@@ -60,11 +69,19 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def get_editorial_link():
+        """
+            No editorials for spoj
+        """
         return None
 
     # -------------------------------------------------------------------------
     @staticmethod
     def get_tags(soup):
+        """
+            @param soup(BeautifulSoup): BeautifulSoup object of problem page
+
+            @return (List): List of tags
+        """
         all_tags = []
         tags = soup.find_all("div",
                              id="problem-tags")
