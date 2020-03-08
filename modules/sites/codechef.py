@@ -60,6 +60,9 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def is_website_down():
+        """
+            @return (Boolean): If the website is down
+        """
         return (Profile.site_name in current.REDIS_CLIENT.smembers("disabled_retrieval"))
 
     # --------------------------------------------------------------------------
@@ -69,39 +72,73 @@ class Profile(object):
 
     # --------------------------------------------------------------------------
     @staticmethod
-    def get_problem_details(problem_link):
+    def get_tags(response):
+        """
+            @param response(Dict): Response json from the API
+
+            @return (List): List of tags
+        """
+        all_tags = []
+        tags = utilities.get_key_from_dict(response, "tags", None)
+
+        if tags is not None:
+            all_as = BeautifulSoup(str(tags), "lxml").find_all("a")
+            for i in all_as:
+                all_tags.append(i.contents[0].strip())
+
+        return all_tags
+
+    # --------------------------------------------------------------------------
+    @staticmethod
+    def get_editorial_link(response):
+        """
+            @param response(Dict): Response json from the API
+
+            @return (String/None): Editorial link
+        """
+        return utilities.get_key_from_dict(response, "editorial_url", None)
+
+    # --------------------------------------------------------------------------
+    @staticmethod
+    def get_problem_setters(response):
+        """
+            @param response(Dict): Response json from the API
+
+            @return (List/None): Problem authors or None
+        """
+        problem_author =  utilities.get_key_from_dict(response,
+                                                      "problem_author",
+                                                      None)
+        return None if problem_author is None else [problem_author]
+
+    # --------------------------------------------------------------------------
+    @staticmethod
+    def get_problem_details(**args):
         """
             Get problem_details given a problem link
 
-            @param problem_link (String): Problem URL
+            @param args (Dict): Dict containing problem_link
             @return (Dict): Details of the problem returned in a dictionary
         """
         editorial_link = None
         all_tags = []
-        api_link = problem_link.replace("https://www.codechef.com/", "https://www.codechef.com/api/contests/")
+        problem_setter = None
+
+        api_link = args["problem_link"].replace("https://www.codechef.com/",
+                                                "https://www.codechef.com/api/contests/")
         response = get_request(api_link + "?v=1554915627060",
                                headers={"User-Agent": user_agent})
 
         if response in REQUEST_FAILURES:
             return dict(tags=all_tags,
-                        editorial_link=editorial_link)
+                        editorial_link=editorial_link,
+                        problem_setters=None)
 
         response = response.json()
-        try:
-            editorial_link = response["editorial_url"]
-        except KeyError:
-            editorial_link = None
 
-        try:
-            tags = response["tags"]
-            all_as = BeautifulSoup(str(tags), "lxml").find_all("a")
-            for i in all_as:
-                all_tags.append(i.contents[0].strip())
-        except KeyError:
-            pass
-
-        return dict(tags=all_tags,
-                    editorial_link=editorial_link)
+        return dict(tags=Profile.get_tags(response),
+                    editorial_link=Profile.get_editorial_link(response),
+                    problem_setters=Profile.get_problem_setters(response))
 
     # -------------------------------------------------------------------------
     @staticmethod

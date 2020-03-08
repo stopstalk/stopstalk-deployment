@@ -41,30 +41,31 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def is_website_down():
+        """
+            @return (Boolean): If the website is down
+        """
         return (Profile.site_name in current.REDIS_CLIENT.smembers("disabled_retrieval"))
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_problem_details(problem_link):
+    def get_contest_id(problem_link):
         """
-            Get problem_details given a problem link
+            Get contest ID from a problem_link
 
             @param problem_link (String): Problem URL
-            @return (Dict): Details of the problem returned in a dictionary
+            @return (Integer): Contest ID from the URL
         """
+        return problem_link.split("/")[-2]
 
-        all_tags = []
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_editorial_link(soup):
+        """
+            @param soup(BeautifulSoup): BeautifulSoup object of problem page
+
+            @return (String/None): Editorial link
+        """
         editorial_link = None
-        if problem_link.__contains__("gymProblem"):
-            return dict(editorial_link=editorial_link,
-                        tags=all_tags)
-
-        response = get_request(problem_link)
-        if response in REQUEST_FAILURES:
-            return dict(editorial_link=editorial_link,
-                        tags=all_tags)
-
-        soup = BeautifulSoup(response.text, "lxml")
         all_as = soup.find_all("a")
 
         for link in all_as:
@@ -78,11 +79,81 @@ class Profile(object):
                     editorial_link = link["href"]
                 break
 
-        tags = soup.find_all("span", class_="tag-box")
-        all_tags = map(lambda tag: tag.contents[0].strip(), tags)
+        return editorial_link
 
-        return dict(editorial_link=editorial_link,
-                    tags=all_tags)
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_tags(soup):
+        """
+            @param soup(BeautifulSoup): BeautifulSoup object of problem page
+
+            @return (List): List of tags
+        """
+        tags = soup.find_all("span", class_="tag-box")
+        return map(lambda tag: tag.contents[0].strip(), tags)
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_problem_setters(problem_link):
+        """
+            @param problem_link(String): Problem link of the page
+
+            @return (List/None): Problem authors or None
+        """
+        import json
+        mappings = current.REDIS_CLIENT.get(CODEFORCES_PROBLEM_SETTERS_KEY)
+        if mappings is None:
+            file_path = "./applications/stopstalk/problem_setters/codeforces_metadata.json"
+            try:
+                file_obj = open(file_path, "r")
+            except IOError:
+                return None
+
+            mappings = json.loads(file_obj.read())
+            current.REDIS_CLIENT.set(CODEFORCES_PROBLEM_SETTERS_KEY,
+                                     json.dumps(mappings))
+            file_obj.close()
+
+        mappings = json.loads(mappings)
+        contest_id = Profile.get_contest_id(problem_link)
+        if contest_id in mappings["normal"]:
+            return mappings["normal"][contest_id]
+        elif contest_id in mappings["gym"]:
+            return mappings["gym"][contest_id]
+        else:
+            return None
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_problem_details(**args):
+        """
+            Get problem_details given a problem link
+
+            @param args (Dict): Dict containing problem_link
+            @return (Dict): Details of the problem returned in a dictionary
+        """
+
+        all_tags = []
+        editorial_link = None
+        problem_link = args["problem_link"]
+        problem_setters = Profile.get_problem_setters(problem_link)
+
+        if problem_link.__contains__("gymProblem"):
+            return dict(editorial_link=editorial_link,
+                        tags=all_tags,
+                        problem_setters=problem_setters)
+
+        response = get_request(problem_link)
+        if response in REQUEST_FAILURES:
+            return dict(editorial_link=editorial_link,
+                        tags=all_tags,
+                        problem_setters=problem_setters)
+
+        soup = BeautifulSoup(response.text, "lxml")
+
+        return dict(editorial_link=Profile.get_editorial_link(soup),
+                    tags=Profile.get_tags(soup),
+                    problem_setters=problem_setters)
 
     # -------------------------------------------------------------------------
     @staticmethod

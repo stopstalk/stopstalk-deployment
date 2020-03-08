@@ -41,30 +41,69 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def is_website_down():
+        """
+            @return (Boolean): If the website is down
+        """
         return (Profile.site_name in current.REDIS_CLIENT.smembers("disabled_retrieval"))
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_problem_details(problem_link):
+    def get_tags(soup):
         """
-            Get problem_details given a problem link
+            @param soup(BeautifulSoup): BeautifulSoup object of problem page
 
-            @param problem_link (String): Problem URL
-            @return (Dict): Details of the problem returned in a dictionary
+            @return (List): List of tags
         """
-        all_tags = []
-        response = get_request(problem_link)
-        if response in REQUEST_FAILURES:
-            return dict(tags=all_tags, editorial_link=None)
-
-        soup = BeautifulSoup(response.text, "lxml")
         div = soup.find("div", class_="problem_links").previous_sibling
         all_as = div.find_all("a")[:-1]
         if len(all_as):
-            return dict(tags=[x.text for x in all_as],
-                        editorial_link=None)
+            return [x.text for x in all_as]
         else:
-            return dict(tags=all_tags, editorial_link=None)
+            return []
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_editorial_link():
+        """
+            No editorials for Timus
+        """
+        return None
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_problem_setters(soup):
+        """
+            @param soup(BeautifulSoup): BeautifulSoup object of problem page
+
+            @return (List/None): Problem authors or None
+        """
+        setter = soup.find("div", class_="problem_source").contents[1]
+        return [setter]
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_problem_details(**args):
+        """
+            Get problem_details given a problem link
+
+            @param args (Dict): Dict containing problem link
+            @return (Dict): Details of the problem returned in a dictionary
+        """
+        all_tags = []
+        editorial_link = Profile.get_editorial_link()
+        problem_setters = None
+
+        response = get_request(args["problem_link"])
+        if response in REQUEST_FAILURES:
+            return dict(tags=all_tags,
+                        editorial_link=editorial_link,
+                        problem_setters=problem_setters)
+
+        soup = BeautifulSoup(response.text, "lxml")
+
+        return dict(tags=Profile.get_tags(soup),
+                    editorial_link=editorial_link,
+                    problem_setters=Profile.get_problem_setters(soup))
 
     # -------------------------------------------------------------------------
     @staticmethod
