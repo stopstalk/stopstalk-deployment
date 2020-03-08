@@ -150,7 +150,7 @@ class RetrievalTest:
             "with_problem_setters": {
                 "CodeChef": {
                     "plink": "https://www.codechef.com/LTIME27/problems/INVERT",
-                    "problem_setters": ["minimario"]
+                    "problem_setters": ["ma5termind"]
                 },
                 "CodeForces": {
                     "plink": "http://www.codeforces.com/problemset/problem/1200/B",
