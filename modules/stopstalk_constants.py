@@ -14,3 +14,5 @@ INFLUX_MEASUREMENT_SCHEMAS = {
         "tags": ["app_name", "host", "site", "kind"]
     }
 }
+
+CODEFORCES_PROBLEM_SETTERS_KEY = "codeforces_problem_setters"

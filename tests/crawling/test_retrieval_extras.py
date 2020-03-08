@@ -86,12 +86,14 @@ class RetrievalTest:
                 continue
 
             tags_func = P.get_problem_details
-            tags_val = tags_func(assertion_hash["with_tags"][site]["plink"])["tags"]
+            tags_val = tags_func(problem_link=assertion_hash["with_tags"][site]["plink"],
+                                 update_things=["tags"])["tags"]
             if set(tags_val) != set(assertion_hash["with_tags"][site]["tags"]):
                 raise RuntimeError(site + " with tags failure")
 
             if site in assertion_hash["without_tags"]:
-                tags_val = tags_func(assertion_hash["without_tags"][site])["tags"]
+                tags_val = tags_func(problem_link=assertion_hash["without_tags"][site],
+                                     update_things=["tags"])["tags"]
                 if tags_val not in ([u"-"], []):
                     raise RuntimeError(site + " without tags failure")
 
@@ -130,14 +132,71 @@ class RetrievalTest:
                 continue
 
             editorial_func = P.get_problem_details
-            editorial_link = editorial_func(assertion_hash["with_editorial"][site]["plink"])["editorial_link"]
+            editorial_link = editorial_func(problem_link=assertion_hash["with_editorial"][site]["plink"],
+                                            update_things=["editorial_link"])["editorial_link"]
             if editorial_link != assertion_hash["with_editorial"][site]["editorial_link"]:
                 raise RuntimeError(site + " with editorial failure")
 
             if site in assertion_hash["without_editorial"]:
-                editorial_link = editorial_func(assertion_hash["without_editorial"][site])["editorial_link"]
+                editorial_link = editorial_func(problem_link=assertion_hash["without_editorial"][site],
+                                                update_things=["editorial_link"])["editorial_link"]
                 if editorial_link is not None:
                     raise RuntimeError(site + " without editorial failure")
+
+    # --------------------------------------------------------------------------
+    def test_problem_setters_retrieval(self):
+        sites_with_problem_setters = ["CodeChef", "CodeForces", "HackerEarth", "HackerRank", "Spoj", "Timus"]
+        assertion_hash = {
+            "with_problem_setters": {
+                "CodeChef": {
+                    "plink": "https://www.codechef.com/LTIME27/problems/INVERT",
+                    "problem_setters": ["minimario"]
+                },
+                "CodeForces": {
+                    "plink": "http://www.codeforces.com/problemset/problem/1200/B",
+                    "problem_setters": ["djm03178", "nong"]
+                },
+                "HackerEarth": {
+                    "plink": "https://www.hackerearth.com/problem/algorithm/level-selections/",
+                    "problem_setters": ["akileshreddy40950"]
+                },
+                "HackerRank": {
+                    "plink": "https://www.hackerrank.com/challenges/candles-2",
+                    "problem_setters": ["gdisastery"]
+                },
+                "Timus": {
+                    "plink": "https://acm.timus.ru/problem.aspx?space=1&num=1954&locale=en",
+                    "problem_setters": ["Mikhail Rubinchik (prepared by Kirill Borozdin)"]
+                },
+                "Spoj": {
+                    "plink": "https://www.spoj.com/problems/CONNECT2/",
+                    "problem_setters": ["nikola_borisof"]
+                }
+            },
+            "without_problem_setters": {
+                "CodeForces": "http://www.codeforces.com/problemset/problem/1212/C",
+                "HackerEarth": "https://www.hackerearth.com/challenges/college/engineers-day-nit-silchar-challenge/algorithm/valentines-day/"
+            }
+        }
+        for site in sites_with_problem_setters:
+            P = self.profile_site[site]
+            if P.is_website_down():
+                # Don't test for websites which are acked to be down
+                continue
+
+            pd_func = P.get_problem_details
+            current_setters = pd_func(problem_link=assertion_hash["with_problem_setters"][site]["plink"],
+                                     update_things=["problem_setters"])["problem_setters"]
+            if current_setters != assertion_hash["with_problem_setters"][site]["problem_setters"]:
+                raise RuntimeError(site + " with problem_setters failure")
+
+            if site in assertion_hash["without_problem_setters"]:
+                current_setters = pd_func(problem_link=assertion_hash["without_problem_setters"][site],
+                                          update_things=["problem_setters"])["problem_setters"]
+                if current_setters is not None:
+                    raise RuntimeError(site + " without problem_setters failure")
+        return
+
 
     # --------------------------------------------------------------------------
     def test_invalid_handle(self):
@@ -274,7 +333,8 @@ for method_name in [
                     "test_invalid_handle",
                     "test_download_submission",
                     "test_rating_graph",
-                    "test_submissions"
+                    "test_submissions",
+                    "test_problem_setters_retrieval"
                     ]:
     res = test_retrieval(rt, method_name)
     if res != "Success":
