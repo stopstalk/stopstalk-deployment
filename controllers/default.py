@@ -848,6 +848,9 @@ def leaderboard():
     # Do not display unverified users in the leaderboard
     aquery &= (atable.registration_key == "")
 
+    # Do not display blacklisted users in the leaderboard
+    aquery &= (atable.blacklisted == False)
+
     if request.vars.has_key("q") and request.vars["q"]:
         from urllib import unquote
         institute = unquote(request.vars["q"])
