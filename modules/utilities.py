@@ -29,7 +29,7 @@ from requests.exceptions import ConnectionError
 from health_metrics import MetricHandler
 from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, I, \
-                  TEXTAREA, SELECT, OPTION, URL, BUTTON
+                  TEXTAREA, SELECT, OPTION, URL, BUTTON, TAG
 from gluon.storage import Storage
 from stopstalk_constants import *
 from influxdb_wrapper import get_series_helper
@@ -1114,7 +1114,15 @@ def compute_trending_table(submissions_list, table_type, user_id=None):
                                  column_name,
                                  user_id)
 
-# ----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+def get_actual_site(lower_site):
+    temp_sites_hash = {}
+    for site in current.SITES:
+        temp_sites_hash[site.lower()] = site
+
+    return temp_sites_hash[lower_site] if lower_site in temp_sites_hash else lower_site
+
+# ------------------------------------------------------------------------------
 def get_profile_url(site, handle):
     """
         Get the link to the site profile of a user
@@ -1127,6 +1135,8 @@ def get_profile_url(site, handle):
 
     if handle == "":
         return "NA"
+
+    site = get_actual_site(site)
 
     url_mappings = {"CodeChef": "users/",
                     "CodeForces": "profile/",
@@ -1152,6 +1162,51 @@ def get_profile_url(site, handle):
 
     else:
         return "%s%s%s" % (current.SITES[site], url_mappings[site], handle)
+
+# ----------------------------------------------------------------------------
+def problem_setters_widget(handles, site):
+    """
+        Get the UI widget to be shown for problem setters
+
+        @param handles (List of String): Site handles of the problem setters
+        @param site (String): Site for which the problem is set
+
+        @return (HTML): HTML to be shown for a problem setter
+    """
+
+    # Take only unique problem setters
+    handles = set(handles)
+
+    db = current.db
+    atable = db.auth_user
+    site_column = site.lower() + "_handle"
+    query = (atable[site_column].belongs(handles)) & \
+            (atable.blacklisted == False)
+    rows = db(query).select(atable[site_column],
+                            atable.stopstalk_handle)
+    mapping = dict([(x[site_column], x.stopstalk_handle) for x in rows])
+    html_value = DIV(_style="max-width: 500px; overflow: scroll; height: 45px;")
+    for handle in handles:
+        if handle in mapping:
+            html_value.append(SPAN(A(handle,
+                                     _href=URL("user",
+                                               "profile",
+                                               args=mapping[handle]),
+                                     _target="_blank"),
+                                   _class="problem-setter-on-stopstalk " + \
+                                          "problem-setter-href"))
+        elif site != "Timus":
+            html_value.append(SPAN(A(handle,
+                                     _href=get_profile_url(site, handle),
+                                     _target="_blank"),
+                                   _class="problem-setter-on-profile-site " + \
+                                          "problem-setter-href",
+                                   _style="white-space: nowrap;"))
+        else:
+            html_value.append(SPAN(handle,
+                                   _class="problem-setter-text"))
+
+    return html_value
 
 # ----------------------------------------------------------------------------
 def render_user_editorials_table(user_editorials,

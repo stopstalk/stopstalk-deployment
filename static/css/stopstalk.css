@@ -15,6 +15,35 @@ input.form-control {
     color: #424242;
 }
 
+.problem-setter-href {
+    text-decoration: none;
+    margin-left: 5px;
+    cursor: pointer;
+    font-size: large;
+    white-space: nowrap;
+}
+
+.problem-setter-href a {
+    color: #424242;
+}
+
+.problem-setter-on-stopstalk {
+    border-bottom: 2px solid #d61e95;
+}
+
+.problem-setter-on-profile-site {
+    border-bottom: 2px solid #f7ba0f;
+}
+
+.problem-setter-text {
+    text-decoration: none;
+    border-bottom: 2px solid #cabfbf;
+    margin-left: 5px;
+    color: black;
+    font-size: large;
+    white-space: nowrap;
+}
+
 body {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
