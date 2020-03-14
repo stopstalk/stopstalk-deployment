@@ -249,12 +249,15 @@ def index():
 
     stable = db.submission
     ptable = db.problem
+    pstable = db.problem_setters
 
     problem_record = ptable(problem_id)
     if problem_record is None:
         session.flash = T("Please click on a Problem Link")
         redirect(URL("default", "index"))
 
+    setters = db(pstable.problem_id == problem_id).select(pstable.handle)
+    setters = [x.handle for x in setters]
     query = (stable.problem_id == problem_id)
     cusfriends = []
 
@@ -288,7 +291,8 @@ def index():
     except AttributeError:
         all_tags = ["-"]
 
-    site = utilities.urltosite(problem_record.link).capitalize()
+    lower_site = utilities.urltosite(problem_record.link)
+    site = utilities.get_actual_site(lower_site)
     problem_details = DIV(_class="row")
     details_table = TABLE(_style="font-size: 140%; float: left; width: 50%;")
     problem_class = ""
@@ -358,6 +362,9 @@ def index():
                                   _class=suggest_tags_class,
                                   _id=suggest_tags_id,
                                   data=suggest_tags_data)))))
+    tbody.append(TR(TD(),
+                    TD(STRONG(T("Problem setters") + ":")),
+                    TD(DIV(utilities.problem_setters_widget(setters, site)))))
 
     details_table.append(tbody)
     problem_details.append(details_table)
