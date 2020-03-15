@@ -449,6 +449,84 @@ def pretty_string(all_items):
     else:
         return ", ".join(all_items[:-1]) + " and " + all_items[-1]
 
+# ------------------------------------------------------------------------------
+def get_problems_table(all_problems,
+                       logged_in_user_id,
+                       problem_with_user_editorials=None):
+    T = current.T
+    db = current.db
+    uetable = db.user_editorials
+    table = TABLE(_class="bordered centered")
+    thead = THEAD(TR(TH(T("Problem Name")),
+                     TH(T("Problem URL")),
+                     TH(T("Site")),
+                     TH(T("Accuracy")),
+                     TH(T("Users solved")),
+                     TH(T("Editorial")),
+                     TH(T("Tags"))))
+
+    table.append(thead)
+    tbody = TBODY()
+
+    if problem_with_user_editorials is None:
+        rows = db(uetable.verification == "accepted").select(uetable.problem_id)
+        problem_with_user_editorials = set([x["problem_id"] for x in rows])
+
+    for problem in all_problems:
+        tr = TR()
+
+        link_class, link_title = get_link_class(problem["id"],
+                                                logged_in_user_id)
+
+        tr.append(TD(problem_widget(problem["name"],
+                                    problem["link"],
+                                    link_class,
+                                    link_title,
+                                    problem["id"])))
+        tr.append(TD(A(I(_class="fa fa-link"),
+                       _href=problem["link"],
+                       _class="tag-problem-link",
+                       _target="_blank")))
+        tr.append(TD(IMG(_src=current.get_static_url("images/" + \
+                                    urltosite(problem["link"]) + \
+                                    "_small.png"),
+                         _style="height: 30px; width: 30px;")))
+        if problem["solved_submissions"] and problem["total_submissions"]:
+            tr.append(TD("%.2f" % (problem["solved_submissions"]  * 100.0 / \
+                                   problem["total_submissions"])))
+        else:
+            tr.append(TD("-"))
+        tr.append(TD(problem["user_count"] + problem["custom_user_count"]))
+
+        if problem["id"] in problem_with_user_editorials or \
+           problem["editorial_link"] not in ("", None):
+            tr.append(TD(A(I(_class="fa fa-book"),
+                           _href=URL("problems",
+                                     "editorials",
+                                     args=problem["id"]),
+                           _target="_blank",
+                           _class="problem-search-editorial-link")))
+        else:
+            tr.append(TD())
+
+        td = TD()
+        all_tags = eval(problem["tags"])
+        for tag in all_tags:
+            td.append(DIV(A(tag,
+                            _href=URL("problems",
+                                      "tag",
+                                      vars={"q": tag.encode("utf8"), "page": 1}),
+                            _class="tags-chip",
+                            _style="color: white;",
+                            _target="_blank"),
+                          _class="chip"))
+            td.append(" ")
+        tr.append(td)
+        tbody.append(tr)
+
+    table.append(tbody)
+
+    return table
 # -----------------------------------------------------------------------------
 def urltosite(url):
     """
@@ -581,12 +659,13 @@ def clear_profile_page_cache(stopstalk_handle):
     current.REDIS_CLIENT.delete("profile_page:user_stats_" + stopstalk_handle)
 
 # ----------------------------------------------------------------------------
-def get_stopstalk_user_stats(user_submissions):
+def get_stopstalk_user_stats(stopstalk_handle, custom, user_submissions):
 
     # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     # Initializations
     solved_problem_ids = set([])
     all_attempted_pids = set([])
+    problems_authored_count = 0
     sites_solved_count = {}
     site_accuracies = {}
     for site in current.SITES:
@@ -599,8 +678,11 @@ def get_stopstalk_user_stats(user_submissions):
     curr_day_streak = max_day_streak = 0
     curr_accepted_streak = max_accepted_streak = 0
 
+    if not custom:
+        problems_authored_count = len(get_problems_authored_by(stopstalk_handle))
+
     if len(user_submissions) == 0:
-        return final_rating
+        return {"problems_authored_count": problems_authored_count}
 
     INITIAL_DATE = datetime.datetime.strptime(current.INITIAL_DATE,
                                               "%Y-%m-%d %H:%M:%S").date()
@@ -744,8 +826,41 @@ def get_stopstalk_user_stats(user_submissions):
         site_accuracies=site_accuracies,
         solved_problems_count=len(solved_problem_ids),
         total_problems_count=len(all_attempted_pids),
-        calendar_data=calendar_data
+        calendar_data=calendar_data,
+        problems_authored_count=problems_authored_count
     )
+
+# ------------------------------------------------------------------------------
+def get_problems_authored_by(stopstalk_handle):
+    db = current.db
+    atable = db.auth_user
+    ptable = db.problem
+    pstable = db.problem_setters
+
+    problems = []
+
+    query = (atable.stopstalk_handle == stopstalk_handle) & \
+            (atable.blacklisted == False) & \
+            (atable.registration_key == "")
+
+    user = db(query).select().first()
+    if user is None:
+        return problems
+
+    site_to_handle = {}
+    for site in current.SITES:
+        handle = user[site.lower() + "_handle"]
+        if handle:
+            site_to_handle[site.lower()] = handle
+
+    records = db(pstable.handle.belongs(site_to_handle.values())).select()
+    for record in records:
+        problem_record = ptable(record.problem_id)
+        site = urltosite(problem_record.link)
+        if user[site + "_handle"] == record.handle:
+            problems.append(problem_record)
+
+    return problems
 
 # -----------------------------------------------------------------------------
 def materialize_form(form, fields):

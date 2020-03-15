@@ -65,6 +65,8 @@ def get_submission_dict_from_row(submission_row):
 def update_stopstalk_rating(user_id, user_submissions, custom):
     global commit_to_db_counter
 
+    # @ToDo: This script is not used. Will have to change the signature of it
+    # before it could be re-run
     final_rating = utilities.get_stopstalk_user_stats(user_submissions)["rating_history"]
     final_rating = dict(final_rating)
     if final_rating == {}:
