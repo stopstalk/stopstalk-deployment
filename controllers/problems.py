@@ -71,7 +71,36 @@ def pie_chart_helper():
                            groupby=stable.status)
     return dict(row=row)
 
-# ----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+def by():
+    if len(request.args) < 1:
+        session.flash = "Invalid URL!"
+        redirect(URL("default", "index"))
+
+    stopstalk_handle = request.args[0]
+
+    atable = db.auth_user
+    pstable = db.problem_setters
+    ptable = db.problem
+
+    return_val = dict(stopstalk_handle=stopstalk_handle,
+                      problems_count=0)
+
+    table = TABLE(_class="bordered centered")
+    thead = THEAD(TR(TH("Problem")))
+
+    problems = utilities.get_problems_authored_by(stopstalk_handle)
+    if len(problems) == 0:
+        return return_val
+
+    return_val["table"] = utilities.get_problems_table(problems,
+                                                       session.user_id,
+                                                       None)
+
+    return_val["problems_count"] = len(problems)
+    return return_val
+
+# ------------------------------------------------------------------------------
 @auth.requires_login()
 def get_tag_values():
     ttable = db.tag
@@ -249,12 +278,15 @@ def index():
 
     stable = db.submission
     ptable = db.problem
+    pstable = db.problem_setters
 
     problem_record = ptable(problem_id)
     if problem_record is None:
         session.flash = T("Please click on a Problem Link")
         redirect(URL("default", "index"))
 
+    setters = db(pstable.problem_id == problem_id).select(pstable.handle)
+    setters = [x.handle for x in setters]
     query = (stable.problem_id == problem_id)
     cusfriends = []
 
@@ -288,7 +320,8 @@ def index():
     except AttributeError:
         all_tags = ["-"]
 
-    site = utilities.urltosite(problem_record.link).capitalize()
+    lower_site = utilities.urltosite(problem_record.link)
+    site = utilities.get_actual_site(lower_site)
     problem_details = DIV(_class="row")
     details_table = TABLE(_style="font-size: 140%; float: left; width: 50%;")
     problem_class = ""
@@ -358,6 +391,9 @@ def index():
                                   _class=suggest_tags_class,
                                   _id=suggest_tags_id,
                                   data=suggest_tags_data)))))
+    tbody.append(TR(TD(),
+                    TD(STRONG(T("Problem setters") + ":")),
+                    TD(DIV(utilities.problem_setters_widget(setters, site)))))
 
     details_table.append(tbody)
     problem_details.append(details_table)
@@ -669,16 +705,6 @@ def search():
         Search page for problems
     """
 
-    table = TABLE(_class="bordered centered")
-    thead = THEAD(TR(TH(T("Problem Name")),
-                     TH(T("Problem URL")),
-                     TH(T("Site")),
-                     TH(T("Accuracy")),
-                     TH(T("Users solved")),
-                     TH(T("Editorial")),
-                     TH(T("Tags"))))
-    table.append(thead)
-
     ttable = db.tag
     uetable = db.user_editorials
 
@@ -805,58 +831,10 @@ def search():
         # No need of caching here
         all_problems = db(query).select(**kwargs)
 
-    tbody = TBODY()
-    for problem in all_problems:
-        tr = TR()
-
-        link_class, link_title = utilities.get_link_class(problem["id"], session.user_id)
-
-        tr.append(TD(utilities.problem_widget(problem["name"],
-                                              problem["link"],
-                                              link_class,
-                                              link_title,
-                                              problem["id"])))
-        tr.append(TD(A(I(_class="fa fa-link"),
-                       _href=problem["link"],
-                       _class="tag-problem-link",
-                       _target="_blank")))
-        tr.append(TD(IMG(_src=get_static_url("images/" + \
-                                             utilities.urltosite(problem["link"]) + \
-                                             "_small.png"),
-                         _style="height: 30px; width: 30px;")))
-        tr.append(TD("%.2f" % (problem["solved_submissions"]  * 100.0 / \
-                               problem["total_submissions"])))
-        tr.append(TD(problem["user_count"] + problem["custom_user_count"]))
-
-        if problem["id"] in problem_with_user_editorials or \
-           problem["editorial_link"] not in ("", None):
-            tr.append(TD(A(I(_class="fa fa-book"),
-                           _href=URL("problems",
-                                     "editorials",
-                                     args=problem["id"]),
-                           _target="_blank",
-                           _class="problem-search-editorial-link")))
-        else:
-            tr.append(TD())
-
-        td = TD()
-        all_tags = eval(problem["tags"])
-        for tag in all_tags:
-            td.append(DIV(A(tag,
-                            _href=URL("problems",
-                                      "tag",
-                                      vars={"q": tag.encode("utf8"), "page": 1}),
-                            _class="tags-chip",
-                            _style="color: white;",
-                            _target="_blank"),
-                          _class="chip"))
-            td.append(" ")
-        tr.append(td)
-        tbody.append(tr)
-
-    table.append(tbody)
-
-    return dict(table=table, generalized_tags=generalized_tags)
+    return dict(table=utilities.get_problems_table(all_problems,
+                                                   session.user_id,
+                                                   problem_with_user_editorials),
+                generalized_tags=generalized_tags)
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()

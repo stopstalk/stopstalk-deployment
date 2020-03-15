@@ -210,6 +210,9 @@
                                 </tr>
                             </table>
                             <span class="light grey-text"><i>{{=T("Last updated")}}: <b>{{=last_updated}}</b></i></span>
+                            {{if custom == False:}}
+                                <br/><span class="light grey-text"><strong><a href="{{=URL('problems', 'by', args=actual_handle)}}" id="problems-authored-count"></a></strong></span>
+                            {{pass}}
                         </div>
                         {{if parent_user:}}
                             <h6>{{=T("Custom User of")}} <a id="profile-custom-user-of" href="{{=URL('user', 'profile', args=parent_user[1])}}">{{=parent_user[0]}}</a></h6>
