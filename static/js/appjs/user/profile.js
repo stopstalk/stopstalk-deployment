@@ -580,11 +580,18 @@
         });
     };
 
+    var populateProblemsAuthoredCount = function(count) {
+        if(custom === 'True') return;
+        var problemString = count === 1 ? 'problem' : 'problems';
+        $('#problems-authored-count').html(count.toString() + " " + problemString + " authored by " + handle);
+    };
+
     $(document).ready(function() {
 
         if (totalSubmissions !== "0") {
             // Load the Visualization API and the piechart package.
             getStopStalkUserStats().then(function(data) {
+                populateProblemsAuthoredCount(data['problems_authored_count']);
                 populateSolvedCounts(data['solved_counts']);
                 $('#solved-problems').html(data['solved_problems_count']);
                 $('#total-problems').html(data['total_problems_count']);
@@ -598,7 +605,6 @@
                 StopStalk.userStats.status_percentages = data['status_percentages'];
                 google.load('visualization', '1.1', {'packages': ['corechart', 'calendar', 'bar'],
                                                      'callback': drawCharts});
-
             });
         } else {
             $('#user-details').css('margin-left', '32%');

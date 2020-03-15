@@ -690,6 +690,8 @@ def get_stopstalk_user_stats():
         result = json.loads(data)
         if not auth.is_logged_in():
             del result["rating_history"]
+        if "problems_authored_count" not in result:
+            result["problems_authored_count"] = 0
         return result
 
     stable = db.submission
@@ -702,7 +704,9 @@ def get_stopstalk_user_stats():
                             orderby=stable.time_stamp)
 
     # Returns rating history, accepted & max streak (day and accepted),
-    result = utilities.get_stopstalk_user_stats(rows.as_list())
+    result = utilities.get_stopstalk_user_stats(stopstalk_handle,
+                                                custom,
+                                                rows.as_list())
 
     if auth.is_logged_in():
         current.REDIS_CLIENT.set(redis_cache_key,
