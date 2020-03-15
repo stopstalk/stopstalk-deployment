@@ -391,9 +391,12 @@ def index():
                                   _class=suggest_tags_class,
                                   _id=suggest_tags_id,
                                   data=suggest_tags_data)))))
-    tbody.append(TR(TD(),
-                    TD(STRONG(T("Problem setters") + ":")),
-                    TD(DIV(utilities.problem_setters_widget(setters, site)))))
+
+    if len(setters) > 0:
+        tbody.append(TR(TD(),
+                        TD(STRONG(T("Problem setters") + ":")),
+                        TD(DIV(utilities.problem_setters_widget(setters,
+                                                                site)))))
 
     details_table.append(tbody)
     problem_details.append(details_table)
