@@ -10,6 +10,17 @@
         });
     };
 
+    var problemAuthorsClickHandler = function() {
+        $(document).on('click', '#problems-authored-count', function() {
+            var problemCount = parseInt($(this).html().split(" ")[0]);
+            if (problemCount > 0) {
+                sendToGA('button', 'Profile page - Non-zero problems authored link', 'click');
+            } else {
+                sendToGA('button', 'Profile page - No problems authored link', 'click');
+            }
+        })
+    };
+
     var addEventListener = function(selector, label, buttonLabel, eventType) {
         if (!eventType) eventType = 'click';
         $(document).on(eventType, selector, function() {
@@ -66,6 +77,8 @@
         addEventListener('#update-my-submissions', 'Refresh my submissions', false);
         addEventListener('#disabled-update-my-submissions', 'Disabled refresh my submissions', false);
         addEventListener('.read-editorial-user-profile-page', 'Read editorial - user profile page', false);
+
+        problemAuthorsClickHandler();
     };
 
     var addMiscellaneousToGA = function() {
@@ -108,6 +121,9 @@
         addEventListener('#show-tags', 'Show tags', false);
         addEventListener('#problem-page-difficulty-button', 'Problem page difficulty', false);
         addEventListener('.problem-page-tag', 'Problem page tag', false);
+        addEventListener('.problem-setter-on-stopstalk', 'Problem author link on StopStalk', false);
+        addEventListener('.problem-setter-on-profile-site', 'Problem author link on Profile Site', false);
+        addEventListener('.problem-setter-text', 'Problem setter text without a link', false);
     };
 
     var addUserEditorialsButtonsToGA = function() {
