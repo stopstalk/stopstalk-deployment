@@ -324,7 +324,9 @@ def update_stopstalk_rating(user_id, stopstalk_handle, custom):
                                  "site": submission[3],
                                  "problem_id": submission[4]})
 
-    final_rating = utilities.get_stopstalk_user_stats(user_submissions)["rating_history"]
+    final_rating = utilities.get_stopstalk_user_stats(stopstalk_handle,
+                                                      custom,
+                                                      user_submissions)["rating_history"]
     final_rating = dict(final_rating)
     today = str(datetime.datetime.now().date())
     current_rating = int(sum(final_rating[today]))
