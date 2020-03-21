@@ -137,7 +137,7 @@ var initTooltips = function() {
         var cacheValue = localStorage.getItem("lastShowedProblemDifficulty");
         if (!isLoggedIn ||
             (cacheValue &&
-             (Date.now() - cacheValue < 48 * 60 * 60 * 1000) && !explicitClick)) {
+             (Date.now() - cacheValue < 72 * 60 * 60 * 1000) && !explicitClick)) {
             // Modal showed less than 48 hours before;
             return;
         }
