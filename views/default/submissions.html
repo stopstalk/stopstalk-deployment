@@ -52,7 +52,7 @@
     {{if len(current.REDIS_CLIENT.smembers("disabled_retrieval")):}}
         <h7 class="red-text"> We are facing some issues for retrieval from {{=utilities.pretty_string(current.REDIS_CLIENT.smembers("disabled_retrieval"))}}. We will be back soon.</h7>
     {{pass}}
-    <p>We have updated StopStalk Rating formula - {{=A("Know more", _href=URL('default', 'updates'), _target="_blank")}}</p>
+    <p>Problem setters data on <b>problem page</b> and <b>profile page</b> - {{=A("Know more", _href=URL('default', 'updates'), _target="_blank")}}</p>
     <p>Please take some time to fill out this {{=A("Survey Form", _href="http://goo.gl/oeLZHd", _target="_blank")}}</p>
 
     <div id="page-selection" class="center"></div>
