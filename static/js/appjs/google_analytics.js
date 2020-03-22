@@ -108,6 +108,9 @@
         addEventListener('#job-profile-cta', 'StopStalk Job profile CTA', false);
 
         addEventListener('#recent-announcements-update-job-profile-now', 'Onboarding StopStalk Job Profile', false);
+
+        addEventListener('#problem-difficulty-later', 'Problem Difficulty modal - Later', false);
+        addEventListener('#skip-this-problem', 'Problem Difficulty modal - Skip problem', false);
     };
 
     var addProblemPageButtonsToGA = function() {
