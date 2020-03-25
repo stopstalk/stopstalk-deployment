@@ -227,6 +227,9 @@ def update_details():
     stable = db.submission
     record = utilities.get_user_records([session.user_id], "id", "id", True)
 
+    for field in form_fields:
+        record[field] = record[field].encode("utf-8")
+
     # Do not allow to modify stopstalk_handle and email
     atable.stopstalk_handle.writable = False
     atable.stopstalk_handle.comment = T("StopStalk handle cannot be updated")
@@ -324,15 +327,19 @@ def update_friend():
     for site in current.SITES:
         form_fields.append(site.lower() + "_handle")
 
+    for field in form_fields:
+        record[field] = unicode(record[field], "utf-8").encode("utf-8")
+
     form = SQLFORM(cftable,
                    record,
                    fields=form_fields,
                    deletable=True,
                    showid=False)
 
-    form.vars.stopstalk_handle = record.stopstalk_handle
+    form.vars.stopstalk_handle = record.stopstalk_handle.replace("cus_", "")
 
     if form.validate(onvalidation=current.sanitize_fields):
+        form.vars.stopstalk_handle = record.stopstalk_handle
         pickle_file_path = "./applications/stopstalk/graph_data/" + \
                            str(record.id) + "_custom.pickle"
         import os
@@ -403,6 +410,7 @@ def update_friend():
             redirect(URL("user", "custom_friend"))
 
     elif form.errors:
+        form.vars.stopstalk_handle = record.stopstalk_handle
         response.flash = T("Form has errors")
 
     return dict(form=form)
