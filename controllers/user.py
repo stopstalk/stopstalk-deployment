@@ -228,6 +228,8 @@ def update_details():
     record = utilities.get_user_records([session.user_id], "id", "id", True)
 
     for field in form_fields:
+        if record[field] is None:
+            continue
         record[field] = record[field].encode("utf-8")
 
     # Do not allow to modify stopstalk_handle and email
@@ -328,6 +330,8 @@ def update_friend():
         form_fields.append(site.lower() + "_handle")
 
     for field in form_fields:
+        if record[field] is None:
+            continue
         record[field] = unicode(record[field], "utf-8").encode("utf-8")
 
     form = SQLFORM(cftable,
