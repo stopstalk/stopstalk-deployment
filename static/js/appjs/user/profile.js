@@ -463,10 +463,10 @@
             newSpanChildren[0].innerHTML = problemName;
             if (isLoggedIn) {
                 $(newSpanChildren[1]).attr("data-pid", problemId);
-                return "<span class='todo-list-icon'>" +
+                return "<div class='todo-list-icon' style='display: inline-flex;'>" +
                        newSpanChildren[0].outerHTML +
                        newSpanChildren[1].outerHTML +
-                       "</span>";
+                       "</div>";
             } else {
                 return newSpanChildren[0].outerHTML;
             }
@@ -509,15 +509,6 @@
             return tableContent;
         };
 
-        $(document).on('mouseenter', '.todo-list-icon', function() {
-            var todoIcon = $(this).find('.add-to-todo-list');
-            todoIcon.show();
-        });
-
-        $(document).on('mouseleave', '.todo-list-icon', function() {
-            var todoIcon = $(this).find('.add-to-todo-list');
-            todoIcon.hide();
-        });
         $.ajax({
             url: getSolvedUnsolvedURL,
             method: "GET",

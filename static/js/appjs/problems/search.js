@@ -51,16 +51,6 @@
 
     $(document).ready(function() {
 
-        $(document).on('mouseenter', '#problem-response tr', function() {
-            var todoIcon = $(this).find('.add-to-todo-list');
-            todoIcon.show();
-        });
-
-        $(document).on('mouseleave', '#problem-response tr', function() {
-            var todoIcon = $(this).find('.add-to-todo-list');
-            todoIcon.hide();
-        });
-
         var curr_url = window.location.href;
         var vars = curr_url.split("?");
         var params = {
