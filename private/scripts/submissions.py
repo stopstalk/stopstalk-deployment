@@ -210,7 +210,7 @@ def get_submissions(user_id,
         try:
             pname = submission[2].encode("utf-8", "ignore")
         except UnicodeDecodeError:
-            pname = str(pname)
+            pname = str(submission[2])
 
         pname = pname.replace("\"", "").replace("'", "")
         plink = submission[1]
