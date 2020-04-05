@@ -606,3 +606,30 @@ nav ul a:hover {
 .tap-target {
     background-color: #f0ff03e8;
 }
+
+.add-to-todo-list.chip {
+    height: 20px;
+    line-height: 20px;
+    color: white;
+    font-size: 12px;
+    margin-left: 6px;
+    background-color: #190c88;
+    padding-left: 10px;
+    display: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.problem-search-tags-column {
+    text-align: left !important;
+    max-width: 450px;
+}
+
+.left-align-problem {
+    text-align: left !important;
+}
+
+.problem-search-name-column {
+    text-align: left !important;
+    padding-left: 10px;
+}

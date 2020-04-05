@@ -336,7 +336,8 @@ def index():
                                                 link_class,
                                                 link_title,
                                                 problem_id,
-                                                anchor=False),
+                                                anchor=False,
+                                                disable_todo=True),
                        _id="problem_name")))
     tbody.append(TR(TD(),
                     TD(STRONG(T("Site") + ":")),
@@ -901,7 +902,7 @@ def trending():
         # Show table with trending problems amongst friends
         div = DIV(DIV("",
                       _id="friends-trending-table",
-                      _class="col offset-s1 s4 z-depth-2",
+                      _class="col offset-s1 s4 z-depth-2 trendings-html-table",
                       _style="padding: 200px;"),
                   DIV("",
                       _id="global-trending-table",
@@ -912,7 +913,7 @@ def trending():
         # Show table with globally trending problems
         div = DIV(DIV("",
                       _id="global-trending-table",
-                      _class="col offset-s3 s6 z-depth-2",
+                      _class="col offset-s3 s6 z-depth-2 trendings-html-table",
                       _style="padding: 200px;"),
                   _class="row center")
 

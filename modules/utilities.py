@@ -457,13 +457,13 @@ def get_problems_table(all_problems,
     db = current.db
     uetable = db.user_editorials
     table = TABLE(_class="bordered centered")
-    thead = THEAD(TR(TH(T("Problem Name")),
+    thead = THEAD(TR(TH(T("Problem Name"), _class="problem-search-name-column"),
                      TH(T("Problem URL")),
                      TH(T("Site")),
                      TH(T("Accuracy")),
                      TH(T("Users solved")),
                      TH(T("Editorial")),
-                     TH(T("Tags"))))
+                     TH(T("Tags"), _class="left-align-problem")))
 
     table.append(thead)
     tbody = TBODY()
@@ -482,7 +482,8 @@ def get_problems_table(all_problems,
                                     problem["link"],
                                     link_class,
                                     link_title,
-                                    problem["id"])))
+                                    problem["id"]),
+                     _class="problem-search-name-column"))
         tr.append(TD(A(I(_class="fa fa-link"),
                        _href=problem["link"],
                        _class="tag-problem-link",
@@ -509,7 +510,7 @@ def get_problems_table(all_problems,
         else:
             tr.append(TD())
 
-        td = TD()
+        td = TD(_class="left-align-problem")
         all_tags = eval(problem["tags"])
         for tag in all_tags:
             td.append(DIV(A(tag,
@@ -577,7 +578,7 @@ def problem_widget(name,
         @return (DIV)
     """
 
-    problem_div = SPAN()
+    problem_div = DIV()
     if anchor:
         problem_div.append(A(name,
                              _href=URL("problems",
@@ -595,12 +596,9 @@ def problem_widget(name,
                                 _title=link_title))
 
     if current.auth.is_logged_in() and disable_todo is False:
-        problem_div.append(I(_class="add-to-todo-list fa fa-check-square-o tooltipped",
-                             _style="padding-left: 10px; display: none; cursor: pointer;",
-                             data={"position": "right",
-                                   "delay": "10",
-                                   "tooltip": "Add problem to Todo List",
-                                   "pid": problem_id}))
+        problem_div.append(SPAN("Add to Todo",
+                                _class="chip add-to-todo-list",
+                                data={"pid": problem_id}))
 
     return problem_div
 
@@ -1007,7 +1005,7 @@ def render_table(submissions, duplicates=[], user_id=None):
     table.append(THEAD(TR(TH(T("Name")),
                           TH(T("Site Profile")),
                           TH(T("Time of submission")),
-                          TH(T("Problem")),
+                          TH(T("Problem"), _class="left-align-problem"),
                           TH(T("Language")),
                           TH(T("Status")),
                           TH(T("Points")),
@@ -1078,7 +1076,8 @@ def render_table(submissions, duplicates=[], user_id=None):
                                  problem_details["link"],
                                  link_class,
                                  link_title,
-                                 submission.problem_id)))
+                                 submission.problem_id),
+                  _class="left-align-problem"))
         append(TD(submission.lang))
         append(TD(IMG(_src=current.get_static_url("images/" + submission.status + ".jpg"),
                       _title=status_dict[submission.status],
@@ -1153,7 +1152,8 @@ def render_trending_table(caption, problems, column_name, user_id):
                                     problem[1]["link"],
                                     link_class,
                                     link_title,
-                                    problem[0])))
+                                    problem[0]),
+                     _class="left-align-problem"))
         tr.append(TD(problem[1]["total_submissions"]))
         tr.append(TD(len(problem[1]["users"]) + \
                      len(problem[1]["custom_users"])))
@@ -1184,7 +1184,7 @@ def compute_trending_table(submissions_list, table_type, user_id=None):
 
     if len(submissions_list) == 0:
         table = TABLE(_class="bordered centered")
-        thead = THEAD(TR(TH(T("Problem")),
+        thead = THEAD(TR(TH(T("Problem"), _class="left-align-problem"),
                          TH(T("Recent Submissions")),
                          TH(column_name)))
         table.append(thead)

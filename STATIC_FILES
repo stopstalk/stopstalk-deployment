@@ -1,1 +1,6 @@
-js/appjs/google_analytics.js
+css/stopstalk.css
+js/appjs/layout.js
+js/appjs/problems/by.js
+js/appjs/problems/search.js
+js/appjs/problems/trending.js
+js/appjs/user/profile.js

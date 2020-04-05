@@ -299,12 +299,19 @@ var initTooltips = function() {
             document.activeElement.blur();
         }
 
-        $(document).on('mouseenter', '.submissions-table tr, .user-editorials-table tr', function() {
+        var todoTrSelectors = ".submissions-table tr," +
+                              ".user-editorials-table tr," +
+                              "#problem-setter-page-table tr," +
+                              "#problem-response tr," +
+                              ".trendings-html-table tr," +
+                              ".todo-list-icon";
+
+        $(document).on('mouseenter', todoTrSelectors, function() {
             var todoIcon = $(this).find('.add-to-todo-list');
-            todoIcon.show();
+            todoIcon.css("display", "inline-flex");
         });
 
-        $(document).on('mouseleave', '.submissions-table tr, .user-editorials-table tr', function() {
+        $(document).on('mouseleave', todoTrSelectors, function() {
             var todoIcon = $(this).find('.add-to-todo-list');
             todoIcon.hide();
         });
