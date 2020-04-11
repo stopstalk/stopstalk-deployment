@@ -295,6 +295,20 @@
         </table>
       </div>
       <br/>
+      <div>
+          {{if not auth.is_logged_in():}}
+              <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+              <!-- Profile page - before contest rating -->
+              <ins class="adsbygoogle"
+                   style="display:inline-block;width:728px;height:90px"
+                   data-ad-client="ca-pub-5161647280125247"
+                   data-ad-slot="6469761463"></ins>
+              <script>
+                   (adsbygoogle = window.adsbygoogle || []).push({});
+              </script>
+          {{pass}}
+      </div>
+      <br/>
       {{if total_submissions != 0:}}
       <div id="carousel-item-2">
         <h5>Contest Ratings</h5>
