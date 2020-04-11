@@ -33,7 +33,7 @@
     </label>
 </div>
 
-{{if not auth.is_logged_in():}}
+{{if utilities.should_show_stopstalk_ads("leaderboard"):}}
   <div>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
     <!-- Leaderboard - before the table -->
