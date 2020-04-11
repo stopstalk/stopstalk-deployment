@@ -4,22 +4,22 @@
 {{=T('Sign Up') if request.args(0) == 'register' else T('Login') if request.args(0) == 'login' else T(request.args(0).replace('_',' ').title())}}
 </h2>
 
-<div class="container">
-    <div class="row">
-        <div id="web2py_user_form" class="col-lg-6">
-        {{
-        if request.args(0)=='login':
-            if not 'register' in auth.settings.actions_disabled:
-                form.add_button(T('Sign Up'),URL(args='register', vars={'_next': request.vars._next} if request.vars._next else None),_class='btn btn-default')
-            pass
-            if not 'request_reset_password' in auth.settings.actions_disabled:
-                form.add_button(T('Lost Password'),URL(args='request_reset_password'),_class='btn btn-default')
-            pass
+<div class="row">
+    <div class="col s1"></div>
+    <div id="web2py_user_form" class="col s10">
+    {{
+    if request.args(0)=='login':
+        if not 'register' in auth.settings.actions_disabled:
+            form.add_button(T('Sign Up'),URL(args='register', vars={'_next': request.vars._next} if request.vars._next else None),_class='btn btn-default')
         pass
-        =form
-        }}
-        </div>
+        if not 'request_reset_password' in auth.settings.actions_disabled:
+            form.add_button(T('Lost Password'),URL(args='request_reset_password'),_class='btn btn-default')
+        pass
+    pass
+    =form
+    }}
     </div>
+    <div class="col s1"></div>
 </div>
 
 

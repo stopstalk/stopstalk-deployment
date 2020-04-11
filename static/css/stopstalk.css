@@ -633,3 +633,7 @@ nav ul a:hover {
     text-align: left !important;
     padding-left: 10px;
 }
+
+.w2p-form-button {
+    margin-left: 10px;
+}
