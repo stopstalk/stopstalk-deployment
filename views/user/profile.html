@@ -296,7 +296,7 @@
       </div>
       <br/>
       <div>
-          {{if not auth.is_logged_in():}}
+          {{if utilities.should_show_stopstalk_ads("profile", actual_handle):}}
               <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
               <!-- Profile page - before contest rating -->
               <ins class="adsbygoogle"
@@ -322,7 +322,7 @@
         {{pass}}
         <br/>
         <div>
-            {{if not auth.is_logged_in():}}
+            {{if utilities.should_show_stopstalk_ads("profile", actual_handle):}}
                 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
                 <!-- Profile page - before rating history -->
                 <ins class="adsbygoogle"
@@ -362,7 +362,7 @@
         </div>
       </div>
       <div>
-          {{if not auth.is_logged_in():}}
+          {{if utilities.should_show_stopstalk_ads("profile", actual_handle):}}
               <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
               <!-- Profile page - Before Activity header -->
               <ins class="adsbygoogle"
@@ -388,7 +388,7 @@
         <div id="activity"></div>
       </div>
       <div>
-          {{if not auth.is_logged_in():}}
+          {{if utilities.should_show_stopstalk_ads("profile", actual_handle):}}
               <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
               <!-- Profile page - before solved problems -->
               <ins class="adsbygoogle"
@@ -404,7 +404,7 @@
         <h4>Solved Problems</h4>
         <div id="solved-problems-list" class="row"></div>
           <div>
-              {{if not auth.is_logged_in():}}
+              {{if utilities.should_show_stopstalk_ads("profile", actual_handle):}}
                   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
                   <!-- Profile page - before unsolved problems -->
                   <ins class="adsbygoogle"
@@ -420,7 +420,7 @@
         <div id="unsolved-problems-list" class="row"></div>
       </div>
       <div>
-          {{if not auth.is_logged_in():}}
+          {{if utilities.should_show_stopstalk_ads("profile", actual_handle):}}
               <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
               <!-- Profile page - page end -->
               <ins class="adsbygoogle"

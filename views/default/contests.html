@@ -18,7 +18,7 @@
 
   <div class="row">
     <div class="col s2">
-      {{if not auth.is_logged_in():}}
+      {{if utilities.should_show_stopstalk_ads("contests"):}}
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
         <!-- Contest page - Left -->
         <ins class="adsbygoogle"
@@ -38,7 +38,7 @@
       {{pass}}
     </div>
     <div class="col s2">
-      {{if not auth.is_logged_in():}}
+      {{if utilities.should_show_stopstalk_ads("contests"):}}
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
         <!-- Contest page - Right -->
         <ins class="adsbygoogle"
