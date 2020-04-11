@@ -306,7 +306,21 @@
         {{else:}}
             <p>No graph data available at the moment !</p>
         {{pass}}
-        <br/><br/>
+        <br/>
+        <div>
+            {{if not auth.is_logged_in():}}
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <!-- Profile page - before rating history -->
+                <ins class="adsbygoogle"
+                     style="display:inline-block;width:728px;height:90px"
+                     data-ad-client="ca-pub-5161647280125247"
+                     data-ad-slot="5249067183"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            {{pass}}
+        </div>
+        <br/>
         <h5>StopStalk Rating History</h5>
         {{if auth.is_logged_in():}}
             <p>Contributions of various aspects to StopStalk Rating</p>
