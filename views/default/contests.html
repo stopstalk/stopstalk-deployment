@@ -16,9 +16,15 @@
   <h1>{{=T("Upcoming Contests")}}</h1>
   <h6>{{=T("Note: All the time stamps mentioned here are in your localized timezone (Browser Time)")}}</h6>
 
-  {{if retrieved:}}
-    {{=table}}
-  {{else:}}
-    <p>Error retrieving contests! If the problem persists please <a href="{{=URL('default', 'contact_us')}}">{{=T("Contact Us")}}</a></p>
-  {{pass}}
+  <div class="row">
+    <div class="col s1"></div>
+    <div class="col s10">
+      {{if retrieved:}}
+        {{=table}}
+      {{else:}}
+        <p>Error retrieving contests! If the problem persists please <a href="{{=URL('default', 'contact_us')}}">{{=T("Contact Us")}}</a></p>
+      {{pass}}
+    </div>
+    <div class="col s1"></div>
+  </div>
 </body>
