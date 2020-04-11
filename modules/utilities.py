@@ -904,11 +904,11 @@ def materialize_form(form, fields):
                                             _class="file-path",
                                             _placeholder=label.components[0]),
                                       _class="file-path-wrapper"),
-                                  _class="col input-field file-field offset-s3 s6")
+                                  _class="col input-field file-field offset-s2 s8")
             elif _type == "checkbox":
                 # Checkbox input field does not require input-field class
                 input_field = DIV(_controls, label,
-                                  _class="col offset-s3 s6")
+                                  _class="col offset-s2 s8")
         if isinstance(controls, SPAN):
             # Mostly for ids which cannot be edited by user
             _controls = INPUT(_value=controls.components[0],
@@ -935,7 +935,7 @@ def materialize_form(form, fields):
             # Note now label will be the first element
             # of Select input whose value would be ""
             input_field = DIV(_controls,
-                              _class="col offset-s3 s6")
+                              _class="col offset-s2 s8")
         elif isinstance(controls, A):
             # For the links in the bottom while updating tables like auth_user
             label = ""
@@ -947,7 +947,7 @@ def materialize_form(form, fields):
 
         if input_field is None:
             input_field = DIV(_controls, label,
-                              _class="input-field col offset-s3 s6")
+                              _class="input-field col offset-s2 s8")
         curr_div.append(input_field)
 
         if field_tooltip:

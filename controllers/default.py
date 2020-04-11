@@ -803,11 +803,10 @@ def contests():
 
 # ------------------------------------------------------------------------------
 def updates():
-  """
-      Show the updates and feature additions
-  """
-
-  return dict()
+    """
+        Show the updates and feature additions
+    """
+    return dict()
 
 # ------------------------------------------------------------------------------
 def leaderboard():
