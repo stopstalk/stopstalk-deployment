@@ -37,7 +37,6 @@ print datetime.datetime.now(), "Total submission count:", len(last_submissions)
 trending_problems = trending_utilities.get_trending_problem_list(last_submissions)
 
 current.REDIS_CLIENT.set(GLOBALLY_TRENDING_PROBLEMS_CACHE_KEY,
-                         str(trending_problems),
-                         ex=1 * 60 * 60)
+                         str(trending_problems))
 
 print datetime.datetime.now(), "Redis set done on", GLOBALLY_TRENDING_PROBLEMS_CACHE_KEY
