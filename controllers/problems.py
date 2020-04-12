@@ -843,6 +843,7 @@ def search():
 # ----------------------------------------------------------------------------
 @auth.requires_login()
 def friends_trending():
+    import trending_utilities
     friends, cusfriends = utilities.get_friends(session.user_id)
 
     # The Original IDs of duplicate custom_friends
@@ -857,11 +858,11 @@ def friends_trending():
     stable = db.submission
     query = (stable.user_id.belongs(friends) | \
              stable.custom_user_id.belongs(custom_friends))
-    last_submissions = utilities.get_last_submissions_for_trending(query)
+    last_submissions = trending_utilities.get_last_submissions_for_trending(query)
 
-    return utilities.compute_trending_table(last_submissions,
-                                            "friends",
-                                            session.user_id)
+    return trending_utilities.compute_trending_table(last_submissions,
+                                                     "friends",
+                                                     session.user_id)
 
 # ----------------------------------------------------------------------------
 def global_trending():
