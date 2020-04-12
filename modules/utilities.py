@@ -578,7 +578,7 @@ def problem_widget(name,
         @return (DIV)
     """
 
-    problem_div = DIV()
+    problem_div = DIV(_style="display: inline;")
     if anchor:
         problem_div.append(A(name,
                              _href=URL("problems",
@@ -870,7 +870,6 @@ def should_show_stopstalk_ads(page_genre, stopstalk_handle=None):
         return True
 
     if page_genre == "profile":
-        print "should_show_stopstalk_ads", page_genre, stopstalk_handle
         # Whitelisted set of stopstalk handles
         starting_regexes = ["17", "18", "19", "20", "21", "22"]
         start_condition = any([stopstalk_handle.startswith(x) for x in starting_regexes])
@@ -1157,7 +1156,7 @@ def render_trending_table(caption, problems, column_name, user_id):
     """
     T = current.T
 
-    table = TABLE(_class="bordered centered")
+    table = TABLE(_class="bordered centered trendings-html-table")
     thead = THEAD(TR(TH(T("Problem")),
                      TH(T("Recent Submissions")),
                      TH(column_name)))
@@ -1218,8 +1217,17 @@ def compute_trending_table(submissions_list, table_type, user_id=None):
                                 x[1]["total_submissions"])
 
     problems_dict = {}
+
+    # Temporary cache for avoiding spam on redis for trending page
+    cache_of_cache = {}
     for submission in submissions_list:
-        problem_details = get_problem_details(submission.problem_id)
+        if len(cache_of_cache) == 200:
+            cache_of_cache = {}
+        if submission.problem_id in cache_of_cache:
+            problem_details = cache_of_cache[submission.problem_id]
+        else:
+            problem_details = get_problem_details(submission.problem_id)
+            cache_of_cache[submission.problem_id] = problem_details
         plink = problem_details["link"]
         pname = problem_details["name"]
         uid = submission.user_id
@@ -1248,6 +1256,23 @@ def compute_trending_table(submissions_list, table_type, user_id=None):
                                  trending_problems[:current.PROBLEMS_PER_PAGE],
                                  column_name,
                                  user_id)
+
+# ------------------------------------------------------------------------------
+def get_last_submissions_for_trending(extra_query=True):
+    db = current.db
+    stable = db.submission
+
+    today = datetime.datetime.today()
+    start_date = str(today - datetime.timedelta(days=current.PAST_DAYS))
+
+    query = (stable.time_stamp >= start_date) & extra_query
+
+    last_submissions = db(query).select(stable.problem_id,
+                                        stable.user_id,
+                                        stable.custom_user_id,
+                                        orderby=stable.user_id|stable.site|stable.time_stamp)
+
+    return last_submissions
 
 # ------------------------------------------------------------------------------
 def get_actual_site(lower_site):
