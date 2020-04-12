@@ -863,18 +863,22 @@ def get_problems_authored_by(stopstalk_handle):
 # -----------------------------------------------------------------------------
 def should_show_stopstalk_ads(page_genre, stopstalk_handle=None):
     # If user is not logged in
-    if not current.auth.is_logged_in() or \
+    user_logged_in = current.auth.is_logged_in()
+    if not user_logged_in or \
        (page_genre == "profile" and \
         stopstalk_handle is None):
         return True
 
     if page_genre == "profile":
+        print "should_show_stopstalk_ads", page_genre, stopstalk_handle
         # Whitelisted set of stopstalk handles
         starting_regexes = ["17", "18", "19", "20", "21", "22"]
         start_condition = any([stopstalk_handle.startswith(x) for x in starting_regexes])
         return start_condition
-    else:
+    elif not user_logged_in:
         return True
+    else:
+        return False
 
 # -----------------------------------------------------------------------------
 def materialize_form(form, fields):
