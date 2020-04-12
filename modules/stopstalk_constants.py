@@ -16,3 +16,5 @@ INFLUX_MEASUREMENT_SCHEMAS = {
 }
 
 CODEFORCES_PROBLEM_SETTERS_KEY = "codeforces_problem_setters"
+
+GLOBALLY_TRENDING_PROBLEMS_CACHE_KEY = "global_trending_table_cache"

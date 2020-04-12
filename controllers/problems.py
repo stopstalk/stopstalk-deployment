@@ -855,16 +855,9 @@ def friends_trending():
 
     friends, custom_friends = set(friends), set(custom_friends)
     stable = db.submission
-    today = datetime.datetime.today()
-    # Consider submissions only after PAST_DAYS(customizable)
-    # for trending problems
-    start_date = str(today - datetime.timedelta(days=current.PAST_DAYS))
-    query = (stable.time_stamp >= start_date) & \
-            (stable.user_id.belongs(friends) | \
+    query = (stable.user_id.belongs(friends) | \
              stable.custom_user_id.belongs(custom_friends))
-    last_submissions = db(query).select(stable.problem_id,
-                                        stable.user_id,
-                                        stable.custom_user_id)
+    last_submissions = utilities.get_last_submissions_for_trending(query)
 
     return utilities.compute_trending_table(last_submissions,
                                             "friends",
@@ -872,24 +865,7 @@ def friends_trending():
 
 # ----------------------------------------------------------------------------
 def global_trending():
-    trending_table = current.REDIS_CLIENT.get("global_trending_table_cache")
-    if trending_table:
-        return trending_table
-
-    stable = db.submission
-    today = datetime.datetime.today()
-    # Consider submissions only after PAST_DAYS(customizable)
-    # for trending problems
-    start_date = str(today - datetime.timedelta(days=current.PAST_DAYS))
-    query = (stable.time_stamp >= start_date)
-    last_submissions = db(query).select(stable.problem_id,
-                                        stable.user_id,
-                                        stable.custom_user_id)
-    trending_table = utilities.compute_trending_table(last_submissions,
-                                                      "global")
-    current.REDIS_CLIENT.set("global_trending_table_cache",
-                             trending_table,
-                             ex=60 * 60)
+    trending_table = current.REDIS_CLIENT.get(GLOBALLY_TRENDING_PROBLEMS_CACHE_KEY)
     return trending_table
 
 # ----------------------------------------------------------------------------
