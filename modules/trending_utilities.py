@@ -57,32 +57,7 @@ def render_trending_table(caption, problems, column_name, user_id):
     return table
 
 # ----------------------------------------------------------------------------
-def compute_trending_table(submissions_list, table_type, user_id=None):
-    """
-        Create trending table from the rows
-
-        @params submission_list (Rows): Submissions to be considered
-        @params table_type (String): friends / global
-        @params user_id (Long): ID of signed in user else None
-    """
-
-    T = current.T
-    if table_type == "friends":
-        table_header = T("Trending among friends")
-        column_name = T("Friends")
-    else:
-        table_header = T("Trending Globally")
-        column_name = T("Users")
-
-    if len(submissions_list) == 0:
-        table = TABLE(_class="bordered centered")
-        thead = THEAD(TR(TH(T("Problem"), _class="left-align-problem"),
-                         TH(T("Recent Submissions")),
-                         TH(column_name)))
-        table.append(thead)
-        table.append(TBODY(TR(TD("Not enough data to show", _colspan=3))))
-        return table
-
+def get_trending_problem_list(submissions_list):
     # Sort the rows according to the number of users
     # who solved the problem in last PAST_DAYS
     custom_compare = lambda x: (len(x[1]["users"]) + \
@@ -125,15 +100,51 @@ def compute_trending_table(submissions_list, table_type, user_id=None):
                                key=custom_compare,
                                reverse=True)
 
+    return trending_problems[:current.PROBLEMS_PER_PAGE]
+
+# ----------------------------------------------------------------------------
+def draw_trending_table(trending_problems, table_type, user_id):
+    T = current.T
+    if table_type == "friends":
+        table_header = T("Trending among friends")
+        column_name = T("Friends")
+    else:
+        table_header = T("Trending Globally")
+        column_name = T("Users")
+
+    if len(trending_problems) == 0:
+        table = TABLE(_class="bordered centered")
+        thead = THEAD(TR(TH(T("Problem"), _class="left-align-problem"),
+                         TH(T("Recent Submissions")),
+                         TH(column_name)))
+        table.append(thead)
+        table.append(TBODY(TR(TD("Not enough data to show", _colspan=3))))
+        return table
+
     return render_trending_table(
         table_header,
-        trending_problems[:current.PROBLEMS_PER_PAGE],
+        trending_problems,
         column_name,
         user_id
     )
 
+# ----------------------------------------------------------------------------
+def compute_trending_table(submissions_list, table_type, user_id=None):
+    """
+        Create trending table from the rows
+
+        @params submission_list (Rows): Submissions to be considered
+        @params table_type (String): friends / global
+        @params user_id (Long): ID of signed in user else None
+    """
+
+
+    trending_problems = get_trending_problem_list(submissions_list)
+
+    return draw_trending_table(trending_problems, table_type, user_id)
+
 # ------------------------------------------------------------------------------
-def get_last_submissions_for_trending(extra_query=True):
+def get_last_submissions_for_trending(extra_query):
     db = current.db
     stable = db.submission
 
