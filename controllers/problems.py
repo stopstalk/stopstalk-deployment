@@ -866,8 +866,10 @@ def friends_trending():
 
 # ----------------------------------------------------------------------------
 def global_trending():
-    trending_table = current.REDIS_CLIENT.get(GLOBALLY_TRENDING_PROBLEMS_CACHE_KEY)
-    return trending_table
+    from trending_utilities import draw_trending_table
+    trending_problems = current.REDIS_CLIENT.get(GLOBALLY_TRENDING_PROBLEMS_CACHE_KEY)
+    trending_problems = eval(trending_problems)
+    return draw_trending_table(trending_problems, "global", session.user_id)
 
 # ----------------------------------------------------------------------------
 def trending():
