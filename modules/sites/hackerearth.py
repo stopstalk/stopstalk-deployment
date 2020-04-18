@@ -223,7 +223,6 @@ class Profile(object):
                 all_as = tr.find_all("a")
                 time_stamp = all_tds[-1].contents[1]["title"]
                 time_stamp = time.strptime(str(time_stamp), "%Y-%m-%d %H:%M:%S")
-
                 # Time of submission
                 time_stamp = datetime.datetime(time_stamp.tm_year,
                                                time_stamp.tm_mon,
@@ -231,7 +230,7 @@ class Profile(object):
                                                time_stamp.tm_hour,
                                                time_stamp.tm_min,
                                                time_stamp.tm_sec) + \
-                                               datetime.timedelta(minutes=690)
+                                               datetime.timedelta(minutes=630)
                 curr = time.strptime(str(time_stamp), "%Y-%m-%d %H:%M:%S")
 
                 if curr <= last_retrieved:
