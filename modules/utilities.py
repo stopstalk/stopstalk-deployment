@@ -862,6 +862,8 @@ def get_problems_authored_by(stopstalk_handle):
 
 # -----------------------------------------------------------------------------
 def should_show_stopstalk_ads(page_genre, stopstalk_handle=None):
+    return False
+
     # If user is not logged in
     user_logged_in = current.auth.is_logged_in()
     if not user_logged_in or \
