@@ -77,6 +77,7 @@
         addEventListener('#update-my-submissions', 'Refresh my submissions', false);
         addEventListener('#disabled-update-my-submissions', 'Disabled refresh my submissions', false);
         addEventListener('.read-editorial-user-profile-page', 'Read editorial - user profile page', false);
+        addEventListener('#login-to-view-stopstalk-rating-graph', 'Profile page - login to view StopStalk rating history', false);
 
         problemAuthorsClickHandler();
     };
