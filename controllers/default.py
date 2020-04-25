@@ -1365,7 +1365,7 @@ def search():
              (atable.last_name.contains(q)) | \
              (atable.stopstalk_handle.contains(q)))
 
-    if auth.is_logged_in() and session.user_id in STOPSTALK_ADMIN_USER_IDS:
+    if utilities.is_stopstalk_admin(session.user_id):
         query |= (atable.email.contains(q))
 
     # Search by profile site handle
@@ -1431,13 +1431,24 @@ def search():
 
     for user in rows:
 
+        authorized_span = ""
+        if utilities.is_stopstalk_admin(session.user_id):
+            authorized_span = SPAN(A(I(_class="fa fa-pencil"),
+                                     _href=URL("appadmin",
+                                               "update",
+                                               args=["db", "auth_user", user.id],
+                                               extension=False),
+                                     _style="color: black;"))
+
         tr = TR()
         tr.append(TD(A(user.first_name + " " + user.last_name,
                        _href=URL("user", "profile",
                                  args=[user.stopstalk_handle],
                                  extension=False),
                        _class="search-user-name",
-                       _target="_blank")))
+                       _target="_blank"),
+                     " ",
+                     authorized_span))
 
         td = TD()
 

@@ -61,6 +61,10 @@ def push_influx_data(measurement, points, app_name="cron"):
         return
 
 # -----------------------------------------------------------------------------
+def is_stopstalk_admin(user_id):
+    return user_id in STOPSTALK_ADMIN_USER_IDS
+
+# -----------------------------------------------------------------------------
 def get_key_from_dict(actual_dict, key, no_key_value):
     try:
         return actual_dict[key]
