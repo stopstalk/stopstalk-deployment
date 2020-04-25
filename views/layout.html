@@ -21,8 +21,25 @@
     <link rel="stylesheet" href="{{=URL('static', 'materialize/css/materialize.min.css')}}"/>
     <link rel="stylesheet" href="{{=get_static_url('css/stopstalk.css')}}"/>
     <link rel="stylesheet" href="{{=URL('static', 'fa/css/font-awesome.min.css')}}"/>
-    <link rel="shortcut icon" href="{{=get_static_url('images/favicon.ico')}}" type="image/x-icon">
-    <link rel="apple-touch-icon" href="{{=get_static_url('images/favicon.png')}}">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="{{=get_static_url('images/fav_assets/apple-icon-57x57.png')}}">
+    <link rel="apple-touch-icon" sizes="60x60" href="{{=get_static_url('images/fav_assets/apple-icon-60x60.png')}}">
+    <link rel="apple-touch-icon" sizes="72x72" href="{{=get_static_url('images/fav_assets/apple-icon-72x72.png')}}">
+    <link rel="apple-touch-icon" sizes="76x76" href="{{=get_static_url('images/fav_assets/apple-icon-76x76.png')}}">
+    <link rel="apple-touch-icon" sizes="114x114" href="{{=get_static_url('images/fav_assets/apple-icon-114x114.png')}}">
+    <link rel="apple-touch-icon" sizes="120x120" href="{{=get_static_url('images/fav_assets/apple-icon-120x120.png')}}">
+    <link rel="apple-touch-icon" sizes="144x144" href="{{=get_static_url('images/fav_assets/apple-icon-144x144.png')}}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{{=get_static_url('images/fav_assets/apple-icon-152x152.png')}}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{=get_static_url('images/fav_assets/apple-icon-180x180.png')}}">
+    <link rel="icon" type="image/png" sizes="192x192"  href="{{=get_static_url('images/fav_assets/android-icon-192x192.png')}}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{=get_static_url('images/fav_assets/favicon-32x32.png')}}">
+    <link rel="icon" type="image/png" sizes="96x96" href="{{=get_static_url('images/fav_assets/favicon-96x96.png')}}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{=get_static_url('images/fav_assets/favicon-16x16.png')}}">
+    <link rel="manifest" href="{{=get_static_url('images/fav_assets/manifest.json')}}">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="{{=get_static_url('images/fav_assets/ms-icon-144x144.png')}}">
+    <meta name="theme-color" content="#ffffff">
+
     <link rel="search" type="application/opensearchdescription+xml" title="StopStalk User Search" href="/static/opensearch.xml" />
     <!-- All JavaScript at the bottom, except for Modernizr which enables
          HTML5 elements & feature detects -->
@@ -30,7 +47,6 @@
     <!--[if lt IE 9]>
         <script src="{{=URL('static', 'js/respond-1.4.2.min.js')}}"></script>
         <![endif]-->
-    <!-- Favicons -->
     {{include 'web2py_ajax.html'}} <!-- this includes jquery.js, calendar.js/.css and web2py.js -->
     <script type="text/javascript">
         {{last_record = db(db.auth_user).select(db.auth_user.id, orderby=~db.auth_user.id, limitby=(0, 1)).first()}}
@@ -49,14 +65,14 @@
     </script>
     {{block head}}{{end}}
     {{
-    # using sidebars need to know what sidebar you want to use
-    mc0 = 'col-md-12'
-    mc1 = 'col-md-9'
-    mc2 = 'col-md-6'
-    left_sidebar_enabled = globals().get('left_sidebar_enabled', False)
-    right_sidebar_enabled = globals().get('right_sidebar_enabled', False)
-    middle_column = {0: mc0, 1: mc1, 2: mc2}[
-    (left_sidebar_enabled and 1 or 0)+(right_sidebar_enabled and 1 or 0)]
+        # using sidebars need to know what sidebar you want to use
+        mc0 = 'col-md-12'
+        mc1 = 'col-md-9'
+        mc2 = 'col-md-6'
+        left_sidebar_enabled = globals().get('left_sidebar_enabled', False)
+        right_sidebar_enabled = globals().get('right_sidebar_enabled', False)
+        middle_column = {0: mc0, 1: mc1, 2: mc2}[
+        (left_sidebar_enabled and 1 or 0)+(right_sidebar_enabled and 1 or 0)]
     }}
   </head>
   <body class="center Site">
