@@ -31,7 +31,7 @@ from bs4 import BeautifulSoup
 from health_metrics import MetricHandler
 from stopstalk_constants import *
 
-user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.122 Safari/537.36"
+user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.122 Safari/537.36"
 urllib3.disable_warnings()
 
 # Constants to be used in case of request failures
