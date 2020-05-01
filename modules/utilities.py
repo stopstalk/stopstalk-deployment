@@ -1281,7 +1281,9 @@ def render_user_editorials_table(user_editorials,
         precords[precord.id] = {"name": precord.name, "link": precord.link}
 
     table = TABLE(_class="centered user-editorials-table")
-    thead = THEAD(TR(TH(T("Problem")),
+
+    thead = THEAD(TR(TH(T("Problem"), _class="left-align-problem"),
+                     TH(T("Site")),
                      TH(T("Editorial By")),
                      TH(T("Added on")),
                      TH(T("Votes")),
@@ -1303,7 +1305,13 @@ def render_user_editorials_table(user_editorials,
                                   record["link"],
                                   link_class,
                                   link_title,
-                                  editorial.problem_id)))
+                                  editorial.problem_id),
+                   _class="left-align-problem"))
+
+        tr.append(TD(IMG(_src=current.get_static_url("images/" + \
+                                                     urltosite(record["link"]) + \
+                                                     "_small.png"),
+                         _style="height: 30px; width: 30px;")))
 
         if logged_in_user_id is not None and \
            (editorial.user_id == logged_in_user_id or

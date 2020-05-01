@@ -43,6 +43,6 @@
 
       setEditorialVoteEventListeners();
 
-      contestCountDownHandler();
+      // contestCountDownHandler();
     });
 })(jQuery);
