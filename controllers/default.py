@@ -217,15 +217,6 @@ def user_editorials():
 
     # Get recent editorials table
     # ----------------------------
-
-    table = TABLE(_class="centered")
-    thead = THEAD(TR(TH(T("Problem")),
-                     TH(T("Editorial By")),
-                     TH(T("Added on")),
-                     TH(T("Votes")),
-                     TH()))
-    tbody = TBODY()
-
     user_id = session.user_id if auth.is_logged_in() else None
     table = utilities.render_user_editorials_table(rows[:300],
                                                    user_id,
