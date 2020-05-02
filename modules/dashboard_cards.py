@@ -36,7 +36,7 @@ class BaseCard:
                             _class="card-content white-text"),
                        DIV(A(args["card_action_text"],
                              _href=args["card_action_url"]),
-                           _class="card-action"),
+                           _class="card-action right-text"),
                        _class="card blue-grey darken-1"),
                    _class="col s4")
 
@@ -44,25 +44,44 @@ class BaseCard:
         pass
 
 class StreakCard(BaseCard):
-    def __init__(self, user_id):
+    # --------------------------------------------------------------------------
+    def __init__(self, user_id, kind):
         self.genre = StreakCard.__name__
+        self.kind = kind
+        self.key_name = "curr_%s_streak" % self.kind
         self.user_id = user_id
-        self.card_title = "Keep your Streak going!"
+        self.card_title = "Keep your %s streak going!" % self.kind
+        self.stats = None
         BaseCard.__init__(self, user_id, "simple_with_cta")
 
+    # --------------------------------------------------------------------------
     def get_html(self):
+        streak_value = self.get_data()
+        if self.kind == "day":
+            card_text = "You're at a %d day streak. Keep solving a new problem everyday!" % streak_value
+            card_action_text = "Pick a Problem"
+        elif self.kind == "accepted":
+            card_text = "You're at a %d accepted problem streak. Let the greens rain!" % streak_value
+            card_action_text = "Pick a Problem"
+        else:
+            return "FAILURE"
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
-                       card_text="This is some long text in each card",
-                       card_action_text="Action CTA",
+                       card_text=card_text,
+                       card_action_text=card_action_text,
                        card_action_url="#"
                     ))
         return card_html
 
+    # --------------------------------------------------------------------------
     def get_data(self):
-        pass
+        if self.stats is None:
+            self.stats = utilities.get_rating_information(self.user_id, False)
+        return self.stats[self.key_name]
 
+    # --------------------------------------------------------------------------
     def should_show(self):
-        pass
+        self.stats = utilities.get_rating_information(self.user_id, False)
+        return self.stats[self.key_name] > 2
 
-
+# ==============================================================================

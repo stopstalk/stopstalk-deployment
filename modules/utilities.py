@@ -430,6 +430,44 @@ def get_stopstalk_handle(user_id, custom):
     return table(user_id).stopstalk_handle
 
 # -----------------------------------------------------------------------------
+def get_rating_information(user_id, custom):
+    db = current.db
+    stopstalk_handle = get_stopstalk_handle(user_id, custom)
+    redis_cache_key = "profile_page:user_stats_" + stopstalk_handle
+
+    # Check if data is present in REDIS
+    data = current.REDIS_CLIENT.get(redis_cache_key)
+    if data:
+        result = json.loads(data)
+        if not current.auth.is_logged_in():
+            del result["rating_history"]
+        if "problems_authored_count" not in result:
+            result["problems_authored_count"] = 0
+        return result
+
+    stable = db.submission
+
+    query = (stable["custom_user_id" if custom else "user_id"] == user_id)
+    rows = db(query).select(stable.time_stamp,
+                            stable.problem_id,
+                            stable.status,
+                            stable.site,
+                            orderby=stable.time_stamp)
+
+    # Returns rating history, accepted & max streak (day and accepted),
+    result = get_stopstalk_user_stats(stopstalk_handle,
+                                      custom,
+                                      rows.as_list())
+
+    if current.auth.is_logged_in():
+        current.REDIS_CLIENT.set(redis_cache_key,
+                                 json.dumps(result, separators=JSON_DUMP_SEPARATORS),
+                                 ex=1 * 60 * 60)
+    elif "rating_history" in result:
+        del result["rating_history"]
+
+    return result
+# -----------------------------------------------------------------------------
 def handles_updated(record, form):
     """
         Check if any of the handles are updated
