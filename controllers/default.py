@@ -151,14 +151,19 @@ def user_editorials():
     atable = db.auth_user
     ptable = db.problem
 
-    # Get all the problems which do not have an official editorial
-    query = (ptable.editorial_link == None) | (ptable.editorial_link == "")
-    pids = db(query).select(ptable.id)
-    pids = [x.id for x in pids]
-
     pending_count = 0
     accepted_problem_ids = set([])
-    rows = db(uetable).select(orderby=~uetable.id)
+    start_time = time.time()
+    rows = db(uetable.problem_id == ptable.id).select(
+                uetable.user_id,
+                uetable.problem_id,
+                uetable.verification,
+                uetable.votes,
+                uetable.added_on,
+                uetable.id,
+                ptable.editorial_link,
+                orderby=~uetable.id
+           )
 
     # Rows to show on the leaderboard
     table_rows = []
@@ -166,31 +171,40 @@ def user_editorials():
     # To handle multiple accepted editorials of same user on same problem
     user_id_pid_map = {}
 
-    # To store the user objects who have atleast one accepted editorial
-    user_object_map = {}
+    user_objs = utilities.get_user_records(
+                    set([x.user_editorials.user_id for x in rows]),
+                    "id",
+                    "id",
+                    False
+                )
 
     for row in rows:
 
-        if row.verification != "accepted":
-            if row.verification == "pending":
+        if row.user_editorials.verification != "accepted":
+            if row.user_editorials.verification == "pending":
                 pending_count += 1
             continue
         else:
-            accepted_problem_ids.add(row.problem_id)
+            accepted_problem_ids.add(row.user_editorials.problem_id)
 
-        if user_object_map.has_key(row.user_id) is False:
-            # Store the user object for later usage
-            user_object_map[row.user_id] = utilities.get_user_records([row.user_id], "id", "id", True)
-
-        if row.problem_id not in pids:
+        if row.problem.editorial_link not in ("", None):
             # This problem has an official editorial - don't count in leaderboard
             continue
 
-        if user_id_pid_map.has_key((row.user_id, row.problem_id)):
+        if user_id_pid_map.has_key((row.user_editorials.user_id, row.user_editorials.problem_id)):
             # This is to handle multiple accepted editorials of same user on same problem
             continue
 
-        user_id_pid_map[(row.user_id, row.problem_id)] = row
+        user_id_pid_map[(row.user_editorials.user_id, row.user_editorials.problem_id)] = row.user_editorials
+
+    # Get recent editorials table
+    # ----------------------------
+    table = utilities.render_user_editorials_table(
+                [x.user_editorials for x in rows][:300],
+                session.user_id,
+                session.user_id,
+                "read-editorial-user-editorials-page"
+            )
 
     # The dictionary to store the count mapping of editorials
     editorial_count_dict = {}
@@ -205,7 +219,6 @@ def user_editorials():
             editorial_count_dict[value.user_id] = {"count": 1,
                                                    "votes": vote_count}
 
-    user_objs = utilities.get_user_records(editorial_count_dict.keys(), "id", "id", False)
     for key in editorial_count_dict:
         user_obj = user_objs[key]
         table_rows.append([editorial_count_dict[key]["count"],
@@ -214,14 +227,6 @@ def user_editorials():
                            user_obj.first_name + " " + user_obj.last_name])
 
     table_rows = sorted(table_rows, key=lambda x: (x[0], x[1]), reverse=True)
-
-    # Get recent editorials table
-    # ----------------------------
-    user_id = session.user_id if auth.is_logged_in() else None
-    table = utilities.render_user_editorials_table(rows[:300],
-                                                   user_id,
-                                                   user_id,
-                                                   "read-editorial-user-editorials-page")
 
     return dict(table_rows=table_rows[:10],
                 recent_editorials_table=table,
