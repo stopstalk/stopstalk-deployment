@@ -149,11 +149,11 @@ def handle_error():
 def dashboard():
     import dashboard_cards
     list_of_cards = [
-        dashboard_cards.StreakCard(session.user_id),
-        dashboard_cards.StreakCard(session.user_id),
-        dashboard_cards.StreakCard(session.user_id),
-        dashboard_cards.StreakCard(session.user_id),
-        dashboard_cards.StreakCard(session.user_id),
+        dashboard_cards.StreakCard(session.user_id, "day"),
+        dashboard_cards.StreakCard(session.user_id, "accepted"),
+        dashboard_cards.StreakCard(session.user_id, "day"),
+        dashboard_cards.StreakCard(session.user_id, "day"),
+        dashboard_cards.StreakCard(session.user_id, "accepted"),
     ]
 
     dashboard_content = DIV()
