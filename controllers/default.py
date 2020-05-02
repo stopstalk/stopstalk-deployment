@@ -145,6 +145,32 @@ def handle_error():
     return dict(error_message=error_message, similar_users=similar_users)
 
 # ----------------------------------------------------------------------------
+@auth.requires_login()
+def dashboard():
+    import dashboard_cards
+    list_of_cards = [
+        dashboard_cards.StreakCard(session.user_id),
+        dashboard_cards.StreakCard(session.user_id),
+        dashboard_cards.StreakCard(session.user_id),
+        dashboard_cards.StreakCard(session.user_id),
+        dashboard_cards.StreakCard(session.user_id),
+    ]
+
+    dashboard_content = DIV()
+    current_div = None
+
+    for i in xrange(len(list_of_cards)):
+        if i % 3 == 0:
+            if current_div is not None:
+                dashboard_content.append(current_div)
+            current_div = DIV(_class="row")
+        current_div.append(list_of_cards[i].get_html())
+
+    dashboard_content.append(current_div)
+
+    return dict(dashboard_content=dashboard_content)
+
+# ----------------------------------------------------------------------------
 def user_editorials():
 
     uetable = db.user_editorials
@@ -282,7 +308,7 @@ def index():
             session.flash = T("Welcome StopStalker!!")
         elif response.flash is not None:
             session.flash = response.flash
-        redirect(URL("default", "submissions", args=[1]))
+        redirect(URL("default", "dashboard"))
 
     return dict()
 
