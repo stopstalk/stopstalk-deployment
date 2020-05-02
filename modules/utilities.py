@@ -483,11 +483,14 @@ def get_problems_table(all_problems,
         rows = db(uetable.verification == "accepted").select(uetable.problem_id)
         problem_with_user_editorials = set([x["problem_id"] for x in rows])
 
+    solved_result = get_solved_problems(logged_in_user_id)
+
     for problem in all_problems:
         tr = TR()
 
         link_class, link_title = get_link_class(problem["id"],
-                                                logged_in_user_id)
+                                                logged_in_user_id,
+                                                solved_result)
 
         tr.append(TD(problem_widget(problem["name"],
                                     problem["link"],
@@ -1011,12 +1014,13 @@ def get_problem_details(problem_id):
     return result
 
 # -----------------------------------------------------------------------------
-def render_table(submissions, duplicates=[], user_id=None):
+def render_table(submissions, duplicates=[], logged_in_user_id=None):
     """
         Create the HTML table from submissions
 
         @param submissions (Dict): Dictionary of submissions to display
         @param duplicates (List): List of duplicate user ids
+        @param logged_in_user_id (Long/None): User id of the logged in user
 
         @return (TABLE):  HTML TABLE containing all the submissions
     """
@@ -1044,9 +1048,11 @@ def render_table(submissions, duplicates=[], user_id=None):
                           TH(T("View/Download Code")))))
 
     tbody = TBODY()
-    # Dictionary to optimize lookup for solved and unsolved problems
-    # Multiple lookups in the main set is bad
-    pid_to_class = {}
+    solved_result = get_solved_problems(logged_in_user_id)
+    problem_ids = set([x.problem_id for x in submissions])
+    pid_to_record = {}
+    for pid in problem_ids:
+        pid_to_record[pid] = get_problem_details(pid)
 
     for submission in submissions:
         span = SPAN()
@@ -1095,15 +1101,12 @@ def render_table(submissions, duplicates=[], user_id=None):
 
         append(TD(submission.time_stamp, _class="stopstalk-timestamp"))
 
-        link_class = ""
         problem_id = submission.problem_id
-        if pid_to_class.has_key(problem_id):
-            link_class, link_title = pid_to_class[problem_id]
-        else:
-            link_class, link_title = get_link_class(problem_id, user_id)
-            pid_to_class[problem_id] = (link_class, link_title)
+        link_class, link_title = get_link_class(problem_id,
+                                                logged_in_user_id,
+                                                solved_result)
 
-        problem_details = get_problem_details(submission.problem_id)
+        problem_details = pid_to_record[problem_id]
         append(TD(problem_widget(problem_details["name"],
                                  problem_details["link"],
                                  link_class,
