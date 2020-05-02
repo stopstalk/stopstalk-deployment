@@ -22,6 +22,7 @@
 
 import re
 import datetime
+import time
 import json
 from boto3 import client
 from socket import gethostname
@@ -312,6 +313,9 @@ def get_solved_problems(user_id, custom=False):
         @return(Tuple): List of solved and unsolved problems
     """
 
+    if user_id is None:
+        return None
+
     def _settify_return_value(data):
         return map(lambda x: set(x), data)
 
@@ -389,12 +393,15 @@ def get_next_problem_to_suggest(user_id, problem_id=None):
         return dict(result=result)
 
 # -----------------------------------------------------------------------------
-def get_link_class(problem_id, user_id):
+def get_link_class(problem_id, user_id, solved_result=None):
     link_class = "unattempted-problem"
     if user_id is None:
         return link_class, (" ".join(link_class.split("-"))).capitalize()
 
-    solved_problems, unsolved_problems = get_solved_problems(user_id, False)
+    if solved_result is None:
+        solved_problems, unsolved_problems = get_solved_problems(user_id, False)
+    else:
+        solved_problems, unsolved_problems = solved_result
 
     link_class = ""
     if problem_id in unsolved_problems:
@@ -1276,6 +1283,7 @@ def render_user_editorials_table(user_editorials,
 
     query = (ptable.id.belongs([x.problem_id for x in user_editorials]))
     problem_records = db(query).select(ptable.id, ptable.name, ptable.link)
+
     precords = {}
     for precord in problem_records:
         precords[precord.id] = {"name": precord.name, "link": precord.link}
@@ -1293,6 +1301,7 @@ def render_user_editorials_table(user_editorials,
                      "rejected": "red",
                      "pending": "blue"}
 
+    solved_result = get_solved_problems(logged_in_user_id)
     for editorial in user_editorials:
         if logged_in_user_id != 1 and user_id != editorial.user_id and editorial.verification != "accepted":
             continue
@@ -1300,7 +1309,9 @@ def render_user_editorials_table(user_editorials,
         user = user_mappings[editorial.user_id]
         record = precords[editorial.problem_id]
         number_of_votes = len(editorial.votes.split(",")) if editorial.votes else 0
-        link_class, link_title = get_link_class(editorial.problem_id, logged_in_user_id)
+        link_class, link_title = get_link_class(editorial.problem_id,
+                                                logged_in_user_id,
+                                                solved_result)
         tr = TR(TD(problem_widget(record["name"],
                                   record["link"],
                                   link_class,
