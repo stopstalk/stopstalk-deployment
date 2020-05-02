@@ -20,7 +20,7 @@
     <!-- include stylesheets -->
     <link rel="stylesheet" href="{{=URL('static', 'materialize/css/materialize.min.css')}}"/>
     <link rel="stylesheet" href="{{=get_static_url('css/stopstalk.css')}}"/>
-    <link rel="stylesheet" href="{{=URL('static', 'fa/css/font-awesome.min.css')}}"/>
+    <link rel="stylesheet" href="{{=URL('static', 'fa/css/font-awesome.min.css')}}" async/>
 
     <link rel="apple-touch-icon" sizes="57x57" href="{{=get_static_url('images/fav_assets/apple-icon-57x57.png')}}">
     <link rel="apple-touch-icon" sizes="60x60" href="{{=get_static_url('images/fav_assets/apple-icon-60x60.png')}}">
@@ -354,8 +354,10 @@
     </div>
     <!-- The javascript =============================== -->
     <script src="{{=URL('static', 'materialize/js/materialize.min.js')}}"></script>
-    <script src="{{=URL('static', 'js/run_prettify.min.js')}}"></script>
-    <script src="{{=get_static_url('js/web2py-bootstrap3.js')}}"></script>
+    <script src="{{=URL('static', 'js/run_prettify.min.js')}}" async></script>
+    <script src="{{=get_static_url('js/web2py-bootstrap3.js')}}" async></script>
+    <script src="{{=get_static_url('js/calendar.js')}}" async></script>
+
     {{block page_js}}{{end page_js}}
     <!-- Analytics ==================================== -->
     {{if current.analytics_id:}}
