@@ -65,11 +65,15 @@ class StreakCard(BaseCard):
             card_action_text = "Pick a Problem"
         else:
             return "FAILURE"
+
+        card_action_url = URL("default",
+                              "cta_handler",
+                              vars=dict(kind="random"))
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
                        card_text=card_text,
                        card_action_text=card_action_text,
-                       card_action_url="#"
+                       card_action_url=card_action_url
                     ))
         return card_html
 

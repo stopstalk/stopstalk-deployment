@@ -124,6 +124,16 @@ def init_metric_handlers(log_to_redis):
 
 
 # ------------------------------------------------------------------------------
+def pick_a_problem(user_id, custom=False, **args):
+    solved_problems, unsolved_problems = get_solved_problems(user_id, custom)
+
+    db = current.db
+    ptable = db.problem
+    query = ~ptable.id.belongs(solved_problems.union(unsolved_problems))
+    record = db(query).select(ptable.id, orderby="<random>").first()
+    return record.id
+
+# ------------------------------------------------------------------------------
 def get_user_record_cache_key(user_id):
     return "auth_user_cache::user_" + str(user_id)
 
