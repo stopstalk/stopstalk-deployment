@@ -25,11 +25,14 @@ from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, I, P, \
                   TEXTAREA, SELECT, OPTION, URL, BUTTON, TAG
 
+# ==============================================================================
 class BaseCard:
+    # --------------------------------------------------------------------------
     def __init__(self, user_id, card_type):
         self.user_id = user_id
         self.card_type = card_type
 
+    # --------------------------------------------------------------------------
     def get_html(self, **args):
         return DIV(DIV(DIV(SPAN(args["card_title"], _class="card-title"),
                            P(args["card_text"]),
@@ -40,9 +43,11 @@ class BaseCard:
                        _class="card blue-grey darken-1"),
                    _class="col s4")
 
+    # --------------------------------------------------------------------------
     def get_data(self):
         pass
 
+# ==============================================================================
 class StreakCard(BaseCard):
     # --------------------------------------------------------------------------
     def __init__(self, user_id, kind):
@@ -69,6 +74,7 @@ class StreakCard(BaseCard):
         card_action_url = URL("default",
                               "cta_handler",
                               vars=dict(kind="random"))
+
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
                        card_text=card_text,
@@ -86,6 +92,6 @@ class StreakCard(BaseCard):
     # --------------------------------------------------------------------------
     def should_show(self):
         self.stats = utilities.get_rating_information(self.user_id, False)
-        return self.stats[self.key_name] > 2
+        return self.stats[self.key_name] > 0
 
 # ==============================================================================
