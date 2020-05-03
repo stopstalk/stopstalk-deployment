@@ -8,29 +8,17 @@
         "init_arguments": [loggedInUserId, "day"]
       },
       {
-        "class_name": "StreakCard",
-        "init_arguments": [loggedInUserId, "accepted"]
+        "class_name": "SuggestProblemCard",
+        "init_arguments": [loggedInUserId]
       },
       {
         "class_name": "StreakCard",
         "init_arguments": [loggedInUserId, "accepted"]
       },
       {
-        "class_name": "StreakCard",
-        "init_arguments": [loggedInUserId, "accepted"]
+        "class_name": "UpcomingContestCard",
+        "init_arguments": [loggedInUserId]
       },
-      {
-        "class_name": "StreakCard",
-        "init_arguments": [loggedInUserId, "accepted"]
-      },
-      {
-        "class_name": "StreakCard",
-        "init_arguments": [loggedInUserId, "accepted"]
-      },
-      {
-        "class_name": "StreakCard",
-        "init_arguments": [loggedInUserId, "accepted"]
-      }
     ];
 
     var cardCounter = 0;
