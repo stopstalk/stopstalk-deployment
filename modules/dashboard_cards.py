@@ -20,6 +20,7 @@
     THE SOFTWARE.
 """
 
+import json
 import utilities
 from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, I, P, \
@@ -73,6 +74,17 @@ class BaseCard:
     def get_data(self):
         pass
 
+    # --------------------------------------------------------------------------
+    def get_from_cache(self):
+        value = current.REDIS_CLIENT.get(self.cache_key)
+        return json.loads(value) if value else None
+
+    # --------------------------------------------------------------------------
+    def set_to_cache(self, value):
+        current.REDIS_CLIENT.set(self.cache_key,
+                                 json.dumps(value),
+                                 ex=1 * 60 * 60)
+
 # ==============================================================================
 class StreakCard(BaseCard):
     # --------------------------------------------------------------------------
@@ -113,13 +125,10 @@ class StreakCard(BaseCard):
 
     # --------------------------------------------------------------------------
     def get_data(self):
-        if self.stats is None:
-            self.stats = utilities.get_rating_information(self.user_id, False)
         return self.stats[self.key_name]
 
     # --------------------------------------------------------------------------
     def should_show(self):
-        return True
         self.stats = utilities.get_rating_information(self.user_id, False)
         return self.stats[self.key_name] > 0
 
@@ -187,6 +196,7 @@ class UpcomingContestCard(BaseCard):
         self.genre = UpcomingContestCard.__name__
         self.user_id = user_id
         self.card_title = "Upcoming contests"
+        self.cache_key = "cards::upcoming_contests"
         BaseCard.__init__(self, self.user_id, "with_html")
 
     # --------------------------------------------------------------------------
@@ -201,7 +211,7 @@ class UpcomingContestCard(BaseCard):
         for contest in contest_data:
             tbody.append(TR(TD(contest[0]),
                             TD(IMG(_src=current.get_static_url(
-                                            "images/%s_small.png" % contest[1]
+                                            "images/%s_small.png" % str(contest[1])
                                         ),
                                    _style="height: 30px; width: 30px;")),
                             TD(A(I(_class="fa fa-external-link-square"),
@@ -227,6 +237,10 @@ class UpcomingContestCard(BaseCard):
 
     # --------------------------------------------------------------------------
     def get_data(self):
+        value = self.get_from_cache()
+        if value:
+            return value
+
         _, upcoming = utilities.get_contests()
         data = []
         for contest in upcoming[:2]:
@@ -235,6 +249,8 @@ class UpcomingContestCard(BaseCard):
                 str(contest["Platform"]).lower(),
                 contest["url"]
             ))
+
+        self.set_to_cache(data)
         return data
 
     # --------------------------------------------------------------------------
@@ -248,6 +264,7 @@ class RecentSubmissionsCard(BaseCard):
         self.genre = RecentSubmissionsCard.__name__
         self.user_id = user_id
         self.card_title = "Recent Friends' submissions"
+        self.cache_key = "cards::recent_submissions_cache_" + str(user_id)
         self.final_data = None
         BaseCard.__init__(self, user_id, "with_html")
 
@@ -299,35 +316,41 @@ class RecentSubmissionsCard(BaseCard):
 
     # --------------------------------------------------------------------------
     def get_data(self):
-        return self.final_data if self.final_data is not None else "FAILURE"
+        return self.final_data if self.final_data else "FAILURE"
 
     # --------------------------------------------------------------------------
     def should_show(self):
-        import datetime
-        db = current.db
-        stable = db.submission
-        friends, _ = utilities.get_friends(self.user_id)
-        today = datetime.datetime.today()
-        last_week = today - datetime.timedelta(days=150)
-        rows = db.executesql("""
-            SELECT user_id, site, count(*)
-            FROM submission
-            WHERE time_stamp >= "%s" AND
-                user_id in (%s) AND custom_user_id is NULL
-            GROUP BY 1, 2
-            ORDER BY 3 DESC
-        """ % (str(last_week.date()),
-               ",".join([str(x) for x in friends])))
-        final_hash = {}
-        for row in rows:
-            if row[0] not in final_hash:
-                final_hash[row[0]] = {"total": 0}
-            final_hash[row[0]][row[1]] = row[2]
-            final_hash[row[0]]["total"] += row[2]
+        final_data = self.get_from_cache()
+        if final_data:
+            pass
+        else:
+            import datetime
+            db = current.db
+            stable = db.submission
+            friends, _ = utilities.get_friends(self.user_id)
+            today = datetime.datetime.today()
+            last_week = today - datetime.timedelta(days=150)
+            rows = db.executesql("""
+                SELECT user_id, site, count(*)
+                FROM submission
+                WHERE time_stamp >= "%s" AND
+                    user_id in (%s) AND custom_user_id is NULL
+                GROUP BY 1, 2
+                ORDER BY 3 DESC
+            """ % (str(last_week.date()),
+                   ",".join([str(x) for x in friends])))
+            final_hash = {}
+            for row in rows:
+                if row[0] not in final_hash:
+                    final_hash[row[0]] = {"total": 0}
+                final_hash[row[0]][row[1]] = int(row[2])
+                final_hash[row[0]]["total"] += int(row[2])
 
-        final_data = sorted(final_hash.items(),
-                            key=lambda x: x[1]["total"],
-                            reverse=True)[:2]
+            final_data = sorted(final_hash.items(),
+                                key=lambda x: x[1]["total"],
+                                reverse=True)[:2]
+            self.set_to_cache(final_data)
+
         if len(final_data) > 0:
             self.final_data = final_data
             return True
