@@ -152,10 +152,6 @@ def get_card_html():
 
     import dashboard_cards
 
-    from random import randint
-    from time import sleep
-
-    sleep(randint(0, 100) * 0.01)
     card_class = getattr(dashboard_cards,
                          request.vars["class_name"])(*request.vars["init_arguments[]"])
     return card_class.get_html() if card_class.should_show() else ""

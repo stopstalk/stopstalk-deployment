@@ -193,8 +193,8 @@ class UpcomingContestCard(BaseCard):
     def get_html(self):
         contest_data = self.get_data()
         card_content_table = TABLE(
-            _class="bordered centered",
-            _style="line-height: 10px"
+            _class="bordered centered highlight",
+            _style="line-height: 20px"
         )
         tbody = TBODY()
 
@@ -240,5 +240,97 @@ class UpcomingContestCard(BaseCard):
     # --------------------------------------------------------------------------
     def should_show(self):
         return True
+
+# ==============================================================================
+class RecentSubmissionsCard(BaseCard):
+    # --------------------------------------------------------------------------
+    def __init__(self, user_id):
+        self.genre = RecentSubmissionsCard.__name__
+        self.user_id = user_id
+        self.card_title = "Recent Friends' submissions"
+        self.final_data = None
+        BaseCard.__init__(self, user_id, "with_html")
+
+    # --------------------------------------------------------------------------
+    def get_html(self):
+        submissions_data = self.get_data()
+        card_action_url = URL("default",
+                              "submissions",
+                              args=[1])
+
+        card_content_table = TABLE(
+            _class="bordered highlight"
+        )
+        tbody = TBODY()
+
+        for row in submissions_data:
+            user_record = utilities.get_user_records([row[0]], "id", "id", True)
+            tr = TR(TD(A(user_record.first_name + " " + user_record.last_name,
+                                 _href=URL("user", "profile",
+                                           args=user_record.stopstalk_handle,
+                                           extension=False),
+                                 _target="_blank")))
+
+            td = TD()
+            for site in row[1]:
+                if site == "total":
+                    continue
+                else:
+                    td.append(SPAN(IMG(_src=current.get_static_url(
+                                                "images/%s_small.png" % str(site).lower()
+                                            ),
+                                       _style="height: 18px; width: 18px; margin-bottom: -4px;"),
+                                   " " + str(row[1][site]),
+                                   _style="padding-right: 10px;"))
+            tr.append(td)
+            tbody.append(tr)
+
+        card_content_table.append(tbody)
+
+        card_html = BaseCard.get_html(self, **dict(
+                       card_title=self.card_title,
+                       custom_html=card_content_table,
+                       card_action_text="View all",
+                       card_action_url=card_action_url,
+                       card_color_class="white",
+                       card_text_color_class="black-text"
+                    ))
+        return card_html
+
+    # --------------------------------------------------------------------------
+    def get_data(self):
+        return self.final_data if self.final_data is not None else "FAILURE"
+
+    # --------------------------------------------------------------------------
+    def should_show(self):
+        import datetime
+        db = current.db
+        stable = db.submission
+        friends, _ = utilities.get_friends(self.user_id)
+        today = datetime.datetime.today()
+        last_week = today - datetime.timedelta(days=150)
+        rows = db.executesql("""
+            SELECT user_id, site, count(*)
+            FROM submission
+            WHERE time_stamp >= "%s" AND
+                user_id in (%s) AND custom_user_id is NULL
+            GROUP BY 1, 2
+            ORDER BY 3 DESC
+        """ % (str(last_week.date()),
+               ",".join([str(x) for x in friends])))
+        final_hash = {}
+        for row in rows:
+            if row[0] not in final_hash:
+                final_hash[row[0]] = {"total": 0}
+            final_hash[row[0]][row[1]] = row[2]
+            final_hash[row[0]]["total"] += row[2]
+
+        final_data = sorted(final_hash.items(),
+                            key=lambda x: x[1]["total"],
+                            reverse=True)[:2]
+        if len(final_data) > 0:
+            self.final_data = final_data
+            return True
+        return False
 
 # ==============================================================================

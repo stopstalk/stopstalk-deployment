@@ -1,6 +1,15 @@
 (function($) {
   "use strict";
 
+  var shuffleArray = function(array) {
+      for (var i = array.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var temp = array[i];
+          array[i] = array[j];
+          array[j] = temp;
+      }
+  }
+
   var populateCards = function() {
     var cardArguments = [
       {
@@ -19,7 +28,13 @@
         "class_name": "UpcomingContestCard",
         "init_arguments": [loggedInUserId]
       },
+      {
+        "class_name": "RecentSubmissionsCard",
+        "init_arguments": [loggedInUserId]
+      }
     ];
+
+    shuffleArray(cardArguments);
 
     var cardCounter = 0;
     var $currentDiv = "";
