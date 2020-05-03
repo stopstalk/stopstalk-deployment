@@ -36,7 +36,7 @@
     var cardCounter = 0;
     var $currentDiv = "";
     var $containerDiv = $("#dashboard-cards-container");
-    console.log("before foreach");
+
     cardArguments.forEach(function(cardParams, iter) {
       var promise = new Promise(function(resolve, reject) {
         $.ajax({
@@ -48,9 +48,7 @@
             else reject();
           },
           error: function(err) {
-            console.log(err);
-            $.web2py.flash("Something went wrong");
-            reject();
+            reject(err);
           }
         });
       }).then(function(response) {
@@ -63,6 +61,11 @@
         $(response).hide().appendTo($currentDiv).fadeIn();
         cardCounter++;
         if (iter === cardArguments.length - 1 && $currentDiv !== "") $containerDiv.append($currentDiv);
+      }).catch(function(err) {
+        if (err) {
+          console.log(err);
+          $.web2py.flash("Something went wrong");
+        }
       });
 
     });

@@ -147,15 +147,18 @@ def handle_error():
 # ----------------------------------------------------------------------------
 @auth.requires_login()
 def get_card_html():
+    if int(request.vars["init_arguments[]"][0]) != session.user_id:
+        return ""
+
     import dashboard_cards
 
     from random import randint
     from time import sleep
 
-    # sleep(randint(0, 2))
+    sleep(randint(0, 100) * 0.01)
     card_class = getattr(dashboard_cards,
                          request.vars["class_name"])(*request.vars["init_arguments[]"])
-    return card_class.get_html()
+    return card_class.get_html() if card_class.should_show() else ""
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
