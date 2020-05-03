@@ -171,8 +171,8 @@ def cta_handler():
     problem_id = utilities.pick_a_problem(
                     session.user_id,
                     False,
-                    **dict(kind="random")
-                 )
+                    **request.vars
+                )
     redirect(URL("problems", "index", vars=dict(problem_id=problem_id)))
 
 # ----------------------------------------------------------------------------
@@ -706,30 +706,14 @@ def contests():
         Show the upcoming contests
     """
 
-    today = datetime.datetime.today()
-    today = datetime.datetime.strptime(str(today)[:-7],
-                                       "%Y-%m-%d %H:%M:%S")
+    ongoing, upcoming = utilities.get_contests()
+    if None in [ongoing, upcoming]:
+        return dict(retrieved=False)
 
-    start_date = today.date()
-    end_date = start_date + datetime.timedelta(90)
     site_mapping = {"CODECHEF": "CodeChef",
                     "CODEFORCES": "Codeforces",
                     "HACKERRANK": "HackerRank",
                     "HACKEREARTH": "HackerEarth"}
-    url = "https://contesttrackerapi.herokuapp.com/"
-
-    from urllib3 import disable_warnings
-    disable_warnings()
-
-    response = requests.get(url, verify=False)
-    if response.status_code == 200:
-        response = response.json()["result"]
-    else:
-        return dict(retrieved=False)
-
-    ongoing = response["ongoing"]
-    upcoming = response["upcoming"]
-    contests = []
     cal = pdt.Calendar()
 
     table = TABLE(_class="centered bordered", _id="contests-table")

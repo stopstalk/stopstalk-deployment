@@ -125,12 +125,24 @@ def init_metric_handlers(log_to_redis):
 
 # ------------------------------------------------------------------------------
 def pick_a_problem(user_id, custom=False, **args):
-    solved_problems, unsolved_problems = get_solved_problems(user_id, custom)
-
     db = current.db
     ptable = db.problem
+    solved_problems, unsolved_problems = get_solved_problems(user_id, custom)
+
     query = ~ptable.id.belongs(solved_problems.union(unsolved_problems))
-    record = db(query).select(ptable.id, orderby="<random>").first()
+
+    if args["kind"] == "random":
+        record = db(query).select(ptable.id, orderby="<random>").first()
+    elif args["kind"] == "suggested_tag":
+        sttable = db.suggested_tags
+        ttable = db.tag
+        tag_query = (sttable.tag_id == ttable.id) & \
+                    (ttable.value == args["tag_category"])
+        pids = db(tag_query).select(sttable.problem_id, distinct=True)
+        pids = set([x.problem_id for x in pids])
+        query &= ptable.id.belongs(pids)
+        record = db(query).select(ptable.id, orderby="<random>").first()
+
     return record.id
 
 # ------------------------------------------------------------------------------
@@ -203,6 +215,28 @@ def get_boto3_client():
     return client("s3",
                   aws_access_key_id=current.s3_access_key_id,
                   aws_secret_access_key=current.s3_secret_access_key)
+
+# ------------------------------------------------------------------------------
+def get_contests():
+    today = datetime.datetime.today()
+    today = datetime.datetime.strptime(str(today)[:-7],
+                                       "%Y-%m-%d %H:%M:%S")
+
+    start_date = today.date()
+    end_date = start_date + datetime.timedelta(90)
+    url = "https://contesttrackerapi.herokuapp.com/"
+
+    from urllib3 import disable_warnings
+    import requests
+    disable_warnings()
+
+    response = requests.get(url, verify=False)
+    if response.status_code == 200:
+        response = response.json()["result"]
+    else:
+        return None, None
+
+    return response["ongoing"], response["upcoming"]
 
 # ------------------------------------------------------------------------------
 def merge_duplicate_problems(original_id, duplicate_id):
