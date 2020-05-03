@@ -146,29 +146,31 @@ def handle_error():
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
-def dashboard():
+def get_card_html():
     import dashboard_cards
-    list_of_cards = [
-        dashboard_cards.StreakCard(session.user_id, "day"),
-        dashboard_cards.StreakCard(session.user_id, "accepted"),
-        dashboard_cards.StreakCard(session.user_id, "day"),
-        dashboard_cards.StreakCard(session.user_id, "day"),
-        dashboard_cards.StreakCard(session.user_id, "accepted"),
-    ]
 
-    dashboard_content = DIV()
-    current_div = None
+    from random import randint
+    from time import sleep
 
-    for i in xrange(len(list_of_cards)):
-        if i % 3 == 0:
-            if current_div is not None:
-                dashboard_content.append(current_div)
-            current_div = DIV(_class="row")
-        current_div.append(list_of_cards[i].get_html())
+    # sleep(randint(0, 2))
+    card_class = getattr(dashboard_cards,
+                         request.vars["class_name"])(*request.vars["init_arguments[]"])
+    return card_class.get_html()
 
-    dashboard_content.append(current_div)
+# ----------------------------------------------------------------------------
+@auth.requires_login()
+def dashboard():
+    return dict()
 
-    return dict(dashboard_content=dashboard_content)
+# ----------------------------------------------------------------------------
+@auth.requires_login()
+def cta_handler():
+    problem_id = utilities.pick_a_problem(
+                    session.user_id,
+                    False,
+                    **dict(kind="random")
+                 )
+    redirect(URL("problems", "index", vars=dict(problem_id=problem_id)))
 
 # ----------------------------------------------------------------------------
 def user_editorials():
