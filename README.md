@@ -129,7 +129,7 @@ npm install uglifycss -g
 
 12. Done. :smile:
 
-13. To setup syntax check before all of your commits, just create a file in applications/stopstalk/.git/hooks/pre-commit with just `make` as it's content.
+13. To setup syntax check before all of your commits, just create a file in applications/stopstalk/.git/hooks/pre-commit with just `make syntaxx_check` as it's content.
  
 A few steps to setup your local database - [StopStalk Wiki](https://github.com/stopstalk/stopstalk-deployment/wiki/Setup-basic-database-tables-locally)
 
