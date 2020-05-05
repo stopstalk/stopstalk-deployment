@@ -42,9 +42,9 @@ if [ ${#static_files[@]} != 0 ]
 then
     for filename in $static_files;
     do
-        newfilename=static/minified_files/${filename}
+        newfilename=../static/minified_files/${filename}
         create_dir $newfilename
-        filename=static/${filename}
+        filename=../static/${filename}
         if [ "${filename: -3}" = ".js" ]
         then
             js_file=${newfilename%$".js"}.min.js
