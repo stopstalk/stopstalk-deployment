@@ -9,6 +9,7 @@ js/web2py-bootstrap3.js
 js/appjs/google_analytics.js
 js/appjs/layout.js
 js/appjs/default/contests.js
+js/appjs/default/dashboard.js
 js/appjs/default/faq.js
 js/appjs/default/filters.js
 js/appjs/default/search.js
