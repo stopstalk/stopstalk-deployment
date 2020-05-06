@@ -22,6 +22,8 @@
 
 import json
 import utilities
+from stopstalk_constants import *
+
 from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, I, P, \
                   TEXTAREA, SELECT, OPTION, URL, BUTTON, TAG
@@ -83,7 +85,7 @@ class BaseCard:
     def set_to_cache(self, value):
         current.REDIS_CLIENT.set(self.cache_key,
                                  json.dumps(value),
-                                 ex=1 * 60 * 60)
+                                 ex=CARD_REDIS_CACHE_TTL)
 
 # ==============================================================================
 class StreakCard(BaseCard):
@@ -355,5 +357,89 @@ class RecentSubmissionsCard(BaseCard):
             self.final_data = final_data
             return True
         return False
+
+# ==============================================================================
+class AddMoreFriendsCard(BaseCard):
+    # --------------------------------------------------------------------------
+    def __init__(self, user_id):
+        self.genre = AddMoreFriendsCard.__name__
+        self.user_id = user_id
+        self.card_title = "Add more friends"
+        self.cache_key = ADD_MORE_FRIENDS_REDIS_KEY_PREFIX + str(self.user_id)
+        BaseCard.__init__(self, user_id, "simple_with_cta")
+
+    # --------------------------------------------------------------------------
+    def get_html(self):
+        data = self.get_data()
+        card_text = "You have %d friends on StopStalk. To make best use of StopStalk, we recommend you to add more friends for best Competitive Programming learning experience." % data["friend_count"]
+        card_action_text = "Show me"
+
+        card_action_url = URL("default", "search",
+                              vars={"institute": data["institute"]})
+
+        card_html = BaseCard.get_html(self, **dict(
+                       card_title=self.card_title,
+                       card_text=card_text,
+                       card_action_text=card_action_text,
+                       card_action_url=card_action_url,
+                       card_color_class="white",
+                       card_text_color_class="black-text"
+                    ))
+        return card_html
+
+    # --------------------------------------------------------------------------
+    def get_data(self):
+        cache_value = self.get_from_cache()
+        if cache_value:
+            return cache_value
+
+        record = utilities.get_user_records([self.user_id], "id", "id", True)
+        result = dict(institute=record["institute"],
+                      friend_count=self.friend_count)
+        self.set_to_cache(result)
+        return result
+
+    # --------------------------------------------------------------------------
+    def should_show(self):
+        db = current.db
+        self.friend_count = db(db.following.follower_id == self.user_id).count()
+        return True
+        return self.friend_count < 3
+
+# ==============================================================================
+class JobProfileCard(BaseCard):
+    # --------------------------------------------------------------------------
+    def __init__(self, user_id):
+        self.genre = JobProfileCard.__name__
+        self.user_id = user_id
+        self.card_title = "Looking for job!"
+        self.cache_key = JOB_PROFILE_REDIS_KEY_PREFIX + str(self.user_id)
+        BaseCard.__init__(self, user_id, "simple_with_cta")
+
+    # --------------------------------------------------------------------------
+    def get_html(self):
+        card_text = "I am looking for a job and I want StopStalk to reach out to me for matching opportunities. Let me update my preferences."
+        card_action_text = "Update job preferences"
+
+        card_action_url = URL("default", "job_profile")
+
+        card_html = BaseCard.get_html(self, **dict(
+                       card_title=self.card_title,
+                       card_text=card_text,
+                       card_action_text=card_action_text,
+                       card_action_url=card_action_url,
+                       card_color_class="white",
+                       card_text_color_class="black-text"
+                    ))
+        return card_html
+
+    # --------------------------------------------------------------------------
+    def get_data(self):
+        pass
+    # --------------------------------------------------------------------------
+    def should_show(self):
+        db = current.db
+        query = (db.resume_data.user_id == self.user_id)
+        return db(query).select().first() is None
 
 # ==============================================================================

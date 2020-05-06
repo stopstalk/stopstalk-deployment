@@ -151,7 +151,6 @@ def get_card_html():
         return ""
 
     import dashboard_cards
-
     card_class = getattr(dashboard_cards,
                          request.vars["class_name"])(*request.vars["init_arguments[]"])
     return card_class.get_html() if card_class.should_show() else ""
@@ -1239,6 +1238,7 @@ def mark_friend():
     # Insert a tuple of users' id into the following table
     ftable.insert(user_id=friend_id, follower_id=session.user_id)
 
+    current.REDIS_CLIENT.delete(ADD_MORE_FRIENDS_REDIS_KEY_PREFIX + str(session.user_id))
     trtable = db.todays_requests
     query = (trtable.user_id == friend_id) & \
             (trtable.follower_id == session.user_id)
@@ -1545,6 +1545,7 @@ def unfriend():
             return _invalid_url()
 
         db(query).delete()
+        current.REDIS_CLIENT.delete(ADD_MORE_FRIENDS_REDIS_KEY_PREFIX + str(session.user_id))
 
         trtable = db.todays_requests
         query = (trtable.user_id == friend_id) & \
