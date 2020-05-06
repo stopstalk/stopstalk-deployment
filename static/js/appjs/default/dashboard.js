@@ -70,6 +70,16 @@ var LocalStorageHelper = (function() {
         "card_id": "recent_submissions_card",
         "class_name": "RecentSubmissionsCard",
         "init_arguments": [loggedInUserId]
+      },
+      {
+        "card_id": "add_more_friends_card",
+        "class_name": "AddMoreFriendsCard",
+        "init_arguments": [loggedInUserId]
+      },
+      {
+        "card_id": "job_profile_card",
+        "class_name": "JobProfileCard",
+        "init_arguments": [loggedInUserId]
       }
     ];
 
