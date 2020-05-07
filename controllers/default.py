@@ -475,6 +475,7 @@ def job_profile():
     else:
         rdtable.insert(**update_params)
         resume_data_record = db(rdtable.user_id == session.user_id).select().first()
+        current.REDIS_CLIENT.delete(CARD_CACHE_REDIS_KEYS["job_profile_prefix"] + str(session.user_id))
 
     response.flash = "Successfully saved your details!"
     return _get_response_from_record(resume_data_record)
@@ -1238,7 +1239,7 @@ def mark_friend():
     # Insert a tuple of users' id into the following table
     ftable.insert(user_id=friend_id, follower_id=session.user_id)
 
-    current.REDIS_CLIENT.delete(ADD_MORE_FRIENDS_REDIS_KEY_PREFIX + str(session.user_id))
+    current.REDIS_CLIENT.delete(CARD_CACHE_REDIS_KEYS["add_more_friends_prefix"] + str(session.user_id))
     trtable = db.todays_requests
     query = (trtable.user_id == friend_id) & \
             (trtable.follower_id == session.user_id)
@@ -1545,7 +1546,7 @@ def unfriend():
             return _invalid_url()
 
         db(query).delete()
-        current.REDIS_CLIENT.delete(ADD_MORE_FRIENDS_REDIS_KEY_PREFIX + str(session.user_id))
+        current.REDIS_CLIENT.delete(CARD_CACHE_REDIS_KEYS["add_more_friends_prefix"] + str(session.user_id))
 
         trtable = db.todays_requests
         query = (trtable.user_id == friend_id) & \

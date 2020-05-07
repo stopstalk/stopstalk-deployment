@@ -132,6 +132,7 @@ class StreakCard(BaseCard):
     # --------------------------------------------------------------------------
     def should_show(self):
         self.stats = utilities.get_rating_information(self.user_id, False)
+        return True
         return self.stats[self.key_name] > 0
 
 # ==============================================================================
@@ -198,7 +199,7 @@ class UpcomingContestCard(BaseCard):
         self.genre = UpcomingContestCard.__name__
         self.user_id = user_id
         self.card_title = "Upcoming contests"
-        self.cache_key = "cards::upcoming_contests"
+        self.cache_key = CARD_CACHE_REDIS_KEYS["upcoming_contests"]
         BaseCard.__init__(self, self.user_id, "with_html")
 
     # --------------------------------------------------------------------------
@@ -266,7 +267,7 @@ class RecentSubmissionsCard(BaseCard):
         self.genre = RecentSubmissionsCard.__name__
         self.user_id = user_id
         self.card_title = "Recent Friends' submissions"
-        self.cache_key = "cards::recent_submissions_cache_" + str(user_id)
+        self.cache_key = CARD_CACHE_REDIS_KEYS["recent_submissions_prefix"] + str(user_id)
         self.final_data = None
         BaseCard.__init__(self, user_id, "with_html")
 
@@ -365,7 +366,7 @@ class AddMoreFriendsCard(BaseCard):
         self.genre = AddMoreFriendsCard.__name__
         self.user_id = user_id
         self.card_title = "Add more friends"
-        self.cache_key = ADD_MORE_FRIENDS_REDIS_KEY_PREFIX + str(self.user_id)
+        self.cache_key = CARD_CACHE_REDIS_KEYS["add_more_friends_prefix"] + str(self.user_id)
         BaseCard.__init__(self, user_id, "simple_with_cta")
 
     # --------------------------------------------------------------------------
@@ -413,7 +414,7 @@ class JobProfileCard(BaseCard):
         self.genre = JobProfileCard.__name__
         self.user_id = user_id
         self.card_title = "Looking for job!"
-        self.cache_key = JOB_PROFILE_REDIS_KEY_PREFIX + str(self.user_id)
+        self.cache_key = CARD_CACHE_REDIS_KEYS["job_profile_prefix"] + str(self.user_id)
         BaseCard.__init__(self, user_id, "simple_with_cta")
 
     # --------------------------------------------------------------------------
