@@ -21,6 +21,10 @@ GLOBALLY_TRENDING_PROBLEMS_CACHE_KEY = "global_trending_table_cache"
 
 CARD_REDIS_CACHE_TTL = 1 * 60 * 60
 
-ADD_MORE_FRIENDS_REDIS_KEY_PREFIX = "cards::add_more_friends_cache_"
 
-JOB_PROFILE_REDIS_KEY_PREFIX = "cards::job_profile_"
+CARD_CACHE_REDIS_KEYS = {
+    "add_more_friends_prefix": "cards::add_more_friends_cache_",
+    "job_profile_prefix": "cards::job_profile_cache_",
+    "upcoming_contests": "cards::upcoming_contests",
+    "recent_submissions_prefix": "cards::recent_submissions_cache_"
+}
