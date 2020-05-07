@@ -46,27 +46,10 @@ query = (atable.blacklisted == False) & \
         (atable.registration_key == "") & \
         (atable.id > last_user_id)
 rows = db(query).select(orderby=~atable.id,
-                        limitby=(0, 100))
+                        limitby=(0, 200))
 
 if len(rows) > 0:
     current.REDIS_CLIENT.set("last_user_id_submitted_to_google",
-                             rows.first().id)
-
-for row in rows:
-    url = "https://www.stopstalk.com/user/profile/%s" % row.stopstalk_handle
-    content = "{\"url\": \"%s\", \"type\": \"URL_UPDATED\"}" % url
-
-    response, content = http.request(ENDPOINT, method="POST", body=content)
-    print response, content
-    time.sleep(1)
-
-last_custom_user_id = current.REDIS_CLIENT.get("last_custom_user_id_submitted_to_google")
-last_custom_user_id = 0 if last_custom_user_id is None else int(last_custom_user_id)
-
-rows = db(cftable.id > last_custom_user_id).select(orderby=~cftable.id,
-                                                   limitby=(0, 50))
-if len(rows) > 0:
-    current.REDIS_CLIENT.set("last_custom_user_id_submitted_to_google",
                              rows.first().id)
 
 for row in rows:
