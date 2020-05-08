@@ -26,5 +26,6 @@ CARD_CACHE_REDIS_KEYS = {
     "add_more_friends_prefix": "cards::add_more_friends_cache_",
     "job_profile_prefix": "cards::job_profile_cache_",
     "upcoming_contests": "cards::upcoming_contests",
-    "recent_submissions_prefix": "cards::recent_submissions_cache_"
+    "recent_submissions_prefix": "cards::recent_submissions_cache_",
+    "more_accounts_prefix": "cards::more_accounts_cache_"
 }

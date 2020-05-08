@@ -80,6 +80,11 @@ var LocalStorageHelper = (function() {
         "card_id": "job_profile_card",
         "class_name": "JobProfileCard",
         "init_arguments": [loggedInUserId]
+      },
+      {
+        "card_id": "linked_accounts_card",
+        "class_name": "LinkedAccountsCard",
+        "init_arguments": [loggedInUserId]
       }
     ];
 

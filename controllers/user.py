@@ -290,7 +290,8 @@ def update_details():
             db(submission_query).delete()
 
         session.auth.user = db.auth_user(session.user_id)
-        redirect(URL("default", "submissions", args=[1]))
+        current.REDIS_CLIENT.delete(CARD_CACHE_REDIS_KEYS["more_accounts_prefix"] + str(session.user_id))
+        redirect(URL("default", "index"))
     elif form.errors:
         response.flash = T("Form has errors")
 
