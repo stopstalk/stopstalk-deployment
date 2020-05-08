@@ -59,18 +59,6 @@ class BaseCard:
                                _class="card-action"),
                            _class="card " + args["card_color_class"]),
                        _class="col s4")
-        elif self.card_type == "with_html":
-            return DIV(DIV(DIV(SPAN(args["card_title"], _class="card-title"),
-                               args["custom_html"],
-                                _class="card-content " + \
-                                       args["card_text_color_class"]),
-                           DIV(A(args["card_action_text"],
-                                 _href=args["card_action_url"],
-                                 _class="btn btn-default",
-                                 _target="_blank"),
-                               _class="card-action right-text"),
-                           _class="card " + args["card_color_class"]),
-                       _class="col s4")
 
     # --------------------------------------------------------------------------
     def get_data(self):
@@ -203,7 +191,7 @@ class UpcomingContestCard(BaseCard):
         self.user_id = user_id
         self.card_title = "Upcoming contests"
         self.cache_key = CARD_CACHE_REDIS_KEYS["upcoming_contests"]
-        BaseCard.__init__(self, self.user_id, "with_html")
+        BaseCard.__init__(self, self.user_id, "simple_with_cta")
 
     # --------------------------------------------------------------------------
     def get_html(self):
@@ -233,7 +221,7 @@ class UpcomingContestCard(BaseCard):
 
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
-                       custom_html=card_content_table,
+                       card_content=card_content_table,
                        card_action_text="View all",
                        card_action_url=URL("default", "contests"),
                        card_color_class="white",
@@ -272,7 +260,7 @@ class RecentSubmissionsCard(BaseCard):
         self.card_title = "Recent Friends' submissions"
         self.cache_key = CARD_CACHE_REDIS_KEYS["recent_submissions_prefix"] + str(user_id)
         self.final_data = None
-        BaseCard.__init__(self, user_id, "with_html")
+        BaseCard.__init__(self, user_id, "simple_with_cta")
 
     # --------------------------------------------------------------------------
     def get_html(self):
@@ -312,7 +300,7 @@ class RecentSubmissionsCard(BaseCard):
 
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
-                       custom_html=card_content_table,
+                       card_content=card_content_table,
                        card_action_text="View all",
                        card_action_url=card_action_url,
                        card_color_class="white",
