@@ -24,7 +24,7 @@ import json
 import utilities
 from stopstalk_constants import *
 
-from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, \
+from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, B, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, I, P, \
                   TEXTAREA, SELECT, OPTION, URL, BUTTON, TAG
 
@@ -39,7 +39,7 @@ class BaseCard:
     def get_html(self, **args):
         if self.card_type == "simple_with_cta":
             return DIV(DIV(DIV(SPAN(args["card_title"], _class="card-title"),
-                               P(args["card_text"]),
+                               args["card_content"],
                                 _class="card-content " + \
                                        args["card_text_color_class"]),
                            DIV(A(args["card_action_text"],
@@ -103,10 +103,14 @@ class StreakCard(BaseCard):
     def get_html(self):
         streak_value = self.get_data()
         if self.kind == "day":
-            card_text = "You're at a %d day streak. Keep solving a new problem everyday!" % streak_value
+            card_content = P("You're at a ",
+                             B("%d day streak" % streak_value),
+                             ". Keep solving a new problem everyday!")
             card_action_text = "Pick a Problem"
         elif self.kind == "accepted":
-            card_text = "You're at a %d accepted problem streak. Let the greens rain!" % streak_value
+            card_content = P("You're at a ",
+                             B("%d accepted problem streak" % streak_value),
+                             ". Let the greens rain!")
             card_action_text = "Pick a Problem"
         else:
             return "FAILURE"
@@ -117,7 +121,7 @@ class StreakCard(BaseCard):
 
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
-                       card_text=card_text,
+                       card_content=card_content,
                        card_action_text=card_action_text,
                        card_action_url=card_action_url,
                        card_color_class="white",
@@ -147,15 +151,14 @@ class SuggestProblemCard(BaseCard):
     # --------------------------------------------------------------------------
     def get_html(self):
         streak_value = self.get_data()
-        card_text = "Let's find you some problem that you can start solving."
+        card_content = P("Let's find you some problem that you can start solving.")
         card_action_url = URL("default",
                               "cta_handler",
                               vars=dict(kind="random"))
 
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
-                       card_text=card_text,
-                       card_action_text="abcd",
+                       card_content=card_content,
                        cta_links=[
                             A("Easy",
                               _href=URL("default", "cta_handler",
@@ -372,7 +375,9 @@ class AddMoreFriendsCard(BaseCard):
     # --------------------------------------------------------------------------
     def get_html(self):
         data = self.get_data()
-        card_text = "You have %d friends on StopStalk. To make best use of StopStalk, we recommend you to add more friends for best Competitive Programming learning experience." % data["friend_count"]
+        card_content = P("You have ",
+                         B("%d friends" % data["friend_count"]),
+                         " on StopStalk. To make best use of StopStalk, we recommend you to add more friends for best Competitive Programming learning experience.")
         card_action_text = "Show me"
 
         card_action_url = URL("default", "search",
@@ -380,7 +385,7 @@ class AddMoreFriendsCard(BaseCard):
 
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
-                       card_text=card_text,
+                       card_content=card_content,
                        card_action_text=card_action_text,
                        card_action_url=card_action_url,
                        card_color_class="white",
@@ -419,14 +424,14 @@ class JobProfileCard(BaseCard):
 
     # --------------------------------------------------------------------------
     def get_html(self):
-        card_text = "I am looking for a job and I want StopStalk to reach out to me for matching opportunities. Let me update my preferences."
+        card_content = P("I am looking for a job and I want StopStalk to reach out to me for matching opportunities. Let me update my preferences.")
         card_action_text = "Update job preferences"
 
         card_action_url = URL("default", "job_profile")
 
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
-                       card_text=card_text,
+                       card_content=card_content,
                        card_action_text=card_action_text,
                        card_action_url=card_action_url,
                        card_color_class="white",
@@ -456,14 +461,16 @@ class LinkedAccountsCard(BaseCard):
     # --------------------------------------------------------------------------
     def get_html(self):
         count = self.get_data()
-        card_text = "You have %d accounts linked with StopStalk. Update your profile with more handles for a very deedy StopStalk profile." % count
+        card_content = P("You have ",
+                         B("%d accounts" % count),
+                         " linked with StopStalk. Update your profile with more handles for a very deedy StopStalk profile.")
         card_action_text = "Update now"
 
         card_action_url = URL("user", "update_details")
 
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
-                       card_text=card_text,
+                       card_content=card_content,
                        card_action_text=card_action_text,
                        card_action_url=card_action_url,
                        card_color_class="white",
