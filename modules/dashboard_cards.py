@@ -444,3 +444,52 @@ class JobProfileCard(BaseCard):
         return db(query).select().first() is None
 
 # ==============================================================================
+class LinkedAccountsCard(BaseCard):
+    # --------------------------------------------------------------------------
+    def __init__(self, user_id):
+        self.genre = JobProfileCard.__name__
+        self.user_id = user_id
+        self.card_title = "Link more accounts"
+        self.cache_key = CARD_CACHE_REDIS_KEYS["more_accounts_prefix"] + str(self.user_id)
+        BaseCard.__init__(self, user_id, "simple_with_cta")
+
+    # --------------------------------------------------------------------------
+    def get_html(self):
+        count = self.get_data()
+        card_text = "You have %d accounts linked with StopStalk. Update your profile with more handles for a very deedy StopStalk profile." % count
+        card_action_text = "Update now"
+
+        card_action_url = URL("user", "update_details")
+
+        card_html = BaseCard.get_html(self, **dict(
+                       card_title=self.card_title,
+                       card_text=card_text,
+                       card_action_text=card_action_text,
+                       card_action_url=card_action_url,
+                       card_color_class="white",
+                       card_text_color_class="black-text"
+                    ))
+        return card_html
+
+    # --------------------------------------------------------------------------
+    def get_data(self):
+        cache_value = self.get_from_cache()
+        if cache_value:
+            return cache_value
+
+        self.set_to_cache(self.handle_count)
+        return self.handle_count
+
+    # --------------------------------------------------------------------------
+    def should_show(self):
+        handle_count = 0
+        db = current.db
+        record = utilities.get_user_records([self.user_id], "id", "id", True)
+        for site in current.SITES:
+            if record[site.lower() + "_handle"]:
+                handle_count += 1
+        self.handle_count = handle_count
+        return True
+        return handle_count < 3
+
+# ==============================================================================
