@@ -647,3 +647,8 @@ nav ul a:hover {
 .stopstalk-dashboard-card .card-content {
     font-size: 17px;
 }
+
+.parent-site-icon-small {
+    height: 30px;
+    width: 30px;
+}

@@ -377,7 +377,7 @@ def todo():
                         TD(IMG(_src=get_static_url("images/" + \
                                                    utilities.urltosite(row.link) + \
                                                    "_small.png"),
-                               _style="height: 30px; weight: 30px;")),
+                               _class="parent-site-icon-small")),
                         TD(row.total_submissions),
                         TD(len(uids) + len(cuids)),
                         TD(I(_class="red-text text-accent-4 fa fa-times remove-from-todo",
@@ -744,7 +744,6 @@ def contests():
     button_class = "btn-floating btn-small accent-4 tooltipped"
     view_link_class = button_class + " green view-contest"
     reminder_class = button_class + " orange set-reminder"
-    icon_style = "height: 30px; width: 30px;"
     left_tooltip_attrs = {"position": "left", "delay": "50"}
 
     for i in ongoing:
@@ -773,7 +772,7 @@ def contests():
                                           str(i["Platform"]).lower() + \
                                           "_small.png"),
                       _title=site_mapping[i["Platform"]],
-                      _style=icon_style)))
+                      _class="parent-site-icon-small")))
 
         append(TD("-"))
         append(TD(str(endtime).replace("-", "/"),
