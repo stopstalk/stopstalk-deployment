@@ -215,7 +215,7 @@ class UpcomingContestCard(BaseCard):
                             TD(IMG(_src=current.get_static_url(
                                             "images/%s_small.png" % str(contest[1])
                                         ),
-                                   _style="height: 30px; width: 30px;")),
+                                   _class="parent-site-icon-small")),
                             TD(A(I(_class="fa fa-external-link-square"),
                                  _class="btn-floating btn-small accent-4 green view-contest",
                                  _href=contest[2],
