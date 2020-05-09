@@ -349,7 +349,7 @@ class RecentSubmissionsCard(BaseCard):
             else:
                 final_data = []
 
-        self.set_to_cache(final_data)
+            self.set_to_cache(final_data)
 
         if len(final_data) > 0:
             self.final_data = final_data
