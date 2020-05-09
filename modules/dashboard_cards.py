@@ -94,6 +94,7 @@ class StreakCard(BaseCard):
         self.key_name = "curr_%s_streak" % self.kind
         self.user_id = user_id
         self.card_title = "Keep your %s streak going!" % self.kind
+        self.cache_key = CARD_CACHE_REDIS_KEYS["curr_streak_prefix"] + str(self.user_id)
         self.stats = None
         self.ctas = [
             dict(btn_url=URL("default",
@@ -135,7 +136,14 @@ class StreakCard(BaseCard):
 
     # --------------------------------------------------------------------------
     def should_show(self):
-        self.stats = utilities.get_rating_information(self.user_id, False, True)
+        cache_value = self.get_from_cache()
+        if cache_value:
+            self.stats = cache_value
+        else:
+            self.stats = utilities.get_rating_information(self.user_id,
+                                                          False,
+                                                          True)
+            self.set_to_cache(self.stats)
         return self.key_name in self.stats and \
                self.stats[self.key_name] > 0
 
@@ -295,7 +303,7 @@ class RecentSubmissionsCard(BaseCard):
                     td.append(SPAN(IMG(_src=current.get_static_url(
                                                 "images/%s_small.png" % str(site).lower()
                                             ),
-                                       _style="height: 18px; width: 18px; margin-bottom: -4px;"),
+                                       _class="parent-site-icon-very-small"),
                                    " " + str(row[1][site]),
                                    _style="padding-right: 10px;"))
             tr.append(td)
@@ -379,8 +387,8 @@ class AddMoreFriendsCard(BaseCard):
         ]
 
         card_content = P("You have ",
-                         B("%d friends" % data["friend_count"]),
-                         " on StopStalk. To make best use of StopStalk, we recommend you to add more friends for best Competitive Programming learning experience.")
+                         B(current.T("%s %%{friend}") % data["friend_count"]),
+                         " on StopStalk. For a better competitive programming learning experience, we recommend you to add more friends.")
 
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
@@ -407,7 +415,7 @@ class AddMoreFriendsCard(BaseCard):
     def should_show(self):
         db = current.db
         self.friend_count = db(db.following.follower_id == self.user_id).count()
-        return self.friend_count < 3
+        return self.friend_count <= 3
 
 # ==============================================================================
 class JobProfileCard(BaseCard):
@@ -464,8 +472,8 @@ class LinkedAccountsCard(BaseCard):
     def get_html(self):
         count = self.get_data()
         card_content = P("You have ",
-                         B("%d accounts" % count),
-                         " linked with StopStalk. Update your profile with more handles for a very deedy StopStalk profile.")
+                         B(current.T("%s %%{account}") % count),
+                         " linked with StopStalk. Update your profile with more handles to track your competitive programming progress.")
 
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
@@ -478,23 +486,23 @@ class LinkedAccountsCard(BaseCard):
 
     # --------------------------------------------------------------------------
     def get_data(self):
-        cache_value = self.get_from_cache()
-        if cache_value:
-            return cache_value
-
-        self.set_to_cache(self.handle_count)
         return self.handle_count
 
     # --------------------------------------------------------------------------
     def should_show(self):
-        handle_count = 0
-        db = current.db
-        record = utilities.get_user_records([self.user_id], "id", "id", True)
-        for site in current.SITES:
-            if record[site.lower() + "_handle"]:
-                handle_count += 1
-        self.handle_count = handle_count
-        return handle_count < 3
+        cache_value = self.get_from_cache()
+        if cache_value:
+            self.handle_count = cache_value
+        else:
+            handle_count = 0
+            db = current.db
+            record = utilities.get_user_records([self.user_id], "id", "id", True)
+            for site in current.SITES:
+                if record[site.lower() + "_handle"]:
+                    handle_count += 1
+            self.handle_count = handle_count
+            self.set_to_cache(self.handle_count)
+        return self.handle_count < 3
 
 # ==============================================================================
 class LastSolvedProblemCard(BaseCard):
@@ -549,27 +557,25 @@ class LastSolvedProblemCard(BaseCard):
 
     # --------------------------------------------------------------------------
     def get_data(self):
-        cache_value = self.get_from_cache()
-        if cache_value:
-            return cache_value
-        pdetails = utilities.get_problem_details(self.final_pid)
-        result = {
-            "name": pdetails["name"],
-            "link": pdetails["link"],
-            "id": self.final_pid
-        }
-        self.set_to_cache(result)
-        return result
+        return self.problem_details
 
     # --------------------------------------------------------------------------
     def should_show(self):
+        cache_value = self.get_from_cache()
+
+        if cache_value:
+            # This means one problem is already there which is supposed to be shown
+            self.problem_details = cache_value
+            self.final_pid = self.problem_details["id"]
+            return True
+
         import datetime
         from random import choice
         db = current.db
         stable = db.submission
         query = (stable.user_id == self.user_id) & \
                 (stable.time_stamp >= datetime.datetime.today() - \
-                                      datetime.timedelta(days=2000)) & \
+                                      datetime.timedelta(days=current.PAST_DAYS)) & \
                 (stable.status == "AC")
         pids = db(query).select(stable.problem_id,
                                 distinct=True,
@@ -580,7 +586,16 @@ class LastSolvedProblemCard(BaseCard):
         except:
             self.final_pid = None
 
-        return self.final_pid is not None
+        if self.final_pid is None:
+            return False
+        else:
+            pdetails = utilities.get_problem_details(self.final_pid)
+            self.problem_details = {
+                "name": pdetails["name"],
+                "link": pdetails["link"],
+                "id": self.final_pid
+            }
+            self.set_to_cache(self.problem_details)
 
 # ==============================================================================
 class TrendingProblemsCard(BaseCard):
