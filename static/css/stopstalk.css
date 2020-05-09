@@ -640,4 +640,10 @@ nav ul a:hover {
 
 .stopstalk-dashboard-card-cta {
     margin-left: 10px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.stopstalk-dashboard-card .card-content {
+    font-size: 17px;
 }

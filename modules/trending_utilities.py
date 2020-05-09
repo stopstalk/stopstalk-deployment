@@ -52,7 +52,8 @@ def render_trending_table(caption, problems, column_name, user_id):
         tbody.append(tr)
 
     table.append(tbody)
-    table = DIV(H5(caption, _class="center"), HR(), table)
+    if caption is not None:
+        table = DIV(H5(caption, _class="center"), HR(), table)
 
     return table
 
@@ -108,8 +109,11 @@ def draw_trending_table(trending_problems, table_type, user_id):
     if table_type == "friends":
         table_header = T("Trending among friends")
         column_name = T("Friends")
-    else:
+    elif table_type == "global":
         table_header = T("Trending Globally")
+        column_name = T("Users")
+    else:
+        table_header = None
         column_name = T("Users")
 
     if len(trending_problems) == 0:
