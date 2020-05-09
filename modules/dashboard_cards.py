@@ -114,10 +114,6 @@ class StreakCard(BaseCard):
         else:
             return "FAILURE"
 
-        card_action_url = URL("default",
-                              "cta_handler",
-                              vars=dict(kind="random"))
-
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
                        card_content=card_content,
@@ -133,8 +129,9 @@ class StreakCard(BaseCard):
 
     # --------------------------------------------------------------------------
     def should_show(self):
-        self.stats = utilities.get_rating_information(self.user_id, False)
-        return self.stats[self.key_name] > 0
+        self.stats = utilities.get_rating_information(self.user_id, False, True)
+        return self.key_name in self.stats and \
+               self.stats[self.key_name] > 0
 
 # ==============================================================================
 class SuggestProblemCard(BaseCard):
@@ -165,9 +162,6 @@ class SuggestProblemCard(BaseCard):
     def get_html(self):
         streak_value = self.get_data()
         card_content = P("Let's find you some problem that you can start solving.")
-        card_action_url = URL("default",
-                              "cta_handler",
-                              vars=dict(kind="random"))
 
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
@@ -223,10 +217,6 @@ class UpcomingContestCard(BaseCard):
 
         card_content_table.append(tbody)
 
-        card_action_url = URL("default",
-                              "cta_handler",
-                              vars=dict(kind="random"))
-
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
                        card_content=card_content_table,
@@ -277,9 +267,6 @@ class RecentSubmissionsCard(BaseCard):
     # --------------------------------------------------------------------------
     def get_html(self):
         submissions_data = self.get_data()
-        card_action_url = URL("default",
-                              "submissions",
-                              args=[1])
 
         card_content_table = TABLE(
             _class="bordered highlight"
@@ -333,28 +320,32 @@ class RecentSubmissionsCard(BaseCard):
             db = current.db
             stable = db.submission
             friends, _ = utilities.get_friends(self.user_id)
-            today = datetime.datetime.today()
-            last_week = today - datetime.timedelta(days=150)
-            rows = db.executesql("""
-                SELECT user_id, site, count(*)
-                FROM submission
-                WHERE time_stamp >= "%s" AND
-                    user_id in (%s) AND custom_user_id is NULL
-                GROUP BY 1, 2
-                ORDER BY 3 DESC
-            """ % (str(last_week.date()),
-                   ",".join([str(x) for x in friends])))
-            final_hash = {}
-            for row in rows:
-                if row[0] not in final_hash:
-                    final_hash[row[0]] = {"total": 0}
-                final_hash[row[0]][row[1]] = int(row[2])
-                final_hash[row[0]]["total"] += int(row[2])
+            if len(friends):
+                today = datetime.datetime.today()
+                last_week = today - datetime.timedelta(days=150)
+                rows = db.executesql("""
+                    SELECT user_id, site, count(*)
+                    FROM submission
+                    WHERE time_stamp >= "%s" AND
+                        user_id in (%s) AND custom_user_id is NULL
+                    GROUP BY 1, 2
+                    ORDER BY 3 DESC
+                """ % (str(last_week.date()),
+                       ",".join([str(x) for x in friends])))
+                final_hash = {}
+                for row in rows:
+                    if row[0] not in final_hash:
+                        final_hash[row[0]] = {"total": 0}
+                    final_hash[row[0]][row[1]] = int(row[2])
+                    final_hash[row[0]]["total"] += int(row[2])
 
-            final_data = sorted(final_hash.items(),
-                                key=lambda x: x[1]["total"],
-                                reverse=True)[:2]
-            self.set_to_cache(final_data)
+                final_data = sorted(final_hash.items(),
+                                    key=lambda x: x[1]["total"],
+                                    reverse=True)[:2]
+            else:
+                final_data = []
+
+        self.set_to_cache(final_data)
 
         if len(final_data) > 0:
             self.final_data = final_data
@@ -469,9 +460,6 @@ class LinkedAccountsCard(BaseCard):
         card_content = P("You have ",
                          B("%d accounts" % count),
                          " linked with StopStalk. Update your profile with more handles for a very deedy StopStalk profile.")
-        card_action_text = "Update now"
-
-        card_action_url = URL("user", "update_details")
 
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,

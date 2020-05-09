@@ -474,7 +474,7 @@ def get_stopstalk_handle(user_id, custom):
     return table(user_id).stopstalk_handle
 
 # -----------------------------------------------------------------------------
-def get_rating_information(user_id, custom):
+def get_rating_information(user_id, custom, is_logged_in):
     db = current.db
     stopstalk_handle = get_stopstalk_handle(user_id, custom)
     redis_cache_key = "profile_page:user_stats_" + stopstalk_handle
@@ -483,7 +483,7 @@ def get_rating_information(user_id, custom):
     data = current.REDIS_CLIENT.get(redis_cache_key)
     if data:
         result = json.loads(data)
-        if not current.auth.is_logged_in():
+        if not is_logged_in:
             del result["rating_history"]
         if "problems_authored_count" not in result:
             result["problems_authored_count"] = 0
@@ -503,7 +503,7 @@ def get_rating_information(user_id, custom):
                                       custom,
                                       rows.as_list())
 
-    if current.auth.is_logged_in():
+    if is_logged_in:
         current.REDIS_CLIENT.set(redis_cache_key,
                                  json.dumps(result, separators=JSON_DUMP_SEPARATORS),
                                  ex=1 * 60 * 60)
