@@ -51,7 +51,7 @@ class BaseCard:
                        _class="col s4")
         elif self.card_type == "simple_with_multiple_ctas":
             return DIV(DIV(DIV(SPAN(args["card_title"], _class="card-title"),
-                               P(args["card_text"]),
+                               args["card_content"],
                                 _class="card-content " + \
                                        args["card_text_color_class"]
                                ),
@@ -486,5 +486,85 @@ class LinkedAccountsCard(BaseCard):
         self.handle_count = handle_count
         return True
         return handle_count < 3
+
+# ==============================================================================
+class LastSolvedProblemCard(BaseCard):
+    # --------------------------------------------------------------------------
+    def __init__(self, user_id):
+        self.genre = LastSolvedProblemCard.__name__
+        self.user_id = user_id
+        self.final_pid = None
+        self.card_title = "Giving back to the community!"
+        self.cache_key = CARD_CACHE_REDIS_KEYS["last_solved_problem_prefix"] + str(self.user_id)
+        BaseCard.__init__(self, user_id, "simple_with_multiple_ctas")
+
+    # --------------------------------------------------------------------------
+    def get_html(self):
+        problem_details = self.get_data()
+        card_content = SPAN("You just solved ",
+                            utilities.problem_widget(problem_details["name"],
+                                                     problem_details["link"],
+                                                     "solved-problem",
+                                                     "Solved Problem",
+                                                     problem_details["id"]),
+                            ". You can write editorials on StopStalk and help the community.")
+
+        card_html = BaseCard.get_html(self, **dict(
+                       card_title=self.card_title,
+                       card_content=card_content,
+                       cta_links=[
+                            A("Write Editorial",
+                              _href=URL("problems", "editorials",
+                                        args=problem_details["id"],
+                                        vars=dict(write_editorial=True)),
+                              _class="btn btn-default",
+                              _target="_blank"),
+                            " ",
+                            A("Suggest Tags",
+                              _href=URL("problems", "index",
+                                        vars=dict(problem_id=problem_details["id"],
+                                                  suggested_tag=True)),
+                              _class="btn btn-default",
+                              _target="_blank")
+                       ],
+                       card_color_class="white",
+                       card_text_color_class="black-text"
+                    ))
+        return card_html
+
+    # --------------------------------------------------------------------------
+    def get_data(self):
+        cache_value = self.get_from_cache()
+        if cache_value:
+            return cache_value
+        pdetails = utilities.get_problem_details(self.final_pid)
+        result = {
+            "name": pdetails["name"],
+            "link": pdetails["link"],
+            "id": self.final_pid
+        }
+        self.set_to_cache(result)
+        return result
+
+    # --------------------------------------------------------------------------
+    def should_show(self):
+        import datetime
+        from random import choice
+        db = current.db
+        stable = db.submission
+        query = (stable.user_id == self.user_id) & \
+                (stable.time_stamp >= datetime.datetime.today() - \
+                                      datetime.timedelta(days=2000)) & \
+                (stable.status == "AC")
+        pids = db(query).select(stable.problem_id,
+                                distinct=True,
+                                orderby=~stable.time_stamp,
+                                limitby=(0, 10)).as_list()
+        try:
+            self.final_pid = choice(pids)["problem_id"]
+        except:
+            self.final_pid = None
+
+        return self.final_pid is not None
 
 # ==============================================================================

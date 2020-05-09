@@ -129,6 +129,7 @@
         addEventListener('.problem-setter-on-stopstalk', 'Problem author link on StopStalk', false);
         addEventListener('.problem-setter-on-profile-site', 'Problem author link on Profile Site', false);
         addEventListener('.problem-setter-text', 'Problem setter text without a link', false);
+        addEventListener('#suggest-trigger', 'Problem page - suggest tag trigger', false)
     };
 
     var addUserEditorialsButtonsToGA = function() {

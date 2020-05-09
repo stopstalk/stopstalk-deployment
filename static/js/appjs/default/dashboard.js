@@ -85,6 +85,11 @@ var LocalStorageHelper = (function() {
         "card_id": "linked_accounts_card",
         "class_name": "LinkedAccountsCard",
         "init_arguments": [loggedInUserId]
+      },
+      {
+        "card_id": "last_solved_problem_card",
+        "class_name": "LastSolvedProblemCard",
+        "init_arguments": [loggedInUserId]
       }
     ];
 
