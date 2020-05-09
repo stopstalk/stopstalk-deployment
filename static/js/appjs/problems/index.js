@@ -98,8 +98,7 @@
         $('.modal').modal();
 
         if (isLoggedIn) {
-            if (openModal)
-                $('#suggest-tags-modal').modal('open');
+            if (openSuggestedTagsModal) $('.suggest-tags-plus').trigger('click');
 
             $('#submit-tags').click(function() {
                 var submittedTags = $('#tag-suggests').val();
@@ -118,6 +117,8 @@
             });
             refreshSuggestedTags();
         }
+
+
     });
 
 })(jQuery);
