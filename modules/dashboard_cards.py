@@ -32,6 +32,7 @@ from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, B, \
 class BaseCard:
     # --------------------------------------------------------------------------
     def __init__(self, user_id):
+        self.genre = self.__class__.__name__
         self.user_id = user_id
 
     # --------------------------------------------------------------------------
@@ -79,7 +80,6 @@ class BaseCard:
 class StreakCard(BaseCard):
     # --------------------------------------------------------------------------
     def __init__(self, user_id, kind):
-        self.genre = StreakCard.__name__
         self.kind = kind
         self.key_name = "curr_%s_streak" % self.kind
         self.user_id = user_id
@@ -135,7 +135,6 @@ class StreakCard(BaseCard):
 class SuggestProblemCard(BaseCard):
     # --------------------------------------------------------------------------
     def __init__(self, user_id):
-        self.genre = SuggestProblemCard.__name__
         self.user_id = user_id
         self.card_title = "Mood"
         self.ctas = [
@@ -187,7 +186,6 @@ class UpcomingContestCard(BaseCard):
 
     # --------------------------------------------------------------------------
     def __init__(self, user_id):
-        self.genre = UpcomingContestCard.__name__
         self.user_id = user_id
         self.card_title = "Upcoming contests"
         self.cache_key = CARD_CACHE_REDIS_KEYS["upcoming_contests"]
@@ -259,7 +257,6 @@ class UpcomingContestCard(BaseCard):
 class RecentSubmissionsCard(BaseCard):
     # --------------------------------------------------------------------------
     def __init__(self, user_id):
-        self.genre = RecentSubmissionsCard.__name__
         self.user_id = user_id
         self.card_title = "Recent Friends' submissions"
         self.cache_key = CARD_CACHE_REDIS_KEYS["recent_submissions_prefix"] + str(user_id)
@@ -363,7 +360,6 @@ class RecentSubmissionsCard(BaseCard):
 class AddMoreFriendsCard(BaseCard):
     # --------------------------------------------------------------------------
     def __init__(self, user_id):
-        self.genre = AddMoreFriendsCard.__name__
         self.user_id = user_id
         self.card_title = "Add more friends"
         self.cache_key = CARD_CACHE_REDIS_KEYS["add_more_friends_prefix"] + str(self.user_id)
@@ -416,7 +412,6 @@ class AddMoreFriendsCard(BaseCard):
 class JobProfileCard(BaseCard):
     # --------------------------------------------------------------------------
     def __init__(self, user_id):
-        self.genre = JobProfileCard.__name__
         self.user_id = user_id
         self.card_title = "Looking for job!"
         self.cache_key = CARD_CACHE_REDIS_KEYS["job_profile_prefix"] + str(self.user_id)
@@ -454,7 +449,6 @@ class JobProfileCard(BaseCard):
 class LinkedAccountsCard(BaseCard):
     # --------------------------------------------------------------------------
     def __init__(self, user_id):
-        self.genre = JobProfileCard.__name__
         self.user_id = user_id
         self.card_title = "Link more accounts"
         self.cache_key = CARD_CACHE_REDIS_KEYS["more_accounts_prefix"] + str(self.user_id)
@@ -509,7 +503,6 @@ class LinkedAccountsCard(BaseCard):
 class LastSolvedProblemCard(BaseCard):
     # --------------------------------------------------------------------------
     def __init__(self, user_id):
-        self.genre = LastSolvedProblemCard.__name__
         self.user_id = user_id
         self.final_pid = None
         self.card_title = "Giving back to the community!"
