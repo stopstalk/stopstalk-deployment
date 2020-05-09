@@ -652,3 +652,9 @@ nav ul a:hover {
     height: 30px;
     width: 30px;
 }
+
+.parent-site-icon-very-small {
+    height: 18px;
+    width: 18px;
+    margin-bottom: -4px;
+}

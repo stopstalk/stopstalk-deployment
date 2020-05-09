@@ -6,7 +6,7 @@ var LocalStorageHelper = (function() {
     if (value === null) return defaultNullValue;
     value = JSON.parse(value);
     if (
-        //value["version"] === null ||
+        value["version"] === null ||
         parseInt(value["version"]) <= stopstalkReleaseVersion ||
         parseInt(value["user_id"]) !== loggedInUserId) {
       localStorage.removeItem(cardIdentifier);
