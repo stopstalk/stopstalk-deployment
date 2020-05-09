@@ -8,11 +8,6 @@
     // var announcementValue = '{{=recent_announcements.has_key("feedback_form") and recent_announcements["feedback_form"]}}';
 
     $(document).ready(function() {
-        // if ('{{=country}}' === 'not-available') {
-        //     $('#fill-country-modal').modal();
-        //     $('#fill-country-modal').modal('open');
-        // }
-
         // if (announcementValue === 'False') {
         //     $('#recent_announcements').modal({
         //         dismissible: false,
@@ -27,13 +22,7 @@
         // }
     });
 </script>
-<div id="fill-country-modal" class="modal">
-    <div class="modal-content">
-        <h4>{{=T("Update your Country")}}</h4>
-        <p>Please update your Country, we have added Country-wise Leaderboards :)</p>
-        {{=country_form}}
-    </div>
-</div>
+
 
 <div id="recent_announcements" class="modal" style="max-height: 80%; width: 60%;">
   <div class="modal-content center">
@@ -49,9 +38,6 @@
     <script src="{{=URL('static', 'js/jquery.bootpag.min.js')}}"></script>
     <script src="{{=get_static_url('js/appjs/default/submissions.js')}}"></script>
     <h1>{{=T("Recent submissions")}}</h1>
-    {{if len(current.REDIS_CLIENT.smembers("disabled_retrieval")):}}
-        <h7 class="red-text"> We are facing some issues for retrieval from {{=utilities.pretty_string(current.REDIS_CLIENT.smembers("disabled_retrieval"))}}. We will be back soon.</h7>
-    {{pass}}
     <p>Problem setters data on <b>problem page</b> and <b>profile page</b> - {{=A("Know more", _href=URL('default', 'updates'), _target="_blank", _id="know-more-submissions-page")}}</p>
     <p>Please take some time to fill out this {{=A("Survey Form", _href="http://goo.gl/oeLZHd", _target="_blank")}}</p>
 
