@@ -124,6 +124,28 @@ def init_metric_handlers(log_to_redis):
 
 
 # ------------------------------------------------------------------------------
+def pick_a_problem(user_id, custom=False, **args):
+    db = current.db
+    ptable = db.problem
+    solved_problems, unsolved_problems = get_solved_problems(user_id, custom)
+
+    query = ~ptable.id.belongs(solved_problems.union(unsolved_problems))
+
+    if args["kind"] == "random":
+        record = db(query).select(ptable.id, orderby="<random>").first()
+    elif args["kind"] == "suggested_tag":
+        sttable = db.suggested_tags
+        ttable = db.tag
+        tag_query = (sttable.tag_id == ttable.id) & \
+                    (ttable.value == args["tag_category"])
+        pids = db(tag_query).select(sttable.problem_id, distinct=True)
+        pids = set([x.problem_id for x in pids])
+        query &= ptable.id.belongs(pids)
+        record = db(query).select(ptable.id, orderby="<random>").first()
+
+    return record.id
+
+# ------------------------------------------------------------------------------
 def get_user_record_cache_key(user_id):
     return "auth_user_cache::user_" + str(user_id)
 
@@ -193,6 +215,28 @@ def get_boto3_client():
     return client("s3",
                   aws_access_key_id=current.s3_access_key_id,
                   aws_secret_access_key=current.s3_secret_access_key)
+
+# ------------------------------------------------------------------------------
+def get_contests():
+    today = datetime.datetime.today()
+    today = datetime.datetime.strptime(str(today)[:-7],
+                                       "%Y-%m-%d %H:%M:%S")
+
+    start_date = today.date()
+    end_date = start_date + datetime.timedelta(90)
+    url = "https://contesttrackerapi.herokuapp.com/"
+
+    from urllib3 import disable_warnings
+    import requests
+    disable_warnings()
+
+    response = requests.get(url, verify=False)
+    if response.status_code == 200:
+        response = response.json()["result"]
+    else:
+        return None, None
+
+    return response["ongoing"], response["upcoming"]
 
 # ------------------------------------------------------------------------------
 def merge_duplicate_problems(original_id, duplicate_id):
@@ -429,6 +473,44 @@ def get_stopstalk_handle(user_id, custom):
     table = current.db.custom_friend if custom else current.db.auth_user
     return table(user_id).stopstalk_handle
 
+# -----------------------------------------------------------------------------
+def get_rating_information(user_id, custom, is_logged_in):
+    db = current.db
+    stopstalk_handle = get_stopstalk_handle(user_id, custom)
+    redis_cache_key = "profile_page:user_stats_" + stopstalk_handle
+
+    # Check if data is present in REDIS
+    data = current.REDIS_CLIENT.get(redis_cache_key)
+    if data:
+        result = json.loads(data)
+        if not is_logged_in:
+            del result["rating_history"]
+        if "problems_authored_count" not in result:
+            result["problems_authored_count"] = 0
+        return result
+
+    stable = db.submission
+
+    query = (stable["custom_user_id" if custom else "user_id"] == user_id)
+    rows = db(query).select(stable.time_stamp,
+                            stable.problem_id,
+                            stable.status,
+                            stable.site,
+                            orderby=stable.time_stamp)
+
+    # Returns rating history, accepted & max streak (day and accepted),
+    result = get_stopstalk_user_stats(stopstalk_handle,
+                                      custom,
+                                      rows.as_list())
+
+    if is_logged_in:
+        current.REDIS_CLIENT.set(redis_cache_key,
+                                 json.dumps(result, separators=JSON_DUMP_SEPARATORS),
+                                 ex=1 * 60 * 60)
+    elif "rating_history" in result:
+        del result["rating_history"]
+
+    return result
 # -----------------------------------------------------------------------------
 def handles_updated(record, form):
     """
