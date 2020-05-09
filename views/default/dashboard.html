@@ -11,7 +11,11 @@
 
 <h1>Dashboard</h1>
 {{if len(current.REDIS_CLIENT.smembers("disabled_retrieval")):}}
-    <h7 class="red-text"> We are facing some issues for retrieval from {{=utilities.pretty_string(current.REDIS_CLIENT.smembers("disabled_retrieval"))}}. We will be back soon.</h7><br/><br/>
+    <h7 class="red-text">
+      We are facing some issues for retrieval from {{=utilities.pretty_string(current.REDIS_CLIENT.smembers("disabled_retrieval"))}}.
+      We will be back soon.
+    </h7>
+    <br/><br/>
 {{pass}}
 
 <div id="dashboard-cards-container"></div>

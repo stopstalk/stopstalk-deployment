@@ -26,7 +26,7 @@ from stopstalk_constants import *
 
 from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, B, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, I, P, FORM, \
-                  TEXTAREA, SELECT, OPTION, URL, BUTTON, TAG
+                  TEXTAREA, SELECT, OPTION, URL, BUTTON, TAG, BR
 
 # ==============================================================================
 class BaseCard:
@@ -114,7 +114,9 @@ class StreakCard(BaseCard):
         elif self.kind == "accepted":
             card_content = P("You're at a ",
                              B("%d accepted problem streak" % streak_value),
-                             ". Let the greens rain!")
+                             ".",
+                             BR(),
+                             "Let the greens rain!")
         else:
             return "FAILURE"
 
