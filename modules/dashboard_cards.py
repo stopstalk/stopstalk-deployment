@@ -649,7 +649,8 @@ class SearchByTagCard(BaseCard):
     # --------------------------------------------------------------------------
     def get_html(self):
         card_content = DIV(FORM(INPUT(_type="text", _name="q",
-                                      _placeholder="Type some tag..."),
+                                      _placeholder="Type some tag...",
+                                      _autocomplete="off"),
                                 INPUT(_type="submit", _value="Search",
                                       _class="btn btn-default"),
                                 _action=URL("problems", "search"),
