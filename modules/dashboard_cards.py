@@ -527,7 +527,7 @@ class LastSolvedProblemCard(BaseCard):
                  btn_url=URL("problems", "index",
                                         vars=dict(problem_id=problem_details["id"],
                                                   suggest_difficulty=True)),
-                 btn_class="last-solved-problem-suggest-tags")
+                 btn_class="last-solved-problem-suggest-difficulty")
         ]
 
         card_content = SPAN("You just solved ",
@@ -657,7 +657,7 @@ class SearchByTagCard(BaseCard):
                                       _class="btn btn-default"),
                                 _action=URL("problems", "search"),
                                 _method="GET",
-                                _class="col offset-s1 s10"),
+                                _class="col offset-s1 s10 search-by-tag-card-submit"),
                            _class="row")
 
         card_html = BaseCard.get_html(self, **dict(
