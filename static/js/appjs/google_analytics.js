@@ -206,6 +206,26 @@
         addEventListener('.read-editorial-problem-editorials-page', 'Read editorial - problem editorials page', false);
     };
 
+    var addDashboardPageToGA = function() {
+        addEventListener('.suggest-problem-card-easy', 'Cards - Suggest Easy Problem', false);
+        addEventListener('.suggest-problem-card-medium', 'Cards - Suggest Medium Problem', false);
+        addEventListener('.suggest-problem-card-hard', 'Cards - Suggest Hard Problem', false);
+        addEventListener('.upcoming-contests-card-view-all', 'Cards - Upcoming contests View All', false);
+        addEventListener('.recent-submissions-card-view-all', 'Cards - Recent submissions View All', false);
+        addEventListener('.add-more-friends-card-institute-search', 'Cards - Add more friends institute search', false);
+        addEventListener('.job-profile-card-update-preferences', 'Cards - Job profile update preferences', false);
+        addEventListener('.linked-accounts-card-update-now', 'Cards - Linked accounts update profile', false);
+        addEventListener('.linked-accounts-card-update-now', 'Cards - Linked accounts update profile', false);
+        addEventListener('.last-solved-problem-write-editorial', 'Cards - Last solved problem write editorial', false);
+        addEventListener('.last-solved-problem-suggest-tags', 'Cards - Last solved problem write editorial', false);
+        addEventListener('.last-solved-problem-suggest-difficulty', 'Cards - Last solved problem write editorial', false);
+        addEventListener('.trending-problems-card-view-all', 'Cards - Trending problems View All', false);
+        addEventListener('.accepted-streak-card-pick-problem', 'Cards - Accepted streak pick problem', false);
+        addEventListener('.day-streak-card-pick-problem', 'Cards - Day streak pick problem', false);
+        addEventListener('.search-by-tag-card-submit', 'Cards - Search by tag Submit', false, 'submit');
+    };
+
+
     $(document).ready(function() {
         addNavItemsToGA();
         addSubmissionPageButtonsToGA();
@@ -220,6 +240,7 @@
         addUserEditorialsPageToGA();
         addUserWiseEditorialsPageToGA();
         addProblemEditorialsPageToGA();
+        addDashboardPageToGA();
         addMiscellaneousToGA();
     });
 })(jQuery);
