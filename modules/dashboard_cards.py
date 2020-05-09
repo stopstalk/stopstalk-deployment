@@ -31,9 +31,8 @@ from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, B, \
 # ==============================================================================
 class BaseCard:
     # --------------------------------------------------------------------------
-    def __init__(self, user_id, card_type):
+    def __init__(self, user_id):
         self.user_id = user_id
-        self.card_type = card_type
 
     # --------------------------------------------------------------------------
     def get_html(self, **args):
@@ -93,7 +92,7 @@ class StreakCard(BaseCard):
                  btn_text="Pick a Problem",
                  btn_class=self.kind + "-streak-card-pick-problem")
         ]
-        BaseCard.__init__(self, user_id, "simple_with_cta")
+        BaseCard.__init__(self, user_id)
 
     # --------------------------------------------------------------------------
     def get_html(self):
@@ -156,7 +155,7 @@ class SuggestProblemCard(BaseCard):
                                        tag_category="Hard")),
                  btn_class="suggest-problem-card-hard")
         ]
-        BaseCard.__init__(self, self.user_id, "simple_with_multiple_ctas")
+        BaseCard.__init__(self, self.user_id)
 
     # --------------------------------------------------------------------------
     def get_html(self):
@@ -197,7 +196,7 @@ class UpcomingContestCard(BaseCard):
                  btn_url=URL("default", "contests"),
                  btn_class="upcoming-contests-card-view-all")
         ]
-        BaseCard.__init__(self, self.user_id, "simple_with_cta")
+        BaseCard.__init__(self, self.user_id)
 
     # --------------------------------------------------------------------------
     def get_html(self):
@@ -271,7 +270,7 @@ class RecentSubmissionsCard(BaseCard):
                  btn_url=URL("default", "submissions", args=[1]),
                  btn_class="recent-submissions-card-view-all")
         ]
-        BaseCard.__init__(self, user_id, "simple_with_cta")
+        BaseCard.__init__(self, user_id)
 
     # --------------------------------------------------------------------------
     def get_html(self):
@@ -368,7 +367,7 @@ class AddMoreFriendsCard(BaseCard):
         self.user_id = user_id
         self.card_title = "Add more friends"
         self.cache_key = CARD_CACHE_REDIS_KEYS["add_more_friends_prefix"] + str(self.user_id)
-        BaseCard.__init__(self, user_id, "simple_with_cta")
+        BaseCard.__init__(self, user_id)
 
     # --------------------------------------------------------------------------
     def get_html(self):
@@ -427,7 +426,7 @@ class JobProfileCard(BaseCard):
                  btn_url=URL("default", "job_profile"),
                  btn_class="job-profile-card-update-preferences")
         ]
-        BaseCard.__init__(self, user_id, "simple_with_cta")
+        BaseCard.__init__(self, user_id)
 
     # --------------------------------------------------------------------------
     def get_html(self):
@@ -464,7 +463,7 @@ class LinkedAccountsCard(BaseCard):
                  btn_url=URL("user", "update_details"),
                  btn_class="linked-accounts-card-update-now")
         ]
-        BaseCard.__init__(self, user_id, "simple_with_cta")
+        BaseCard.__init__(self, user_id)
 
     # --------------------------------------------------------------------------
     def get_html(self):
@@ -517,7 +516,7 @@ class LastSolvedProblemCard(BaseCard):
         self.cache_key = CARD_CACHE_REDIS_KEYS["last_solved_problem_prefix"] + \
                          str(self.user_id)
 
-        BaseCard.__init__(self, user_id, "simple_with_multiple_ctas")
+        BaseCard.__init__(self, user_id)
 
     # --------------------------------------------------------------------------
     def get_html(self):
