@@ -112,7 +112,7 @@
 
         addEventListener('#problem-difficulty-later', 'Problem Difficulty modal - Later', false);
         addEventListener('#skip-this-problem', 'Problem Difficulty modal - Skip problem', false);
-        addEventListener('#know-more-submissions-page', 'Know more - Recent submissions page', false);
+        addEventListener('#know-more-dashboard-page', 'Know more - Dashboard page', false);
     };
 
     var addProblemPageButtonsToGA = function() {
