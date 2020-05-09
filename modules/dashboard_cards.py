@@ -25,7 +25,7 @@ import utilities
 from stopstalk_constants import *
 
 from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, B, \
-                  TBODY, TR, TH, TD, A, SPAN, INPUT, I, P, \
+                  TBODY, TR, TH, TD, A, SPAN, INPUT, I, P, FORM, \
                   TEXTAREA, SELECT, OPTION, URL, BUTTON, TAG
 
 # ==============================================================================
@@ -38,12 +38,16 @@ class BaseCard:
 
     # --------------------------------------------------------------------------
     def get_html(self, **args):
+
+        if len(args["cta_links"]) > 0:
+            actions_div = DIV(*args["cta_links"], _class="card-action")
+        else:
+            actions_div = ""
         return DIV(DIV(DIV(SPAN(args["card_title"], _class="card-title"),
                            args["card_content"],
                             _class="card-content " + \
                                    args["card_text_color_class"]),
-                       DIV(*args["cta_links"],
-                           _class="card-action"),
+                       actions_div,
                        _class="card stopstalk-dashboard-card " + \
                               args["card_color_class"]),
                    _class="col s4")
@@ -625,6 +629,46 @@ class TrendingProblemsCard(BaseCard):
 
         self.set_to_cache(trending_problems)
         return trending_problems
+
+    # --------------------------------------------------------------------------
+    def should_show(self):
+        return True
+
+# ==============================================================================
+class SearchByTagCard(BaseCard):
+    # --------------------------------------------------------------------------
+    def __init__(self, user_id):
+        self.user_id = user_id
+        self.final_pid = None
+        self.card_title = "Pick a tag"
+        self.cache_key = CARD_CACHE_REDIS_KEYS["search_by_tag"]
+
+        self.ctas = []
+        BaseCard.__init__(self, user_id)
+
+    # --------------------------------------------------------------------------
+    def get_html(self):
+        card_content = DIV(FORM(INPUT(_type="text", _name="q",
+                                      _placeholder="Type some tag..."),
+                                INPUT(_type="submit", _value="Search",
+                                      _class="btn btn-default"),
+                                _action=URL("problems", "search"),
+                                _method="GET",
+                                _class="col offset-s1 s10"),
+                           _class="row")
+
+        card_html = BaseCard.get_html(self, **dict(
+                       card_title=self.card_title,
+                       card_content=card_content,
+                       cta_links=self.get_cta_html(),
+                       card_color_class="white",
+                       card_text_color_class="black-text"
+                    ))
+        return card_html
+
+    # --------------------------------------------------------------------------
+    def get_data(self):
+        return
 
     # --------------------------------------------------------------------------
     def should_show(self):
