@@ -95,6 +95,12 @@ var LocalStorageHelper = (function() {
         "card_id": "trending_problems_card",
         "class_name": "TrendingProblemsCard",
         "init_arguments": [loggedInUserId]
+      },
+      {
+        "card_id": "search_by_tag_card",
+        "class_name": "SearchByTagCard",
+        "init_arguments": [loggedInUserId],
+        "local_cache": true
       }
     ];
 

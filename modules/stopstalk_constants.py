@@ -28,5 +28,6 @@ CARD_CACHE_REDIS_KEYS = {
     "recent_submissions_prefix": "cards::recent_submissions_cache_",
     "more_accounts_prefix": "cards::more_accounts_cache_",
     "last_solved_problem_prefix": "cards::last_solved_problem_cache_",
-    "trending_problems": "cards::trending_problems"
+    "trending_problems": "cards::trending_problems",
+    "search_by_tag": "cards::search_by_tag"
 }
