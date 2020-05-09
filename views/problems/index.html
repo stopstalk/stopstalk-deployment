@@ -16,7 +16,8 @@
         var globalSubmissionURL = '{{=URL("problems", "index", vars={"submission_type": "global", "problem_id": problem_id})}}'.replace(/&amp;/g, '&');
         var friendsSubmissionURL = '{{=URL("problems", "index", vars={"submission_type": "friends", "problem_id": problem_id})}}'.replace(/&amp;/g, '&');
         var mySubmissionURL = '{{=URL("problems", "index", vars={"submission_type": "my", "problem_id": problem_id})}}'.replace(/&amp;/g, '&');
-        var openModal = ('{{=request.vars.open_modal}}' === 'True');
+        var openSuggestTagsModal = '{{=request.vars.suggest_tag}}' === 'True';
+        var openProblemDifficultyModal = '{{=request.vars.suggest_difficulty}}' === 'True';
     </script>
     <script type="text/javascript">
         // Callback that creates and populates a data table,
@@ -149,7 +150,7 @@
     {{if auth.is_logged_in():}}
         <div class="modal" id="suggest-tags-modal">
             <div class="modal-content">
-                <h4>{{=T("Suggest tags")}}</h4>
+                <h4>{{=T("Suggest tags")}} for {{=problem_name}}</h4>
                 <div class="row center">
                     <div class="col s8 offset-s2">
                         <input class="center" data-role="materialtags" id="tag-suggests" placeholder="Add tags..." type="text"/>

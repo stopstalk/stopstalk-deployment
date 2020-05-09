@@ -290,7 +290,8 @@ def update_details():
             db(submission_query).delete()
 
         session.auth.user = db.auth_user(session.user_id)
-        redirect(URL("default", "submissions", args=[1]))
+        current.REDIS_CLIENT.delete(CARD_CACHE_REDIS_KEYS["more_accounts_prefix"] + str(session.user_id))
+        redirect(URL("default", "index"))
     elif form.errors:
         response.flash = T("Form has errors")
 
@@ -693,40 +694,10 @@ def get_stopstalk_user_stats():
 
     user_id = int(user_id)
     custom = (custom == "True")
-    stopstalk_handle = utilities.get_stopstalk_handle(user_id, custom)
-    redis_cache_key = "profile_page:user_stats_" + stopstalk_handle
 
-    # Check if data is present in REDIS
-    data = current.REDIS_CLIENT.get(redis_cache_key)
-    if data:
-        result = json.loads(data)
-        if not auth.is_logged_in():
-            del result["rating_history"]
-        if "problems_authored_count" not in result:
-            result["problems_authored_count"] = 0
-        return result
-
-    stable = db.submission
-
-    query = (stable["custom_user_id" if custom else "user_id"] == user_id)
-    rows = db(query).select(stable.time_stamp,
-                            stable.problem_id,
-                            stable.status,
-                            stable.site,
-                            orderby=stable.time_stamp)
-
-    # Returns rating history, accepted & max streak (day and accepted),
-    result = utilities.get_stopstalk_user_stats(stopstalk_handle,
-                                                custom,
-                                                rows.as_list())
-
-    if auth.is_logged_in():
-        current.REDIS_CLIENT.set(redis_cache_key,
-                                 json.dumps(result, separators=JSON_DUMP_SEPARATORS),
-                                 ex=1 * 60 * 60)
-    elif "rating_history" in result:
-        del result["rating_history"]
-
+    result = utilities.get_rating_information(user_id,
+                                              custom,
+                                              auth.is_logged_in())
     return result
 
 # ------------------------------------------------------------------------------
@@ -1082,7 +1053,7 @@ def custom_friend():
     if form.accepted:
         session.flash = T("Submissions will be added in some time")
         current.create_next_retrieval_record(form.vars, custom=True)
-        redirect(URL("default", "submissions", args=[1]))
+        redirect(URL("default", "dashboard"))
 
     return dict(form=form,
                 table=table,

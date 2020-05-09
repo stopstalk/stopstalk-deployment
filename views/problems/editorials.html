@@ -9,6 +9,7 @@
   <script type="text/javascript">
     var submitEditorialURL = "{{=URL('problems', 'submit_editorial')}}";
     var problemId = "{{=problem_id}}";
+    var showWriteEditorial = "{{=request.vars.write_editorial}}" === "True";
   </script>
 {{end}}
 <div id="editorial-listing">
@@ -90,18 +91,15 @@
     $('#editorial-listing').css('display', 'block');
   };
 
-  var showEditor = function() {
-    $('#editorial-listing').fadeOut(function() {
-      $('#write-editorial-div').fadeIn(function() {
-        // If refreshed the page, then the content of the textarea is not visible
-        simpleMDEObject.codemirror.refresh();
-      });
-    });
-    simpleMDEObject = getSimpleMDE();
+  var hideEditorialListing = function() {
+    $('#write-editorial-div').css('display', 'block');
+    $('#editorial-listing').css('display', 'none');
   };
 
-  var cancelEditorial = function() {
-    showEditorialListing();
+  var showEditor = function() {
+    hideEditorialListing();
+    simpleMDEObject = getSimpleMDE();
+    simpleMDEObject.codemirror.refresh();
   };
 
   var submitEditorial = function() {
@@ -122,7 +120,7 @@
           simpleMDEObject = null;
           // God forbid my Frontend sins :D
           $.web2py.flash('Editorial submitted for review');
-          window.location.href = "";
+          window.location.href = window.location.origin + window.location.pathname;
         },
         error: function(err) {
           $.web2py.flash('Error submitting editorial for verification');
@@ -140,7 +138,7 @@
     });
 
     $('#cancel-editorial').click(function() {
-      cancelEditorial();
+      showEditorialListing();
     });
 
     $('#submit-editorial').click(function() {
@@ -150,6 +148,10 @@
     $('#editorial-form').click(function() {
       return false;
     });
+
+    if (showWriteEditorial) {
+      $('#show-editor').trigger('click');
+    }
   });
 
 </script>

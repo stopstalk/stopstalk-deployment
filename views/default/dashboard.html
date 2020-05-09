@@ -1,0 +1,50 @@
+{{extend 'layout.html'}}
+{{block head}}
+  <title>{{=T("Dashboard")}}</title>
+  <meta name="description" content="Various cards to have quick actions around StopStalk features">
+  <script type="text/javascript">
+    var getCardURL = "{{=URL('default', 'get_card_html')}}";
+    var stopstalkReleaseVersion = parseInt("{{=get_static_file_version('js/appjs/default/dashboard.js')[2]}}");
+    // var announcementValue = '{{=recent_announcements.has_key("feedback_form") and recent_announcements["feedback_form"]}}';
+
+    $(document).ready(function() {
+        // if (announcementValue === 'False') {
+        //     $('#recent_announcements').modal({
+        //         dismissible: false,
+        //         complete: function() {
+        //             $.ajax({
+        //                 url: '{{=URL("user", "mark_read")}}',
+        //                 data: {key: "feedback_form"}
+        //             });
+        //         }
+        //     });
+        //     $('#recent_announcements').modal('open');
+        // }
+    });
+
+  </script>
+  <script type="text/javascript" src="{{=get_static_url('js/appjs/default/dashboard.js')}}"></script>
+{{end}}
+
+<h1>Dashboard</h1>
+{{if len(current.REDIS_CLIENT.smembers("disabled_retrieval")):}}
+    <h7 class="red-text">
+      We are facing some issues for retrieval from {{=utilities.pretty_string(current.REDIS_CLIENT.smembers("disabled_retrieval"))}}.
+      We will be back soon.
+    </h7>
+{{pass}}
+
+<p>Problem setters data on <b>problem page</b> and <b>profile page</b> - {{=A("Know more", _href=URL('default', 'updates'), _target="_blank", _id="know-more-dashboard-page")}}</p>
+<p>Please take some time to fill out this {{=A("Survey Form", _href="http://goo.gl/oeLZHd", _target="_blank")}}</p>
+
+<div id="recent_announcements" class="modal" style="max-height: 80%; width: 60%;">
+  <div class="modal-content center">
+    <h4>We are more than 16000 StopStalkers now 🎉🎊</h4>
+    <p>All thanks to you guys! We are curious about your feedback and want to make StopStalk a great platform for collaborative learning. Please fill out this Feedback form and let us know what you think - <a href="https://forms.gle/LpeSjX4CVmqxXoGq9" target="_blank">https://forms.gle/LpeSjX4CVmqxXoGq9</a>.</p>
+    <div class="modal-footer">
+        <button class="modal-action modal-close waves-effect blue lighten-5 waves-blue btn-flat">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="dashboard-cards-container"></div>
