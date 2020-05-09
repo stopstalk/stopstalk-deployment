@@ -695,7 +695,9 @@ def get_stopstalk_user_stats():
     user_id = int(user_id)
     custom = (custom == "True")
 
-    result = utilities.get_rating_information(user_id, custom)
+    result = utilities.get_rating_information(user_id,
+                                              custom,
+                                              auth.is_logged_in())
     return result
 
 # ------------------------------------------------------------------------------
