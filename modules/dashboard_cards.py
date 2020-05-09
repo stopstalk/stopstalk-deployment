@@ -37,28 +37,14 @@ class BaseCard:
 
     # --------------------------------------------------------------------------
     def get_html(self, **args):
-        if self.card_type == "simple_with_cta":
-            return DIV(DIV(DIV(SPAN(args["card_title"], _class="card-title"),
-                               args["card_content"],
-                                _class="card-content " + \
-                                       args["card_text_color_class"]),
-                           DIV(A(args["card_action_text"],
-                                 _href=args["card_action_url"],
-                                 _class="btn btn-default",
-                                 _target="_blank"),
-                               _class="card-action right-text"),
-                           _class="card " + args["card_color_class"]),
-                       _class="col s4")
-        elif self.card_type == "simple_with_multiple_ctas":
-            return DIV(DIV(DIV(SPAN(args["card_title"], _class="card-title"),
-                               args["card_content"],
-                                _class="card-content " + \
-                                       args["card_text_color_class"]
-                               ),
-                           DIV(*args["cta_links"],
-                               _class="card-action"),
-                           _class="card " + args["card_color_class"]),
-                       _class="col s4")
+        return DIV(DIV(DIV(SPAN(args["card_title"], _class="card-title"),
+                           args["card_content"],
+                            _class="card-content " + \
+                                   args["card_text_color_class"]),
+                       DIV(*args["cta_links"],
+                           _class="card-action"),
+                       _class="card " + args["card_color_class"]),
+                   _class="col s4")
 
     # --------------------------------------------------------------------------
     def get_data(self):
@@ -68,6 +54,21 @@ class BaseCard:
     def get_from_cache(self):
         value = current.REDIS_CLIENT.get(self.cache_key)
         return json.loads(value) if value else None
+
+    # --------------------------------------------------------------------------
+    def get_cta_html(self):
+        cta_buttons = []
+
+        for cta in self.ctas:
+            cta_buttons.append(
+                A(cta["btn_text"],
+                  _href=cta["btn_url"],
+                  _class="btn btn-default stopstalk-dashboard-card-cta " + \
+                         cta["btn_class"],
+                  _target="_blank")
+            )
+
+        return cta_buttons
 
     # --------------------------------------------------------------------------
     def set_to_cache(self, value):
@@ -85,6 +86,13 @@ class StreakCard(BaseCard):
         self.user_id = user_id
         self.card_title = "Keep your %s streak going!" % self.kind
         self.stats = None
+        self.ctas = [
+            dict(btn_url=URL("default",
+                             "cta_handler",
+                             vars=dict(kind="random")),
+                 btn_text="Pick a Problem",
+                 btn_class=self.kind + "-streak-card-pick-problem")
+        ]
         BaseCard.__init__(self, user_id, "simple_with_cta")
 
     # --------------------------------------------------------------------------
@@ -94,12 +102,10 @@ class StreakCard(BaseCard):
             card_content = P("You're at a ",
                              B("%d day streak" % streak_value),
                              ". Keep solving a new problem everyday!")
-            card_action_text = "Pick a Problem"
         elif self.kind == "accepted":
             card_content = P("You're at a ",
                              B("%d accepted problem streak" % streak_value),
                              ". Let the greens rain!")
-            card_action_text = "Pick a Problem"
         else:
             return "FAILURE"
 
@@ -110,8 +116,7 @@ class StreakCard(BaseCard):
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
                        card_content=card_content,
-                       card_action_text=card_action_text,
-                       card_action_url=card_action_url,
+                       cta_links=self.get_cta_html(),
                        card_color_class="white",
                        card_text_color_class="black-text"
                     ))
@@ -134,6 +139,23 @@ class SuggestProblemCard(BaseCard):
         self.genre = SuggestProblemCard.__name__
         self.user_id = user_id
         self.card_title = "Mood"
+        self.ctas = [
+            dict(btn_text="Easy",
+                 btn_url=URL("default", "cta_handler",
+                             vars=dict(kind="suggested_tag",
+                                       tag_category="Easy")),
+                 btn_class="suggest-problem-card-easy"),
+            dict(btn_text="Medium",
+                 btn_url=URL("default", "cta_handler",
+                             vars=dict(kind="suggested_tag",
+                                       tag_category="Medium")),
+                 btn_class="suggest-problem-card-medium"),
+            dict(btn_text="Hard",
+                 btn_url=URL("default", "cta_handler",
+                             vars=dict(kind="suggested_tag",
+                                       tag_category="Hard")),
+                 btn_class="suggest-problem-card-hard")
+        ]
         BaseCard.__init__(self, self.user_id, "simple_with_multiple_ctas")
 
     # --------------------------------------------------------------------------
@@ -147,28 +169,7 @@ class SuggestProblemCard(BaseCard):
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
                        card_content=card_content,
-                       cta_links=[
-                            A("Easy",
-                              _href=URL("default", "cta_handler",
-                                        vars=dict(kind="suggested_tag",
-                                                  tag_category="Easy")),
-                              _class="btn btn-default",
-                              _target="_blank"),
-                            " ",
-                            A("Medium",
-                              _href=URL("default", "cta_handler",
-                                        vars=dict(kind="suggested_tag",
-                                                  tag_category="Medium")),
-                              _class="btn btn-default",
-                              _target="_blank"),
-                            " ",
-                            A("Hard",
-                              _href=URL("default", "cta_handler",
-                                        vars=dict(kind="suggested_tag",
-                                                  tag_category="Hard")),
-                              _class="btn btn-default",
-                              _target="_blank"),
-                       ],
+                       cta_links=self.get_cta_html(),
                        card_color_class="white",
                        card_text_color_class="black-text"
                     ))
@@ -176,7 +177,7 @@ class SuggestProblemCard(BaseCard):
 
     # --------------------------------------------------------------------------
     def get_data(self):
-        pass
+        return
 
     # --------------------------------------------------------------------------
     def should_show(self):
@@ -191,6 +192,11 @@ class UpcomingContestCard(BaseCard):
         self.user_id = user_id
         self.card_title = "Upcoming contests"
         self.cache_key = CARD_CACHE_REDIS_KEYS["upcoming_contests"]
+        self.ctas = [
+            dict(btn_text="View all",
+                 btn_url=URL("default", "contests"),
+                 btn_class="upcoming-contests-card-view-all")
+        ]
         BaseCard.__init__(self, self.user_id, "simple_with_cta")
 
     # --------------------------------------------------------------------------
@@ -222,8 +228,7 @@ class UpcomingContestCard(BaseCard):
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
                        card_content=card_content_table,
-                       card_action_text="View all",
-                       card_action_url=URL("default", "contests"),
+                       cta_links=self.get_cta_html(),
                        card_color_class="white",
                        card_text_color_class="black-text"
                     ))
@@ -260,6 +265,12 @@ class RecentSubmissionsCard(BaseCard):
         self.card_title = "Recent Friends' submissions"
         self.cache_key = CARD_CACHE_REDIS_KEYS["recent_submissions_prefix"] + str(user_id)
         self.final_data = None
+
+        self.ctas = [
+            dict(btn_text="View all",
+                 btn_url=URL("default", "submissions", args=[1]),
+                 btn_class="recent-submissions-card-view-all")
+        ]
         BaseCard.__init__(self, user_id, "simple_with_cta")
 
     # --------------------------------------------------------------------------
@@ -301,8 +312,7 @@ class RecentSubmissionsCard(BaseCard):
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
                        card_content=card_content_table,
-                       card_action_text="View all",
-                       card_action_url=card_action_url,
+                       cta_links=self.get_cta_html(),
                        card_color_class="white",
                        card_text_color_class="black-text"
                     ))
@@ -363,19 +373,22 @@ class AddMoreFriendsCard(BaseCard):
     # --------------------------------------------------------------------------
     def get_html(self):
         data = self.get_data()
+
+        self.ctas = [
+            dict(btn_text="Show me",
+                 btn_url=URL("default", "search",
+                             vars={"institute": data["institute"]}),
+                 btn_class="add-more-friends-card-institute-search")
+        ]
+
         card_content = P("You have ",
                          B("%d friends" % data["friend_count"]),
                          " on StopStalk. To make best use of StopStalk, we recommend you to add more friends for best Competitive Programming learning experience.")
-        card_action_text = "Show me"
-
-        card_action_url = URL("default", "search",
-                              vars={"institute": data["institute"]})
 
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
                        card_content=card_content,
-                       card_action_text=card_action_text,
-                       card_action_url=card_action_url,
+                       cta_links=self.get_cta_html(),
                        card_color_class="white",
                        card_text_color_class="black-text"
                     ))
@@ -408,20 +421,22 @@ class JobProfileCard(BaseCard):
         self.user_id = user_id
         self.card_title = "Looking for job!"
         self.cache_key = CARD_CACHE_REDIS_KEYS["job_profile_prefix"] + str(self.user_id)
+
+        self.ctas = [
+            dict(btn_text="Update job preferences",
+                 btn_url=URL("default", "job_profile"),
+                 btn_class="job-profile-card-update-preferences")
+        ]
         BaseCard.__init__(self, user_id, "simple_with_cta")
 
     # --------------------------------------------------------------------------
     def get_html(self):
         card_content = P("I am looking for a job and I want StopStalk to reach out to me for matching opportunities. Let me update my preferences.")
-        card_action_text = "Update job preferences"
-
-        card_action_url = URL("default", "job_profile")
 
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
                        card_content=card_content,
-                       card_action_text=card_action_text,
-                       card_action_url=card_action_url,
+                       cta_links=self.get_cta_html(),
                        card_color_class="white",
                        card_text_color_class="black-text"
                     ))
@@ -444,6 +459,11 @@ class LinkedAccountsCard(BaseCard):
         self.user_id = user_id
         self.card_title = "Link more accounts"
         self.cache_key = CARD_CACHE_REDIS_KEYS["more_accounts_prefix"] + str(self.user_id)
+        self.ctas = [
+            dict(btn_text="Update now",
+                 btn_url=URL("user", "update_details"),
+                 btn_class="linked-accounts-card-update-now")
+        ]
         BaseCard.__init__(self, user_id, "simple_with_cta")
 
     # --------------------------------------------------------------------------
@@ -459,8 +479,7 @@ class LinkedAccountsCard(BaseCard):
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
                        card_content=card_content,
-                       card_action_text=card_action_text,
-                       card_action_url=card_action_url,
+                       cta_links=self.get_cta_html(),
                        card_color_class="white",
                        card_text_color_class="black-text"
                     ))
@@ -495,12 +514,28 @@ class LastSolvedProblemCard(BaseCard):
         self.user_id = user_id
         self.final_pid = None
         self.card_title = "Giving back to the community!"
-        self.cache_key = CARD_CACHE_REDIS_KEYS["last_solved_problem_prefix"] + str(self.user_id)
+        self.cache_key = CARD_CACHE_REDIS_KEYS["last_solved_problem_prefix"] + \
+                         str(self.user_id)
+
         BaseCard.__init__(self, user_id, "simple_with_multiple_ctas")
 
     # --------------------------------------------------------------------------
     def get_html(self):
         problem_details = self.get_data()
+
+        self.ctas = [
+            dict(btn_text="Write Editorial",
+                 btn_url=URL("problems", "editorials",
+                             args=problem_details["id"],
+                             vars=dict(write_editorial=True)),
+                 btn_class="last-solved-problem-write-editorial"),
+            dict(btn_text="Suggest tags",
+                 btn_url=URL("problems", "index",
+                                        vars=dict(problem_id=problem_details["id"],
+                                                  suggested_tag=True)),
+                 btn_class="last-solved-problem-suggest-tags")
+        ]
+
         card_content = SPAN("You just solved ",
                             utilities.problem_widget(problem_details["name"],
                                                      problem_details["link"],
@@ -512,21 +547,7 @@ class LastSolvedProblemCard(BaseCard):
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
                        card_content=card_content,
-                       cta_links=[
-                            A("Write Editorial",
-                              _href=URL("problems", "editorials",
-                                        args=problem_details["id"],
-                                        vars=dict(write_editorial=True)),
-                              _class="btn btn-default",
-                              _target="_blank"),
-                            " ",
-                            A("Suggest Tags",
-                              _href=URL("problems", "index",
-                                        vars=dict(problem_id=problem_details["id"],
-                                                  suggested_tag=True)),
-                              _class="btn btn-default",
-                              _target="_blank")
-                       ],
+                       cta_links=self.get_cta_html(),
                        card_color_class="white",
                        card_text_color_class="black-text"
                     ))
