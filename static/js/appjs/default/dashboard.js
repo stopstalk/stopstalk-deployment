@@ -90,6 +90,11 @@ var LocalStorageHelper = (function() {
         "card_id": "last_solved_problem_card",
         "class_name": "LastSolvedProblemCard",
         "init_arguments": [loggedInUserId]
+      },
+      {
+        "card_id": "trending_problems_card",
+        "class_name": "TrendingProblemsCard",
+        "init_arguments": [loggedInUserId]
       }
     ];
 

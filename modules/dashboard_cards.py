@@ -34,6 +34,7 @@ class BaseCard:
     def __init__(self, user_id):
         self.genre = self.__class__.__name__
         self.user_id = user_id
+        self.cache_serializer = "json"
 
     # --------------------------------------------------------------------------
     def get_html(self, **args):
@@ -43,17 +44,13 @@ class BaseCard:
                                    args["card_text_color_class"]),
                        DIV(*args["cta_links"],
                            _class="card-action"),
-                       _class="card " + args["card_color_class"]),
+                       _class="card stopstalk-dashboard-card " + \
+                              args["card_color_class"]),
                    _class="col s4")
 
     # --------------------------------------------------------------------------
     def get_data(self):
         pass
-
-    # --------------------------------------------------------------------------
-    def get_from_cache(self):
-        value = current.REDIS_CLIENT.get(self.cache_key)
-        return json.loads(value) if value else None
 
     # --------------------------------------------------------------------------
     def get_cta_html(self):
@@ -71,9 +68,18 @@ class BaseCard:
         return cta_buttons
 
     # --------------------------------------------------------------------------
+    def get_from_cache(self):
+        value = current.REDIS_CLIENT.get(self.cache_key)
+        if self.cache_serializer == "json":
+            return json.loads(value) if value else None
+        else:
+            return eval(value) if value else None
+
+    # --------------------------------------------------------------------------
     def set_to_cache(self, value):
+        result = json.dumps(value) if self.cache_serializer == "json" else str(value)
         current.REDIS_CLIENT.set(self.cache_key,
-                                 json.dumps(value),
+                                 result,
                                  ex=CARD_REDIS_CACHE_TTL)
 
 # ==============================================================================
@@ -128,7 +134,6 @@ class StreakCard(BaseCard):
     # --------------------------------------------------------------------------
     def should_show(self):
         self.stats = utilities.get_rating_information(self.user_id, False)
-        return True
         return self.stats[self.key_name] > 0
 
 # ==============================================================================
@@ -405,7 +410,6 @@ class AddMoreFriendsCard(BaseCard):
     def should_show(self):
         db = current.db
         self.friend_count = db(db.following.follower_id == self.user_id).count()
-        return True
         return self.friend_count < 3
 
 # ==============================================================================
@@ -496,7 +500,6 @@ class LinkedAccountsCard(BaseCard):
             if record[site.lower() + "_handle"]:
                 handle_count += 1
         self.handle_count = handle_count
-        return True
         return handle_count < 3
 
 # ==============================================================================
@@ -524,7 +527,12 @@ class LastSolvedProblemCard(BaseCard):
             dict(btn_text="Suggest tags",
                  btn_url=URL("problems", "index",
                                         vars=dict(problem_id=problem_details["id"],
-                                                  suggested_tag=True)),
+                                                  suggest_tag=True)),
+                 btn_class="last-solved-problem-suggest-tags"),
+            dict(btn_text="Suggest difficulty",
+                 btn_url=URL("problems", "index",
+                                        vars=dict(problem_id=problem_details["id"],
+                                                  suggest_difficulty=True)),
                  btn_class="last-solved-problem-suggest-tags")
         ]
 
@@ -579,5 +587,59 @@ class LastSolvedProblemCard(BaseCard):
             self.final_pid = None
 
         return self.final_pid is not None
+
+# ==============================================================================
+class TrendingProblemsCard(BaseCard):
+    # --------------------------------------------------------------------------
+    def __init__(self, user_id):
+        self.user_id = user_id
+        self.final_pid = None
+        self.card_title = "Trending problems"
+        self.cache_key = CARD_CACHE_REDIS_KEYS["trending_problems"]
+
+        self.ctas = [
+            dict(btn_text="View all",
+                 btn_url=URL("problems", "trending"),
+                 btn_class="trending-problems-card-view-all")
+        ]
+
+        BaseCard.__init__(self, user_id)
+        self.cache_serializer = "str"
+
+    # --------------------------------------------------------------------------
+    def get_html(self):
+        trending_problems = self.get_data()
+
+        from trending_utilities import draw_trending_table
+        trending_table = draw_trending_table(trending_problems,
+                                             None,
+                                             self.user_id)
+
+        card_content = trending_table
+
+        card_html = BaseCard.get_html(self, **dict(
+                       card_title=self.card_title,
+                       card_content=card_content,
+                       cta_links=self.get_cta_html(),
+                       card_color_class="white",
+                       card_text_color_class="black-text"
+                    ))
+        return card_html
+
+    # --------------------------------------------------------------------------
+    def get_data(self):
+        cache_value = self.get_from_cache()
+        if cache_value:
+            return cache_value
+
+        trending_problems = current.REDIS_CLIENT.get(GLOBALLY_TRENDING_PROBLEMS_CACHE_KEY)
+        trending_problems = eval(trending_problems)[:2]
+
+        self.set_to_cache(trending_problems)
+        return trending_problems
+
+    # --------------------------------------------------------------------------
+    def should_show(self):
+        return True
 
 # ==============================================================================

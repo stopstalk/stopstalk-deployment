@@ -16,7 +16,8 @@
         var globalSubmissionURL = '{{=URL("problems", "index", vars={"submission_type": "global", "problem_id": problem_id})}}'.replace(/&amp;/g, '&');
         var friendsSubmissionURL = '{{=URL("problems", "index", vars={"submission_type": "friends", "problem_id": problem_id})}}'.replace(/&amp;/g, '&');
         var mySubmissionURL = '{{=URL("problems", "index", vars={"submission_type": "my", "problem_id": problem_id})}}'.replace(/&amp;/g, '&');
-        var openSuggestedTagsModal = '{{=request.vars.suggested_tag}}' === 'True';
+        var openSuggestTagsModal = '{{=request.vars.suggest_tag}}' === 'True';
+        var openProblemDifficultyModal = '{{=request.vars.suggest_difficulty}}' === 'True';
     </script>
     <script type="text/javascript">
         // Callback that creates and populates a data table,
