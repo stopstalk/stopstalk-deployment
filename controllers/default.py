@@ -803,7 +803,7 @@ def contests():
                                           str(i["Platform"]).lower() + \
                                           "_small.png"),
                       _title=site_mapping[i["Platform"]],
-                      _style=icon_style)))
+                      _class="parent-site-icon-small")))
 
         append(TD(str(start_time), _class="stopstalk-timestamp"))
 
