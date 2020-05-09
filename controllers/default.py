@@ -164,7 +164,20 @@ def get_card_html():
 # ----------------------------------------------------------------------------
 @auth.requires_login()
 def dashboard():
-    return dict()
+    session.welcome_shown = True
+    ratable = db.recent_announcements
+    rarecord = db(ratable.user_id == session.user_id).select().first()
+    if rarecord is None:
+        ratable.insert(user_id=session.user_id)
+        rarecord = db(ratable.user_id == session.user_id).select().first()
+
+    user = session.auth.user
+    db.sessions_today.insert(message="%s %s %d %s" % (user.first_name,
+                                                      user.last_name,
+                                                      user.id,
+                                                      datetime.datetime.now()))
+
+    return dict(recent_announcements=json.loads(rarecord.data))
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
@@ -1588,13 +1601,11 @@ def submissions():
             # The pagination page number is not integer
             raise HTTP(404)
             return
-    session.welcome_shown = True
 
     cftable = db.custom_friend
     stable = db.submission
     atable = db.auth_user
     ptable = db.problem
-    ratable = db.recent_announcements
 
     # Get all the friends/custom friends of the logged-in user
     friends, cusfriends = utilities.get_friends(session.user_id)
@@ -1621,17 +1632,6 @@ def submissions():
         return dict(count=count,
                     total_rows=1)
 
-    rarecord = db(ratable.user_id == session.user_id).select().first()
-    if rarecord is None:
-        ratable.insert(user_id=session.user_id)
-        rarecord = db(ratable.user_id == session.user_id).select().first()
-
-    user = session.auth.user
-    db.sessions_today.insert(message="%s %s %d %s" % (user.first_name,
-                                                      user.last_name,
-                                                      user.id,
-                                                      datetime.datetime.now()))
-
     offset = PER_PAGE * (active - 1)
     # Retrieve only some number of submissions from the offset
     rows = db(query).select(orderby=~db.submission.time_stamp,
@@ -1639,30 +1639,10 @@ def submissions():
 
     table = utilities.render_table(rows, cusfriends, session.user_id)
 
-    country_value = session.auth.user.get("country")
-    country = country_value if country_value else "not-available"
-
-    country_form = None
-    if country == "not-available":
-        country_form = SQLFORM(db.auth_user,
-                               session.auth.user,
-                               fields=["country"],
-                               showid=False)
-        if country_form.process(onvalidation=current.sanitize_fields).accepted:
-            session.auth.user = db.auth_user(session.user_id)
-            session.flash = T("Country updated!")
-            redirect(URL("default", "submissions", args=1))
-        elif country_form.errors:
-            response.flash = T("Form has errors")
-
     return dict(table=table,
                 friends=friends,
                 cusfriends=cusfriends,
-                total_rows=len(rows),
-                country=country,
-                country_form=country_form,
-                utilities=utilities,
-                recent_announcements=json.loads(rarecord.data))
+                total_rows=len(rows))
 
 # ----------------------------------------------------------------------------
 def faq():
