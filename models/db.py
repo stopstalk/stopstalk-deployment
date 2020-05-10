@@ -598,6 +598,7 @@ db.define_table("problem",
                 Field("total_submissions", "integer", default=0),
                 Field("user_ids", "text", default=""),
                 Field("custom_user_ids", "text", default=""),
+                Field("difficulty", "float"),
                 Field.Virtual("user_count", _count_users_lambda),
                 Field.Virtual("custom_user_count", _count_custom_users_lambda),
                 format="%(name)s %(id)s")
