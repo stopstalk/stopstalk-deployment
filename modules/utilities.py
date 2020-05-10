@@ -218,6 +218,11 @@ def get_boto3_client():
 
 # ------------------------------------------------------------------------------
 def get_contests():
+
+    cache_value = current.REDIS_CLIENT.get(CONTESTS_CACHE_KEY)
+    if cache_value:
+        return json.loads(cache_value)
+
     today = datetime.datetime.today()
     today = datetime.datetime.strptime(str(today)[:-7],
                                        "%Y-%m-%d %H:%M:%S")
@@ -233,6 +238,10 @@ def get_contests():
     response = requests.get(url, verify=False)
     if response.status_code == 200:
         response = response.json()["result"]
+        current.REDIS_CLIENT.set(CONTESTS_CACHE_KEY,
+                                 json.dumps([response["ongoing"],
+                                             response["upcoming"]]),
+                                 ex=ONE_HOUR)
     else:
         return None, None
 
