@@ -84,7 +84,7 @@ class BaseCard:
         result = json.dumps(value) if self.cache_serializer == "json" else str(value)
         current.REDIS_CLIENT.set(self.cache_key,
                                  result,
-                                 ex=CARD_REDIS_CACHE_TTL)
+                                 ex=ONE_HOUR)
 
 # ==============================================================================
 class StreakCard(BaseCard):

@@ -19,7 +19,7 @@ CODEFORCES_PROBLEM_SETTERS_KEY = "codeforces_problem_setters"
 
 GLOBALLY_TRENDING_PROBLEMS_CACHE_KEY = "global_trending_table_cache"
 
-CARD_REDIS_CACHE_TTL = 1 * 60 * 60
+ONE_HOUR = 1 * 60 * 60
 
 CARD_CACHE_REDIS_KEYS = {
     "add_more_friends_prefix": "cards::add_more_friends_cache_",
@@ -32,3 +32,5 @@ CARD_CACHE_REDIS_KEYS = {
     "search_by_tag": "cards::search_by_tag",
     "curr_streak_prefix": "cards::streak_cache_"
 }
+
+CONTESTS_CACHE_KEY = "upcoming_contests_cache"
