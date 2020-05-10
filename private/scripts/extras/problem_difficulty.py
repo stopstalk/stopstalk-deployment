@@ -51,15 +51,15 @@ tags = tag_difficulty.keys()
 difficulty = defaultdict(list)
 
 # Compute problem difficulty for CodeForces problems.
-query = (ptable.link.like("%codeforces%")) & \
-        ~(ptable.link.like("%gymProblem%"))
+query = (ptable.link.contains("codeforces")) & \
+        ~(ptable.link.contains("gymProblem"))
 rows = db(query).select(ptable.id, ptable.link)
 
 for row in rows:
     tag = row.link.split("/")[-1][0]
     pid = row.id
 
-    if tag in codeforces_difficulty.keys():
+    if tag in codeforces_difficulty:
         difficulty[pid].append(codeforces_difficulty[tag])
 
 # Problems with tags easy, medium, difficult etc.
@@ -88,10 +88,11 @@ for pid, score in res:
 
 # Compute average difficulty from all types of problem difficulties.
 write_count = 0
-for key, value in difficulty.items():
+for pid, difficulties in difficulty.items():
     if write_count >= 100:
         write_count = 0
         time.sleep(0.5)
 
-    avg_difficulty = sum(value) / float(len(value))
-    update = db.problem(key).update_record(difficulty=avg_difficulty)
+    write_count += 1
+    avg_difficulty = sum(difficulties) / float(len(difficulties))
+    update = ptable(pid).update_record(difficulty=avg_difficulty)
