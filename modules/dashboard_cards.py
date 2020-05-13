@@ -336,7 +336,7 @@ class RecentSubmissionsCard(BaseCard):
             friends, _ = utilities.get_friends(self.user_id)
             if len(friends):
                 today = datetime.datetime.today()
-                last_week = today - datetime.timedelta(days=150)
+                last_week = today - datetime.timedelta(days=7)
                 rows = db.executesql("""
                     SELECT user_id, site, count(*)
                     FROM submission
