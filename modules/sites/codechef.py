@@ -215,7 +215,7 @@ class Profile(object):
         """
 
         response = get_request("%s/users/%s" % (CODECHEF_API_URL, self.handle),
-                               headers={"User-Agent": user_agent,
+                               headers={"User-Agent": COMMON_USER_AGENT,
                                         "Authorization": "Bearer %s" % self.access_token},
                                timeout=10,
                                is_daily_retrieval=self.is_daily_retrieval)
