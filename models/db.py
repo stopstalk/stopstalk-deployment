@@ -405,6 +405,8 @@ def sanitize_fields(form):
             form.errors.timus_handle = "Timus handle / ID should be a number"
 
     if form.errors:
+        current.REDIS_CLIENT.sadd("update_details_form_errors",
+                                  str(form.errors) + str(form.vars))
         response.flash = T("Form has errors")
 
 #-----------------------------------------------------------------------------
