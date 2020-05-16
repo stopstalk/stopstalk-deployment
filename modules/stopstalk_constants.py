@@ -34,3 +34,8 @@ CARD_CACHE_REDIS_KEYS = {
 }
 
 CONTESTS_CACHE_KEY = "upcoming_contests_cache"
+
+CONTESTS_SITE_MAPPING = {"CODECHEF": "CodeChef",
+                         "CODEFORCES": "Codeforces",
+                         "HACKERRANK": "HackerRank",
+                         "HACKEREARTH": "HackerEarth"}

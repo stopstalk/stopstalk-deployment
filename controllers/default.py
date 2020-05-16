@@ -725,10 +725,6 @@ def contests():
     if None in [ongoing, upcoming]:
         return dict(retrieved=False)
 
-    site_mapping = {"CODECHEF": "CodeChef",
-                    "CODEFORCES": "Codeforces",
-                    "HACKERRANK": "HackerRank",
-                    "HACKEREARTH": "HackerEarth"}
     cal = pdt.Calendar()
 
     table = TABLE(_class="centered bordered", _id="contests-table")
@@ -747,7 +743,7 @@ def contests():
     left_tooltip_attrs = {"position": "left", "delay": "50"}
 
     for i in ongoing:
-        if i["Platform"] not in site_mapping:
+        if i["Platform"] not in CONTESTS_SITE_MAPPING:
             continue
 
         try:
@@ -771,7 +767,7 @@ def contests():
         append(TD(IMG(_src=get_static_url("images/" + \
                                           str(i["Platform"]).lower() + \
                                           "_small.png"),
-                      _title=site_mapping[i["Platform"]],
+                      _title=CONTESTS_SITE_MAPPING[i["Platform"]],
                       _class="parent-site-icon-small")))
 
         append(TD("-"))
@@ -791,7 +787,7 @@ def contests():
 
     for i in upcoming:
 
-        if i["Platform"] not in site_mapping:
+        if i["Platform"] not in CONTESTS_SITE_MAPPING:
             continue
 
         start_time = datetime.datetime.strptime(i["StartTime"],
@@ -802,7 +798,7 @@ def contests():
         append(TD(IMG(_src=get_static_url("images/" + \
                                           str(i["Platform"]).lower() + \
                                           "_small.png"),
-                      _title=site_mapping[i["Platform"]],
+                      _title=CONTESTS_SITE_MAPPING[i["Platform"]],
                       _class="parent-site-icon-small")))
 
         append(TD(str(start_time), _class="stopstalk-timestamp"))
