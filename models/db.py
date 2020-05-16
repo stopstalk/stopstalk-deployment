@@ -382,7 +382,7 @@ def sanitize_fields(form):
             continue
         if form.vars[site_handle] and \
            form.vars[site_handle] != form.vars[site_handle].lower():
-            form.errors[site_handle] = T("Please enter in lower case")
+            form.vars[site_handle] = form.vars[site_handle].lower()
 
     # 4.
     if form.vars.institute == "":
@@ -407,8 +407,6 @@ def sanitize_fields(form):
             form.errors.timus_handle = "Timus handle / ID should be a number"
 
     if form.errors:
-        current.REDIS_CLIENT.sadd("update_details_form_errors",
-                                  str(form.errors) + str(form.vars))
         response.flash = T("Form has errors")
 
 #-----------------------------------------------------------------------------
