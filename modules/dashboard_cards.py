@@ -248,12 +248,16 @@ class UpcomingContestCard(BaseCard):
 
         _, upcoming = utilities.get_contests()
         data = []
-        for contest in upcoming[:2]:
+        for contest in upcoming:
+            if contest["Platform"] not in CONTESTS_SITE_MAPPING:
+                continue
             data.append((
                 contest["Name"],
                 str(contest["Platform"]).lower(),
                 contest["url"]
             ))
+            if len(data) == 2:
+                break
 
         self.set_to_cache(data)
         return data
@@ -637,18 +641,21 @@ class TrendingProblemsCard(BaseCard):
 
     # --------------------------------------------------------------------------
     def get_data(self):
-        cache_value = self.get_from_cache()
-        if cache_value:
-            return cache_value
-
-        trending_problems = current.REDIS_CLIENT.get(GLOBALLY_TRENDING_PROBLEMS_CACHE_KEY)
-        trending_problems = eval(trending_problems)[:2]
-
-        self.set_to_cache(trending_problems)
-        return trending_problems
+        return self.trending_problems
 
     # --------------------------------------------------------------------------
     def should_show(self):
+        cache_value = self.get_from_cache()
+        if cache_value:
+            self.trending_problems = cache_value
+            return True
+
+        trending_problems = current.REDIS_CLIENT.get(GLOBALLY_TRENDING_PROBLEMS_CACHE_KEY)
+        if trending_problems is None:
+            return False
+
+        self.trending_problems = eval(trending_problems)[:2]
+        self.set_to_cache(self.trending_problems)
         return True
 
 # ==============================================================================
