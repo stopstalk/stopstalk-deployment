@@ -245,9 +245,6 @@ def update_details():
                    fields=form_fields,
                    showid=False)
 
-    form.vars.email = record.email
-    form.vars.stopstalk_handle = record.stopstalk_handle
-
     if form.process(onvalidation=current.sanitize_fields).accepted:
         current.REDIS_CLIENT.delete(utilities.get_user_record_cache_key(session.user_id))
         session.flash = T("User details updated")

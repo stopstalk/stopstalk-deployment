@@ -40,7 +40,7 @@ def get_gym_problem_authors():
 
     response = get_request("https://codeforces.com/api/contest.list?gym=true",
                            timeout=10,
-                           headers={"User-Agent": user_agent})
+                           headers={"User-Agent": COMMON_USER_AGENT})
     if response in REQUEST_FAILURES:
         print "[get_gym_problem_authors]: Error while requesting API", response
         return
@@ -68,7 +68,7 @@ def get_normal_problem_authors():
     while i <= pagination_count:
         url = base_url + str(i)
         response = get_request(url,
-                               headers={"User-Agent": user_agent})
+                               headers={"User-Agent": COMMON_USER_AGENT})
         if response in REQUEST_FAILURES:
             print "[get_normal_problem_authors]: Failure for url", url, response
             break

@@ -31,7 +31,6 @@ from bs4 import BeautifulSoup
 from health_metrics import MetricHandler
 from stopstalk_constants import *
 
-user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.122 Safari/537.36"
 urllib3.disable_warnings()
 
 # Constants to be used in case of request failures
@@ -79,7 +78,7 @@ def get_request(url, headers={}, timeout=current.TIMEOUT, params={}, is_daily_re
                                                 site,
                                                 is_daily_retrieval)
 
-    headers.update({"User-Agent": user_agent})
+    headers.update({"User-Agent": COMMON_USER_AGENT})
 
     i = 0
     while i < current.MAX_TRIES_ALLOWED:

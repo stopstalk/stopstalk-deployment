@@ -284,7 +284,9 @@ def validate_email(email):
         """
         domain = email.split("@")[-1]
         try:
-            response = requests.get("http://" + domain, timeout=3)
+            response = requests.get("http://" + domain,
+                                    headers={"User-Agent": COMMON_USER_AGENT},
+                                    timeout=3)
             return (response.status_code == 200)
         except:
             return False

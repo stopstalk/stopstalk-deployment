@@ -39,3 +39,6 @@ CONTESTS_SITE_MAPPING = {"CODECHEF": "CodeChef",
                          "CODEFORCES": "Codeforces",
                          "HACKERRANK": "HackerRank",
                          "HACKEREARTH": "HackerEarth"}
+
+COMMON_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.122 Safari/537.36"
+
