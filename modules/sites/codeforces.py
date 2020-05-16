@@ -261,7 +261,7 @@ class Profile(object):
             url += "&count=50000"
 
         tmp = get_request(url,
-                          headers={"User-Agent": user_agent},
+                          headers={"User-Agent": COMMON_USER_AGENT},
                           timeout=timeout,
                           is_daily_retrieval=is_daily_retrieval)
 

@@ -54,7 +54,7 @@ class Profile(object):
         csrf_token = re.findall(r"csrftoken=\w*", cookie_value)[0][10:]
         return {
             "host": "www.hackerearth.com",
-            "user-agent": user_agent,
+            "user-agent": COMMON_USER_AGENT,
             "accept": "application/json, text/javascript, */*; q=0.01",
             "accept-language": "en-US,en;q=0.5",
             "accept-encoding": "gzip, deflate",

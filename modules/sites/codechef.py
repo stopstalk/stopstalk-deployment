@@ -127,7 +127,7 @@ class Profile(object):
         api_link = args["problem_link"].replace("https://www.codechef.com/",
                                                 "https://www.codechef.com/api/contests/")
         response = get_request(api_link + "?v=1554915627060",
-                               headers={"User-Agent": user_agent})
+                               headers={"User-Agent": COMMON_USER_AGENT})
 
         if response in REQUEST_FAILURES:
             return dict(tags=all_tags,
@@ -160,7 +160,7 @@ class Profile(object):
         download_url = "https://www.codechef.com/viewplaintext/" + \
                        str(problem_id)
         response = get_request(download_url,
-                               headers={"User-Agent": user_agent})
+                               headers={"User-Agent": COMMON_USER_AGENT})
         if response in REQUEST_FAILURES:
             return -1
         try:
@@ -172,7 +172,7 @@ class Profile(object):
     @staticmethod
     def rating_graph_data(handle):
         url = "https://www.codechef.com/users/" + handle
-        response = get_request(url, headers={"User-Agent": user_agent})
+        response = get_request(url, headers={"User-Agent": COMMON_USER_AGENT})
 
         if response in REQUEST_FAILURES:
             return response

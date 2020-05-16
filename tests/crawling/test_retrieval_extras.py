@@ -27,7 +27,6 @@ import urllib3
 urllib3.disable_warnings()
 
 current.environment = "test"
-user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36"
 
 # ==============================================================================
 class RetrievalTest:
