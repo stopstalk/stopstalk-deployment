@@ -752,6 +752,10 @@ def get_stopstalk_rating(parts):
             "total": sum(rating_components)}
 
 # ----------------------------------------------------------------------------
+def get_country_details(country):
+    return [current.all_countries[country], country] if country in current.all_countries else None
+
+# ----------------------------------------------------------------------------
 def clear_profile_page_cache(stopstalk_handle):
     """
         Clear all the data in REDIS corresponding to stopstalk_handle

@@ -33,12 +33,6 @@ from stopstalk_constants import *
 
 urllib3.disable_warnings()
 
-# Constants to be used in case of request failures
-SERVER_FAILURE = "SERVER_FAILURE"
-NOT_FOUND = "NOT_FOUND"
-OTHER_FAILURE = "OTHER_FAILURE"
-REQUEST_FAILURES = (SERVER_FAILURE, NOT_FOUND, OTHER_FAILURE)
-
 # -----------------------------------------------------------------------------
 def log_time_things(request_time_metric_handler, start_request_time, site):
     time_difference = time.time() - start_request_time

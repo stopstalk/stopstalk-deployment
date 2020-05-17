@@ -903,7 +903,7 @@ def leaderboard():
     if global_leaderboard == True and \
        specific_institute == False and \
        specific_country == False:
-        user_ratings = current.REDIS_CLIENT.get("global_leaderboard_cache")
+        user_ratings = current.REDIS_CLIENT.get(GLOBAL_LEADERBOARD_CACHE_KEY)
         if user_ratings:
             users = json.loads(user_ratings)
             logged_in_row = None
@@ -933,16 +933,12 @@ def leaderboard():
         if user.id in custom_friends_count:
             cf_count = custom_friends_count[user.id]
 
-        country_details = None
-        if user.country in current.all_countries:
-            country_details = [current.all_countries[user.country], user.country]
-
         this_row = (user.first_name + " " + user.last_name,
                     user.stopstalk_handle,
                     user.institute,
                     user.stopstalk_rating,
                     float(user.per_day_change),
-                    country_details,
+                    utilities.get_country_details(user.country),
                     cf_count,
                     leaderboard_rank)
 
@@ -955,7 +951,7 @@ def leaderboard():
     if global_leaderboard == True and \
        specific_institute == False and \
        specific_country == False:
-        current.REDIS_CLIENT.set("global_leaderboard_cache",
+        current.REDIS_CLIENT.set(GLOBAL_LEADERBOARD_CACHE_KEY,
                                  json.dumps(users),
                                  ex=1 * 60 * 60)
 
