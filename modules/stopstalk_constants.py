@@ -34,6 +34,7 @@ CARD_CACHE_REDIS_KEYS = {
 }
 
 CONTESTS_CACHE_KEY = "upcoming_contests_cache"
+GLOBAL_LEADERBOARD_CACHE_KEY = "global_leaderboard_cache"
 
 CONTESTS_SITE_MAPPING = {"CODECHEF": "CodeChef",
                          "CODEFORCES": "Codeforces",
@@ -42,3 +43,9 @@ CONTESTS_SITE_MAPPING = {"CODECHEF": "CodeChef",
 
 COMMON_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.122 Safari/537.36"
 
+# Constants to be used in case of request failures
+SERVER_FAILURE = "SERVER_FAILURE"
+NOT_FOUND = "NOT_FOUND"
+OTHER_FAILURE = "OTHER_FAILURE"
+
+REQUEST_FAILURES = (SERVER_FAILURE, NOT_FOUND, OTHER_FAILURE)

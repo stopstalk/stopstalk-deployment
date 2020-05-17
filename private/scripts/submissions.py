@@ -28,6 +28,7 @@ import datetime
 import utilities
 import sites
 from gevent import monkey
+from stopstalk_constants import *
 
 gevent.monkey.patch_all(thread=False)
 
@@ -39,10 +40,6 @@ cftable = db.custom_friend
 nrtable = db.next_retrieval
 ptable = db.problem
 stable = db.submission
-
-SERVER_FAILURE = "SERVER_FAILURE"
-NOT_FOUND = "NOT_FOUND"
-OTHER_FAILURE = "OTHER_FAILURE"
 
 TIME_CONVERSION = "%Y-%m-%d %H:%M:%S"
 INVALID_HANDLES = None
@@ -331,31 +328,54 @@ def update_stopstalk_rating(user_id, stopstalk_handle, custom):
     today = str(datetime.datetime.now().date())
     current_rating = int(sum(final_rating[today]))
     update_params = dict(stopstalk_rating=current_rating)
+    record = None
+
     if custom:
-        cftable(user_id).update_record(**update_params)
+        record = cftable(user_id)
     else:
+        record = atable(user_id)
         current.REDIS_CLIENT.delete(utilities.get_user_record_cache_key(user_id))
-        atable(user_id).update_record(**update_params)
+
+    record.update_record(**update_params)
 
     db.commit()
 
+    if custom == True:
+        # Don't need to do anything on global_leaderboard_cache if custom is true
+        return current_rating
+
     # Update global leaderboard cache
-    current_value = current.REDIS_CLIENT.get("global_leaderboard_cache")
+    current_value = current.REDIS_CLIENT.get(GLOBAL_LEADERBOARD_CACHE_KEY)
     if current_value is None:
         # Global leaderboard cache not present
         return current_rating
 
     import json
     current_value = json.loads(current_value)
+    reorder_leaderboard = False
     for row in current_value:
         if row[1] == stopstalk_handle:
             row[3] = current_rating
-            current_value = reorder_leaderboard_data(current_value)
-            current.REDIS_CLIENT.set("global_leaderboard_cache",
-                                     json.dumps(current_value),
-                                     ex=1 * 60 * 60)
-            return current_rating
+            reorder_leaderboard = True
+            break
 
+    if not reorder_leaderboard:
+        reorder_leaderboard = True
+        cf_count = db(cftable.user_id == record.id).count()
+        current_value.append((record.first_name + " " + record.last_name,
+                              record.stopstalk_handle,
+                              record.institute,
+                              record.stopstalk_rating,
+                              float(record.per_day_change),
+                              utilities.get_country_details(record.country),
+                              cf_count,
+                              0))
+
+    current_value = reorder_leaderboard_data(current_value)
+    current.REDIS_CLIENT.set(GLOBAL_LEADERBOARD_CACHE_KEY,
+                             json.dumps(current_value),
+                             ex=ONE_HOUR)
+    return current_rating
 
 # ------------------------------------------------------------------------------
 def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codechef_retrieval=False):

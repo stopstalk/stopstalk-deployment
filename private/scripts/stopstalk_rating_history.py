@@ -134,7 +134,7 @@ if __name__ == "__main__":
 
 #        compute_group_ratings(last_custom_user_id, True)
         compute_group_ratings(last_user_id, False)
-        current.REDIS_CLIENT.delete("global_leaderboard_cache")
+        current.REDIS_CLIENT.delete(GLOBAL_LEADERBOARD_CACHE_KEY)
     elif sys.argv[1] == "single":
         user_id = int(sys.argv[2])
         custom = (sys.argv[3] == "custom")
