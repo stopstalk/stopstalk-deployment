@@ -717,6 +717,8 @@ def search():
     clubbed_tags = request.vars.get("generalized_tags", None)
     q = request.vars.get("q", None)
     sites = request.vars.get("site", None)
+    include_editorials = request.vars.get("include_editorials", "")
+    exclude_solved = request.vars.get("exclude_solved", None)
 
     generalized_tags = db(ttable).select(ttable.value, orderby=ttable.value)
     generalized_tags = [x.value for x in generalized_tags]
@@ -729,8 +731,6 @@ def search():
                 # No filter is applied
                 response.flash = "No filter is applied"
             return dict(table=DIV(), generalized_tags=generalized_tags)
-
-    include_editorials = request.vars.get("include_editorials", "")
 
     clubbed_tags = None if clubbed_tags == "" else clubbed_tags
 
@@ -790,6 +790,12 @@ def search():
         query &= (((ptable.editorial_link != None) & \
                    (ptable.editorial_link != "")) | \
                   (ptable.id.belongs(problem_with_user_editorials)))
+
+    if exclude_solved and auth.is_logged_in():
+        solved_pids, _ = utilities.get_solved_problems(session.user_id, False)
+        query &= ~ptable.id.belongs(solved_pids)
+    elif exclude_solved and request.extension == "html":
+        response.flash = T("Login to apply this filter")
 
     site_query = None
     for site in sites:

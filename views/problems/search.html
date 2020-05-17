@@ -59,7 +59,17 @@
             {{else:}}
                 <input id="include-editorials" type="checkbox" name="include_editorials"/>
             {{pass}}
-            <label for="include-editorials">{{=T("Only show Problems with Editorials")}}</label>
+            <label for="include-editorials">{{=T("Only show problems with editorials")}}</label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col offset-s3 s6">
+            {{if request.vars.get('exclude_solved', '') == 'on':}}
+                <input id="exclude-solved" type="checkbox" name="exclude_solved" checked/>
+            {{else:}}
+                <input id="exclude-solved" type="checkbox" name="exclude_solved"/>
+            {{pass}}
+            <label for="exclude-solved">{{=T("Exclude my solved problems")}}</label>
         </div>
     </div>
     <div class="row">
