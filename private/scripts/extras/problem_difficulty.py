@@ -80,6 +80,7 @@ SELECT problem_id, avg(score)
 FROM problem_difficulty
 WHERE problem_id IN (%(pids)s)
 GROUP BY problem_id
+HAVING count(*) >= 3
 """ % ({"pids": ",".join(pids)})
 
 res = db.executesql(sql_query)
