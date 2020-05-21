@@ -640,6 +640,8 @@ def urltosite(url):
 
         @param url (String): Site URL
         @return url (String): Site
+
+        @Todo: Move this to individual sites?
     """
     if url.__contains__("uva.onlinejudge.org") or url.__contains__("uhunt.felix-halim.net"):
         return "uva"
@@ -653,6 +655,10 @@ def urltosite(url):
         return "codeforces"
     if url == current.spoj_lambda_url:
         return "spoj"
+    if url.__contains__("kenkoooo.com/atcoder/atcoder-api") or \
+       url.__contains__("atcoder.jp/"):
+        return "atcoder"
+
     # Note: try/except is not added because this function is not to
     #       be called for invalid problem urls
     site = re.search(r"www\..*?\.com", url).group()
