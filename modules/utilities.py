@@ -656,7 +656,7 @@ def urltosite(url):
     if url == current.spoj_lambda_url:
         return "spoj"
     if url.__contains__("kenkoooo.com/atcoder/atcoder-api") or \
-       url.__contains__("atcoder.jp/"):
+       url.__contains__("atcoder.jp"):
         return "atcoder"
 
     # Note: try/except is not added because this function is not to
@@ -1296,7 +1296,8 @@ def get_profile_url(site, handle):
                     "HackerEarth": "users/",
                     "HackerRank": "",
                     "Spoj": "users/",
-                    "Timus": "author.aspx?id="}
+                    "Timus": "author.aspx?id=",
+                    "AtCoder": "users/"}
 
     if site == "UVa":
         uvadb = current.uvadb
