@@ -516,6 +516,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
         site = submissions[0]
         lower_site = site.lower()
         site_delay = lower_site + "_delay"
+        print site, submissions[1]
         submissions_count = get_submissions(record.id,
                                             record[lower_site + "_handle"],
                                             record.stopstalk_handle,

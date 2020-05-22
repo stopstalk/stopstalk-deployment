@@ -48,6 +48,21 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
+    def download_submission(view_link):
+        if Profile.is_website_down():
+            return -1
+
+        response = get_request(view_link)
+        if response in REQUEST_FAILURES:
+            return -1
+
+        try:
+            return BeautifulSoup(response.text, "lxml").find(id="submission-code").text
+        except:
+            return -1
+
+    # -------------------------------------------------------------------------
+    @staticmethod
     def get_problem_setters():
         """
             @return (None): Problem authors or None
@@ -120,7 +135,6 @@ class Profile(object):
         """
 
         self.is_daily_retrieval = is_daily_retrieval
-        self.submissions = []
         str_init_time = time.strptime(str(current.INITIAL_DATE),
                                       "%Y-%m-%d %H:%M:%S")
         # Test for invalid handles
@@ -140,16 +154,35 @@ class Profile(object):
             return response
 
         response = response.json()
+        self.submissions_list = []
         submissions = sorted(response,
                              key=lambda x: x["epoch_second"],
                              reverse=True)
 
         for submission in submissions:
-            self.submissions.append()
-            print (submission["language"])
-            print submission
+            curr = time.gmtime(submission["epoch_second"] + 330 * 60)
 
-        return []
+            if curr <= last_retrieved:
+                return self.submissions_list
 
+            problem_name = submission["problem_id"]
+            problem_link = "%scontests/%s/tasks/%s" % (current.SITES["AtCoder"],
+                                                       submission["contest_id"],
+                                                       submission["problem_id"])
+
+            view_link = "%scontests/%s/submissions/%s" % (current.SITES["AtCoder"],
+                                                          submission["contest_id"],
+                                                          submission["id"])
+            self.submissions_list.append((
+                str(time.strftime("%Y-%m-%d %H:%M:%S", curr)),
+                problem_link,
+                problem_name,
+                submission["result"],
+                submission["point"],
+                submission["language"],
+                view_link
+            ))
+
+        return self.submissions_list
 
 # =============================================================================
