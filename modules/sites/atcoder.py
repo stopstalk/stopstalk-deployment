@@ -65,18 +65,24 @@ class Profile(object):
     @staticmethod
     def get_problem_setters():
         """
-            @return (None): Problem authors or None
+            @return (None): None
         """
         return None
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_editorial_link():
+    def get_editorial_link(problem_link):
         """
-            No editorials for spoj
         """
         # @Todo fill this
-        return None
+
+        try:
+            contest_id = re.search("contests/.*/tasks",
+                                   problem_link).group().split("/")[1]
+        except:
+            return None
+
+        return "https://img.atcoder.jp/%s/editorial.pdf" % contest_id
 
     # -------------------------------------------------------------------------
     @staticmethod
@@ -93,23 +99,9 @@ class Profile(object):
             @return (Dict): Details of the problem returned in a dictionary
         """
 
-        editorial_link = Profile.get_editorial_link()
-        all_tags = []
-        problem_setters = None
-
-        # Temporary hack - spoj seems to have removed their SSL cert
-        problem_link = args["problem_link"].replace("https", "http")
-        response = get_request(problem_link)
-        if response in REQUEST_FAILURES:
-            return dict(tags=all_tags,
-                        editorial_link=editorial_link,
-                        problem_setters=problem_setters)
-
-        soup = BeautifulSoup(response.text, "lxml")
-        return dict(tags=Profile.get_tags(soup),
-                    editorial_link=editorial_link,
-                    problem_setters=Profile.get_problem_setters(soup,
-                                                                problem_link))
+        return dict(tags=Profile.get_tags(),
+                    editorial_link=Profile.get_editorial_link(args["problem_link"]),
+                    problem_setters=Profile.get_problem_setters())
 
     # -------------------------------------------------------------------------
     @staticmethod
