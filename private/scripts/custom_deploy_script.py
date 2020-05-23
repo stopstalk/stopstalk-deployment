@@ -20,4 +20,22 @@
     THE SOFTWARE.
 """
 
-print "hello world"
+def update_handles(table):
+    query = (table["atcoder_handle"] == None) | \
+            (table["atcoder_lr"] == None)
+    rows = db(query).select()
+
+    for row in rows:
+        update_params = {}
+        if row.atcoder_handle == None:
+            update_params["atcoder_handle"] = ""
+        if row.atcoder_lr == None:
+            update_params["atcoder_lr"] = current.INITIAL_DATE
+
+        if len(update_params) > 0:
+            print row.stopstalk_handle, update_params
+            row.update_record(**update_params)
+
+
+update_handles(db.auth_user)
+update_handles(db.custom_friend)
