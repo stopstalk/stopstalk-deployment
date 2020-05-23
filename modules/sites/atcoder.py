@@ -106,10 +106,9 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def is_invalid_handle(handle):
-        url = current.SITES[self.site] + "users/" + handle
+        url = current.SITES["AtCoder"] + "users/" + handle
         first_response = get_request(url,
-                                     timeout=10,
-                                     is_daily_retrieval=self.is_daily_retrieval)
+                                     timeout=10)
 
         if first_response in REQUEST_FAILURES:
             return True
