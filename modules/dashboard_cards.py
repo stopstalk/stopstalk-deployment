@@ -22,6 +22,7 @@
 
 import json
 import utilities
+import datetime
 from stopstalk_constants import *
 
 from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, B, \
@@ -35,6 +36,7 @@ class BaseCard:
         self.genre = self.__class__.__name__
         self.user_id = user_id
         self.cache_serializer = "json"
+        self.sunset_card_date = None
 
     # --------------------------------------------------------------------------
     def get_html(self, **args):
@@ -86,6 +88,16 @@ class BaseCard:
                                  result,
                                  ex=ONE_HOUR)
 
+    # --------------------------------------------------------------------------
+    @staticmethod
+    def enabled_check(func):
+        def wrapper(*args):
+            self_obj = args[0]
+            return (self_obj.sunset_card_date is None or \
+                    datetime.datetime.now() - self_obj.sunset_card_date) and \
+                   func(*args)
+        return wrapper
+
 # ==============================================================================
 class StreakCard(BaseCard):
     # --------------------------------------------------------------------------
@@ -135,6 +147,7 @@ class StreakCard(BaseCard):
         return self.stats[self.key_name]
 
     # --------------------------------------------------------------------------
+    @BaseCard.enabled_check
     def should_show(self):
         cache_value = self.get_from_cache()
         if cache_value:
@@ -191,6 +204,7 @@ class SuggestProblemCard(BaseCard):
         return
 
     # --------------------------------------------------------------------------
+    @BaseCard.enabled_check
     def should_show(self):
         return True
 
@@ -263,6 +277,7 @@ class UpcomingContestCard(BaseCard):
         return data
 
     # --------------------------------------------------------------------------
+    @BaseCard.enabled_check
     def should_show(self):
         return True
 
@@ -329,6 +344,7 @@ class RecentSubmissionsCard(BaseCard):
         return self.final_data if self.final_data else "FAILURE"
 
     # --------------------------------------------------------------------------
+    @BaseCard.enabled_check
     def should_show(self):
         final_data = self.get_from_cache()
         if final_data:
@@ -416,6 +432,7 @@ class AddMoreFriendsCard(BaseCard):
         return result
 
     # --------------------------------------------------------------------------
+    @BaseCard.enabled_check
     def should_show(self):
         db = current.db
         self.friend_count = db(db.following.follower_id == self.user_id).count()
@@ -453,6 +470,7 @@ class JobProfileCard(BaseCard):
     def get_data(self):
         pass
     # --------------------------------------------------------------------------
+    @BaseCard.enabled_check
     def should_show(self):
         db = current.db
         query = (db.resume_data.user_id == self.user_id)
@@ -493,6 +511,7 @@ class LinkedAccountsCard(BaseCard):
         return self.handle_count
 
     # --------------------------------------------------------------------------
+    @BaseCard.enabled_check
     def should_show(self):
         cache_value = self.get_from_cache()
         if cache_value:
@@ -564,6 +583,7 @@ class LastSolvedProblemCard(BaseCard):
         return self.problem_details
 
     # --------------------------------------------------------------------------
+    @BaseCard.enabled_check
     def should_show(self):
         cache_value = self.get_from_cache()
 
@@ -644,6 +664,7 @@ class TrendingProblemsCard(BaseCard):
         return self.trending_problems
 
     # --------------------------------------------------------------------------
+    @BaseCard.enabled_check
     def should_show(self):
         cache_value = self.get_from_cache()
         if cache_value:
@@ -696,7 +717,50 @@ class SearchByTagCard(BaseCard):
         return
 
     # --------------------------------------------------------------------------
+    @BaseCard.enabled_check
     def should_show(self):
         return True
+
+# ==============================================================================
+class AtCoderHandleCard(BaseCard):
+    # --------------------------------------------------------------------------
+    def __init__(self, user_id):
+        self.user_id = user_id
+        self.final_pid = None
+        self.card_title = "Link AtCoder now!"
+
+        self.ctas = [
+            dict(btn_url=URL("user",
+                             "update_details"),
+                 btn_text="Update Now",
+                 btn_class="atcoder-handle-card-update-now")
+        ]
+        BaseCard.__init__(self, user_id)
+        self.sunset_card_date = datetime.datetime.now() - \
+                                datetime.timedelta(days=90)
+
+    # --------------------------------------------------------------------------
+    def get_html(self):
+        card_content = P("AtCoder has come up in our surveys multiple times and here we are. We now support AtCoder profiles :)")
+
+        card_html = BaseCard.get_html(self, **dict(
+                       card_title=self.card_title,
+                       card_content=card_content,
+                       cta_links=self.get_cta_html(),
+                       card_color_class="white",
+                       card_text_color_class="black-text"
+                    ))
+        return card_html
+
+    # --------------------------------------------------------------------------
+    def get_data(self):
+        return
+
+    # --------------------------------------------------------------------------
+    @BaseCard.enabled_check
+    def should_show(self):
+        db = current.db
+        user_record = utilities.get_user_records([self.user_id], "id", "id", True)
+        return user_record["atcoder_handle"] == ""
 
 # ==============================================================================
