@@ -116,6 +116,38 @@ class Profile(object):
         return False
 
     # -------------------------------------------------------------------------
+    @staticmethod
+    def rating_graph_data(handle):
+        url = "https://atcoder.jp/users/%s/history" % handle
+
+        response = get_request(url)
+        if response in REQUEST_FAILURES:
+            return response
+
+        soup = bs4.BeautifulSoup(response.text, "lxml")
+        trs =  soup.find("table", id="history").find("tbody").find_all("tr")
+
+        contest_data = {}
+
+        for tr in trs:
+            tds = tr.find_all("td")
+            time_stamp = datetime.datetime.strptime(tds[0].text.split("+")[0],
+                                                    "%Y-%m-%d %H:%M:%S") - \
+                         datetime.timedelta(minutes=210)
+            contest_data[str(time_stamp)] = {
+                "name": tds[1].text.strip(),
+                "url": current.SITES["AtCoder"] + \
+                       tds[1].find("a",
+                                   href=True)["href"][1:],
+                "rating": str(tds[4].text.strip()),
+                "ratingChange": str(tds[5].text),
+                "rank": tds[2].text.strip()
+            }
+
+        return [{"title": "AtCoder",
+                 "data": contest_data}]
+
+    # -------------------------------------------------------------------------
     def get_submissions(self, last_retrieved,
                         atcoder_problem_dict, is_daily_retrieval):
         """
