@@ -100,8 +100,7 @@ var LocalStorageHelper = (function() {
       {
         "card_id": "atcoder_handle_card",
         "class_name": "AtCoderHandleCard",
-        "init_arguments": [loggedInUserId],
-        "local_cache": true
+        "init_arguments": [loggedInUserId]
       }
     ];
 
