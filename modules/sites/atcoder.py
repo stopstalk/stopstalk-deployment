@@ -181,11 +181,16 @@ class Profile(object):
             view_link = "%scontests/%s/submissions/%s" % (current.SITES["AtCoder"],
                                                           submission["contest_id"],
                                                           submission["id"])
+
+            status = submission["result"]
+            if status not in ["AC", "WA", "TLE", "MLE", "CE", "RE"]:
+                status = "OTH"
+
             self.submissions_list.append((
                 str(time.strftime("%Y-%m-%d %H:%M:%S", curr)),
                 problem_link,
                 problem_name,
-                submission["result"],
+                status,
                 submission["point"],
                 submission["language"],
                 view_link
