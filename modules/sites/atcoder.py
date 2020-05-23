@@ -125,11 +125,15 @@ class Profile(object):
         return False
 
     # -------------------------------------------------------------------------
-    def get_submissions(self, last_retrieved, is_daily_retrieval):
+    def get_submissions(self, last_retrieved,
+                        atcoder_problem_dict, is_daily_retrieval):
         """
             Retrieve Spoj submissions after last retrieved timestamp
 
             @param last_retrieved (DateTime): Last retrieved timestamp for the user
+            @param atcoder_problem_dict (Dict): Problem ID to name mapping
+            @param is_daily_retrieval (Boolean): If the retrieval is daily retrieval
+
             @return (List): List of submissions containing all the
                             information
         """
@@ -165,7 +169,11 @@ class Profile(object):
             if curr <= last_retrieved:
                 return self.submissions_list
 
-            problem_name = submission["problem_id"]
+            try:
+                problem_name = atcoder_problem_dict[submission["problem_id"]]
+            except:
+                return SERVER_FAILURE
+
             problem_link = "%scontests/%s/tasks/%s" % (current.SITES["AtCoder"],
                                                        submission["contest_id"],
                                                        submission["problem_id"])

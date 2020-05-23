@@ -571,6 +571,11 @@ nav ul a:hover {
     cursor: pointer;
 }
 
+.profile-page-site-profile-url {
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
 .preview-editor-wrapper {
     cursor: text;
     user-select: text;

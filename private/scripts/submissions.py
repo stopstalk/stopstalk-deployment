@@ -48,6 +48,7 @@ failed_user_retrievals = []
 retrieval_type = None
 todays_date = datetime.datetime.today().date()
 uva_problem_dict = {}
+atcoder_problem_dict = {}
 metric_handlers = {}
 plink_to_id = {}
 todays_date_string = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -117,6 +118,14 @@ def populate_uva_problems():
     ptable = uvadb.problem
     uvaproblems = uvadb(ptable).select(ptable.problem_id, ptable.title)
     uva_problem_dict = dict([(x.problem_id, x.title) for x in uvaproblems])
+
+# ------------------------------------------------------------------------------
+def populate_atcoder_problems():
+    global atcoder_problem_dict
+
+    aptable = db.atcoder_problems
+    problems = db(aptable).select(aptable.problem_identifier, aptable.name)
+    atcoder_problem_dict = dict([(x.problem_identifier, x.name) for x in problems])
 
 # ------------------------------------------------------------------------------
 def flush_problem_stats():
@@ -463,6 +472,8 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
             start_retrieval_time = time.time()
             if site == "UVa":
                 submissions = site_method(last_retrieved, uva_problem_dict, is_daily_retrieval)
+            elif site == "AtCoder":
+                submissions = site_method(last_retrieved, atcoder_problem_dict, is_daily_retrieval)
             else:
                 submissions = site_method(last_retrieved, is_daily_retrieval)
             total_retrieval_time = time.time() - start_retrieval_time
@@ -516,7 +527,6 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
         site = submissions[0]
         lower_site = site.lower()
         site_delay = lower_site + "_delay"
-        print site, submissions[1]
         submissions_count = get_submissions(record.id,
                                             record[lower_site + "_handle"],
                                             record.stopstalk_handle,
@@ -754,6 +764,7 @@ if __name__ == "__main__":
         sys.exit()
 
     populate_uva_problems()
+    populate_atcoder_problems()
 
     links = db(ptable).select(ptable.id, ptable.link)
     for row in links:
