@@ -223,6 +223,7 @@
         addEventListener('.accepted-streak-card-pick-problem', 'Cards - Accepted streak pick problem', false);
         addEventListener('.day-streak-card-pick-problem', 'Cards - Day streak pick problem', false);
         addEventListener('.search-by-tag-card-submit', 'Cards - Search by tag Submit', false, 'submit');
+        addEventListener('.atcoder-handle-card-update-now', 'Cards - Atcoder handle update now', false);
     };
 
 
