@@ -82,10 +82,10 @@ class Profile(object):
         except IndexError:
             return all_tags
 
-        lis = tags.find_all("span")[1:]
+        lis = tags.find_all("span")
         for li in lis:
             if li.contents[0] != "No tags":
-                all_tags.append(li.contents[0].strip(", "))
+                all_tags.append(li.text.strip(", "))
 
         return all_tags
 
@@ -170,6 +170,7 @@ class Profile(object):
             editorial_link = None
         else:
             soup = BeautifulSoup(response.text, "lxml")
+            print "soup", soup
             tags = Profile.get_tags(soup)
             editorial_link = Profile.get_editorial_link(problem_link,
                                                         soup,
