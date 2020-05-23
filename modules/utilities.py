@@ -655,7 +655,7 @@ def urltosite(url):
         return "codeforces"
     if url == current.spoj_lambda_url:
         return "spoj"
-    if url.__contains__("kenkoooo.com/atcoder/atcoder-api") or \
+    if url.__contains__("kenkoooo.com/") or \
        url.__contains__("atcoder.jp"):
         return "atcoder"
 
