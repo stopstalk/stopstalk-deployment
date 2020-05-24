@@ -736,7 +736,7 @@ class AtCoderHandleCard(BaseCard):
                  btn_class="atcoder-handle-card-update-now")
         ]
         BaseCard.__init__(self, user_id)
-        self.sunset_card_date = datetime.datetime.now() - \
+        self.sunset_card_date = datetime.datetime.now() + \
                                 datetime.timedelta(days=90)
 
     # --------------------------------------------------------------------------
