@@ -58,6 +58,10 @@
             text-align: center;
         }
 
+        #profile-page-accuracy-table td {
+            padding: 5px 5px;
+        }
+
     </style>
 
     <!--Load the AJAX API-->
@@ -220,30 +224,36 @@
                         <div class="row center" style="margin-bottom: 2px; padding-top: 5px;">
                             <h6><strong>{{=T("Accuracy")}}</strong></h6>
                             {{i = 0}}
+                            <table id="profile-page-accuracy-table" class="centered col offset-s1 s10"><tbody>
                             {{for site in current.SITES:}}
                                 {{if i % 4 == 0:}}
-                                    <div class="row" style="margin-bottom: 5px;">
+                                    <tr style="margin-bottom: 5px;">
                                 {{pass}}
                                 {{if profile_urls[site] != "NA":}}
-                                    <a id="{{=site.lower()}}-profile-url" class="tooltipped profile-page-site-profile-url" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank" href="{{=profile_urls[site]}}">
-                                        <div class="chip" id="{{=site.lower()}}_chip">
-                                            <img src="{{=get_static_url('images/' + site.lower() + '_logo.png')}}" alt="{{=site}}"/>
-                                            <b id="site-accuracy-{{=site.lower()}}">-</b>
-                                        </div>
-                                    </a>
+                                    <td>
+                                        <a id="{{=site.lower()}}-profile-url" class="tooltipped profile-page-site-profile-url" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank" href="{{=profile_urls[site]}}">
+                                            <div class="chip" id="{{=site.lower()}}_chip">
+                                                <img src="{{=get_static_url('images/' + site.lower() + '_logo.png')}}" alt="{{=site}}"/>
+                                                <b id="site-accuracy-{{=site.lower()}}">-</b>
+                                            </div>
+                                        </a>
+                                    </td>
                                 {{else:}}
-                                    <a id="{{=site.lower()}}-profile-url" href="{{=current.SITES[site]}}" class="tooltipped" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank">
-                                        <div class="chip" id="{{=site.lower()}}_chip">
-                                            <img src="{{=get_static_url('images/' + site.lower() + '_logo.png')}}" alt="{{=site}}"/>
-                                            <b id="site-accuracy-{{=site.lower()}}">-</b>
-                                        </div>
-                                    </a>
+                                    <td>
+                                        <a id="{{=site.lower()}}-profile-url" href="{{=current.SITES[site]}}" class="tooltipped" data-position="bottom" data-delay="30" data-tooltip="{{=site}}" target="_blank">
+                                            <div class="chip" id="{{=site.lower()}}_chip">
+                                                <img src="{{=get_static_url('images/' + site.lower() + '_logo.png')}}" alt="{{=site}}"/>
+                                                <b id="site-accuracy-{{=site.lower()}}">-</b>
+                                            </div>
+                                        </a>
+                                    </td>
                                 {{pass}}
                                 {{if (i + 1) % 4 == 0:}}
-                                    </div>
+                                    </tr>
                                 {{pass}}
                                 {{i += 1}}
                             {{pass}}
+                            </tbody></table>
                         </div>
                         <table class="bordered centered">
                             <thead>
