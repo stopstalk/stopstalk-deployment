@@ -94,7 +94,7 @@ class BaseCard:
         def wrapper(*args):
             self_obj = args[0]
             return (self_obj.sunset_card_date is None or \
-                    datetime.datetime.now() - self_obj.sunset_card_date) and \
+                    (self_obj.sunset_card_date - datetime.datetime.now()).days > 0) and \
                    func(*args)
         return wrapper
 
