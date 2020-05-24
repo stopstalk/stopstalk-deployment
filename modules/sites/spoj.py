@@ -42,6 +42,11 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
+    def is_valid_url(url):
+        return url.__contains__("spoj.com/") or url == current.spoj_lambda_url
+
+    # -------------------------------------------------------------------------
+    @staticmethod
     def is_website_down():
         """
             @return (Boolean): If the website is down
