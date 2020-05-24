@@ -640,33 +640,13 @@ def urltosite(url):
 
         @param url (String): Site URL
         @return url (String): Site
-
-        @Todo: Move this to individual sites?
     """
-    if url.__contains__("uva.onlinejudge.org") or url.__contains__("uhunt.felix-halim.net"):
-        return "uva"
-    if url.__contains__("acm.timus.ru"):
-        return "timus"
-    if url.__contains__("codechef.com"):
-        return "codechef"
-    if url.__contains__("spoj.com"):
-        return "spoj"
-    if url.__contains__("codeforces.com"):
-        return "codeforces"
-    if url == current.spoj_lambda_url:
-        return "spoj"
-    if url.__contains__("kenkoooo.com/") or \
-       url.__contains__("atcoder.jp"):
-        return "atcoder"
+    import sites
+    for site in current.SITES:
+        if getattr(sites, site.lower()).Profile.is_valid_url(url):
+            return site.lower()
 
-    # Note: try/except is not added because this function is not to
-    #       be called for invalid problem urls
-    site = re.search(r"www\..*?\.com", url).group()
-
-    # Remove www. and .com from the url to get the site
-    site = site[4:-4]
-
-    return site
+    return "unknown_site"
 
 # -----------------------------------------------------------------------------
 def problem_widget(name,

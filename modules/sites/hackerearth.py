@@ -40,6 +40,11 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
+    def is_valid_url(url):
+        return url.__contains__("hackerearth.com/")
+
+    # -------------------------------------------------------------------------
+    @staticmethod
     def is_website_down():
         """
             @return (Boolean): If the website is down

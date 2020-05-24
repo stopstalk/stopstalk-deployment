@@ -32,11 +32,17 @@ class Profile(object):
     # -------------------------------------------------------------------------
     def __init__(self, handle=""):
         """
-            @param handle (String): Spoj handle
+            @param handle (String): AtCoder handle
         """
 
         self.site = Profile.site_name
         self.handle = handle
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def is_valid_url(url):
+        return url.__contains__("kenkoooo.com/") or \
+               url.__contains__("atcoder.jp/")
 
     # -------------------------------------------------------------------------
     @staticmethod
@@ -74,8 +80,6 @@ class Profile(object):
     def get_editorial_link(problem_link):
         """
         """
-        # @Todo fill this
-
         try:
             contest_id = re.search("contests/.*/tasks",
                                    problem_link).group().split("/")[1]
@@ -118,7 +122,7 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def rating_graph_data(handle):
-        url = "https://atcoder.jp/users/%s/history" % handle
+        url = "%susers/%s/history" % (current.SITES["AtCoder"], handle)
 
         response = get_request(url)
         if response in REQUEST_FAILURES:
@@ -151,7 +155,7 @@ class Profile(object):
     def get_submissions(self, last_retrieved,
                         atcoder_problem_dict, is_daily_retrieval):
         """
-            Retrieve Spoj submissions after last retrieved timestamp
+            Retrieve AtCoder submissions after last retrieved timestamp
 
             @param last_retrieved (DateTime): Last retrieved timestamp for the user
             @param atcoder_problem_dict (Dict): Problem ID to name mapping

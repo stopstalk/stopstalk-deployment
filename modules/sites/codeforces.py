@@ -38,6 +38,12 @@ class Profile(object):
         self.site = Profile.site_name
         self.handle = handle
 
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def is_valid_url(url):
+        return url.__contains__("codeforces.com/")
+
     # -------------------------------------------------------------------------
     @staticmethod
     def is_website_down():
