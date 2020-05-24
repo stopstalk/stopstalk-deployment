@@ -230,6 +230,10 @@ class RetrievalTest:
             "CodeForces": {
                 "view_link": "http://www.codeforces.com/contest/454/submission/7375767",
                 "submission": '#include<stdio.h>\nint main()\n{\n\tint n,i,j,k;\n\tscanf("%d",&n);\n\tint h=n/2+1;\n\tfor(i=0;i<h;i++)\n\t{\n\t\tfor(k=0;k<n/2-i;k++)\n\t\t\tprintf("*");\n\t\tfor(j=0;j<2*i+1;j++)\n\t\t\tprintf("D");\n\t\tfor(j=n/2+i+1;j<n;j++)\n\t\t\tprintf("*");\n\t\tprintf("\\n");\n\t}\n\tfor(i=0;i<n/2;i++)\n\t{\n\t\tfor(k=0;k<=i;k++)\n\t\t        printf("*");\n\t\tfor(j=n-2*i;j>=3;j--)\n\t\t\tprintf("D");\n\t\tfor(j=0;j<=i;j++)\n\t\t\tprintf("*");\n\t\tprintf("\\n");\n\t}\n\treturn 0;\n}\n'
+            },
+            "AtCoder": {
+                "view_link": "https://atcoder.jp/contests/agc039/submissions/7869333",
+                "submission": "/**\r\n *    author:  tourist\r\n *    created: 05.10.2019 16:12:28       \r\n**/\r\n#include <bits/stdc++.h>\r\n\r\nusing namespace std;\r\n\r\nint main() {\r\n  ios::sync_with_stdio(false);\r\n  cin.tie(0);\r\n  int n;\r\n  cin >> n;\r\n  n *= 2;\r\n  vector<string> g(n);\r\n  for (int i = 0; i < n; i++) {\r\n    cin >> g[i];\r\n  }\r\n  vector<vector<vector<long long>>> dp(2 * n, vector<vector<long long>>(2 * n, vector<long long>(2 * n)));\r\n  for (int i = n - 1; i >= 1; i--) {\r\n    for (int j = i; j < n; j++) {\r\n      for (int k = j; k < n; k++) {\r\n        if (i == j && j == k) {\r\n          dp[i][j][k] = 1;\r\n          continue;\r\n        }\r\n        if (i == j || j == k) {\r\n          dp[i][j][k] = 0;\r\n          continue;\r\n        }\r\n        dp[i][j][k] = 0;\r\n        for (int x = i; x < j; x++) {\r\n          for (int y = j + 1; y <= k; y++) {\r\n            for (int u = i; u <= x; u++) {\r\n              for (int v = y; v <= k; v++) {\r\n                if (g[u][v] == '1') {\r\n                  dp[i][j][k] += dp[i][u][x] * dp[y][v][k] * dp[x + 1][j][y - 1];\r\n                }\r\n              }\r\n            }\r\n          }\r\n        }\r\n      }\r\n    }\r\n  }\r\n  long long ans = 0;\r\n  for (int j = 1; j < n; j++) {\r\n    if (g[0][j] == '1') {\r\n      ans += dp[1][j][n - 1];\r\n    }\r\n  }\r\n  cout << ans << '\\n';\r\n  return 0;\r\n}\r\n"
             }
         }
 
@@ -265,7 +269,12 @@ class RetrievalTest:
         }
         result = {}
         for site in sites_with_rating_graph_functionality:
-            get_rating_func = getattr(sites, site.lower()).Profile.rating_graph_data
+            P = self.profile_site[site]
+            if P.is_website_down():
+                # Don't test for websites which are acked to be down
+                continue
+
+            get_rating_func = P.rating_graph_data
             res = get_rating_func(handles[site])
             if expected_list[site] != res:
                 raise RuntimeError("Rating graph dict does not match for " + site)
