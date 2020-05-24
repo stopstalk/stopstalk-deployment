@@ -132,7 +132,10 @@ class Profile(object):
             return response
 
         soup = bs4.BeautifulSoup(response.text, "lxml")
-        trs =  soup.find("table", id="history").find("tbody").find_all("tr")
+        try:
+            trs =  soup.find("table", id="history").find("tbody").find_all("tr")
+        except AttributeError:
+            return []
 
         contest_data = {}
 
