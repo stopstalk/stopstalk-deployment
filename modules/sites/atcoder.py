@@ -79,6 +79,9 @@ class Profile(object):
     @staticmethod
     def get_editorial_link(problem_link):
         """
+            @param problem_link (String): Problem URL
+
+            @return (String/None): Editorial link
         """
         try:
             contest_id = re.search("contests/.*/tasks",
