@@ -112,22 +112,6 @@ def concurrent_submission_retrieval_handler(action, user_id, custom):
         current.REDIS_CLIENT.delete(redis_key)
 
 # ------------------------------------------------------------------------------
-def populate_uva_problems():
-    global uva_problem_dict
-
-    ptable = uvadb.problem
-    uvaproblems = uvadb(ptable).select(ptable.problem_id, ptable.title)
-    uva_problem_dict = dict([(x.problem_id, x.title) for x in uvaproblems])
-
-# ------------------------------------------------------------------------------
-def populate_atcoder_problems():
-    global atcoder_problem_dict
-
-    aptable = db.atcoder_problems
-    problems = db(aptable).select(aptable.problem_identifier, aptable.name)
-    atcoder_problem_dict = dict([(x.problem_identifier, x.name) for x in problems])
-
-# ------------------------------------------------------------------------------
 def flush_problem_stats():
 
     global problem_solved_stats
@@ -763,9 +747,13 @@ if __name__ == "__main__":
         print "Invalid arguments"
         sys.exit()
 
-    populate_uva_problems()
-    populate_atcoder_problems()
-
+    uva_problem_dict = utilities.get_problem_mappings(uvadb,
+                                                      uvadb.problem,
+                                                      ["problem_id", "title"])
+    atcoder_problem_dict = utilities.get_problem_mappings(db,
+                                                          db.atcoder_problems,
+                                                          ["problem_identifier",
+                                                           "name"])
     links = db(ptable).select(ptable.id, ptable.link)
     for row in links:
         plink_to_id[row.link] = row.id

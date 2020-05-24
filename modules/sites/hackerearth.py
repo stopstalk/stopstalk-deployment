@@ -175,7 +175,6 @@ class Profile(object):
             editorial_link = None
         else:
             soup = BeautifulSoup(response.text, "lxml")
-            print "soup", soup
             tags = Profile.get_tags(soup)
             editorial_link = Profile.get_editorial_link(problem_link,
                                                         soup,

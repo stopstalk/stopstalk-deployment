@@ -62,6 +62,11 @@ def push_influx_data(measurement, points, app_name="cron"):
         return
 
 # -----------------------------------------------------------------------------
+def get_problem_mappings(db_obj, table, fields):
+    problems = db_obj(table).select(table[fields[0]], table[fields[1]])
+    return dict([(x[fields[0]], x[fields[1]]) for x in problems])
+
+# -----------------------------------------------------------------------------
 def is_stopstalk_admin(user_id):
     return user_id in STOPSTALK_ADMIN_USER_IDS
 
