@@ -40,6 +40,11 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
+    def is_valid_url(url):
+        return url.__contains__("hackerearth.com/")
+
+    # -------------------------------------------------------------------------
+    @staticmethod
     def is_website_down():
         """
             @return (Boolean): If the website is down
@@ -170,7 +175,6 @@ class Profile(object):
             editorial_link = None
         else:
             soup = BeautifulSoup(response.text, "lxml")
-            print "soup", soup
             tags = Profile.get_tags(soup)
             editorial_link = Profile.get_editorial_link(problem_link,
                                                         soup,

@@ -48,6 +48,7 @@ failed_user_retrievals = []
 retrieval_type = None
 todays_date = datetime.datetime.today().date()
 uva_problem_dict = {}
+atcoder_problem_dict = {}
 metric_handlers = {}
 plink_to_id = {}
 todays_date_string = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -109,14 +110,6 @@ def concurrent_submission_retrieval_handler(action, user_id, custom):
         current.REDIS_CLIENT.set(redis_key, True, ex=1 * 60 * 60)
     elif action == "DEL":
         current.REDIS_CLIENT.delete(redis_key)
-
-# ------------------------------------------------------------------------------
-def populate_uva_problems():
-    global uva_problem_dict
-
-    ptable = uvadb.problem
-    uvaproblems = uvadb(ptable).select(ptable.problem_id, ptable.title)
-    uva_problem_dict = dict([(x.problem_id, x.title) for x in uvaproblems])
 
 # ------------------------------------------------------------------------------
 def flush_problem_stats():
@@ -463,6 +456,8 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
             start_retrieval_time = time.time()
             if site == "UVa":
                 submissions = site_method(last_retrieved, uva_problem_dict, is_daily_retrieval)
+            elif site == "AtCoder":
+                submissions = site_method(last_retrieved, atcoder_problem_dict, is_daily_retrieval)
             else:
                 submissions = site_method(last_retrieved, is_daily_retrieval)
             total_retrieval_time = time.time() - start_retrieval_time
@@ -752,8 +747,13 @@ if __name__ == "__main__":
         print "Invalid arguments"
         sys.exit()
 
-    populate_uva_problems()
-
+    uva_problem_dict = utilities.get_problem_mappings(uvadb,
+                                                      uvadb.problem,
+                                                      ["problem_id", "title"])
+    atcoder_problem_dict = utilities.get_problem_mappings(db,
+                                                          db.atcoder_problems,
+                                                          ["problem_identifier",
+                                                           "name"])
     links = db(ptable).select(ptable.id, ptable.link)
     for row in links:
         plink_to_id[row.link] = row.id

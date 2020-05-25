@@ -96,6 +96,11 @@ var LocalStorageHelper = (function() {
         "class_name": "SearchByTagCard",
         "init_arguments": [loggedInUserId],
         "local_cache": true
+      },
+      {
+        "card_id": "atcoder_handle_card",
+        "class_name": "AtCoderHandleCard",
+        "init_arguments": [loggedInUserId]
       }
     ];
 

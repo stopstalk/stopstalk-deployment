@@ -771,6 +771,11 @@ db.define_table("problem_setters",
                 Field("problem_id", "reference problem"),
                 Field("handle"))
 
+db.define_table("atcoder_problems",
+                Field("problem_identifier"),
+                Field("contest_id"),
+                Field("name"))
+
 uvadb.define_table("problem",
                    Field("problem_id", "integer"),
                    Field("problem_num", "integer"),

@@ -1519,11 +1519,11 @@ def download_submission():
 
     site = request.get_vars["site"]
     view_link = request.get_vars["viewLink"]
-    if site == "CodeChef":
-        return getattr(sites, "codechef").Profile.download_submission(view_link)
-    elif site == "CodeForces":
-        return getattr(sites, "codeforces").Profile.download_submission(view_link)
-    else:
+
+    try:
+        return getattr(sites,
+                       site.lower()).Profile.download_submission(view_link)
+    except AttributeError:
         return -1
 
 # ----------------------------------------------------------------------------

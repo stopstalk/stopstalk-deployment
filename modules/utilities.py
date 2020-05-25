@@ -62,6 +62,11 @@ def push_influx_data(measurement, points, app_name="cron"):
         return
 
 # -----------------------------------------------------------------------------
+def get_problem_mappings(db_obj, table, fields):
+    problems = db_obj(table).select(table[fields[0]], table[fields[1]])
+    return dict([(x[fields[0]], x[fields[1]]) for x in problems])
+
+# -----------------------------------------------------------------------------
 def is_stopstalk_admin(user_id):
     return user_id in STOPSTALK_ADMIN_USER_IDS
 
@@ -641,26 +646,12 @@ def urltosite(url):
         @param url (String): Site URL
         @return url (String): Site
     """
-    if url.__contains__("uva.onlinejudge.org") or url.__contains__("uhunt.felix-halim.net"):
-        return "uva"
-    if url.__contains__("acm.timus.ru"):
-        return "timus"
-    if url.__contains__("codechef.com"):
-        return "codechef"
-    if url.__contains__("spoj.com"):
-        return "spoj"
-    if url.__contains__("codeforces.com"):
-        return "codeforces"
-    if url == current.spoj_lambda_url:
-        return "spoj"
-    # Note: try/except is not added because this function is not to
-    #       be called for invalid problem urls
-    site = re.search(r"www\..*?\.com", url).group()
+    import sites
+    for site in current.SITES:
+        if getattr(sites, site.lower()).Profile.is_valid_url(url):
+            return site.lower()
 
-    # Remove www. and .com from the url to get the site
-    site = site[4:-4]
-
-    return site
+    return "unknown_site"
 
 # -----------------------------------------------------------------------------
 def problem_widget(name,
@@ -1290,7 +1281,8 @@ def get_profile_url(site, handle):
                     "HackerEarth": "users/",
                     "HackerRank": "",
                     "Spoj": "users/",
-                    "Timus": "author.aspx?id="}
+                    "Timus": "author.aspx?id=",
+                    "AtCoder": "users/"}
 
     if site == "UVa":
         uvadb = current.uvadb
