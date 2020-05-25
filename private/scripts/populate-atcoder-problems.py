@@ -20,22 +20,22 @@
     THE SOFTWARE.
 """
 
-def update_handles(table):
-    query = (table["atcoder_handle"] == None) | \
-            (table["atcoder_lr"] == None)
-    rows = db(query).select()
+import requests
+from sites.init import *
 
-    for row in rows:
-        update_params = {}
-        if row.atcoder_handle == None:
-            update_params["atcoder_handle"] = ""
-        if row.atcoder_lr == None:
-            update_params["atcoder_lr"] = current.INITIAL_DATE
+aptable = db.atcoder_problems
 
-        if len(update_params) > 0:
-            print row.stopstalk_handle, update_params
-            row.update_record(**update_params)
+row_count = db(aptable).count()
 
+import requests
+response = get_request("https://kenkoooo.com/atcoder/resources/problems.json")
+problems = response.json()
 
-update_handles(db.auth_user)
-update_handles(db.custom_friend)
+if len(problems) > row_count:
+    print str(datetime.datetime.now()), "Row counts is different db:", row_count, " api:", len(problems)
+    for row in problems:
+        aptable.insert(contest_id=row["contest_id"],
+                       problem_identifier=row["id"],
+                       name=row["title"])
+else:
+    print str(datetime.datetime.now()), "Row count is same as in db", row_count

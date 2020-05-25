@@ -36,6 +36,7 @@ current.SITES = OrderedDict()
 current.SITES["CodeChef"] = "https://www.codechef.com/"
 current.SITES["CodeForces"] = "http://www.codeforces.com/"
 current.SITES["Spoj"] = "https://www.spoj.com/"
+current.SITES["AtCoder"] = "https://atcoder.jp/"
 current.SITES["HackerEarth"] = "https://www.hackerearth.com/"
 current.SITES["HackerRank"] = "https://www.hackerrank.com/"
 current.SITES["UVa"] = "https://uva.onlinejudge.org/"

@@ -89,6 +89,8 @@
                 return "hackerrank";
             } else if (url.search("hackerearth.com") !== -1) {
                 return "hackerearth";
+            } else if (url.search("atcoder.jp") !== -1) {
+                return "atcoder";
             } else {
                 $.web2py.flash("Some error occurred");
                 return "";
