@@ -91,6 +91,7 @@ for pid, score in res:
 write_count = 0
 for pid, difficulties in difficulty.items():
     if write_count >= 100:
+        db.commit()
         write_count = 0
         time.sleep(0.5)
 
