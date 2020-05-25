@@ -820,6 +820,10 @@ def contests():
     return dict(table=table, upcoming=upcoming, retrieved=True)
 
 # ------------------------------------------------------------------------------
+def privacy_policy():
+    return dict()
+
+# ------------------------------------------------------------------------------
 def updates():
     """
         Show the updates and feature additions
