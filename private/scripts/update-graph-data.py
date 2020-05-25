@@ -98,7 +98,13 @@ class User:
             # The profile site does not support fetching rating graph data
             log_line(site + " rating history not implemented")
             return
-        result = get_rating_func(handle)
+
+        try:
+            result = get_rating_func(handle)
+        except Exception as e:
+            log_line("%s Error in rating function %s %s %s" % (self.get_debug_statement(), site, handle, e))
+            self.retrieval_failed = True
+            return
 
         if result in REQUEST_FAILURES:
             if result != NOT_FOUND:
