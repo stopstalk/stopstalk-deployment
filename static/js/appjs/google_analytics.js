@@ -93,6 +93,7 @@
         addEventListener('#problem-difficulty-title a', 'Problem page from Problem difficulty modal', false);
         addEventListener('#onboarding-button', 'Onboarding Button', false);
         addEventListener('#footer-media-kit', 'Footer Media Kit', false);
+        addEventListener('#footer-privacy-policy', 'Footer Privacy Policy', false);
         addEventListener('#footer-faqs', 'Footer FAQs', false);
         addEventListener('#footer-contact-us', 'Footer Contact Us', false);
         addEventListener('#footer-stopstalk-status', 'Footer StopStalk status', false);
