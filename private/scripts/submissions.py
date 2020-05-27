@@ -631,8 +631,9 @@ def daily_retrieve():
             (atable.registration_key == "") # Unverified email
     registered_users = db(query).select()
 
-    query = (cftable.id % M == N) & (cftable.duplicate_cu == None)
-    custom_users = db(query).select()
+    # query = (cftable.id % M == N) & (cftable.duplicate_cu == None)
+    # custom_users = db(query).select()
+    custom_users = []
 
     return (registered_users, custom_users)
 
