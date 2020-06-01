@@ -33,6 +33,7 @@ problems = response.json()
 
 if len(problems) > row_count:
     print str(datetime.datetime.now()), "Row counts is different db:", row_count, " api:", len(problems)
+    aptable.truncate()
     for row in problems:
         aptable.insert(contest_id=row["contest_id"],
                        problem_identifier=row["id"],
