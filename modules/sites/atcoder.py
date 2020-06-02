@@ -112,15 +112,24 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def is_invalid_handle(handle):
+    def is_invalid_handle(handle, just_boolean=True):
         url = current.SITES["AtCoder"] + "users/" + handle
         first_response = get_request(url,
                                      timeout=10)
 
-        if first_response in REQUEST_FAILURES:
-            return True
+        if just_boolean:
+            return first_response in REQUEST_FAILURES
+        else:
+            if first_response in REQUEST_FAILURES:
+                if first_response == NOT_FOUND:
+                    return True
+                return first_response
 
-        return False
+            soup = BeautifulSoup(first_response.text, "lxml")
+            if soup.find(class_="username").text != handle:
+                return True
+
+            return False
 
     # -------------------------------------------------------------------------
     @staticmethod
@@ -176,13 +185,11 @@ class Profile(object):
                                       "%Y-%m-%d %H:%M:%S")
         # Test for invalid handles
         if  last_retrieved == str_init_time:
-            url = current.SITES[self.site] + "users/" + self.handle
-            first_response = get_request(url,
-                                         timeout=10,
-                                         is_daily_retrieval=self.is_daily_retrieval)
-
-            if first_response in REQUEST_FAILURES:
-                return first_response
+            response = Profile.is_invalid_handle(self.handle, False)
+            if response == True:
+                return NOT_FOUND
+            elif response in REQUEST_FAILURES:
+                return response
 
         url = "https://kenkoooo.com/atcoder/atcoder-api/results?user=" + self.handle
         response = get_request(url, is_daily_retrieval=self.is_daily_retrieval)
