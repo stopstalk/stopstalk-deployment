@@ -142,6 +142,9 @@ var LocalStorageHelper = (function() {
           }, Math.floor(Math.random() * Math.floor(800)));
         }
       }).then(function(response) {
+        if (cardCounter == 0) {
+          $containerDiv.html("");
+        }
         if (cardCounter % 3 === 0) {
           $containerDiv.append($currentDiv);
           $currentDiv = $("<div class='row'>");
@@ -161,6 +164,11 @@ var LocalStorageHelper = (function() {
   };
 
   $(document).ready(function() {
+    var $dashboardThrobber = $("#view-submission-preloader").clone();
+        $dashboardThrobber.attr('id', 'dashboard-page-throbber');
+
+    $dashboardThrobber.css("margin-top", "10%");
+    $("#dashboard-cards-container").html($dashboardThrobber);
     populateCards();
   });
 })(jQuery);
