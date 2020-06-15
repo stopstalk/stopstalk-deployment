@@ -109,7 +109,7 @@ npm install uglifycss -g
 
    In case if you want to send emails - Install `postfix` for your respective OS and configure the above smtp server accordingly.
 
-8. Install Redis - [here](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-redis-on-ubuntu-16-04)
+8. Install Redis - [here](https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-redis-on-ubuntu-18-04)
 
 9. Install InfluxDB (1.7) - [here](https://docs.influxdata.com/influxdb/v1.7/introduction/installation/)
 
