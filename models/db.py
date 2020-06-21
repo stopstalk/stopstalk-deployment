@@ -776,6 +776,13 @@ db.define_table("atcoder_problems",
                 Field("contest_id"),
                 Field("name"))
 
+db.define_table("problem_recommendations",
+                Field("user_id", "reference auth_user"),
+                Field("problem_id", "reference problem"),
+                Field("state", "integer"),
+                Field("is_active", "boolean"),
+                Field("generated_at", "date"))
+
 uvadb.define_table("problem",
                    Field("problem_id", "integer"),
                    Field("problem_num", "integer"),
