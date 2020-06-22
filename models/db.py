@@ -779,9 +779,9 @@ db.define_table("atcoder_problems",
 db.define_table("problem_recommendations",
                 Field("user_id", "reference auth_user"),
                 Field("problem_id", "reference problem"),
-                # The possible states of a recommendation are: 0 - Recommended,
-                # 1 - Viewed, 2 - Attempted, 3 - Solved
-                Field("state", "integer",
+                # The possible states of a recommendation are:
+                # 0 - Recommended, 1 - Viewed, 2 - Attempted, 3 - Solved
+                Field("state", "integer", default=0),
                 Field("is_active", "boolean"),
                 Field("generated_at", "date"))
 
