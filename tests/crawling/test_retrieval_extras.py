@@ -103,7 +103,7 @@ class RetrievalTest:
             "with_editorial": {
                 "CodeChef": {
                     "plink": "https://www.codechef.com/LTIME27/problems/INVERT",
-                    "editorial_link": "http://discuss.codechef.com/problems/INVERT"
+                    "editorial_link": "https://discuss.codechef.com/problems/INVERT"
                 },
                 "CodeForces": {
                     "plink": "http://www.codeforces.com/problemset/problem/102/B",
