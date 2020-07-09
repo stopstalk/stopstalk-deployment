@@ -101,7 +101,8 @@ class Profile(object):
 
             @return (String/None): Editorial link
         """
-        return utilities.get_key_from_dict(response, "editorial_url", None)
+        editorial_link = utilities.get_key_from_dict(response, "editorial_url", None)
+        return None if editorial_link == "" else editorial_link
 
     # --------------------------------------------------------------------------
     @staticmethod
