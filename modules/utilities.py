@@ -1211,7 +1211,7 @@ def render_table(submissions, duplicates=[], logged_in_user_id=None):
                                "site": submission.site}
             button_class = "btn waves-light waves-effect"
             if current.auth.is_logged_in():
-                if submission.site != "HackerEarth":
+                if submission.site not in VIEW_ONLY_SUBMISSION_SITES:
                     td = TD(BUTTON(T("View"),
                                    _class="view-submission-button " + button_class,
                                    _style="background-color: #FF5722",
