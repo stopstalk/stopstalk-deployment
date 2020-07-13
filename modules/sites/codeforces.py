@@ -172,6 +172,7 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def rating_graph_data(handle):
+        return []
         website = "http://www.codeforces.com/"
 
         url = "%sapi/contest.list" % website
