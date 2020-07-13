@@ -65,38 +65,45 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_editorial_link(soup):
-        """
-            @param soup(BeautifulSoup): BeautifulSoup object of problem page
+    def get_url_parts(problem_link=None, parts=None):
+        if parts is None:
+            parts = problem_link.split("/")[-2:]
 
-            @return (String/None): Editorial link
-        """
-        editorial_link = None
-        all_as = soup.find_all("a")
-
-        for link in all_as:
-            url = link.contents[0]
-            if url.__contains__("Tutorial"):
-                # Some problems have complete url -_-
-                # Example: http://codeforces.com/problemset/problem/358/C
-                if link["href"][0] == "/":
-                    editorial_link = "http://www.codeforces.com" + link["href"]
-                else:
-                    editorial_link = link["href"]
-                break
-
-        return editorial_link
+        return "problem_" + "_".join(parts)
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_tags(soup):
+    def get_tags(problem_link):
         """
             @param soup(BeautifulSoup): BeautifulSoup object of problem page
 
             @return (List): List of tags
         """
-        tags = soup.find_all("span", class_="tag-box")
-        return map(lambda tag: tag.contents[0].strip(), tags)
+
+        value = current.REDIS_CLIENT.hgetall("codeforces_problem_tag_mapping")
+        if len(value) == 0:
+            response = get_request("https://codeforces.com/api/problemset.problems")
+            if response in REQUEST_FAILURES:
+                return []
+
+            result = response.json()["result"]["problems"]
+            redis_dict = {}
+            for problem in result:
+                redis_key = Profile.get_url_parts(parts=[str(problem["contestId"]),
+                                                         problem["index"]])
+                redis_dict[redis_key] = problem["tags"]
+
+            current.REDIS_CLIENT.hmset("codeforces_problem_tag_mapping",
+                                       redis_dict)
+
+            value = redis_dict
+
+        redis_key = Profile.get_url_parts(problem_link=problem_link)
+        if redis_key in value:
+            from ast import literal_eval
+            return literal_eval(value[redis_key])
+        else:
+            return []
 
     # -------------------------------------------------------------------------
     @staticmethod
@@ -149,16 +156,8 @@ class Profile(object):
                         tags=all_tags,
                         problem_setters=problem_setters)
 
-        response = get_request(problem_link)
-        if response in REQUEST_FAILURES:
-            return dict(editorial_link=editorial_link,
-                        tags=all_tags,
-                        problem_setters=problem_setters)
-
-        soup = BeautifulSoup(response.text, "lxml")
-
-        return dict(editorial_link=Profile.get_editorial_link(soup),
-                    tags=Profile.get_tags(soup),
+        return dict(editorial_link=None,
+                    tags=Profile.get_tags(problem_link),
                     problem_setters=problem_setters)
 
     # -------------------------------------------------------------------------
