@@ -73,6 +73,13 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
+    def make_codeforces_request(url):
+        return get_request(url,
+                           headers=current.codeforces_headers,
+                           cookies=current.codeforces_cookies)
+
+    # -------------------------------------------------------------------------
+    @staticmethod
     def get_tags(problem_link):
         """
             @param soup(BeautifulSoup): BeautifulSoup object of problem page
@@ -172,7 +179,6 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def rating_graph_data(handle):
-        return []
         website = "http://www.codeforces.com/"
 
         url = "%sapi/contest.list" % website
@@ -187,7 +193,8 @@ class Profile(object):
             all_contests[contest["id"]] = contest
 
         url = "%scontests/with/%s" % (website, handle)
-        response = get_request(url)
+        response = Profile.make_codeforces_request(url)
+
         if response in REQUEST_FAILURES:
             return response
 
@@ -252,7 +259,6 @@ class Profile(object):
             url += "&count=50000"
 
         tmp = get_request(url,
-                          headers={"User-Agent": COMMON_USER_AGENT},
                           timeout=timeout,
                           is_daily_retrieval=is_daily_retrieval)
 

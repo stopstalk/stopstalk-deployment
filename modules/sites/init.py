@@ -43,7 +43,12 @@ def log_time_things(request_time_metric_handler, start_request_time, site):
                                     value=time_difference))
 
 # -----------------------------------------------------------------------------
-def get_request(url, headers={}, timeout=current.TIMEOUT, params={}, is_daily_retrieval=False):
+def get_request(url,
+                headers={},
+                timeout=current.TIMEOUT,
+                params={},
+                cookies={},
+                is_daily_retrieval=False):
     """
         Make a HTTP GET request to a url
 
@@ -53,6 +58,7 @@ def get_request(url, headers={}, timeout=current.TIMEOUT, params={}, is_daily_re
         @param timeout (Number): Number of seconds after which client will close
                                  the request
         @param params (Dict): Dictionary of get request parms
+        @param cookies (Dict): Dictionary of cookies for the http request
         @param is_daily_retrieval (Boolean): Consider the function call to get_request
                                       for health report or not
 
@@ -83,6 +89,7 @@ def get_request(url, headers={}, timeout=current.TIMEOUT, params={}, is_daily_re
                                     params=params,
                                     proxies=current.PROXY,
                                     timeout=timeout,
+                                    cookies=cookies,
                                     verify=False)
         except Exception as e:
             print e, url

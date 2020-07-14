@@ -84,4 +84,9 @@ current.spoj_lambda_url = ""
 current.codechef_client_id = ""
 current.codechef_client_secret = ""
 
+# codeforces request details
+current.codeforces_cookies = {}
+
+current.codeforces_headers = {}
+
 # =============================================================================
