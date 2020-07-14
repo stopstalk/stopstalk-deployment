@@ -98,12 +98,16 @@ class RetrievalTest:
 
     # --------------------------------------------------------------------------
     def test_editorial_retrieval(self):
-        sites_with_editorial_functionality = ["CodeChef", "HackerEarth", "HackerRank"]
+        sites_with_editorial_functionality = ["CodeChef", "CodeForces", "HackerEarth", "HackerRank"]
         assertion_hash = {
             "with_editorial": {
                 "CodeChef": {
                     "plink": "https://www.codechef.com/LTIME27/problems/INVERT",
                     "editorial_link": "https://discuss.codechef.com/problems/INVERT"
+                },
+                "CodeForces": {
+                    "plink": "http://www.codeforces.com/problemset/problem/102/B",
+                    "editorial_link": "http://www.codeforces.com/blog/entry/2393"
                 },
                 "HackerEarth": {
                     "plink": "https://www.hackerearth.com/problem/approximate/lots-of-circles/",
@@ -120,6 +124,7 @@ class RetrievalTest:
             },
             "without_editorial": {
                 "CodeChef": "https://www.codechef.com/PRACTICE/problems/PG",
+                "CodeForces": "http://www.codeforces.com/problemset/problem/234/D",
                 "HackerEarth": "https://www.hackerearth.com/problem/algorithm/level-selections/"
             }
         }
