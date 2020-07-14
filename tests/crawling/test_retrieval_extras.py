@@ -216,11 +216,15 @@ class RetrievalTest:
         import requests
         from bs4 import BeautifulSoup
 
-        sites_with_download_functionality = ["CodeChef"]
+        sites_with_download_functionality = ["CodeChef", "CodeForces"]
         assertion_hash = {
             "CodeChef": {
                 "view_link": "https://www.codechef.com/viewsolution/27348746",
                 "submission": '#include<bits/stdc++.h>\r\nusing namespace std;\r\nint main(){\r\n\tint t;\r\n\tcin>>t;\r\n\twhile(t--){\r\n\t\tint n,m,u,v;\r\n\t\tcin>>n>>m;\r\n\t\tif(m%2==0){\r\n\t\t\tint temp;\r\n\t\t\tfor(auto i=0;i<m;i++){\r\n\t\t\t\tcin>>temp>>temp;\r\n\t\t\t}\t\r\n\t\t\tcout<<1<<endl;\r\n\t\t\tfor(auto i=0;i<n;i++)\r\n\t\t\t{\r\n\t\t\t\tcout<<1<<" ";\r\n\t\t\t}\r\n\t\t\tcout<<endl;\r\n\t\t\tcontinue;\r\n\t\t}\r\n\r\n\t\t// m is odd\r\n\t\tvector<vector<int>> g(n);\r\n\t\tvector<int> d(n);\r\n\t\tfor(auto i=0;i<m;i++){\r\n\t\t\tcin>>u>>v;\r\n\t\t\td[u-1]++;\r\n\t\t\td[v-1]++;\r\n\t\t\tg[u-1].push_back(v-1);\r\n\t\t\tg[v-1].push_back(u-1);\r\n\t\t}\r\n\r\n\t\t// m is odd and we find an odd vertice\r\n\t\tint idx=-1;\r\n\t\tfor(auto i=0;i<n;i++){\r\n\t\t\tif(d[i]%2==1) {idx=i;break;}\r\n\t\t}\r\n\t\tif(idx!=-1){\r\n\t\t\tcout<<2<<endl;\r\n\t\t\tfor(auto i=0;i<n;i++)\r\n\t\t\t{\r\n\t\t\t\tcout<<((i==idx)?1:2)<<" ";\r\n\t\t\t}\r\n\t\t\tcout<<endl;\r\n\t\t\tcontinue;\r\n\r\n\t\t}\r\n\r\n\t\t// m is odd and all degrees are even\r\n\t\t// idx is 3 idx1 is 2 rest is 1\r\n\t\tidx=-1;\r\n\t\tint idx1=-1;\r\n\t\t// find a vertex removing which we get odd vertices\r\n\t\tfor(auto i=0;i<n;i++){\r\n\t\t\tif(d[i]>0){idx=i;break;}\r\n\t\t}\r\n\t\t// idx will be 3\r\n\t\t// change all degrees\r\n\t\tfor(auto i:g[idx]){\r\n\t\t\td[i]--;\r\n\t\t\tidx1=i;\r\n\t\t}\r\n\t\tcout<<3<<endl;\r\n\t\td[idx]=0;\r\n\t\tg[idx]=vector<int>();\r\n\t\tfor(auto i=0;i<n;i++)\r\n\t\t{\r\n\t\t\tif(i==idx){ \r\n\t\t\t\tcout<<1<<" ";\r\n\t\t\t}\r\n\t\t\telse if(i==idx1){\r\n\t\t\t\tcout<<2<<" ";\r\n\t\t\t}\r\n\t\t\telse{\r\n\t\t\t\tcout<<3<<" ";\r\n\t\t\t}\r\n\t\t}\r\n\t\tcout<<endl;\r\n\t}\r\n}\r\n'
+            },
+            "CodeForces": {
+                "view_link": "http://www.codeforces.com/contest/454/submission/7375767",
+                "submission": '#include<stdio.h>\nint main()\n{\n\tint n,i,j,k;\n\tscanf("%d",&n);\n\tint h=n/2+1;\n\tfor(i=0;i<h;i++)\n\t{\n\t\tfor(k=0;k<n/2-i;k++)\n\t\t\tprintf("*");\n\t\tfor(j=0;j<2*i+1;j++)\n\t\t\tprintf("D");\n\t\tfor(j=n/2+i+1;j<n;j++)\n\t\t\tprintf("*");\n\t\tprintf("\\n");\n\t}\n\tfor(i=0;i<n/2;i++)\n\t{\n\t\tfor(k=0;k<=i;k++)\n\t\t        printf("*");\n\t\tfor(j=n-2*i;j>=3;j--)\n\t\t\tprintf("D");\n\t\tfor(j=0;j<=i;j++)\n\t\t\tprintf("*");\n\t\tprintf("\\n");\n\t}\n\treturn 0;\n}\n'
             },
             "AtCoder": {
                 "view_link": "https://atcoder.jp/contests/agc039/submissions/7869333",
