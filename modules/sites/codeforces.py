@@ -80,9 +80,37 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
+    def get_editorial_link(problem_link):
+        """
+            @param problem_link(String): Problem link of the page
+
+            @return (String/None): Editorial link
+        """
+        editorial_link = None
+        response = Profile.make_codeforces_request(problem_link)
+        if response in REQUEST_FAILURES:
+            return editorial_link
+
+        soup = BeautifulSoup(response.text, "lxml")
+        all_as = soup.find_all("a")
+        for link in all_as:
+            url = link.contents[0]
+            if url.__contains__("Tutorial"):
+                # Some problems have complete url -_-
+                # Example: http://codeforces.com/problemset/problem/358/C
+                if link["href"][0] == "/":
+                    editorial_link = "http://www.codeforces.com" + link["href"]
+                else:
+                    editorial_link = link["href"]
+                break
+
+        return editorial_link
+
+    # -------------------------------------------------------------------------
+    @staticmethod
     def get_tags(problem_link):
         """
-            @param soup(BeautifulSoup): BeautifulSoup object of problem page
+            @param problem_link(String): Problem link of the page
 
             @return (List): List of tags
         """
@@ -156,15 +184,23 @@ class Profile(object):
         all_tags = []
         editorial_link = None
         problem_link = args["problem_link"]
-        problem_setters = Profile.get_problem_setters(problem_link)
-
+        problem_setters = None
         if problem_link.__contains__("gymProblem"):
             return dict(editorial_link=editorial_link,
                         tags=all_tags,
                         problem_setters=problem_setters)
 
-        return dict(editorial_link=None,
-                    tags=Profile.get_tags(problem_link),
+        if "problem_setters" in args["update_things"]:
+            problem_setters = Profile.get_problem_setters(problem_link)
+
+        if "editorial_link" in args["update_things"]:
+            editorial_link = Profile.get_editorial_link(problem_link)
+
+        if "tags" in args["update_things"]:
+            all_tags = Profile.get_tags(problem_link)
+
+        return dict(editorial_link=editorial_link,
+                    tags=all_tags,
                     problem_setters=problem_setters)
 
     # -------------------------------------------------------------------------
