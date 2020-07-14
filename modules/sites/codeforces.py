@@ -178,6 +178,21 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
+    def download_submission(view_link):
+        if Profile.is_website_down():
+            return -1
+
+        response = Profile.make_codeforces_request(view_link)
+        if response in REQUEST_FAILURES:
+            return -1
+
+        try:
+            return BeautifulSoup(response.text, "lxml").find("pre").text
+        except:
+            return -1
+
+    # -------------------------------------------------------------------------
+    @staticmethod
     def rating_graph_data(handle):
         website = "http://www.codeforces.com/"
 
