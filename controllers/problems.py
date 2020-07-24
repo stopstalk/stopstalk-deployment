@@ -246,6 +246,64 @@ def get_suggested_tags():
                 tag_counts=tag_counts)
 
 # ----------------------------------------------------------------------------
+def get_submissions_list():
+    if request.vars.has_key("problem_id") is False:
+        # Disables direct entering of a URL
+        session.flash = T("Please click on a Problem Link")
+        redirect(URL("default", "index"))
+        return
+
+    try:
+        problem_id = int(request.vars["problem_id"])
+    except ValueError:
+        session.flash = T("Invalid problem!")
+        redirect(URL("default", "index"))
+        return
+
+    submission_type = "friends"
+    if request.vars.has_key("submission_type"):
+        if request.vars["submission_type"] == "global":
+            submission_type = "global"
+        elif request.vars["submission_type"] == "my":
+            submission_type = "my"
+
+    if auth.is_logged_in() is False and submission_type != "global":
+        response.flash = T("Login to view your/friends' submissions")
+        submission_type = "global"
+
+    stable = db.submission
+    query = (stable.problem_id == problem_id)
+    cusfriends = []
+
+    if submission_type in ("my", "friends"):
+        if auth.is_logged_in():
+            if submission_type == "friends":
+                friends, cusfriends = utilities.get_friends(session.user_id)
+                # The Original IDs of duplicate custom_friends
+                custom_friends = []
+                for cus_id in cusfriends:
+                    if cus_id[1] is None:
+                        custom_friends.append(cus_id[0])
+                    else:
+                        custom_friends.append(cus_id[1])
+
+                query &= (stable.user_id.belongs(friends)) | \
+                         (stable.custom_user_id.belongs(custom_friends))
+            else:
+                query &= (stable.user_id == session.user_id)
+        else:
+            response.flash = T("Login to view your/friends' submissions")
+
+    submissions = db(query).select(orderby=~stable.time_stamp,
+                                   limitby=(0, 200))
+
+    if len(submissions):
+        table = utilities.render_table(submissions, cusfriends, session.user_id)
+    else:
+        table = DIV(T("No submissions found"))
+    return table
+
+# ----------------------------------------------------------------------------
 def index():
     """
         The main problem page
@@ -276,7 +334,6 @@ def index():
         response.flash = T("Login to view your/friends' submissions")
         submission_type = "global"
 
-    stable = db.submission
     ptable = db.problem
     pstable = db.problem_setters
 
@@ -287,30 +344,7 @@ def index():
 
     setters = db(pstable.problem_id == problem_id).select(pstable.handle)
     setters = [x.handle for x in setters]
-    query = (stable.problem_id == problem_id)
-    cusfriends = []
 
-    if submission_type in ("my", "friends"):
-        if auth.is_logged_in():
-            if submission_type == "friends":
-                friends, cusfriends = utilities.get_friends(session.user_id)
-                # The Original IDs of duplicate custom_friends
-                custom_friends = []
-                for cus_id in cusfriends:
-                    if cus_id[1] is None:
-                        custom_friends.append(cus_id[0])
-                    else:
-                        custom_friends.append(cus_id[1])
-
-                query &= (stable.user_id.belongs(friends)) | \
-                         (stable.custom_user_id.belongs(custom_friends))
-            else:
-                query &= (stable.user_id == session.user_id)
-        else:
-            response.flash = T("Login to view your/friends' submissions")
-
-    submissions = db(query).select(orderby=~stable.time_stamp,
-                                   limitby=(0, 300))
     try:
         all_tags = problem_record.tags
         if all_tags:
@@ -405,19 +439,12 @@ def index():
                                _id="chart_div",
                                _class="right"))
 
-    if len(submissions):
-        table = utilities.render_table(submissions, cusfriends, session.user_id)
-    else:
-        table = DIV(T("No submissions found"))
-
     return dict(site=site,
                 problem_details=problem_details,
                 problem_name=problem_record.name,
                 problem_link=problem_record.link,
                 problem_id=problem_id,
-                submission_type=submission_type,
-                submission_length=len(submissions),
-                table=table)
+                submission_type=submission_type)
 
 # ----------------------------------------------------------------------------
 def editorials():
