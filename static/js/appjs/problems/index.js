@@ -55,6 +55,23 @@
         });
     };
 
+    var populateSubmissionsList = function() {
+        var $submissionThrobber = $("#view-submission-preloader").clone();
+        $submissionThrobber.attr('id', 'problems-page-submission-preloader');
+        $submissionThrobber.css('margin-top', '5%');
+        $('.problem-submissions-list').html($submissionThrobber);
+
+        $.ajax({
+            url: getProblemSubmissionsURL,
+            data: {problem_id: problemId, submission_type: submissionType},
+            success: function(response) {
+                setTimeout(function() {
+                    $(".problem-submissions-list").html(response);
+                }, 2000);
+            }
+        })
+    };
+
     $(document).ready(function() {
 
         $('.tooltipped').tooltip({
@@ -96,6 +113,8 @@
         });
 
         $('.modal').modal();
+
+        populateSubmissionsList();
 
         if (isLoggedIn) {
             if (openSuggestTagsModal) $('.suggest-tags-plus').trigger('click');

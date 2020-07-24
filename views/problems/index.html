@@ -18,6 +18,7 @@
         var mySubmissionURL = '{{=URL("problems", "index", vars={"submission_type": "my", "problem_id": problem_id})}}'.replace(/&amp;/g, '&');
         var openSuggestTagsModal = '{{=request.vars.suggest_tag}}' === 'True';
         var openProblemDifficultyModal = '{{=request.vars.suggest_difficulty}}' === 'True';
+        var getProblemSubmissionsURL = '{{=URL("problems", "get_submissions_list")}}';
     </script>
     <script type="text/javascript">
         // Callback that creates and populates a data table,
@@ -238,7 +239,4 @@
     <div id="friend" class="col s12"></div>
     <div id="global" class="col s12"></div>
 </div>
-{{if submission_type == "global" and submission_length >= 300:}}
-    <p style="font-size: 12px;">Note: This is the list of 300 recent submissions</p>
-{{pass}}
-{{=table}}
+<div class="problem-submissions-list"></div>
