@@ -43,6 +43,48 @@ def uva_handle():
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()
+def recheck_handle_details():
+    if session.user_id not in STOPSTALK_ADMIN_USER_IDS:
+        return "Don't be here"
+
+    response = ""
+    email = request.vars.email
+    site = request.vars.site
+
+    if site is None or email is None:
+        return "site and email param is required"
+
+    atable = db.auth_user
+    stable = db.submission
+    ihtable = db.invalid_handle
+
+    user_record = db(atable.email == email).select().first()
+
+    if user_record is None:
+        return "User with that email not found"
+
+    handle = user_record[site.lower() + "_handle"]
+    invalid_handles = db((ihtable.handle == handle) & \
+                         (ihtable.site == site)).delete()
+    response += "Deleted %d handles\n" % invalid_handles
+
+    query = (stable.user_id == user_record.id) & \
+            (stable.site == site)
+    submission_records = db(query).delete()
+    response += "Deleted %d submission records\n" % submission_records
+
+    user_record.update_record(**{site.lower() + "_lr": current.INITIAL_DATE})
+    response += "User record updated for last retrieved to INITIAL_DATE\n"
+
+    current.REDIS_CLIENT.rpush("next_retrieve_user", user_record.id)
+    response += "User added to next refresh queue\n"
+
+    utilities.clear_profile_page_cache(user_record.stopstalk_handle)
+    response += "Profile page cache deleted\n"
+    return response
+
+# ------------------------------------------------------------------------------
+@auth.requires_login()
 def blacklist_user():
     if session.user_id not in STOPSTALK_ADMIN_USER_IDS:
         return "Don't be here"
