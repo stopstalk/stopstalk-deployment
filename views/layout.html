@@ -83,6 +83,7 @@
     <ul id="welcome" class="dropdown-content" style="min-width: 190px; color: #536dfe;">
         {{if auth.is_logged_in():}}
             <li><a href="{{=URL('user', 'profile', args=session.handle)}}" data-analytics-label="Nav User Profile" class="nav-dropdown">{{=T("Profile")}}</a></li>
+            <li><a href="{{=URL('default', 'job_profile')}}" data-analytics-label="Nav Job Preferences" class="nav-dropdown">{{=T("Job Preferences")}}</a></li>
             <li><a href="{{=URL('user', 'submissions', args=session.handle)}}" data-analytics-label="Nav My Submissions" class="nav-dropdown">{{=T("My Submissions")}}</a></li>
             <li><a href="{{=URL('default', 'user_wise_editorials', args=session.handle)}}" data-analytics-label="Nav My Editorials" class="nav-dropdown">{{=T("My Editorials")}}</a></li>
             <li><a href="{{=URL('user', 'update_details')}}" data-analytics-label="Nav Update Details" class="nav-dropdown">{{=T("Update Details")}}</a></li>
@@ -116,7 +117,7 @@
         <div class="right">
             <span class="left">
             </span>
-            <a id="job-profile-cta" class="btn btn-default black-text" style="background-color: #f5f5f5; margin-right: 13px;" href="{{=URL('default', 'job_profile')}}" target="_blank">Job Profile</a>
+            <a id="problem-recommendations" class="btn btn-default black-text" style="background-color: #f5f5f5; margin-right: 13px;" href="{{=URL('problems', 'recommendations')}}">Find Me Problems</a>
             <ul class="right" style="float: left;">
                 <li><a class="dropdown-button left" href="" data-activates="welcome"><i class="fa fa-sort-down fa-2x"></i></a></li>
             <!-- Dropdown Trigger -->

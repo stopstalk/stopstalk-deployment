@@ -597,6 +597,7 @@ def get_problems_table(all_problems,
         tr.append(TD(A(I(_class="fa fa-link"),
                        _href=problem["link"],
                        _class="tag-problem-link",
+                       data={"pid": problem["id"]},
                        _target="_blank")))
         tr.append(TD(IMG(_src=current.get_static_url("images/" + \
                                     urltosite(problem["link"]) + \
@@ -685,6 +686,7 @@ def problem_widget(name,
                              _class="problem-listing " + link_class,
                              _title=link_title,
                              _target="_blank",
+                             data={"pid": problem_id},
                              extension=False))
     else:
         problem_div.append(SPAN(name,

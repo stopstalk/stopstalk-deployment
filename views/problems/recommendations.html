@@ -1,0 +1,31 @@
+{{extend 'layout.html'}}
+<html>
+    {{block head}}
+        <title>{{=T("Problem Recommendations")}}</title>
+        <meta name="description" content="Problem recommendations">
+        <link rel="stylesheet" href="{{=URL('static', 'flag-icon/css/flag-icon.min.css')}}">
+
+        <script>
+            var fetchRecommendationsUrl = "{{=URL('problems', 'recommendations', extension='json')}}";
+            var canUpdate = ("{{=can_update}}" === "True");
+        </script>
+
+        <script src="{{=get_static_url('js/appjs/problems/recommendations.js')}}" type="text/javascript"></script>
+    {{end}}
+
+    <body>
+        <h1>{{=T("Problem Recommendations")}}</h1>
+        <div>
+            {{if can_update:}}
+                <button id="update-problem-recommendations" class="btn btn-default white-text tooltipped" data-delay="50" data-tooltip="Fetch new recommendations" style="margin-bottom: 15px;">Refresh</button>
+            {{else:}}
+                <div class="tooltipped" data-delay="50" data-tooltip="Can only update once in {{=RECOMMENDATION_REFRESH_INTERVAL}} days">
+                    <button id="update-problem-recommendations-disabled" class="btn btn-default disabled white-text" style="margin-bottom: 15px;">Refresh</button>
+                </div>
+            {{pass}}
+        </div>
+        <div id="recommendation-table">
+            {{=table}}
+        </div>
+    </body>
+</html>
