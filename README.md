@@ -190,11 +190,10 @@ The project also depends on several other open-source packages, some of which ar
 
 > Email: admin@stopstalk.com, contactstopstalk@gmail.com, raj454raj@gmail.com
 
-> Creator Website: http://raj454raj.me
+> Creator Website: http://raj454raj.com
 
 ## Social Links
 
 - [Facebook](https://www.facebook.com/stopstalkcommunity/)
 - [Facebook Group](https://www.facebook.com/groups/stopstalk/)
 - [Twitter](https://twitter.com/stop_stalk)
-- [Google-Plus](https://plus.google.com/110575194069678651985)
