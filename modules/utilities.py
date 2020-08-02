@@ -955,7 +955,7 @@ def get_problems_authored_by(stopstalk_handle):
     for record in records:
         problem_record = ptable(record.problem_id)
         site = urltosite(problem_record.link)
-        if user[site + "_handle"] == record.handle:
+        if user[site + "_handle"].lower() == record.handle.lower():
             problems.append(problem_record)
 
     return problems
