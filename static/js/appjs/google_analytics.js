@@ -114,6 +114,8 @@
         addEventListener('#problem-difficulty-later', 'Problem Difficulty modal - Later', false);
         addEventListener('#skip-this-problem', 'Problem Difficulty modal - Skip problem', false);
         addEventListener('#know-more-dashboard-page', 'Know more - Dashboard page', false);
+
+        addEventListener('#problem-recommendations', 'Find me problems - Problem recommendations', false);
     };
 
     var addProblemPageButtonsToGA = function() {
@@ -227,6 +229,10 @@
         addEventListener('.atcoder-handle-card-update-now', 'Cards - Atcoder handle update now', false);
     };
 
+    var addProblemRecommendationsPageToGA = function() {
+        addEventListener('#update-problem-recommendations', 'Refresh problem recommendations', false)
+    }
+
 
     $(document).ready(function() {
         addNavItemsToGA();
@@ -244,5 +250,6 @@
         addProblemEditorialsPageToGA();
         addDashboardPageToGA();
         addMiscellaneousToGA();
+        addProblemRecommendationsPageToGA();
     });
 })(jQuery);
