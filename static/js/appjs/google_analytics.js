@@ -107,7 +107,6 @@
         addEventListener('.custom-user-list-name', 'Custom user name in Modal', false);
         addEventListener('.custom-user-modal-site-profile', 'Custom user Site Profile in Modal', false);
         addEventListener('#open-side-nav', 'Open Side Navbar', false);
-        addEventListener('#job-profile-cta', 'StopStalk Job profile CTA', false);
 
         addEventListener('#recent-announcements-update-job-profile-now', 'Onboarding StopStalk Job Profile', false);
 
@@ -115,7 +114,7 @@
         addEventListener('#skip-this-problem', 'Problem Difficulty modal - Skip problem', false);
         addEventListener('#know-more-dashboard-page', 'Know more - Dashboard page', false);
 
-        addEventListener('#problem-recommendations', 'Find me problems - Problem recommendations', false);
+        addEventListener('#problem-recommendations-cta', 'Find me problems - Problem recommendations', false);
     };
 
     var addProblemPageButtonsToGA = function() {
@@ -230,7 +229,11 @@
     };
 
     var addProblemRecommendationsPageToGA = function() {
-        addEventListener('#update-problem-recommendations', 'Refresh problem recommendations', false)
+        addEventListener('#update-problem-recommendations', 'Refresh problem recommendations', false);
+        addEventListener('#close-refresh-recommendations', 'Close refresh problem recommendations modal', false);
+        addEventListener('#confirm-refresh-recommendations', 'Confirm refresh problem recommendations modal', false);
+        addEventListener('#recommendation-contact-us', 'Recommendation feedback', false);
+
     }
 
 
