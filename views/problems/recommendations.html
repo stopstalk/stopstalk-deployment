@@ -15,9 +15,20 @@
 
     <body>
         <h1>{{=T("Problem Recommendations")}}</h1>
+        <div id="recommendation-refresh-modal" style="width: 50%" class="modal center">
+            <div class="modal-content">
+                <h5 style="margin-bottom: 15px;" id="recommendation-refresh-modal-header">Are you sure?</h5>
+                <div>You cannot refresh the recommendations for the next {{=RECOMMENDATION_REFRESH_INTERVAL}} days.</div>
+                <div>Please <a id="recommendation-contact-us" href="{{=URL('default', 'contact_us')}}" target="_blank">write to us</a> for feedback on recommendations!</div>
+            </div>
+            <div class="modal-footer">
+                <button id="close-refresh-recommendations" class="modal-close waves-effect orange lighten-5 btn-flat">Don't Refresh</button>
+                <button id="confirm-refresh-recommendations" class="modal-close waves-effect blue lighten-5 btn-flat">Refresh</button>
+            </div>
+        </div>
         <div>
             {{if can_update:}}
-                <button id="update-problem-recommendations" class="btn btn-default white-text tooltipped" data-delay="50" data-tooltip="Fetch new recommendations" style="margin-bottom: 15px;">Refresh</button>
+                <button id="update-problem-recommendations" data-target="recommendation-refresh-modal" class="btn btn-default white-text tooltipped modal-trigger" data-delay="50" data-tooltip="Fetch new recommendations" style="margin-bottom: 15px;">Refresh</button>
             {{else:}}
                 <div class="tooltipped" data-delay="50" data-tooltip="Can only update once in {{=RECOMMENDATION_REFRESH_INTERVAL}} days">
                     <button id="update-problem-recommendations-disabled" class="btn btn-default disabled white-text" style="margin-bottom: 15px;">Refresh</button>

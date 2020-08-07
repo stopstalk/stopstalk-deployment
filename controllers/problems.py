@@ -938,7 +938,6 @@ def recommendations():
         Problem recommendations for the user.
     """
     import recommendations.problems as recommendations
-    import stopstalk_constants
 
     ptable = db.problem
     rtable = db.problem_recommendations
@@ -949,7 +948,7 @@ def recommendations():
     recommendation_pids = []
 
     rows = db(rtable.user_id == user_id).select()
-    if rows is None or len(rows.as_list()) == 0:
+    if len(rows) == 0:
         refresh = True
 
     if refresh:
@@ -957,8 +956,8 @@ def recommendations():
     else:
         recommendation_pids, _ = recommendations.retrieve_past_recommendations(user_id)
 
-    if recommendation_pids is not None and len(recommendation_pids) > 0:
-        problem_details = db(ptable.id.belongs(recommendation_pids)).select().as_list()
+    if len(recommendation_pids) > 0:
+        problem_details = db(ptable.id.belongs(recommendation_pids)).select()
         output["table"] = utilities.get_problems_table(problem_details, user_id)
     else:
         output["table"] = "No recommendations available."
@@ -967,9 +966,9 @@ def recommendations():
     rows = db(query).select(rtable.generated_at)
 
     output["can_update"] = True
-    if rows is not None and len(rows) > 0:
+    if len(rows) > 0:
         output["can_update"] = (datetime.datetime.now().date() - rows[0].generated_at).days \
-            >= stopstalk_constants.RECOMMENDATION_REFRESH_INTERVAL
+            >= RECOMMENDATION_REFRESH_INTERVAL
 
     return output
 

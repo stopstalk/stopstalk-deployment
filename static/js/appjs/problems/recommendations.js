@@ -1,7 +1,9 @@
 (function($) {
     'use strict';
     $(document).ready(function() {
-        $('#update-problem-recommendations').click(function() {
+        $('#recommendation-refresh-modal').modal();
+
+        $('#confirm-refresh-recommendations').click(function() {
             var $this = $(this);
             $.ajax({
                 url: fetchRecommendationsUrl,
