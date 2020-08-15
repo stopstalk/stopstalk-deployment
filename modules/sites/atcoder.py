@@ -153,13 +153,15 @@ class Profile(object):
             time_stamp = datetime.datetime.strptime(tds[0].text.split("+")[0],
                                                     "%Y-%m-%d %H:%M:%S") - \
                          datetime.timedelta(minutes=210)
+            rating_change = tds[5].text.encode("ascii", "ignore")
+            rating_change = 0 if rating_change == "-" else int(rating_change)
             contest_data[str(time_stamp)] = {
                 "name": tds[1].text.strip(),
                 "url": current.SITES["AtCoder"] + \
                        tds[1].find("a",
                                    href=True)["href"][1:],
                 "rating": str(tds[4].text.strip()),
-                "ratingChange": str(tds[5].text),
+                "ratingChange": rating_change,
                 "rank": tds[2].text.strip()
             }
 
