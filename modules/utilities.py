@@ -497,7 +497,7 @@ def get_rating_information(user_id, custom, is_logged_in):
     data = current.REDIS_CLIENT.get(redis_cache_key)
     if data:
         result = json.loads(data)
-        if not is_logged_in:
+        if not is_logged_in and "rating_history" in result:
             del result["rating_history"]
         if "problems_authored_count" not in result:
             result["problems_authored_count"] = 0
