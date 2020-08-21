@@ -1067,7 +1067,7 @@ def filters():
         else:
             custom_friends.append(cus_id.id)
 
-    query = (atable.id > 0)
+    query = True
     # Get the friends of logged in user
     if username != "":
         tmplist = username.split()
@@ -1082,18 +1082,25 @@ def filters():
 
         query &= username_query
 
-    # @ToDo: Anyway to use join instead of two such db calls
-    possible_users = db(query).select(atable.id)
-    possible_users = [x.id for x in possible_users]
-    friends = possible_users
+        possible_users = db(query).select(atable.id)
+        possible_users = [x.id for x in possible_users]
+        friends = possible_users
+    else:
+        possible_users = None
+        friends = None
+
     query = (stable.id > 0)
     if global_submissions is False:
-        query = (ftable.follower_id == session.user_id) & \
-                (ftable.user_id.belongs(possible_users))
+        query = (ftable.follower_id == session.user_id)
+
+        if possible_users is not None:
+            query &= (ftable.user_id.belongs(possible_users))
+
         friend_ids = db(query).select(ftable.user_id)
         friends = [x.user_id for x in friend_ids]
 
-        if session.user_id in possible_users:
+        if possible_users is not None and \
+           session.user_id in possible_users:
             # Show submissions of user also
             friends.append(session.user_id)
 
