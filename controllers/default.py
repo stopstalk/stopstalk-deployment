@@ -1423,7 +1423,9 @@ def search():
         columns.append(atable[site.lower() + "_handle"])
 
     rows = db(query).select(*columns,
-                            orderby=[atable.first_name, atable.last_name])
+                            orderby=[atable.first_name, atable.last_name],
+                            limitby=(0, 300))
+
     table = TABLE(_class="bordered centered")
     tr = TR(TH(T("Name")), TH(T("Site handles")))
 
@@ -1516,6 +1518,7 @@ def search():
         tbody.append(tr)
 
     table.append(tbody)
+
     return dict(table=table)
 
 # ----------------------------------------------------------------------------

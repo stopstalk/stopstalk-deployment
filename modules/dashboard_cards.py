@@ -435,6 +435,12 @@ class AddMoreFriendsCard(BaseCard):
     @BaseCard.enabled_check
     def should_show(self):
         db = current.db
+
+        user_record = utilities.get_user_records([self.user_id], "id", "id", True)
+        if user_record.institute == "Other":
+            # Don't show the card if the user's institute is Other
+            return False
+
         self.friend_count = db(db.following.follower_id == self.user_id).count()
         return self.friend_count <= 3
 
