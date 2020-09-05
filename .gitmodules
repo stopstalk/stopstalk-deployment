@@ -1,3 +1,3 @@
 [submodule "modules/recommendations"]
-	path = modules/recommendations
-	url = https://github.com/stopstalk/recommendations.git
+  path = modules/recommendations
+  url = https://github.com/stopstalk/recommendations.git
