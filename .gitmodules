@@ -1,3 +1,0 @@
-[submodule "modules/recommendations"]
-  path = modules/recommendations
-  url = git@github.com/stopstalk/recommendations.git
