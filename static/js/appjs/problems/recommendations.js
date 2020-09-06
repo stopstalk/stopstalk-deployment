@@ -10,7 +10,7 @@
                 method: 'GET',
                 data: {refresh: canUpdate},
                 success: function(response) {
-                    $('#recommendation-table').html(response['table']);
+                    $('#recommendations-table-content').html(response['table']);
 
                     if (response['can_update'] === false) {
                         $this.addClass("disabled");
@@ -24,7 +24,7 @@
             });
         });
 
-        $(document).on('click', '.problem-listing, .tag-problem-link', function() {
+        $(document).on('click', '.recommendation-problem-listing, .recommendation-tag-problem-link', function() {
             var $this = $(this);
             var pid = $this.data('pid');
 

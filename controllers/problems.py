@@ -95,6 +95,7 @@ def by():
 
     return_val["table"] = utilities.get_problems_table(problems,
                                                        session.user_id,
+                                                       "problems-authored",
                                                        None)
 
     return_val["problems_count"] = len(problems)
@@ -870,6 +871,7 @@ def search():
 
     return dict(table=utilities.get_problems_table(all_problems,
                                                    session.user_id,
+                                                   "problem-search",
                                                    problem_with_user_editorials),
                 generalized_tags=generalized_tags)
 
@@ -958,7 +960,10 @@ def recommendations():
 
     if len(recommendation_pids) > 0:
         problem_details = db(ptable.id.belongs(recommendation_pids)).select()
-        output["table"] = utilities.get_problems_table(problem_details, user_id)
+        output["table"] = utilities.get_problems_table(problem_details,
+                                                       user_id,
+                                                       "recommendation",
+                                                       None)
     else:
         output["table"] = "No recommendations available."
 

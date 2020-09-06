@@ -169,8 +169,9 @@
     };
 
     var addProblemSearchPageToGA = function() {
-        addEventListener('.tag-problem-link', 'Tags problem link', false);
-        addEventListener('.tags-chip', 'Tags page chip', false);
+        addEventListener('.problem-search-problem-listing', 'Problem name problem page link');
+        addEventListener('.problem-search-tag-problem-link', 'Problem search tags problem link', false);
+        addEventListener('.problem-search-tags-chip', 'Problem search tags page chip', false);
         addEventListener('#problem-name', 'Problem Search Problem name field', false);
         addEventListener('#profile-site', 'Problem Search Site field', false, 'change');
         addEventListener('#orderby-problem', 'Problem Search Order By field', false, 'change');
@@ -233,7 +234,10 @@
         addEventListener('#close-refresh-recommendations', 'Close refresh problem recommendations modal', false);
         addEventListener('#confirm-refresh-recommendations', 'Confirm refresh problem recommendations modal', false);
         addEventListener('#recommendation-contact-us', 'Recommendation feedback', false);
-
+        addEventListener('.recommendation-problem-listing', 'Recommendations page problem link');
+        addEventListener('.recommendation-tag-problem-link', 'Recommendation tags link', false);
+        addEventListener('.recommendation-tags-chip', 'Recommendations page tags chip', false);
+        addEventListener('.recommendation-editorial-link', 'Recommendations page editorial link', false);
     }
 
 
