@@ -46,6 +46,11 @@ var LocalStorageHelper = (function() {
   var populateCards = function() {
     var cardArguments = [
       {
+        "card_id": "recommendations_page_card",
+        "class_name": "RecommendationsPageCard",
+        "init_arguments": [loggedInUserId]
+      },
+      {
         "card_id": "streak_card_day",
         "class_name": "StreakCard",
         "init_arguments": [loggedInUserId, "day"]
