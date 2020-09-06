@@ -770,3 +770,47 @@ class AtCoderHandleCard(BaseCard):
         return user_record["atcoder_handle"] == ""
 
 # ==============================================================================
+class RecommendationsPageCard(BaseCard):
+    # --------------------------------------------------------------------------
+    def __init__(self, user_id):
+        self.user_id = user_id
+        self.final_pid = None
+        self.card_title = "StopStalk can recommend now!"
+
+        self.ctas = [
+            dict(btn_url=URL("problems",
+                             "recommendations"),
+                 btn_text="Find me problems",
+                 btn_class="recommendations-card-find-me-problems")
+        ]
+        BaseCard.__init__(self, user_id)
+
+    # --------------------------------------------------------------------------
+    def get_html(self):
+        card_content = TAG[""](SPAN("StopStalk will recommend you problems based on your past submissions."),
+                               " ",
+                               SPAN("Click on the"),
+                               " ",
+                               B("'Find me problems'"),
+                               " ",
+                               SPAN("button on the top and keep increasing your level gradually!"))
+
+        card_html = BaseCard.get_html(self, **dict(
+                       card_title=self.card_title,
+                       card_content=card_content,
+                       cta_links=self.get_cta_html(),
+                       card_color_class="deep-purple lighten-5",
+                       card_text_color_class="black-text"
+                    ))
+        return card_html
+
+    # --------------------------------------------------------------------------
+    def get_data(self):
+        return
+
+    # --------------------------------------------------------------------------
+    @BaseCard.enabled_check
+    def should_show(self):
+        return True
+
+# ==============================================================================
