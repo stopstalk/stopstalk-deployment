@@ -559,12 +559,13 @@ def pretty_string(all_items):
 # ------------------------------------------------------------------------------
 def get_problems_table(all_problems,
                        logged_in_user_id,
+                       page_prefix,
                        problem_with_user_editorials=None):
     T = current.T
     db = current.db
     uetable = db.user_editorials
     table = TABLE(_class="bordered centered")
-    thead = THEAD(TR(TH(T("Problem Name"), _class="problem-search-name-column"),
+    thead = THEAD(TR(TH(T("Problem Name"), _class=page_prefix + "-name-column"),
                      TH(T("Problem URL")),
                      TH(T("Site")),
                      TH(T("Accuracy")),
@@ -592,11 +593,12 @@ def get_problems_table(all_problems,
                                     problem["link"],
                                     link_class,
                                     link_title,
-                                    problem["id"]),
-                     _class="problem-search-name-column"))
+                                    problem["id"],
+                                    page_prefix=page_prefix),
+                     _class=page_prefix + "-name-column"))
         tr.append(TD(A(I(_class="fa fa-link"),
                        _href=problem["link"],
-                       _class="tag-problem-link",
+                       _class=page_prefix + "-tag-problem-link",
                        data={"pid": problem["id"]},
                        _target="_blank")))
         tr.append(TD(IMG(_src=current.get_static_url("images/" + \
@@ -617,7 +619,7 @@ def get_problems_table(all_problems,
                                      "editorials",
                                      args=problem["id"]),
                            _target="_blank",
-                           _class="problem-search-editorial-link")))
+                           _class=page_prefix + "-editorial-link")))
         else:
             tr.append(TD())
 
@@ -628,7 +630,7 @@ def get_problems_table(all_problems,
                             _href=URL("problems",
                                       "tag",
                                       vars={"q": tag.encode("utf8"), "page": 1}),
-                            _class="tags-chip",
+                            _class=page_prefix + "-tags-chip",
                             _style="color: white;",
                             _target="_blank"),
                           _class="chip"))
@@ -662,7 +664,8 @@ def problem_widget(name,
                    problem_id,
                    disable_todo=False,
                    anchor=True,
-                   request_vars={}):
+                   request_vars={},
+                   page_prefix=None):
     """
         Widget to display a problem in UI tables
 
@@ -677,13 +680,14 @@ def problem_widget(name,
 
     problem_div = DIV(_style="display: inline;")
     if anchor:
+        class_name = page_prefix + "-problem-listing" if page_prefix is not None else "problem-listing"
         problem_div.append(A(name,
                              _href=URL("problems",
                                        "index",
                                        vars=dict(problem_id=problem_id,
                                                  **request_vars),
                                        extension=False),
-                             _class="problem-listing " + link_class,
+                             _class=class_name + " " + link_class,
                              _title=link_title,
                              _target="_blank",
                              data={"pid": problem_id},
