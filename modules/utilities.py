@@ -565,7 +565,7 @@ def get_problems_table(all_problems,
     db = current.db
     uetable = db.user_editorials
     table = TABLE(_class="bordered centered")
-    thead = THEAD(TR(TH(T("Problem Name"), _class=page_prefix + "-name-column"),
+    thead = THEAD(TR(TH(T("Problem Name"), _class=generate_page_specific_class(page_prefix, "name-column")),
                      TH(T("Problem URL")),
                      TH(T("Site")),
                      TH(T("Accuracy")),
@@ -595,10 +595,10 @@ def get_problems_table(all_problems,
                                     link_title,
                                     problem["id"],
                                     page_prefix=page_prefix),
-                     _class=page_prefix + "-name-column"))
+                     _class=generate_page_specific_class(page_prefix, "name-column")))
         tr.append(TD(A(I(_class="fa fa-link"),
                        _href=problem["link"],
-                       _class=page_prefix + "-tag-problem-link",
+                       _class=generate_page_specific_class(page_prefix, "tag-problem-link") + " tag-problem-link",
                        data={"pid": problem["id"]},
                        _target="_blank")))
         tr.append(TD(IMG(_src=current.get_static_url("images/" + \
@@ -619,7 +619,7 @@ def get_problems_table(all_problems,
                                      "editorials",
                                      args=problem["id"]),
                            _target="_blank",
-                           _class=page_prefix + "-editorial-link")))
+                           _class=generate_page_specific_class(page_prefix, "editorial-link"))))
         else:
             tr.append(TD())
 
@@ -630,7 +630,7 @@ def get_problems_table(all_problems,
                             _href=URL("problems",
                                       "tag",
                                       vars={"q": tag.encode("utf8"), "page": 1}),
-                            _class=page_prefix + "-tags-chip",
+                            _class=generate_page_specific_class(page_prefix, "tags-chip") + " tags-chip",
                             _style="color: white;",
                             _target="_blank"),
                           _class="chip"))
@@ -680,14 +680,13 @@ def problem_widget(name,
 
     problem_div = DIV(_style="display: inline;")
     if anchor:
-        class_name = page_prefix + "-problem-listing" if page_prefix is not None else "problem-listing"
         problem_div.append(A(name,
                              _href=URL("problems",
                                        "index",
                                        vars=dict(problem_id=problem_id,
                                                  **request_vars),
                                        extension=False),
-                             _class=class_name + " " + link_class,
+                             _class=generate_page_specific_class(page_prefix, "problem-listing") + " " + link_class,
                              _title=link_title,
                              _target="_blank",
                              data={"pid": problem_id},
@@ -1479,5 +1478,9 @@ def render_user_editorials_table(user_editorials,
     table.append(tbody)
 
     return table
+
+# ----------------------------------------------------------------------------
+def generate_page_specific_class(page_prefix, class_name):
+    return (page_prefix + "-" + class_name) if page_prefix is not None else class_name
 
 # =============================================================================
