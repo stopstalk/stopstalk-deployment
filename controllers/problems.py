@@ -958,14 +958,13 @@ def recommendations():
     else:
         recommendation_pids, _ = recommendations.retrieve_past_recommendations(user_id)
 
+    output["recommendations_length"] = len(recommendation_pids)
     if len(recommendation_pids) > 0:
         problem_details = db(ptable.id.belongs(recommendation_pids)).select()
         output["table"] = utilities.get_problems_table(problem_details,
                                                        user_id,
                                                        "recommendation",
                                                        None)
-    else:
-        output["table"] = "No recommendations available."
 
     query = (rtable.user_id == user_id) & (rtable.is_active == True)
     rows = db(query).select(rtable.generated_at)
