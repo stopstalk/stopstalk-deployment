@@ -811,6 +811,9 @@ class RecommendationsPageCard(BaseCard):
     # --------------------------------------------------------------------------
     @BaseCard.enabled_check
     def should_show(self):
-        return True
+        db = current.db
+        stable = db.submission
+        submission_count = db(stable.user_id == self.user_id).count()
+        return submission_count > 0
 
 # ==============================================================================
