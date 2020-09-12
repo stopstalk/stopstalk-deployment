@@ -1,38 +1,47 @@
-var LocalStorageHelper = (function() {
-  var defaultNullValue = null;
 
-  var getCardContent = function(cardIdentifier) {
-    var value = localStorage.getItem(cardIdentifier);
-    if (value === null) return defaultNullValue;
-    value = JSON.parse(value);
-    if (
-        value["version"] === null ||
-        parseInt(value["version"]) <= stopstalkReleaseVersion ||
-        parseInt(value["user_id"]) !== loggedInUserId) {
-      localStorage.removeItem(cardIdentifier);
-      return defaultNullValue;
-    }
-
-    return value["content"];
-  };
-
-  var setCardContent = function(cardIdentifier, content) {
-    localStorage.setItem(cardIdentifier, JSON.stringify({
-      version: stopstalkReleaseVersion,
-      content: content,
-      user_id: loggedInUserId
-    }));
-  };
-
-  return {
-    defaultNullValue: defaultNullValue,
-    getCardContent: getCardContent,
-    setCardContent: setCardContent
-  };
-})();
 
 (function($) {
   "use strict";
+
+  var isStaleDashboard = function() {
+    var cachedTimestamp = localStorage.getItem("dashboardCacheTime");
+    return (cachedTimestamp === null || Date.now() - parseInt(cachedTimestamp) > 1 * 60 * 60 * 1000);
+  };
+
+  var LocalStorageHelper = (function() {
+    var defaultNullValue = null;
+
+    var getCardContent = function(cardIdentifier) {
+      var value = localStorage.getItem(cardIdentifier);
+      if (value === null) return defaultNullValue;
+      value = JSON.parse(value);
+      if (
+          value["version"] === null ||
+          parseInt(value["version"]) <= stopstalkReleaseVersion ||
+          parseInt(value["user_id"]) !== loggedInUserId ||
+          isStaleDashboard()
+          ) {
+        localStorage.removeItem(cardIdentifier);
+        return defaultNullValue;
+      }
+
+      return value["content"];
+    };
+
+    var setCardContent = function(cardIdentifier, content) {
+      localStorage.setItem(cardIdentifier, JSON.stringify({
+        version: stopstalkReleaseVersion,
+        content: content,
+        user_id: loggedInUserId
+      }));
+    };
+
+    return {
+      defaultNullValue: defaultNullValue,
+      getCardContent: getCardContent,
+      setCardContent: setCardContent
+    };
+  })();
 
   var shuffleArray = function(array) {
       for (var i = array.length - 1; i > 0; i--) {
@@ -109,8 +118,6 @@ var LocalStorageHelper = (function() {
       }
     ];
 
-    shuffleArray(cardArguments);
-
     cardArguments.unshift({
       "card_id": "recent_submissions_card",
       "class_name": "RecentSubmissionsCard",
@@ -120,6 +127,11 @@ var LocalStorageHelper = (function() {
     var cardCounter = 0;
     var $currentDiv = "";
     var $containerDiv = $("#dashboard-cards-container");
+
+    if(!isStaleDashboard()) {
+      $containerDiv.html(localStorage.getItem("dashboardContainerCards"));
+      return;
+    }
 
     cardArguments.forEach(function(cardParams, iter) {
       var promise = new Promise(function(resolve, reject) {
@@ -144,9 +156,10 @@ var LocalStorageHelper = (function() {
         } else {
           setTimeout(function() {
             resolve(cardCacheValue);
-          }, Math.floor(Math.random() * Math.floor(800)));
+          }, Math.floor(Math.random() * Math.floor(100)));
         }
       }).then(function(response) {
+        if(response === null) return;
         if (cardCounter == 0) {
           $containerDiv.html("");
         }
@@ -155,7 +168,9 @@ var LocalStorageHelper = (function() {
           $currentDiv = $("<div class='row'>");
           $containerDiv.append($currentDiv);
         }
-        $(response).hide().appendTo($currentDiv).fadeIn();
+        $(response).hide().appendTo($currentDiv).fadeIn(function() {
+          localStorage.setItem("dashboardContainerCards", $containerDiv.html());
+        });
         cardCounter++;
         if (iter === cardArguments.length - 1 && $currentDiv !== "") $containerDiv.append($currentDiv);
       }).catch(function(err) {
@@ -166,6 +181,8 @@ var LocalStorageHelper = (function() {
       });
 
     });
+
+    localStorage.setItem("dashboardCacheTime", Date.now());
   };
 
   $(document).ready(function() {
