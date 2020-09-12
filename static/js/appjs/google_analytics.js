@@ -107,13 +107,14 @@
         addEventListener('.custom-user-list-name', 'Custom user name in Modal', false);
         addEventListener('.custom-user-modal-site-profile', 'Custom user Site Profile in Modal', false);
         addEventListener('#open-side-nav', 'Open Side Navbar', false);
-        addEventListener('#job-profile-cta', 'StopStalk Job profile CTA', false);
 
         addEventListener('#recent-announcements-update-job-profile-now', 'Onboarding StopStalk Job Profile', false);
 
         addEventListener('#problem-difficulty-later', 'Problem Difficulty modal - Later', false);
         addEventListener('#skip-this-problem', 'Problem Difficulty modal - Skip problem', false);
         addEventListener('#know-more-dashboard-page', 'Know more - Dashboard page', false);
+
+        addEventListener('#problem-recommendations-cta', 'Find me problems - Problem recommendations', false);
     };
 
     var addProblemPageButtonsToGA = function() {
@@ -170,6 +171,9 @@
     var addProblemSearchPageToGA = function() {
         addEventListener('.tag-problem-link', 'Tags problem link', false);
         addEventListener('.tags-chip', 'Tags page chip', false);
+        addEventListener('.problem-search-problem-listing', 'Problem name problem page link', false);
+        addEventListener('.problem-search-tag-problem-link', 'Problem search tags problem link', false);
+        addEventListener('.problem-search-tags-chip', 'Problem search tags page chip', false);
         addEventListener('#problem-name', 'Problem Search Problem name field', false);
         addEventListener('#profile-site', 'Problem Search Site field', false, 'change');
         addEventListener('#orderby-problem', 'Problem Search Order By field', false, 'change');
@@ -228,6 +232,24 @@
         addEventListener('.recommendations-card-find-me-problems', 'Cards - Recommendations page find me problems', false);
     };
 
+    var addProblemRecommendationsPageToGA = function() {
+        addEventListener('#update-problem-recommendations', 'Refresh problem recommendations', false);
+        addEventListener('#close-refresh-recommendations', 'Close refresh problem recommendations modal', false);
+        addEventListener('#confirm-refresh-recommendations', 'Confirm refresh problem recommendations modal', false);
+        addEventListener('#recommendation-contact-us', 'Recommendation feedback', false);
+        addEventListener('.recommendation-problem-listing', 'Recommendations page problem link', false);
+        addEventListener('.recommendation-tag-problem-link', 'Recommendations page tags link', false);
+        addEventListener('.recommendation-tags-chip', 'Recommendations page tags chip', false);
+        addEventListener('.recommendation-editorial-link', 'Recommendations page editorial link', false);
+    };
+
+    var addProblemsAuthoredPageToGA = function() {
+        addEventListener('.problems-authored-problem-listing', 'Problems authored page problem link', false);
+        addEventListener('.problems-authored-tag-problem-link', 'Problems authored page tags link', false);
+        addEventListener('.problems-authored-tags-chip', 'Problems authored page tags chip', false);
+        addEventListener('.problems-authored-editorial-link', 'Problems authored page editorial link', false);
+    };
+
 
     $(document).ready(function() {
         addNavItemsToGA();
@@ -245,5 +267,7 @@
         addProblemEditorialsPageToGA();
         addDashboardPageToGA();
         addMiscellaneousToGA();
+        addProblemRecommendationsPageToGA();
+        addProblemsAuthoredPageToGA();
     });
 })(jQuery);

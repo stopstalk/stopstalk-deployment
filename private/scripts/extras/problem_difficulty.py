@@ -97,4 +97,10 @@ for pid, difficulties in difficulty.items():
 
     write_count += 1
     avg_difficulty = sum(difficulties) / float(len(difficulties))
-    update = ptable(pid).update_record(difficulty=avg_difficulty)
+    avg_difficulty = float("{0:.3f}".format(avg_difficulty))
+    precord = ptable(pid)
+    if precord.difficulty != avg_difficulty:
+        print "updating problem difficulty for", pid, ":", precord.difficulty, "->", avg_difficulty
+        precord.update_record(difficulty=avg_difficulty)
+
+db.commit()
