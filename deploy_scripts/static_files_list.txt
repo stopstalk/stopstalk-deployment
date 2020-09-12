@@ -28,6 +28,7 @@ js/appjs/user/submissions.js
 js/appjs/user/profile.js
 js/appjs/default/user_editorials.js
 js/appjs/default/user_wise_editorials.js
+js/appjs/problems/recommendations.js
 css/stopstalk.css
 css/style.css
 css/material.css
