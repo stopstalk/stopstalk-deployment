@@ -191,6 +191,8 @@ def get_submissions(user_id,
         Get the submissions and populate the database
     """
 
+    from recommendations.problems import update_recommendation_status
+
     submission_count = len(submissions)
 
     if submission_count == 0:
@@ -252,6 +254,8 @@ def get_submissions(user_id,
                               submission[3],
                               user_id,
                               custom)
+
+        update_recommendation_status(user_id, pid, submission)
 
     return submission_count
 

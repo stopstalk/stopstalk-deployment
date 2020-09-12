@@ -95,6 +95,7 @@ def by():
 
     return_val["table"] = utilities.get_problems_table(problems,
                                                        session.user_id,
+                                                       "problems-authored",
                                                        None)
 
     return_val["problems_count"] = len(problems)
@@ -870,6 +871,7 @@ def search():
 
     return dict(table=utilities.get_problems_table(all_problems,
                                                    session.user_id,
+                                                   "problem-search",
                                                    problem_with_user_editorials),
                 generalized_tags=generalized_tags)
 
@@ -930,5 +932,57 @@ def trending():
                   _class="row center")
 
     return dict(div=div)
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
+def recommendations():
+    """
+        Problem recommendations for the user.
+    """
+    import recommendations.problems as recommendations
+
+    ptable = db.problem
+    rtable = db.problem_recommendations
+    user_id = session.user_id
+    refresh = request.vars.get("refresh", "false") == "true"
+
+    output = {}
+    recommendation_pids = []
+
+    rows = db(rtable.user_id == user_id).select()
+    if len(rows) == 0:
+        refresh = True
+
+    if refresh:
+        recommendation_pids = recommendations.generate_recommendations(user_id)
+    else:
+        recommendation_pids, _ = recommendations.retrieve_past_recommendations(user_id)
+
+    if len(recommendation_pids) > 0:
+        problem_details = db(ptable.id.belongs(recommendation_pids)).select()
+        output["table"] = utilities.get_problems_table(problem_details,
+                                                       user_id,
+                                                       "recommendation",
+                                                       None)
+    else:
+        output["table"] = "No recommendations available."
+
+    query = (rtable.user_id == user_id) & (rtable.is_active == True)
+    rows = db(query).select(rtable.generated_at)
+
+    output["can_update"] = True
+    if len(rows) > 0:
+        output["can_update"] = (datetime.datetime.now().date() - rows[0].generated_at).days \
+            >= RECOMMENDATION_REFRESH_INTERVAL
+
+    return output
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
+def update_recommendation_status():
+    from recommendations.problems import update_recommendation_status
+
+    pid = long(request.args[0])
+    update_recommendation_status(session.user_id, pid)
 
 # ==============================================================================
