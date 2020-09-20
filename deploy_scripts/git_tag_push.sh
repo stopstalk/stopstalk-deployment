@@ -1,4 +1,9 @@
 #!/bin/bash
+if [[ $SKIP_HOOKS ]]; then
+  unset $SKIP_HOOKS
+  exit 0
+fi
+
 ENV_TAG_PREFIX=""
 
 #get highest tag number
@@ -38,7 +43,7 @@ echo "-------------------------------------------------------------------------"
 if [ -z "$NEEDS_TAG" ]; then
   echo "Tagged with $NEW_TAG"
   git tag $NEW_TAG
-  git push origin $NEW_TAG
+  SKIP_HOOKS=true git push origin $NEW_TAG
 else
   echo "Current commit already has a tag $VERSION"
 fi
