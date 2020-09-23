@@ -45,13 +45,18 @@ class BaseCard:
             actions_div = DIV(*args["cta_links"], _class="card-action")
         else:
             actions_div = ""
+
+        if "card_style" not in args:
+            args["card_style"] = ""
+
         return DIV(DIV(DIV(SPAN(args["card_title"], _class="card-title"),
                            args["card_content"],
                             _class="card-content " + \
                                    args["card_text_color_class"]),
                        actions_div,
                        _class="card stopstalk-dashboard-card " + \
-                              args["card_color_class"]),
+                              args["card_color_class"],
+                       _style=args["card_style"]),
                    _class="col s4")
 
     # --------------------------------------------------------------------------
@@ -774,32 +779,43 @@ class RecommendationsPageCard(BaseCard):
     # --------------------------------------------------------------------------
     def __init__(self, user_id):
         self.user_id = user_id
-        self.final_pid = None
-        self.card_title = "StopStalk can recommend now!"
-
-        self.ctas = [
-            dict(btn_url=URL("problems",
-                             "recommendations"),
-                 btn_text="Find me problems",
-                 btn_class="recommendations-card-find-me-problems")
-        ]
         BaseCard.__init__(self, user_id)
 
     # --------------------------------------------------------------------------
     def get_html(self):
-        card_content = TAG[""](SPAN("StopStalk will recommend you problems based on your past submissions."),
-                               " ",
-                               SPAN("Click on the"),
-                               " ",
-                               B("'Find me problems'"),
-                               " ",
-                               SPAN("button on the top and keep increasing your level gradually!"))
+        if self.stale_recommendations:
+            self.card_title = "New problems to solve!"
+            card_content = TAG[""](SPAN("It has been more than a week since you last generated problem recommendations. Generate new ones and keep getting better by solving them."))
+            card_color = "#fdf3e6"
+            self.ctas = [
+                dict(btn_url=URL("problems",
+                                 "recommendations"),
+                     btn_text="Generate recommendations",
+                     btn_class="recommendations-card-generate-recommendations")
+            ]
+        else:
+            self.card_title = "StopStalk can recommend now!"
+            card_content = TAG[""](SPAN("StopStalk will recommend you problems based on your past submissions."),
+                                   " ",
+                                   SPAN("Click on the"),
+                                   " ",
+                                   B("'Find me problems'"),
+                                   " ",
+                                   SPAN("button on the top and keep increasing your level gradually!"))
+            card_color = "#f7f1fa"
+            self.ctas = [
+                dict(btn_url=URL("problems",
+                                 "recommendations"),
+                     btn_text="Find me problems",
+                     btn_class="recommendations-card-find-me-problems")
+            ]
 
         card_html = BaseCard.get_html(self, **dict(
                        card_title=self.card_title,
                        card_content=card_content,
                        cta_links=self.get_cta_html(),
-                       card_color_class="deep-purple lighten-5",
+                       card_style="background-color: " + card_color,
+                       card_color_class="",
                        card_text_color_class="black-text"
                     ))
         return card_html
@@ -813,7 +829,12 @@ class RecommendationsPageCard(BaseCard):
     def should_show(self):
         db = current.db
         stable = db.submission
+        prtable = db.problem_recommendations
         submission_count = db(stable.user_id == self.user_id).count()
-        return submission_count > 0
-
+        last_recommended = db(prtable.user_id == self.user_id).select().last()
+        self.stale_recommendations = (last_recommended is not None and \
+                                      (datetime.datetime.now().date() - \
+                                       last_recommended.generated_at).days > 7)
+        return submission_count > 0 and \
+               (last_recommended is None or self.stale_recommendations)
 # ==============================================================================

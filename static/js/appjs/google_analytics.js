@@ -230,6 +230,7 @@
         addEventListener('.search-by-tag-card-submit', 'Cards - Search by tag Submit', false, 'submit');
         addEventListener('.atcoder-handle-card-update-now', 'Cards - Atcoder handle update now', false);
         addEventListener('.recommendations-card-find-me-problems', 'Cards - Recommendations page find me problems', false);
+        addEventListener('.recommendations-card-generate-recommendations', 'Cards - Recommendations page generate new recommendations', false);
     };
 
     var addProblemRecommendationsPageToGA = function() {
