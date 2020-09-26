@@ -83,7 +83,7 @@ import utilities
 from stopstalk_constants import *
 
 auth = Auth(db)
-userjwt = AuthJWT(auth, secret_key= current.jwt_secret, user_param="email")
+auth_jwt = AuthJWT(auth, secret_key=current.jwt_secret, user_param="email")
 service = Service()
 plugins = PluginManager()
 
@@ -492,7 +492,7 @@ auth.settings.verify_email_onaccept.extend([notify_institute_users,
                                             create_next_retrieval_record,
                                             append_user_to_refreshed_users])
 current.auth = auth
-current.userjwt = userjwt
+current.auth_jwt = auth_jwt
 current.response.formstyle = utilities.materialize_form
 current.sanitize_fields = sanitize_fields
 current.create_next_retrieval_record = create_next_retrieval_record

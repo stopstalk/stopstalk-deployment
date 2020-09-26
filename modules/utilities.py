@@ -35,32 +35,36 @@ from gluon.storage import Storage
 from stopstalk_constants import *
 from influxdb_wrapper import get_series_helper
 
-#Check wheck the request has Api Token
-#If it has an api_token the requset in an API Call
+# -----------------------------------------------------------------------------
 def is_apicall():
+    """
+        Check whether the request has an API Token
+        If it has an api_token then requset its an API Call
+    """
     return 'api_token' in current.request.vars
 
 # -----------------------------------------------------------------------------
 def check_api_token(function):
-    '''
+    """
         API Token Checking Decorator
-    '''
+    """
     def verifier(*args, **kwargs):
-        if(is_apicall()):
+        if is_apicall():
             token = current.request.vars['api_token']
             allowed_tokens = current.api_tokens
+            # check if the API call has a valid authentication token
             if(token not in allowed_tokens):
-                current.response.status = 400
+                current.response.status = 401
                 return current.response
         return function(*args, **kwargs)
     return verifier
 
 # -----------------------------------------------------------------------------
 def check_api_userauth(function):
-    '''
+    """
         API Token with userauth Checking Decorator
-    '''
-    @current.userjwt.allows_jwt()
+    """
+    @current.auth_jwt.allows_jwt()
     def verifier(*args, **kwargs):
         return check_api_token(function(*args, **kwargs))
     return verifier
