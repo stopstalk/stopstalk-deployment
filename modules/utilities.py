@@ -35,6 +35,36 @@ from gluon.storage import Storage
 from stopstalk_constants import *
 from influxdb_wrapper import get_series_helper
 
+#Check wheck the request has Api Token
+#If it has an api_token the requset in an API Call
+def is_apicall():
+    return 'api_token' in current.request.vars
+
+# -----------------------------------------------------------------------------
+def check_api_token(function):
+    '''
+        API Token Checking Decorator
+    '''
+    def verifier(*args, **kwargs):
+        if(is_apicall()):
+            token = current.request.vars['api_token']
+            allowed_tokens = current.api_tokens
+            if(token not in allowed_tokens):
+                current.response.status = 400
+                return current.response
+        return function(*args, **kwargs)
+    return verifier
+
+# -----------------------------------------------------------------------------
+def check_api_authtoken(function):
+    '''
+        API Token with userauth Checking Decorator
+    '''
+    @current.userjwt.allows_jwt()
+    def verifier(*args, **kwargs):
+        return check_api_token(function(*args, **kwargs))
+    return verifier
+
 # -----------------------------------------------------------------------------
 def push_influx_data(measurement, points, app_name="cron"):
 
