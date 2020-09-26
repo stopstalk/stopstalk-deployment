@@ -77,12 +77,13 @@ response.form_label_separator = myconf.take('forms.separator')
 ## (more options discussed in gluon/tools.py)
 #########################################################################
 
-from gluon.tools import Auth, Service, PluginManager
+from gluon.tools import Auth, Service, PluginManager, AuthJWT
 import datetime
 import utilities
 from stopstalk_constants import *
 
 auth = Auth(db)
+userjwt = AuthJWT(auth, secret_key= current.jwt_secret, user_param="email")
 service = Service()
 plugins = PluginManager()
 
@@ -491,6 +492,7 @@ auth.settings.verify_email_onaccept.extend([notify_institute_users,
                                             create_next_retrieval_record,
                                             append_user_to_refreshed_users])
 current.auth = auth
+current.userjwt = userjwt
 current.response.formstyle = utilities.materialize_form
 current.sanitize_fields = sanitize_fields
 current.create_next_retrieval_record = create_next_retrieval_record

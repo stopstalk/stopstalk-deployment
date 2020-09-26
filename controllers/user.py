@@ -26,6 +26,21 @@ import datetime
 import json
 
 # ------------------------------------------------------------------------------
+@utilities.check_api_token
+def login_token():
+    '''
+        @only accesible to verified Api Calls
+    '''
+    if(not utilities.is_apicall()):
+        raise HTTP(400, u'Access Denied not an API Call')
+    '''
+        @withparameter email and password return {token : ''} if valid credentials
+        @withparameter token returns the new refresh token
+    '''
+    userjwt.verify_expiration = False
+    return userjwt.jwt_token_manager()
+
+# ------------------------------------------------------------------------------
 @auth.requires_login()
 def index():
     """
