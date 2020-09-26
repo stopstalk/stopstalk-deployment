@@ -56,7 +56,7 @@ def check_api_token(function):
     return verifier
 
 # -----------------------------------------------------------------------------
-def check_api_authtoken(function):
+def check_api_userauth(function):
     '''
         API Token with userauth Checking Decorator
     '''
