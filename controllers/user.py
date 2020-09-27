@@ -26,6 +26,21 @@ import datetime
 import json
 
 # ------------------------------------------------------------------------------
+@utilities.check_api_token
+def login_token():
+    """
+        Only accesible to whitelisted Api Calls
+    """
+    if not utilities.is_apicall():
+        raise HTTP(400, u'Invalid API params')
+    """
+        @withparameter email and password return {token : ''} if valid credentials
+        @withparameter token returns the new refresh token
+    """
+    auth_jwt.verify_expiration = False
+    return auth_jwt.jwt_token_manager()
+
+# ------------------------------------------------------------------------------
 @auth.requires_login()
 def index():
     """

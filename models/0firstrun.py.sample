@@ -89,4 +89,9 @@ current.codeforces_cookies = {}
 
 current.codeforces_headers = {}
 
+#app auth token
+current.api_tokens = []
+
+#user verification JWT secret
+current.jwt_secret = ""
 # =============================================================================
