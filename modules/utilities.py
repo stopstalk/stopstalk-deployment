@@ -53,7 +53,7 @@ def check_api_token(function):
             token = current.request.vars['api_token']
             allowed_tokens = current.api_tokens
             # check if the API call has a valid authentication token
-            if(token not in allowed_tokens):
+            if token not in allowed_tokens:
                 current.response.status = 401
                 return current.response
         return function(*args, **kwargs)
