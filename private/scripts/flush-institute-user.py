@@ -53,13 +53,6 @@ base_utm_params = {
 
 def send_message(to_record, from_records):
     utm_params = base_utm_params.copy()
-    names = [str(A(x.first_name + " " + x.last_name,
-                   _href=URL("user",
-                             "profile",
-                             args=x.stopstalk_handle,
-                             scheme="https",
-                             host="www.stopstalk.com",
-                             extension=False))) for x in from_records]
     names = []
     for x in from_records:
         utm_params.update({
