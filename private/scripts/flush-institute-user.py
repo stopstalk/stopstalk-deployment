@@ -92,7 +92,7 @@ Hello %s,<br/>
 %s from your Institute %s just joined StopStalk.<br/>
 Add %s as your friend now for better learning experience on StopStalk.<br/>
 <br/>
-Adjust your email preferences <a href="%s">here</a><br/>.
+Adjust your email preferences <a href="%s">here</a>.<br/>
 <br/>
 Cheers,<br />
 Team StopStalk
