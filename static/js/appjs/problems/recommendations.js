@@ -13,9 +13,9 @@
                     $('#recommendations-table-content').html(response['table']);
 
                     if (response['can_update'] === false) {
-                        $this.addClass("disabled");
+                        $('#update-problem-recommendations').addClass("disabled");
                     } else {
-                        $this.removeClass("disabled");
+                        $('#update-problem-recommendations').removeClass("disabled");
                     }
                 },
                 error: function(err) {

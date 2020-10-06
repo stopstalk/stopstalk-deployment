@@ -966,13 +966,7 @@ def recommendations():
                                                        "recommendation",
                                                        None)
 
-    query = (rtable.user_id == user_id) & (rtable.is_active == True)
-    rows = db(query).select(rtable.generated_at)
-
-    output["can_update"] = True
-    if len(rows) > 0:
-        output["can_update"] = (datetime.datetime.now().date() - rows[0].generated_at).days \
-            >= RECOMMENDATION_REFRESH_INTERVAL
+    output["can_update"] = recommendations.can_refresh_recommendations(user_id)
 
     return output
 
