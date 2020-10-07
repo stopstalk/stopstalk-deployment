@@ -162,6 +162,10 @@ def get_card_html():
 # ----------------------------------------------------------------------------
 @auth.requires_login()
 def dashboard():
+    user = session.auth.user
+    if user.stopstalk_handle == None:
+        return redirect(URL("user","update_details"))
+
     session.welcome_shown = True
     ratable = db.recent_announcements
     rarecord = db(ratable.user_id == session.user_id).select().first()
@@ -169,7 +173,6 @@ def dashboard():
         ratable.insert(user_id=session.user_id)
         rarecord = db(ratable.user_id == session.user_id).select().first()
 
-    user = session.auth.user
     db.sessions_today.insert(message="%s %s %d %s" % (user.first_name,
                                                       user.last_name,
                                                       user.id,
@@ -974,6 +977,43 @@ def user():
         redirect(URL("user", "update_details"))
 
     return dict(form=auth())
+
+# ----------------------------------------------------------------------------
+
+def googleauth():
+    if auth.is_logged_in():
+        redirect(URL("dashboard"))
+
+    SCOPE = "profile+email"
+    CLIENT_ID = current.CLIENT_ID
+    CLIENT_SECRET = current.CLIENT_SECRET
+    REDIRECT_URI = current.REDIRECT_URI
+    if not request.vars.get("code"):
+        auth_uri = ("https://accounts.google.com/o/oauth2/v2/auth?response_type=code"
+                    "&client_id={}&redirect_uri={}&scope={}").format(CLIENT_ID, REDIRECT_URI, SCOPE)
+        return redirect(auth_uri)
+    else:
+        auth_code = request.vars.get("code")
+        print('1')
+        data = {"code": auth_code,
+                "client_id": CLIENT_ID,
+                "client_secret": CLIENT_SECRET,
+                "redirect_uri": REDIRECT_URI,
+                "grant_type": "authorization_code"}
+        token = requests.post("https://oauth2.googleapis.com/token", data=data)
+        print(2)
+        if not token.ok:
+            raise HTTP(401, "AUTH rejected")
+        print(3)
+        resp = requests.post("https://oauth2.googleapis.com/tokeninfo", data=token)
+        print(4)
+        data = resp.json()
+        user_email = data['email']
+        user = db.auth_user(**{"email": user_email})
+        if not user :
+            user = auth.register_bare(email=user_email)
+        auth.login_user(user)
+        return redirect(URL("dashboard"))
 
 # ----------------------------------------------------------------------------
 def filters():

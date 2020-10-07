@@ -290,8 +290,10 @@ def update_details():
         record[field] = record[field].encode("utf-8")
 
     # Do not allow to modify stopstalk_handle and email
-    atable.stopstalk_handle.writable = False
+    atable.stopstalk_handle.writable = (record.stopstalk_handle == None)
     atable.stopstalk_handle.comment = T("StopStalk handle cannot be updated")
+    atable.stopstalk_handle.requires = IS_NOT_EMPTY(
+    error_message=auth.messages.is_empty)
 
     atable.email.readable = True
     atable.email.writable = False
@@ -308,7 +310,8 @@ def update_details():
 
         updated_sites = utilities.handles_updated(record, form)
         if updated_sites != []:
-            utilities.clear_profile_page_cache(record.stopstalk_handle)
+            if record.stopstalk_handle != None:
+                utilities.clear_profile_page_cache(record.stopstalk_handle)
             site_lrs = {}
             nrtable = db.next_retrieval
             submission_query = (stable.user_id == session.user_id)
@@ -348,6 +351,8 @@ def update_details():
         redirect(URL("default", "index"))
     elif form.errors:
         response.flash = T("Form has errors")
+    elif record.stopstalk_handle == None:
+        response.flash = T("Please update your details to continue")
 
     return dict(form=form)
 
