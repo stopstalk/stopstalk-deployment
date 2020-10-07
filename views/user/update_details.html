@@ -11,7 +11,9 @@
 <h1>{{=T("Update Details")}}</h1>
 <div class="row">
     <div class="col offset-s2 s8">
+        {{if auth.user.stopstalk_handle:}}
         <p class="red-text">{{=T("Note: If you update your handles, your rating and per-day change will become zero for some time and will be re-computed in the next round of update when your submissions from the updated handle are retrieved.")}}</p>
+        {{pass}}
         {{=form}}
     </div>
 </div>
