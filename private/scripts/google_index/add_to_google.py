@@ -82,6 +82,7 @@ for row in rows:
     current_request_count["total"] += 1
     if current_request_count["total"] >= TOTAL_REQUEST_CALLS:
         log_info("Total requests for the day processed %s" % str(current_request_count))
+        current.REDIS_CLIENT.set("last_user_id_submitted_to_google", row.id)
         sys.exit(0)
     time.sleep(1)
 
@@ -93,6 +94,9 @@ query = (ptable.id > last_problem_id)
 pids = db(query).select(ptable.id,
                         limitby=(0, 1000))
 pids = [x.id for x in pids]
+if len(pids) > 0:
+    current.REDIS_CLIENT.set("last_problem_id_submitted_to_google",
+                             pids[-1])
 
 for pid in pids:
     url = "https://www.stopstalk.com/problems?problem_id=%d" % pid
@@ -101,11 +105,9 @@ for pid in pids:
     current_request_count["total"] += 1
     if current_request_count["total"] >= TOTAL_REQUEST_CALLS:
         log_info("Total requests for the day processed %s" % str(current_request_count))
+        current.REDIS_CLIENT.set("last_problem_id_submitted_to_google", pid)
         sys.exit(0)
     time.sleep(1)
 
-if len(pids) > 0:
-    current.REDIS_CLIENT.set("last_problem_id_submitted_to_google",
-                             pids[-1])
 
 log_info("Outside of both loops %s" % str(current_request_count))
