@@ -49,6 +49,7 @@ def make_api_request(url):
     ENDPOINT = "https://indexing.googleapis.com/v3/urlNotifications:publish"
     response, content = http.request(ENDPOINT, method="POST", body=content)
     log_info("API response - %s %s" % (str(response["status"]), url))
+    return str(response["status"]) == "200"
 
 
 TOTAL_REQUEST_CALLS = 900 # We have quota for 1000
@@ -71,16 +72,12 @@ rows = db(query).select(atable.id,
                         orderby=~atable.id,
                         limitby=(0, 300))
 
-if len(rows) > 0:
-    current.REDIS_CLIENT.set("last_user_id_submitted_to_google",
-                             rows.first().id)
-
 for row in rows:
     url = "https://www.stopstalk.com/user/profile/%s" % row.stopstalk_handle
-    make_api_request(url)
+    result = make_api_request(url)
     current_request_count["users"] += 1
     current_request_count["total"] += 1
-    if current_request_count["total"] >= TOTAL_REQUEST_CALLS:
+    if not result or current_request_count["total"] >= TOTAL_REQUEST_CALLS:
         log_info("Total requests for the day processed %s" % str(current_request_count))
         current.REDIS_CLIENT.set("last_user_id_submitted_to_google", row.id)
         sys.exit(0)
@@ -94,20 +91,16 @@ query = (ptable.id > last_problem_id)
 pids = db(query).select(ptable.id,
                         limitby=(0, 1000))
 pids = [x.id for x in pids]
-if len(pids) > 0:
-    current.REDIS_CLIENT.set("last_problem_id_submitted_to_google",
-                             pids[-1])
 
 for pid in pids:
     url = "https://www.stopstalk.com/problems?problem_id=%d" % pid
-    make_api_request(url)
+    result = make_api_request(url)
     current_request_count["problems"] += 1
     current_request_count["total"] += 1
-    if current_request_count["total"] >= TOTAL_REQUEST_CALLS:
+    if not result or current_request_count["total"] >= TOTAL_REQUEST_CALLS:
         log_info("Total requests for the day processed %s" % str(current_request_count))
         current.REDIS_CLIENT.set("last_problem_id_submitted_to_google", pid)
         sys.exit(0)
     time.sleep(1)
-
 
 log_info("Outside of both loops %s" % str(current_request_count))
