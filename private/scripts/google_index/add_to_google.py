@@ -24,29 +24,52 @@
 
 from oauth2client.service_account import ServiceAccountCredentials
 import httplib2
+import datetime
 import time
+import sys
 
-SCOPES = [ "https://www.googleapis.com/auth/indexing" ]
-ENDPOINT = "https://indexing.googleapis.com/v3/urlNotifications:publish"
+def log_info(message):
+    print "%s: %s" % (str(datetime.datetime.now()),
+                      message)
 
-# service_account_file.json is the private key that you created for your service account.
-google_index_dir = "/home/www-data/web2py/applications/stopstalk/private/scripts/google_index"
-# google_index_dir = "/Users/raj454raj/devwork/stopstalk/web2py/applications/stopstalk/private/scripts/google_index"
-JSON_KEY_FILE = "%s/service-account.json" % google_index_dir
+def getHTTPObject():
+    SCOPES = [ "https://www.googleapis.com/auth/indexing" ]
 
-credentials = ServiceAccountCredentials.from_json_keyfile_name(JSON_KEY_FILE, scopes=SCOPES)
-http = credentials.authorize(httplib2.Http())
+    # service_account_file.json is the private key that you created for your service account.
+    google_index_dir = "/home/www-data/web2py/applications/stopstalk/private/scripts/google_index"
+    # google_index_dir = "/Users/raj454raj/devwork/stopstalk/web2py/applications/stopstalk/private/scripts/google_index"
+    JSON_KEY_FILE = "%s/service-account.json" % google_index_dir
 
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(JSON_KEY_FILE, scopes=SCOPES)
+    return credentials.authorize(httplib2.Http())
+
+def make_api_request(url):
+    content = "{\"url\": \"%s\", \"type\": \"URL_UPDATED\"}" % url
+    http = getHTTPObject()
+    ENDPOINT = "https://indexing.googleapis.com/v3/urlNotifications:publish"
+    response, content = http.request(ENDPOINT, method="POST", body=content)
+    log_info("API response - %s %s" % (str(response["status"]), url))
+
+
+TOTAL_REQUEST_CALLS = 900 # We have quota for 1000
+current_request_count = {"users": 0, "problems": 0, "total": 0}
+
+atable = db.auth_user
+ptable = db.problem
+
+# ===================
+# Add users to Google
+# ===================
 last_user_id = current.REDIS_CLIENT.get("last_user_id_submitted_to_google")
 last_user_id = 0 if last_user_id is None else int(last_user_id)
 
-atable = db.auth_user
-cftable = db.custom_friend
 query = (atable.blacklisted == False) & \
         (atable.registration_key == "") & \
         (atable.id > last_user_id)
-rows = db(query).select(orderby=~atable.id,
-                        limitby=(0, 200))
+rows = db(query).select(atable.id,
+                        atable.stopstalk_handle,
+                        orderby=~atable.id,
+                        limitby=(0, 300))
 
 if len(rows) > 0:
     current.REDIS_CLIENT.set("last_user_id_submitted_to_google",
@@ -54,8 +77,35 @@ if len(rows) > 0:
 
 for row in rows:
     url = "https://www.stopstalk.com/user/profile/%s" % row.stopstalk_handle
-    content = "{\"url\": \"%s\", \"type\": \"URL_UPDATED\"}" % url
-
-    response, content = http.request(ENDPOINT, method="POST", body=content)
-    print response, content
+    make_api_request(url)
+    current_request_count["users"] += 1
+    current_request_count["total"] += 1
+    if current_request_count["total"] >= TOTAL_REQUEST_CALLS:
+        log_info("Total requests for the day processed %s" % str(current_request_count))
+        sys.exit(0)
     time.sleep(1)
+
+
+last_problem_id = current.REDIS_CLIENT.get("last_problem_id_submitted_to_google")
+last_problem_id = 0 if last_problem_id is None else int(last_problem_id)
+
+query = (ptable.id > last_problem_id)
+pids = db(query).select(ptable.id,
+                        limitby=(0, 1000))
+pids = [x.id for x in pids]
+
+for pid in pids:
+    url = "https://www.stopstalk.com/problems?problem_id=%d" % pid
+    make_api_request(url)
+    current_request_count["problems"] += 1
+    current_request_count["total"] += 1
+    if current_request_count["total"] >= TOTAL_REQUEST_CALLS:
+        log_info("Total requests for the day processed %s" % str(current_request_count))
+        sys.exit(0)
+    time.sleep(1)
+
+if len(pids) > 0:
+    current.REDIS_CLIENT.set("last_problem_id_submitted_to_google",
+                             pids[-1])
+
+log_info("Outside of both loops %s" % str(current_request_count))
