@@ -56,6 +56,7 @@ def check_api_token(function):
             if token not in allowed_tokens:
                 current.response.status = 401
                 return current.response
+            current.request.extension = 'json'
         return function(*args, **kwargs)
     return verifier
 
@@ -70,6 +71,25 @@ def check_api_userauth(function):
     return verifier
 
 # -----------------------------------------------------------------------------
+def gauth_redirect(token):
+    import requests
+    from gluon import URL
+    resp = requests.post("https://oauth2.googleapis.com/tokeninfo", data = {'id_token':token})
+    data = resp.json()
+    user_email = data['email']
+    user = current.db.auth_user(**{"email": user_email})
+    if not user :
+        user_info = {
+            'g_token':data['jti'],
+            'first_name': data['given_name'],
+            'last_name': data['family_name']
+        }
+        user_info = json.dumps(user_info)
+        current.REDIS_CLIENT.set('g_token_'+user_email, user_info, ex=1 * 60 * 10)
+        return '/user/fill_details?g_token='+data['jti']+'&email='+user_email
+    current.auth.login_user(user)
+    return URL("dashboard")
+
 def push_influx_data(measurement, points, app_name="cron"):
 
     if current.environment != "production":
