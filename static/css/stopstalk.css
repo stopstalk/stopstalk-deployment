@@ -663,3 +663,7 @@ nav ul a:hover {
     width: 18px;
     margin-bottom: -4px;
 }
+
+#recommendation-table {
+    padding-left: 5%;
+}
