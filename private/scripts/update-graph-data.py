@@ -34,6 +34,7 @@
 import requests, re, os, sys, json, gevent, pickle
 import sites as all_site_profiles
 from getpass import getuser
+import utilities
 from pwd import getpwnam
 from gevent import monkey
 gevent.monkey.patch_all(thread=False)
@@ -139,6 +140,7 @@ class User:
             os.chown(self.pickle_file_path, www_data.pw_uid, www_data.pw_gid)
 
         log_line(self.get_debug_statement() + "Writing to filesystem done")
+        utilities.clear_profile_page_cache(self.user_record.stopstalk_handle)
 
     # --------------------------------------------------------------------------
     def update_graph_data(self, sites):
@@ -151,7 +153,6 @@ class User:
 
         gevent.joinall(threads)
         if self.retrieval_failed == False:
-            current.REDIS_CLIENT.delete("get_stopstalk_rating_history_" + self.user_record.stopstalk_handle)
             self.write_to_filesystem()
             self.user_record.update_record(graph_data_retrieved=True)
         else:
