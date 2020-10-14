@@ -173,6 +173,7 @@ def dashboard():
         ratable.insert(user_id=session.user_id)
         rarecord = db(ratable.user_id == session.user_id).select().first()
 
+    user = session.auth.user
     db.sessions_today.insert(message="%s %s %d %s" % (user.first_name,
                                                       user.last_name,
                                                       user.id,
@@ -988,34 +989,29 @@ def googleauth():
     CLIENT_ID = current.CLIENT_ID
     CLIENT_SECRET = current.CLIENT_SECRET
     REDIRECT_URI = current.REDIRECT_URI
-    if not request.vars.get("code"):
-        auth_uri = ("https://accounts.google.com/o/oauth2/v2/auth?response_type=code"
-                    "&client_id={}&redirect_uri={}&scope={}").format(CLIENT_ID, REDIRECT_URI, SCOPE)
-        return redirect(auth_uri)
-    else:
+
+    if request.vars.get("credential"):
+        token = request.vars.get("credential")
+        return redirect(utilities.gauth_redirect(token))
+    elif request.vars.get("code"):
         auth_code = request.vars.get("code")
-        print('1')
         data = {"code": auth_code,
                 "client_id": CLIENT_ID,
                 "client_secret": CLIENT_SECRET,
                 "redirect_uri": REDIRECT_URI,
                 "grant_type": "authorization_code"}
-        token = requests.post("https://oauth2.googleapis.com/token", data=data)
-        print(2)
-        if not token.ok:
+        resp = requests.post("https://oauth2.googleapis.com/token", data=data)
+        if not resp.ok:
             raise HTTP(401, "AUTH rejected")
-        print(3)
-        resp = requests.post("https://oauth2.googleapis.com/tokeninfo", data=token)
-        print(4)
-        data = resp.json()
-        user_email = data['email']
-        user = db.auth_user(**{"email": user_email})
-        if not user :
-            user = auth.register_bare(email=user_email)
-        auth.login_user(user)
-        return redirect(URL("dashboard"))
+        token = resp.json()["id_token"]
+        return redirect(utilities.gauth_redirect(token))
+    else:
+        auth_uri = ("https://accounts.google.com/o/oauth2/v2/auth?response_type=code"
+                    "&client_id={}&redirect_uri={}&scope={}").format(CLIENT_ID, REDIRECT_URI, SCOPE)
+        return redirect(auth_uri)
 
 # ----------------------------------------------------------------------------
+
 def filters():
     """
         Apply multiple kind of filters on submissions
@@ -1406,7 +1402,7 @@ def search():
         Show the list of registered users
     """
 
-    if request.extension == "html":
+    if request.extension == "html" :
         # Get all the list of institutes for the dropdown
         itable = db.institutes
         all_institutes = db(itable).select(itable.name,
