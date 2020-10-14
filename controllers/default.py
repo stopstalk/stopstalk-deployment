@@ -162,10 +162,6 @@ def get_card_html():
 # ----------------------------------------------------------------------------
 @auth.requires_login()
 def dashboard():
-    user = session.auth.user
-    if user.stopstalk_handle == None:
-        return redirect(URL("user","update_details"))
-
     session.welcome_shown = True
     ratable = db.recent_announcements
     rarecord = db(ratable.user_id == session.user_id).select().first()
@@ -1402,7 +1398,7 @@ def search():
         Show the list of registered users
     """
 
-    if request.extension == "html" :
+    if request.extension == "html":
         # Get all the list of institutes for the dropdown
         itable = db.institutes
         all_institutes = db(itable).select(itable.name,
