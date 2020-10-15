@@ -78,17 +78,17 @@ def gauth_redirect(token):
     data = resp.json()
     user_email = data['email']
     user = current.db.auth_user(**{"email": user_email})
-    if not user :
+    if not user:
         user_info = {
-            'g_token':data['jti'],
+            'g_token': data['sub'],
             'first_name': data['given_name'],
             'last_name': data['family_name']
         }
         user_info = json.dumps(user_info)
         current.REDIS_CLIENT.set('g_token_'+user_email, user_info, ex=1 * 60 * 10)
-        return '/user/fill_details?g_token='+data['jti']+'&email='+user_email
+        return '/user/fill_details?g_token='+data['sub']+'&email='+user_email
     current.auth.login_user(user)
-    return URL("dashboard")
+    return URL("default", "dashboard")
 
 def push_influx_data(measurement, points, app_name="cron"):
 

@@ -74,8 +74,6 @@ def fill_details():
 
     # Set defaults
     atable.stopstalk_handle.comment = T("StopStalk handle cannot be empty")
-    atable.stopstalk_handle.requires.append(IS_NOT_EMPTY(
-    error_message=auth.messages.is_empty))
 
     atable.email.readable = True
     atable.email.writable = False
@@ -90,8 +88,7 @@ def fill_details():
                    showid=False)
 
     if form.process(onvalidation=current.sanitize_fields).accepted:
-        current.REDIS_CLIENT.delete("g_token_"+email)
-        print('pp')
+        current.REDIS_CLIENT.delete("g_token_" + email)
         user = db.auth_user(**{"email": email})
         print(user)
         auth.login_user(user)

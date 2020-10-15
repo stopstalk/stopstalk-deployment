@@ -979,7 +979,7 @@ def user():
 
 def googleauth():
     if auth.is_logged_in():
-        redirect(URL("dashboard"))
+        return redirect(URL("default", "dashboard"))
 
     SCOPE = "profile+email"
     CLIENT_ID = current.CLIENT_ID
@@ -1007,7 +1007,6 @@ def googleauth():
         return redirect(auth_uri)
 
 # ----------------------------------------------------------------------------
-
 def filters():
     """
         Apply multiple kind of filters on submissions
