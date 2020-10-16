@@ -32,7 +32,7 @@
             <img src="{{=URL('static','images/btn_google_signup.png')}}" height="50px">
         {{pass}}
     </a>
-    <hr width="50%" style="margin-top: 35px; margin-bottom: 20px;">
+    <hr id="gauth-login-divider">
     {{
     if request.args(0)=='login':
         if not 'register' in auth.settings.actions_disabled:
