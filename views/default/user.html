@@ -25,7 +25,12 @@
     </div>
     <div id="web2py_user_form" class="col s8">
     <a href="/default/googleauth">
-        <img src="{{=URL('static','images/btn_google_sigin.png')}}" height="50px">
+        {{if request.args(0)=='login':}}
+            <img src="{{=URL('static','images/btn_google_sigin.png')}}" height="50px">
+        {{pass}}
+        {{if request.args(0)=='register':}}
+            <img src="{{=URL('static','images/btn_google_sigup.png')}}" height="50px">
+        {{pass}}
     </a>
     <hr width="50%" style="margin-top: 35px; margin-bottom: 20px;">
     {{
