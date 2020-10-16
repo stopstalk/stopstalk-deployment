@@ -88,7 +88,7 @@ def fill_details():
         current.REDIS_CLIENT.delete("g_token_" + email)
         user = db.auth_user(**{"email": email})
         auth.login_user(user)
-        return redirect(URL("default","dashboard")
+        return redirect(URL("default","dashboard"))
     elif form.errors:
         response.flash = T("Form has errors")
     else:
