@@ -976,7 +976,6 @@ def user():
     return dict(form=auth())
 
 # ----------------------------------------------------------------------------
-
 def googleauth():
     if auth.is_logged_in():
         return redirect(URL("default", "dashboard"))

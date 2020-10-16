@@ -73,7 +73,6 @@ def check_api_userauth(function):
 # -----------------------------------------------------------------------------
 def gauth_redirect(token):
     import requests
-    from gluon import URL
     resp = requests.post("https://oauth2.googleapis.com/tokeninfo", data = {'id_token':token})
     data = resp.json()
     user_email = data['email']
@@ -86,7 +85,7 @@ def gauth_redirect(token):
         }
         user_info = json.dumps(user_info)
         current.REDIS_CLIENT.set('g_token_'+user_email, user_info, ex=1 * 60 * 10)
-        return '/user/fill_details?g_token='+data['sub']+'&email='+user_email
+        return return URL("user","fill_details",vars={'g_token': data['sub'],'email': user_email})
     current.auth.login_user(user)
     return URL("default", "dashboard")
 
