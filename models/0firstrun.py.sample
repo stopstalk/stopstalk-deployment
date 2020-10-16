@@ -94,4 +94,9 @@ current.api_tokens = []
 
 #user verification JWT secret
 current.jwt_secret = ""
+
+#gauth Credentials
+current.CLIENT_ID=""
+current.CLIENT_SECRET=""
+current.REDIRECT_URI="http://127.0.0.1:8001/default/googleauth"
 # =============================================================================

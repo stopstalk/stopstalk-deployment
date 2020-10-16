@@ -41,6 +41,64 @@ def login_token():
     return auth_jwt.jwt_token_manager()
 
 # ------------------------------------------------------------------------------
+def fill_details():
+    """
+        Fill the details after google registration 
+    """
+    auth_token = request.vars.get("g_token")
+
+    # verify parameters
+    if not auth_token:
+        raise HTTP(400, "Invalid parameters")
+        return
+
+    gauth_redis_key = utilities.get_gauth_key(auth_token)
+
+    # verify credentials
+    user_info = json.loads(current.REDIS_CLIENT.get(gauth_redis_key))
+    if auth_token != user_info["g_token"]:
+        raise HTTP(401, "Invalid credentials")
+        return
+    
+    # create form
+    form_fields = ["first_name",
+                   "last_name",
+                   "email",
+                   "institute",
+                   "country",
+                   "stopstalk_handle"]
+
+    for site in current.SITES:
+        form_fields.append(site.lower() + "_handle")
+
+    atable = db.auth_user
+    stable = db.submission
+
+    # Set defaults
+    atable.email.readable = True
+    atable.email.writable = False
+
+    atable.email.default = user_info["email"]
+    atable.first_name.default = user_info["first_name"]
+    atable.last_name.default = user_info["last_name"]
+
+    form = SQLFORM(db.auth_user,
+                   fields=form_fields,
+                   showid=False)
+
+    if form.process(onvalidation=current.sanitize_fields).accepted:
+        current.REDIS_CLIENT.delete(gauth_redis_key)
+        user = db.auth_user(**{"email": user_info["email"]})
+        auth.login_user(user)
+        return redirect(URL("default","dashboard"))
+    elif form.errors:
+        response.flash = T("Form has errors")
+    else:
+        response.flash = T("Please update your details to continue")
+
+    return dict(form=form)
+
+# ------------------------------------------------------------------------------
 @auth.requires_login()
 def index():
     """

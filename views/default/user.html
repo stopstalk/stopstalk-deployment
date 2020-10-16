@@ -3,7 +3,12 @@
 <h2>
 {{=T('Sign Up') if request.args(0) == 'register' else T('Login') if request.args(0) == 'login' else T(request.args(0).replace('_',' ').title())}}
 </h2>
-
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<div id="g_id_onload"
+     data-client_id="{{=current.CLIENT_ID}}"
+     data-auto_select="false"
+     data-login_uri="{{=current.REDIRECT_URI}}">
+</div>
 <div class="row">
     <div class="col s2">
         {{if utilities.should_show_stopstalk_ads("auth"):}}
@@ -19,6 +24,15 @@
         {{pass}}
     </div>
     <div id="web2py_user_form" class="col s8">
+    <a href="/default/googleauth">
+        {{if request.args(0)=='login':}}
+            <img src="{{=URL('static','images/btn_google_signin.png')}}" height="50px">
+        {{pass}}
+        {{if request.args(0)=='register':}}
+            <img src="{{=URL('static','images/btn_google_signup.png')}}" height="50px">
+        {{pass}}
+    </a>
+    <hr id="gauth-login-divider">
     {{
     if request.args(0)=='login':
         if not 'register' in auth.settings.actions_disabled:

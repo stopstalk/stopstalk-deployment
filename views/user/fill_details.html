@@ -1,0 +1,16 @@
+{{extend 'layout.html'}}
+{{block head}}
+  <title>{{=T("Create Profile")}}</title>
+  <meta name="description" content="Create profile on StopStalk">
+  <script>
+    $(document).ready(function() {
+      $('select').material_select();
+    });
+  </script>
+{{end}}
+<h1>{{=T("You're almost there!")}}</h1>
+<div class="row">
+    <div class="col offset-s2 s8">
+        {{=form}}
+    </div>
+</div>

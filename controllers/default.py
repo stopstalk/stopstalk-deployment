@@ -979,6 +979,36 @@ def user():
     return dict(form=auth())
 
 # ----------------------------------------------------------------------------
+def googleauth():
+    if auth.is_logged_in():
+        return redirect(URL("default", "dashboard"))
+
+    SCOPE = "profile+email"
+    CLIENT_ID = current.CLIENT_ID
+    CLIENT_SECRET = current.CLIENT_SECRET
+    REDIRECT_URI = current.REDIRECT_URI
+
+    if request.vars.get("credential"):
+        token = request.vars.get("credential")
+        return redirect(utilities.gauth_redirect(token))
+    elif request.vars.get("code"):
+        auth_code = request.vars.get("code")
+        data = {"code": auth_code,
+                "client_id": CLIENT_ID,
+                "client_secret": CLIENT_SECRET,
+                "redirect_uri": REDIRECT_URI,
+                "grant_type": "authorization_code"}
+        resp = requests.post("https://oauth2.googleapis.com/token", data=data)
+        if not resp.ok:
+            raise HTTP(401, "AUTH rejected")
+        token = resp.json()["id_token"]
+        return redirect(utilities.gauth_redirect(token))
+    else:
+        auth_uri = ("https://accounts.google.com/o/oauth2/v2/auth?response_type=code"
+                    "&client_id={}&redirect_uri={}&scope={}").format(CLIENT_ID, REDIRECT_URI, SCOPE)
+        return redirect(auth_uri)
+
+# ----------------------------------------------------------------------------
 def filters():
     """
         Apply multiple kind of filters on submissions
