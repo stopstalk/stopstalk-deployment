@@ -663,3 +663,9 @@ nav ul a:hover {
     width: 18px;
     margin-bottom: -4px;
 }
+
+#gauth-login-divider {
+    border-top: 2px dashed #b1abab;
+    margin-top: 35px; margin-bottom: 20px;
+    width: 50%;
+}
