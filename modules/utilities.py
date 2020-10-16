@@ -85,7 +85,7 @@ def gauth_redirect(token):
         user_info = {
             "g_token": data["sub"],
             "first_name": data["given_name"],
-            "last_name": data["family_name"],
+            "last_name": data["family_name"] if "family_name" in data else "",
             "email": user_email
         }
         user_info = json.dumps(user_info)
