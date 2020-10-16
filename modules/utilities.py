@@ -71,6 +71,10 @@ def check_api_userauth(function):
     return verifier
 
 # -----------------------------------------------------------------------------
+def get_gauth_key(auth_token):
+    return "g_token_" + auth_token
+
+# -----------------------------------------------------------------------------
 def gauth_redirect(token):
     import requests
     resp = requests.post("https://oauth2.googleapis.com/tokeninfo", data={"id_token": token})
@@ -81,11 +85,12 @@ def gauth_redirect(token):
         user_info = {
             "g_token": data["sub"],
             "first_name": data["given_name"],
-            "last_name": data["family_name"]
+            "last_name": data["family_name"],
+            "email": user_email
         }
         user_info = json.dumps(user_info)
-        current.REDIS_CLIENT.set("g_token_" + user_email, user_info, ex=1 * 60 * 10)
-        return URL("user", "fill_details", vars={"g_token": data["sub"], "email": user_email})
+        current.REDIS_CLIENT.set(get_gauth_key(data["sub"]), user_info, ex=1 * 60 * 10)
+        return URL("user", "fill_details", vars={"g_token": data["sub"]})
     current.auth.login_user(user)
     return URL("default", "dashboard")
 

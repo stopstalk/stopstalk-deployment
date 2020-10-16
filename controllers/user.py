@@ -45,20 +45,22 @@ def fill_details():
     """
         Fill the details after google registration 
     """
-    auth_token = request.vars.get('g_token')
-    email = request.vars.get('email')
+    auth_token = request.vars.get("g_token")
 
-    #verify parameters
-    if not email or not auth_token:
-        raise HTTP(400, 'Invalid parameters')
+    # verify parameters
+    if not auth_token:
+        raise HTTP(400, "Invalid parameters")
         return
-    #verify credentials
-    user_info = json.loads(current.REDIS_CLIENT.get("g_token_" + email))
-    if auth_token != user_info['g_token']:
-        raise HTTP(401, 'Invalid credentials')
+
+    gauth_redis_key = utilities.get_gauth_key(auth_token)
+
+    # verify credentials
+    user_info = json.loads(current.REDIS_CLIENT.get(gauth_redis_key))
+    if auth_token != user_info["g_token"]:
+        raise HTTP(401, "Invalid credentials")
         return
     
-    #create form
+    # create form
     form_fields = ["first_name",
                    "last_name",
                    "email",
@@ -76,17 +78,17 @@ def fill_details():
     atable.email.readable = True
     atable.email.writable = False
 
-    atable.email.default = email
-    atable.first_name.default = user_info['first_name']
-    atable.last_name.default = user_info['last_name']
+    atable.email.default = user_info["email"]
+    atable.first_name.default = user_info["first_name"]
+    atable.last_name.default = user_info["last_name"]
 
     form = SQLFORM(db.auth_user,
                    fields=form_fields,
                    showid=False)
 
     if form.process(onvalidation=current.sanitize_fields).accepted:
-        current.REDIS_CLIENT.delete("g_token_" + email)
-        user = db.auth_user(**{"email": email})
+        current.REDIS_CLIENT.delete(gauth_redis_key)
+        user = db.auth_user(**{"email": user_info["email"]})
         auth.login_user(user)
         return redirect(URL("default","dashboard"))
     elif form.errors:
