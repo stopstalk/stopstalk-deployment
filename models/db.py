@@ -496,6 +496,10 @@ current.auth = auth
 current.auth_jwt = auth_jwt
 current.response.formstyle = utilities.materialize_form
 current.sanitize_fields = sanitize_fields
+current.register_callback = register_callback
+current.notify_institute_users = notify_institute_users
+current.create_next_retrieval_record = create_next_retrieval_record
+current.append_user_to_refreshed_users = append_user_to_refreshed_users
 current.create_next_retrieval_record = create_next_retrieval_record
 
 #########################################################################
