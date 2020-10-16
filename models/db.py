@@ -456,7 +456,7 @@ def append_user_to_refreshed_users(record):
     current.REDIS_CLIENT.rpush("next_retrieve_user", record.id)
 
 # -----------------------------------------------------------------------------
-def register_callback(form):
+def register_callback(form, register_type="normal"):
     """
         Send mail to raj454raj@gmail.com about all the users who register
 
@@ -472,12 +472,14 @@ def register_callback(form):
     message = """
 Name: %s %s
 Email: %s
+Register Type: %s
 Institute: %s
 Country: %s
 StopStalk handle: %s
 Referrer: %s\n""" % (form.vars.first_name,
                      form.vars.last_name,
                      form.vars.email,
+                     register_type,
                      form.vars.institute,
                      form.vars.country,
                      form.vars.stopstalk_handle,
