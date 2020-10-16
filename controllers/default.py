@@ -120,6 +120,9 @@ def handle_error():
                   " " + \
                   str([x["stopstalk_handle"] for x in similar_users])
         error_message = "Not found"
+    elif code == "401":
+        message = "Invalid token"
+        error_message = "Invalid token"
     elif code == "500":
         # Get ticket URL:
         ticket_url = URL("admin", "default", "ticket",
@@ -135,10 +138,6 @@ def handle_error():
     else:
         message = request.vars.requested_uri if request.vars.requested_uri else request_url
         error_message = "Other error"
-
-    db.http_errors.insert(status_code=int(code),
-                          content=message,
-                          user_id=session.user_id if auth.is_logged_in() else None)
 
     return dict(error_message=error_message, similar_users=similar_users)
 

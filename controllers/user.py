@@ -49,14 +49,22 @@ def fill_details():
 
     # verify parameters
     if not auth_token:
+        session.flash = "Invalid request parameters!"
         raise HTTP(400, "Invalid parameters")
         return
 
     gauth_redis_key = utilities.get_gauth_key(auth_token)
+    redis_value = current.REDIS_CLIENT.get(gauth_redis_key)
+
+    if not redis_value:
+        session.flash = "Token not found, please try again!"
+        raise HTTP(401, "Invalid credentials")
+        return
 
     # verify credentials
-    user_info = json.loads(current.REDIS_CLIENT.get(gauth_redis_key))
+    user_info = json.loads(redis_value)
     if auth_token != user_info["g_token"]:
+        session.flash = "Invalid token!"
         raise HTTP(401, "Invalid credentials")
         return
     

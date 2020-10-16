@@ -89,7 +89,7 @@ def gauth_redirect(token):
             "email": user_email
         }
         user_info = json.dumps(user_info)
-        current.REDIS_CLIENT.set(get_gauth_key(data["sub"]), user_info, ex=1 * 60 * 10)
+        current.REDIS_CLIENT.set(get_gauth_key(data["sub"]), user_info, ex=1 * 60 * 20)
         return URL("user", "fill_details", vars={"g_token": data["sub"]})
     current.auth.login_user(user)
     return URL("default", "dashboard")
