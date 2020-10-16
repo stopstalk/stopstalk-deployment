@@ -86,10 +86,12 @@ def fill_details():
                    fields=form_fields,
                    showid=False)
 
+    form.vars.email = user_info["email"]
+
     if form.process(onvalidation=current.sanitize_fields).accepted:
         current.REDIS_CLIENT.delete(gauth_redis_key)
         user = db.auth_user(**{"email": user_info["email"]})
-        current.register_callback(form)
+        current.register_callback(form, "google_auth")
         current.notify_institute_users(user)
         current.create_next_retrieval_record(user)
         current.append_user_to_refreshed_users(user)
