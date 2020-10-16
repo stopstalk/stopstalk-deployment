@@ -380,7 +380,7 @@ class RecentSubmissionsCard(BaseCard):
 
                 final_data = sorted(final_hash.items(),
                                     key=lambda x: x[1]["total"],
-                                    reverse=True)[:2]
+                                    reverse=True)[:3]
             else:
                 final_data = []
 
