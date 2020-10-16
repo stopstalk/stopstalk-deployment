@@ -89,6 +89,10 @@ def fill_details():
     if form.process(onvalidation=current.sanitize_fields).accepted:
         current.REDIS_CLIENT.delete(gauth_redis_key)
         user = db.auth_user(**{"email": user_info["email"]})
+        current.register_callback(form)
+        current.notify_institute_users(user)
+        current.create_next_retrieval_record(user)
+        current.append_user_to_refreshed_users(user)
         auth.login_user(user)
         return redirect(URL("default","dashboard"))
     elif form.errors:
