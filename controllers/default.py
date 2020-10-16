@@ -185,7 +185,10 @@ def cta_handler():
                     False,
                     **request.vars
                 )
-    redirect(URL("problems", "index", vars=dict(problem_id=problem_id)))
+    redirect(URL("problems",
+                 "index",
+                 vars=dict(problem_id=problem_id,
+                           submission_type="global")))
 
 # ----------------------------------------------------------------------------
 def user_editorials():
