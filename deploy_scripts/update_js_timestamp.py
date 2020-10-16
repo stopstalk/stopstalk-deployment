@@ -97,7 +97,9 @@ all_image_files = ["images/favicon.ico",
                    "images/paypal-donate-button.png",
                    "images/me.jpg",
                    "images/todo_onboarding.gif",
-                   "images/write-editorials.gif"]
+                   "images/write-editorials.gif",
+                   "images/btn_google_signin.png",
+                   "images/btn_google_signup.png"]
 
 REDIS_CLIENT = redis.Redis(host='localhost', port=6379, db=0)
 
