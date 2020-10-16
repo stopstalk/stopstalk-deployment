@@ -53,7 +53,7 @@ def fill_details():
         raise HTTP(400, 'Invalid parameters')
         return
     #verify credentials
-    user_info = json.loads(current.REDIS_CLIENT.get("g_token_"+email))
+    user_info = json.loads(current.REDIS_CLIENT.get("g_token_" + email))
     if auth_token != user_info['g_token']:
         raise HTTP(401, 'Invalid credentials')
         return
@@ -73,11 +73,8 @@ def fill_details():
     stable = db.submission
 
     # Set defaults
-    atable.stopstalk_handle.comment = T("StopStalk handle cannot be empty")
-
     atable.email.readable = True
     atable.email.writable = False
-    atable.email.comment = T("Email cannot be updated")
 
     atable.email.default = email
     atable.first_name.default = user_info['first_name']
@@ -90,9 +87,8 @@ def fill_details():
     if form.process(onvalidation=current.sanitize_fields).accepted:
         current.REDIS_CLIENT.delete("g_token_" + email)
         user = db.auth_user(**{"email": email})
-        print(user)
         auth.login_user(user)
-        return redirect('/dashboard')
+        return redirect(URL("default","dashboard")
     elif form.errors:
         response.flash = T("Form has errors")
     else:
