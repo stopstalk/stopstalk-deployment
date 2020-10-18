@@ -74,7 +74,8 @@ def fill_details():
                    "email",
                    "institute",
                    "country",
-                   "stopstalk_handle"]
+                   "stopstalk_handle",
+                   "referrer"]
 
     for site in current.SITES:
         form_fields.append(site.lower() + "_handle")
