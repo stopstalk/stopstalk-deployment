@@ -166,7 +166,7 @@ class RetrievalTest:
                 },
                 "HackerRank": {
                     "plink": "https://www.hackerrank.com/challenges/candles-2",
-                    "problem_setters": ["gdisastery"]
+                    "problem_setters": ["Gary97"]
                 },
                 "Timus": {
                     "plink": "https://acm.timus.ru/problem.aspx?space=1&num=1954&locale=en",
