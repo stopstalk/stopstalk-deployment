@@ -195,7 +195,7 @@ def pick_a_problem(user_id, custom=False, **args):
     query = ~ptable.id.belongs(solved_problems.union(unsolved_problems))
 
     if "kind" not in args:
-	args["kind"] = "random"
+        args["kind"] = "random"
 
     if args["kind"] == "random":
         record = db(query).select(ptable.id, orderby="<random>").first()
