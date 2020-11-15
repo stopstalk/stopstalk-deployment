@@ -77,12 +77,14 @@ for row in rows:
     result = make_api_request(url)
     current_request_count["users"] += 1
     current_request_count["total"] += 1
+    last_user_id = row.id
     if not result or current_request_count["total"] >= TOTAL_REQUEST_CALLS:
         log_info("Total requests for the day processed %s" % str(current_request_count))
         current.REDIS_CLIENT.set("last_user_id_submitted_to_google", row.id)
         sys.exit(0)
     time.sleep(1)
 
+current.REDIS_CLIENT.set("last_user_id_submitted_to_google", last_user_id)
 
 last_problem_id = current.REDIS_CLIENT.get("last_problem_id_submitted_to_google")
 last_problem_id = 0 if last_problem_id is None else int(last_problem_id)
@@ -97,10 +99,12 @@ for pid in pids:
     result = make_api_request(url)
     current_request_count["problems"] += 1
     current_request_count["total"] += 1
+    last_problem_id = pid
     if not result or current_request_count["total"] >= TOTAL_REQUEST_CALLS:
         log_info("Total requests for the day processed %s" % str(current_request_count))
         current.REDIS_CLIENT.set("last_problem_id_submitted_to_google", pid)
         sys.exit(0)
     time.sleep(1)
 
+current.REDIS_CLIENT.set("last_problem_id_submitted_to_google", last_problem_id)
 log_info("Outside of both loops %s" % str(current_request_count))
