@@ -334,17 +334,22 @@ class Profile(object):
                 return submissions
 
             if row.has_key("contestId") == False:
-                print "Contest ID not found for", row["problem"]["name"]
-                continue
+                try:
+                    problem_link = "http://www.codeforces.com/problemsets/" + \
+                                   row["problem"]["problemsetName"] + \
+                                   "/problem/99999/" + str(row["problem"]["index"])
+                except Exception as e:
+                    print "Unable to create problem_link for", row
+                    continue
+            else:
+                arg = "problem/"
+                if int(row["contestId"]) > 90000:
+                    arg = "gymProblem/"
 
-            arg = "problem/"
-            if int(row["contestId"]) > 90000:
-                arg = "gymProblem/"
-
-            # Problem Name/URL
-            problem_link = "http://www.codeforces.com/problemset/" + arg + \
-                           str(row["contestId"]) + "/" + \
-                           row["problem"]["index"]
+                # Problem Name/URL
+                problem_link = "http://www.codeforces.com/problemset/" + arg + \
+                               str(row["contestId"]) + "/" + \
+                               row["problem"]["index"]
 
             problem_name = row["problem"]["name"]
 
@@ -382,7 +387,8 @@ class Profile(object):
                 points = "0"
 
             # View code link
-            if problem_link.__contains__("gymProblem"):
+            if problem_link.__contains__("gymProblem") or \
+               row.has_key("contestId") == False:
                 view_link = ""
             else:
                 view_link = "http://www.codeforces.com/contest/" + \
