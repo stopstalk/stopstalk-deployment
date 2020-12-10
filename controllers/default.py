@@ -336,13 +336,17 @@ def raj454raj():
     return dict()
 
 # ----------------------------------------------------------------------------
-@auth.requires_login()
+@utilities.check_api_userauth
 def todo():
 
     ptable = db.problem
     tltable = db.todo_list
 
     res = db(tltable.user_id == session.user_id).select(tltable.problem_link)
+    # for api request
+    if utilities.is_apicall():
+        return response.json(dict(todos=res))
+        
     table = TABLE(_class="bordered centered")
     table.append(THEAD(TR(TH(T("Problem")),
                           TH(T("Site")),
@@ -390,11 +394,10 @@ def todo():
                   BR(),
                   _class="col offset-s2 s8 z-depth-2"),
               _class="row")
-
     return dict(div=div)
 
 # ----------------------------------------------------------------------------
-@auth.requires_login()
+@utilities.check_api_userauth
 def remove_todo():
     plink = request.vars["plink"]
     tltable = db.todo_list
