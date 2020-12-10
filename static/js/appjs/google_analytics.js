@@ -96,7 +96,7 @@
         addEventListener('#footer-privacy-policy', 'Footer Privacy Policy', false);
         addEventListener('#footer-faqs', 'Footer FAQs', false);
         addEventListener('#footer-contact-us', 'Footer Contact Us', false);
-        addEventListener('#footer-stopstalk-status', 'Footer StopStalk status', false);
+        addEventListener('#footer-license', 'Footer MIT License', false);
         addEventListener('#footer-contributors', 'Footer Contributors', false);
         addEventListener('#footer-raj454raj', 'Footer raj454raj', false);
         addEventListener('#first-friend-search', 'First friend search', false);
