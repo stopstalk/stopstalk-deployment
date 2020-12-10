@@ -28,7 +28,7 @@ response.title = request.application.replace('_',' ').title()
 response.subtitle = ''
 
 response.meta.author = 'StopStalk admin@stopstalk.com'
-response.meta.keywords = 'stopstalk, raj454raj, competitive programming, algorithms, algorithmic progress'
+response.meta.keywords = 'stopstalk, raj454raj, competitive programming, algorithms, algorithmic progress, codechef, codeforces, spoj, uva, timus, atcoder, hackerearth, hackerrank'
 response.meta.generator = ''
 
 response.google_analytics_id = None
