@@ -17,37 +17,11 @@
   <h6>{{=T("Note: All the time stamps mentioned here are in your localized timezone (Browser Time)")}}</h6>
 
   <div class="row">
-    <div class="col s2">
-      {{if utilities.should_show_stopstalk_ads("contests"):}}
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-        <!-- Contest page - Left -->
-        <ins class="adsbygoogle"
-             style="display:inline-block;width:160px;height:600px"
-             data-ad-client="ca-pub-5161647280125247"
-             data-ad-slot="3679946592"></ins>
-        <script>
-             (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
-      {{pass}}
-    </div>
-    <div class="col s8">
+    <div class="col offset-s1 s10">
       {{if retrieved:}}
         {{=table}}
       {{else:}}
         <p>Error retrieving contests! If the problem persists please <a href="{{=URL('default', 'contact_us')}}">{{=T("Contact Us")}}</a></p>
-      {{pass}}
-    </div>
-    <div class="col s2">
-      {{if utilities.should_show_stopstalk_ads("contests"):}}
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-        <!-- Contest page - Right -->
-        <ins class="adsbygoogle"
-             style="display:inline-block;width:160px;height:600px"
-             data-ad-client="ca-pub-5161647280125247"
-             data-ad-slot="9718741338"></ins>
-        <script>
-             (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
       {{pass}}
     </div>
   </div>
