@@ -10,20 +10,7 @@
      data-login_uri="{{=current.REDIRECT_URI}}">
 </div>
 <div class="row">
-    <div class="col s2">
-        {{if utilities.should_show_stopstalk_ads("auth"):}}
-            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-            <!-- Login page - left -->
-            <ins class="adsbygoogle"
-                 style="display:inline-block;width:160px;height:600px"
-                 data-ad-client="ca-pub-5161647280125247"
-                 data-ad-slot="2589747277"></ins>
-            <script>
-                 (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
-        {{pass}}
-    </div>
-    <div id="web2py_user_form" class="col s8">
+    <div id="web2py_user_form" class="col offset-s1 s10">
     <a href="/default/googleauth">
         {{if request.args(0)=='login':}}
             <img src="{{=URL('static','images/btn_google_signin.png')}}" height="50px">
@@ -39,24 +26,11 @@
             form.add_button(T('Sign Up'),URL(args='register', vars={'_next': request.vars._next} if request.vars._next else None),_class='btn btn-default')
         pass
         if not 'request_reset_password' in auth.settings.actions_disabled:
-            form.add_button(T('Lost Password'),URL(args='request_reset_password'),_class='btn btn-default')
+            form.add_button(T('Forgot Password'),URL(args='request_reset_password'),_class='btn btn-default')
         pass
     pass
     =form
     }}
-    </div>
-    <div class="col s2">
-        {{if utilities.should_show_stopstalk_ads("auth"):}}
-            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-            <!-- Login page - right -->
-            <ins class="adsbygoogle"
-                 style="display:inline-block;width:160px;height:600px"
-                 data-ad-client="ca-pub-5161647280125247"
-                 data-ad-slot="1889827557"></ins>
-            <script>
-                 (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
-        {{pass}}
     </div>
 </div>
 
