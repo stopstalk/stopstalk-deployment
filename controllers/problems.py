@@ -912,7 +912,7 @@ def global_trending():
     trending_problems = eval(trending_problems)
     # for api
     if utilities.is_apicall():
-        return response.json(dict(problems = trending_problems))
+        return response.json(dict(problems=trending_problems))
     return draw_trending_table(trending_problems, "global", session.user_id)
 
 # ----------------------------------------------------------------------------
