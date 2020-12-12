@@ -66,8 +66,12 @@ def check_api_userauth(function):
         API Token with userauth Checking Decorator
     """
     @current.auth_jwt.allows_jwt()
+    @check_api_token
+    @current.auth.requires_login()  
     def verifier(*args, **kwargs):
-        return check_api_token(function(*args, **kwargs))
+        if current.session.user_id is None:
+            current.session.user_id = current.auth.user_id
+        return function(*args, **kwargs)
     return verifier
 
 # -----------------------------------------------------------------------------
