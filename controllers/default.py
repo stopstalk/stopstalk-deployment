@@ -343,9 +343,6 @@ def todo():
     tltable = db.todo_list
 
     res = db(tltable.user_id == session.user_id).select(tltable.problem_link)
-    # for api request
-    if utilities.is_apicall():
-        return response.json(dict(todos=res))
         
     table = TABLE(_class="bordered centered")
     table.append(THEAD(TR(TH(T("Problem")),
@@ -364,6 +361,10 @@ def todo():
                                                   ptable.user_ids,
                                                   ptable.custom_user_ids)
 
+    # for api request
+    if utilities.is_apicall():
+        return response.json(dict(todos=rows))
+    
     def _get_ids(ids):
         ids = ids.split(",")
         return [] if ids[0] == "" else ids
