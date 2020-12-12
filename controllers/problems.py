@@ -897,7 +897,7 @@ def friends_trending():
      
     # for api
     if utilities.is_apicall():
-        return response.json(dict(problems = last_submissions))
+        return response.json(dict(submissions=last_submissions))
 
     return trending_utilities.compute_trending_table(last_submissions,
                                                      "friends",
