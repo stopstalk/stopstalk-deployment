@@ -112,7 +112,7 @@ def get_tag_values():
     return dict(tags=tags)
 
 # ----------------------------------------------------------------------------
-@auth.requires_login()
+@utilities.check_api_userauth
 def add_todo_problem():
     problem_id = request.vars["pid"]
 
@@ -876,7 +876,7 @@ def search():
                 generalized_tags=generalized_tags)
 
 # ----------------------------------------------------------------------------
-@auth.requires_login()
+@utilities.check_api_userauth
 def friends_trending():
     import trending_utilities
     friends, cusfriends = utilities.get_friends(session.user_id)
@@ -894,16 +894,25 @@ def friends_trending():
     query = (stable.user_id.belongs(friends) | \
              stable.custom_user_id.belongs(custom_friends))
     last_submissions = trending_utilities.get_last_submissions_for_trending(query)
+     
+    # for api
+    if utilities.is_apicall():
+        problems = trending_utilities.get_trending_problem_list(last_submissions)
+        return response.json(dict(problems=problems))
 
     return trending_utilities.compute_trending_table(last_submissions,
                                                      "friends",
                                                      session.user_id)
 
 # ----------------------------------------------------------------------------
+@utilities.check_api_token
 def global_trending():
     from trending_utilities import draw_trending_table
     trending_problems = current.REDIS_CLIENT.get(GLOBALLY_TRENDING_PROBLEMS_CACHE_KEY)
     trending_problems = eval(trending_problems)
+    # for api
+    if utilities.is_apicall():
+        return response.json(dict(problems=trending_problems))
     return draw_trending_table(trending_problems, "global", session.user_id)
 
 # ----------------------------------------------------------------------------
