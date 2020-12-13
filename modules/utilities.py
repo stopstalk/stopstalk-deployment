@@ -98,6 +98,20 @@ def gauth_redirect(token):
     current.auth.login_user(user)
     return URL("default", "dashboard")
 
+# -----------------------------------------------------------------------------
+def get_jwt_token_from_request():
+        """
+        The method that extracts and validates the token from the header
+        """
+        token = None
+        token_in_header = current.request.env.http_authorization
+        if token_in_header:
+            parts = token_in_header.split()
+            if parts[0].lower() == 'bearer' and len(parts) == 2:
+                token = parts[1]
+        return token
+
+# -----------------------------------------------------------------------------
 def push_influx_data(measurement, points, app_name="cron"):
 
     if current.environment != "production":
