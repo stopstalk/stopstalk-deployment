@@ -363,6 +363,8 @@ def todo():
 
     # for api request
     if utilities.is_apicall():
+        for row in rows:
+            row['platform'] = utilities.urltosite(row.link)
         return response.json(dict(todos=rows))
     
     def _get_ids(ids):
