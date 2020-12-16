@@ -37,6 +37,7 @@ def login_token():
         @withparameter email and password return {token : ''} if valid credentials
         @withparameter token returns the new refresh token
     """
+    request.vars.token = utilities.get_jwt_token_from_request()
     auth_jwt.verify_expiration = False
     return auth_jwt.jwt_token_manager()
 
