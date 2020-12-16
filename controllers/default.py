@@ -839,6 +839,7 @@ def updates():
     return dict()
 
 # ------------------------------------------------------------------------------
+@utilities.check_api_user
 def leaderboard():
     """
         Get a table with users sorted by StopStalk rating
@@ -922,7 +923,10 @@ def leaderboard():
                 logged_in_row = filter(lambda x: x[1] == session.handle, users)
                 logged_in_row = None if len(logged_in_row) == 0 else logged_in_row[0]
 
-            return dict(users=users, logged_in_row=logged_in_row)
+            resp = dict(users=users, logged_in_row=logged_in_row)
+            if utilities.is_apicall():
+                return response.json(resp)
+            return resp
 
     reg_users = db(aquery).select(*afields, orderby=~atable.stopstalk_rating)
 
@@ -966,7 +970,11 @@ def leaderboard():
                                  json.dumps(users),
                                  ex=1 * 60 * 60)
 
-    return dict(users=users, logged_in_row=logged_in_row)
+    resp = dict(users=users, logged_in_row=logged_in_row)
+
+    if utilities.is_apicall():
+        return response.json(resp)
+    return resp
 
 # ----------------------------------------------------------------------------
 def user():
