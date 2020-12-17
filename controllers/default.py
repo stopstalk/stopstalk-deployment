@@ -844,7 +844,6 @@ def leaderboard():
     """
         Get a table with users sorted by StopStalk rating
     """
-
     specific_institute = False
     specific_country = False
     atable = db.auth_user
