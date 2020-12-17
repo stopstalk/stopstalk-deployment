@@ -57,7 +57,6 @@ def check_api_token(function):
                 current.response.status = 401
                 return current.response.json('Token is invalid')
             current.request.extension = 'json'
-            current.request.ajax = True
         return function(*args, **kwargs)
     return verifier
 
@@ -66,6 +65,8 @@ def check_api_userauth(function):
     """
         API Token with userauth Checking Decorator
     """
+    if is_apicall():
+        current.request.ajax = True
     @current.auth_jwt.allows_jwt()
     @check_api_token
     @current.auth.requires_login()  
