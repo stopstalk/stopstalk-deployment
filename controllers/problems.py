@@ -732,11 +732,12 @@ def tag():
     return
 
 # ----------------------------------------------------------------------------
+@utilities.check_api_user
 def search():
     """
         Search page for problems
     """
-
+    api_call = utilities.is_apicall()
     ttable = db.tag
     uetable = db.user_editorials
 
@@ -752,6 +753,8 @@ def search():
     generalized_tags = [x.value for x in generalized_tags]
 
     if any([problem_name, orderby, clubbed_tags, q, sites]) is False:
+        if api_call:
+            return response.json({'generalized_tags': generalized_tags})
         if request.extension == "json":
             return dict(total_pages=0)
         else:
@@ -850,7 +853,7 @@ def search():
     query &= (ptable.user_ids != None)
     query &= (ptable.custom_user_ids != None)
 
-    if request.extension == "json":
+    if request.extension == "json" and not api_call:
         total_problems = db(query).count()
 
         total_pages = total_problems / PER_PAGE
@@ -869,6 +872,9 @@ def search():
         # No need of caching here
         all_problems = db(query).select(**kwargs)
 
+    if api_call:
+        return response.json({'problems': all_problems})
+    
     return dict(table=utilities.get_problems_table(all_problems,
                                                    session.user_id,
                                                    "problem-search",
@@ -943,7 +949,7 @@ def trending():
     return dict(div=div)
 
 # ----------------------------------------------------------------------------
-@auth.requires_login()
+@utilities.check_api_userauth
 def recommendations():
     """
         Problem recommendations for the user.

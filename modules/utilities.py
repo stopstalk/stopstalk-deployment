@@ -55,8 +55,9 @@ def check_api_token(function):
             # check if the API call has a valid authentication token
             if token not in allowed_tokens:
                 current.response.status = 401
-                return current.response
+                return current.response.json('Token is invalid')
             current.request.extension = 'json'
+            current.request.ajax = True
         return function(*args, **kwargs)
     return verifier
 
@@ -70,6 +71,20 @@ def check_api_userauth(function):
     @current.auth.requires_login()  
     def verifier(*args, **kwargs):
         if current.session.user_id is None:
+            current.session.user_id = current.auth.user_id
+        return function(*args, **kwargs)
+    return verifier
+
+# -----------------------------------------------------------------------------
+def check_api_user(function):
+    """
+        API Token with user Checking Decorator
+        Login is not required
+    """
+    @check_api_token
+    @current.auth_jwt.allows_jwt(function)
+    def verifier(*args, **kwargs):
+        if current.session.user_id is None and current.auth.is_logged_in():
             current.session.user_id = current.auth.user_id
         return function(*args, **kwargs)
     return verifier
