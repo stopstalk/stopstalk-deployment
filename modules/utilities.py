@@ -65,6 +65,8 @@ def check_api_userauth(function):
     """
         API Token with userauth Checking Decorator
     """
+    if is_apicall():
+        current.request.ajax = True
     @current.auth_jwt.allows_jwt()
     @check_api_token
     @current.auth.requires_login()  
@@ -80,10 +82,15 @@ def check_api_user(function):
         API Token with user Checking Decorator
         Login is not required
     """
+    if not is_apicall():
+        def verifier(*args, **kwargs):
+            return function(*args, **kwargs)
+        return verifier
+
+    current.request.ajax = False
     @check_api_token
     @current.auth_jwt.allows_jwt(function)
     def verifier(*args, **kwargs):
-        current.request.ajax = False
         if current.session.user_id is None and current.auth.is_logged_in():
             current.session.user_id = current.auth.user_id
         return function(*args, **kwargs)
