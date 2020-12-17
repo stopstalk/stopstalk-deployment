@@ -976,6 +976,9 @@ def recommendations():
     output["recommendations_length"] = len(recommendation_pids)
     if len(recommendation_pids) > 0:
         problem_details = db(ptable.id.belongs(recommendation_pids)).select()
+        if utilities.is_apicall():
+            output["problems"] = problem_details
+            return output
         output["table"] = utilities.get_problems_table(problem_details,
                                                        user_id,
                                                        "recommendation",
