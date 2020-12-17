@@ -1407,12 +1407,14 @@ def friends():
     return dict(table1=table1, table2=table2)
 
 # ----------------------------------------------------------------------------
+utilities.check_api_user
 def search():
     """
         Show the list of registered users
     """
 
-    if request.extension == "html":
+    get_list = request.get_vars.get("get_list", None)
+    if request.extension == "html" or get_list is not None:
         # Get all the list of institutes for the dropdown
         itable = db.institutes
         all_institutes = db(itable).select(itable.name,
@@ -1423,8 +1425,11 @@ def search():
         country_name_list = current.all_countries.keys()
         country_name_list.sort()
 
-        return dict(all_institutes=all_institutes,
+        resp = dict(all_institutes=all_institutes,
                     country_name_list=country_name_list)
+        if utilities.is_apicall():
+            return response.json(resp)
+        return resp
 
     atable = db.auth_user
     ftable = db.following
@@ -1502,9 +1507,8 @@ def search():
                     userid=user_id)
 
     btn_class = "tooltipped btn-floating btn-large waves-effect waves-light"
-
+    output_users = []
     for user in rows:
-
         authorized_span = ""
         if utilities.is_stopstalk_admin(session.user_id):
             authorized_span = SPAN(A(I(_class="fa fa-pencil"),
@@ -1542,6 +1546,7 @@ def search():
 
         # If user is not logged-in then don't show the buttons
         if auth.is_logged_in() is False:
+            output_users.append(user)
             tbody.append(tr)
             continue
 
@@ -1555,17 +1560,22 @@ def search():
             tr.append(TD(BUTTON(I(_class="fa fa-user-plus fa-3x"),
                                 _class=btn_class + " green search-add-friend",
                                 data=_get_tooltip_data(*tooltip_attrs))))
+            user['is_friend'] = False
         else:
             # Already friends
             tooltip_attrs[:2] = T("Unfriend"), "unfriend"
             tr.append(TD(BUTTON(I(_class="fa fa-user-times fa-3x"),
                                 _class=btn_class + " black search-unfriend",
                                 data=_get_tooltip_data(*tooltip_attrs))))
+            user['is_friend'] = True
+        output_users.append(user)
         tbody.append(tr)
 
     table.append(tbody)
-
+    if utilities.is_apicall():
+        return response.json({'users': output_users})
     return dict(table=table)
+
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
