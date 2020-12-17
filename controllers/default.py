@@ -1407,7 +1407,7 @@ def friends():
     return dict(table1=table1, table2=table2)
 
 # ----------------------------------------------------------------------------
-utilities.check_api_user
+@utilities.check_api_user
 def search():
     """
         Show the list of registered users
