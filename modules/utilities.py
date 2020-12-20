@@ -134,8 +134,9 @@ def get_jwt_token_from_request():
 # -----------------------------------------------------------------------------
 def push_influx_data(measurement, points, app_name="cron"):
 
-    if current.environment != "production":
-        return
+    # if current.environment != "production":
+    # Temporarily commenting out the data insert for disk issues
+    return
 
     try:
         SeriesHelperClass = get_series_helper(
