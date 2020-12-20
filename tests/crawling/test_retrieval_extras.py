@@ -253,11 +253,11 @@ class RetrievalTest:
     def test_rating_graph(self):
         sites_with_rating_graph_functionality = ["CodeChef", "CodeForces", "HackerRank", "HackerEarth"]
         handles = {
-            # "CodeChef": "tryingtocode",
+            "CodeChef": "tryingtocode",
             "CodeForces": "raj454raj",
-            # "HackerRank": "tryingtocode",
-            # "HackerEarth": "karanaggarwal",
-            # "AtCoder": "imanudeep111"
+            "HackerRank": "tryingtocode",
+            "HackerEarth": "karanaggarwal",
+            "AtCoder": "imanudeep111"
         }
 
         expected_list = {
