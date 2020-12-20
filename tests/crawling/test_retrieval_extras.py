@@ -253,11 +253,11 @@ class RetrievalTest:
     def test_rating_graph(self):
         sites_with_rating_graph_functionality = ["CodeChef", "CodeForces", "HackerRank", "HackerEarth"]
         handles = {
-            "CodeChef": "tryingtocode",
+            # "CodeChef": "tryingtocode",
             "CodeForces": "raj454raj",
-            "HackerRank": "tryingtocode",
-            "HackerEarth": "karanaggarwal",
-            "AtCoder": "imanudeep111"
+            # "HackerRank": "tryingtocode",
+            # "HackerEarth": "karanaggarwal",
+            # "AtCoder": "imanudeep111"
         }
 
         expected_list = {
@@ -346,13 +346,13 @@ rt = RetrievalTest()
 pushover_message = ""
 
 for method_name in [
-                    "test_tag_retrieval",
-                    "test_editorial_retrieval",
-                    "test_invalid_handle",
-                    "test_download_submission",
+                    # "test_tag_retrieval",
+                    # "test_editorial_retrieval",
+                    # "test_invalid_handle",
+                    # "test_download_submission",
                     "test_rating_graph",
-                    "test_submissions",
-                    "test_problem_setters_retrieval"
+                    # "test_submissions",
+                    # "test_problem_setters_retrieval"
                     ]:
     res = test_retrieval(rt, method_name)
     if res != "Success":

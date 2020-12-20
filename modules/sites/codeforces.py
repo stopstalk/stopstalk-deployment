@@ -260,16 +260,16 @@ class Profile(object):
         for tr in tbody.find_all("tr"):
             all_tds = tr.find_all("td")
             contest_id = int(all_tds[1].find("a")["href"].split("/")[-1])
-            if all_tds[2].find("a"):
+            if all_tds[3].find("a"):
                 # For some users there is no rank for some contests
                 # Example http://codeforces.com/contests/with/cjoa (Contest number 3)
-                rank = int(all_tds[2].find("a").contents[0].strip())
+                rank = int(all_tds[3].find("a").contents[0].strip())
             else:
                 # @Todo: Will this create any issues as rank is assumed to be an int
                 rank = ""
-            solved_count = int(all_tds[3].find("a").contents[0].strip())
-            rating_change = int(all_tds[4].find("span").contents[0].strip())
-            new_rating = int(all_tds[5].contents[0].strip())
+            solved_count = int(all_tds[4].find("a").contents[0].strip())
+            rating_change = int(all_tds[5].find("span").contents[0].strip())
+            new_rating = int(all_tds[6].contents[0].strip())
             contest = all_contests[contest_id]
             time_stamp = str(datetime.datetime.fromtimestamp(contest["startTimeSeconds"]))
             contest_data[time_stamp] = {"name": contest["name"],
