@@ -1,6 +1,8 @@
 (function($) {
     "use strict";
 
+    var lastReminderLogged = new Set([]);
+
     /* Handle the case of single digit in a time stamp */
     function formatTimeStamp(num) {
         var strnum = num.toString();
@@ -269,6 +271,27 @@
         $('.contest-end-time').each(function() {
             runCounter($(this));
         });
+
+        window.addeventasync = function(){
+            addeventatc.settings({
+                appleical  : {show:true, text:"Apple Calendar"},
+                google     : {show:true, text:"Google"},
+                office365  : {show:false, text:"Office 365 <em>(online)</em>"},
+                outlook    : {show:false, text:"Outlook"},
+                outlookcom : {show:true, text:"Outlook"},
+                yahoo      : {show:false, text:"Yahoo <em>(online)</em>"}
+            });
+
+            addeventatc.register('button-click', function(obj){
+                console.log(lastReminderLogged);
+                $(".addeventatc_dropdown .copyx").remove();
+                var buttonData = $("#" + obj.id).data();
+                if(!lastReminderLogged.has(buttonData["title"])) {
+                    logContest(buttonData["title"], buttonData["site"], buttonData["url"], "Reminder");
+                    lastReminderLogged.add(buttonData["title"]);
+                }
+            });
+        };
 
         $(document).on('click', '.set-reminder:not(.disabled)', function() {
             var children = this.parentElement.parentElement.children,
