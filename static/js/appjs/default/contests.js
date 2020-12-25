@@ -278,7 +278,7 @@
                 duration = children[3].textContent, // Note this will always be duration and not endtime
                 contestLink = children[4].firstChild.href;
 
-            setReminder(contestName, siteName, startTime, duration, contestLink);
+            // setReminder(contestName, siteName, startTime, duration, contestLink);
             logContest(contestName, siteName, contestLink, "Reminder");
         });
 
