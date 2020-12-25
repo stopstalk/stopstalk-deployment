@@ -830,7 +830,10 @@ def get_static_file_version(file_path):
     if current.environment == "production":
         new_file_path = file_path
         static_dir = "static/minified_files"
-        if file_path[-3:] == ".js":
+        if file_path[-7:] == "min.js":
+            static_dir = "static"
+            new_file_path = file_path
+        elif file_path[-3:] == ".js":
             new_file_path = file_path[:-3] + ".min.js"
         elif file_path[-4:] == ".css":
             new_file_path = file_path[:-4] + ".min.css"
