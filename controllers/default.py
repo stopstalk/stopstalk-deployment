@@ -738,7 +738,8 @@ def contests():
                      TH(T("Site")),
                      TH(T("Start")),
                      TH(T("Duration/Ending")),
-                     TH(T("Link"))))
+                     TH(T("Link")),
+                     TH(T("Add Reminder"))))
     table.append(thead)
     tbody = TBODY()
 
@@ -784,10 +785,10 @@ def contests():
                     data=dict(tooltip=T("Contest Link"),
                               **left_tooltip_attrs),
                     _target="_blank")))
-        # append(TD(BUTTON(I(_class="fa fa-calendar-plus-o"),
-        #                  _class=reminder_class + " disabled",
-        #                  data=dict(tooltip=T("Already started!"),
-        #                            **left_tooltip_attrs))))
+        append(TD(BUTTON(I(_class="fa fa-calendar-plus-o"),
+                         _class=reminder_class + " disabled",
+                         data=dict(tooltip=T("Already started!"),
+                                   **left_tooltip_attrs))))
         tbody.append(tr)
 
     for i in upcoming:
@@ -797,6 +798,8 @@ def contests():
 
         start_time = datetime.datetime.strptime(i["StartTime"],
                                                 "%a, %d %b %Y %H:%M")
+        end_time = datetime.datetime.strptime(i["EndTime"],
+                                              "%a, %d %b %Y %H:%M")
         tr = TR()
         append = tr.append
         append(TD(i["Name"]))
@@ -818,10 +821,28 @@ def contests():
                     data=dict(tooltip=T("Contest Link"),
                               **left_tooltip_attrs),
                     _target="_blank")))
-        # append(TD(BUTTON(I(_class="fa fa-calendar-plus-o"),
-        #                  _class=reminder_class,
-        #                  data=dict(tooltip=T("Set Reminder to Google Calendar"),
-        #                            **left_tooltip_attrs))))
+        append(TD(A(I(_class="fa fa-calendar-plus-o"),
+                    _class=reminder_class,
+                    _href=URL("calendar", "u",
+                              scheme="https",
+                              host="calendar.google.com",
+                              args=["0", "r", "eventedit"],
+                              vars={"text": "Contest at " + i["Platform"].capitalize() + ": " + i["Name"],
+                                    "dates": "%s/%s" % (start_time.strftime("%Y%m%dT%H%M00"),
+                                                        end_time.strftime("%Y%m%dT%H%M00")),
+                                    "ctz": "Asia/Kolkata",
+                                    "details": "<b>Event created from <a href='https://www.stopstalk.com'>StopStalk</a></b>\n" + \
+                                               "_____________________________\n\n"
+                                               "<b>Link:</b> <a href='%s'>Contest Link</a>\n" % i["url"] + \
+                                               "<b>Site:</b> %s\n" % i["Platform"].capitalize() + \
+                                               "<b>Duration:</b> %s" % duration,
+                                    "location": i["url"],
+                                    "sf": "true",
+                                    "output": "xml"},
+                              extension=False),
+                    _target="_blank",
+                    data=dict(tooltip=T("Set Reminder to Google Calendar"),
+                              **left_tooltip_attrs))))
         tbody.append(tr)
 
     table.append(tbody)
