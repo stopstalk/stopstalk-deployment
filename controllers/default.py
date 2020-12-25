@@ -739,7 +739,7 @@ def contests():
                      TH(T("Start")),
                      TH(T("Duration/Ending")),
                      TH(T("Link")),
-                     TH(T("Add Reminder"), _style="min-width: 180px;")))
+                     TH(T("Add Reminder"))))
     table.append(thead)
     tbody = TBODY()
 
@@ -785,7 +785,10 @@ def contests():
                     data=dict(tooltip=T("Contest Link"),
                               **left_tooltip_attrs),
                     _target="_blank")))
-        append(TD())
+        append(TD(BUTTON(I(_class="fa fa-calendar-plus-o"),
+                         _class=reminder_class + " disabled",
+                         data=dict(tooltip=T("Already started!"),
+                                   **left_tooltip_attrs))))
         tbody.append(tr)
 
     for i in upcoming:
@@ -795,8 +798,6 @@ def contests():
 
         start_time = datetime.datetime.strptime(i["StartTime"],
                                                 "%a, %d %b %Y %H:%M")
-        end_time = datetime.datetime.strptime(i["EndTime"],
-                                              "%a, %d %b %Y %H:%M")
         tr = TR()
         append = tr.append
         append(TD(i["Name"]))
@@ -818,14 +819,10 @@ def contests():
                     data=dict(tooltip=T("Contest Link"),
                               **left_tooltip_attrs),
                     _target="_blank")))
-        append(TD(utilities.get_contest_reminder_button({
-                "start_time": start_time,
-                "end_time": end_time,
-                "url": i["url"],
-                "platform": i["Platform"],
-                "duration": duration,
-                "title": i["Name"]
-               })))
+        append(TD(BUTTON(I(_class="fa fa-calendar-plus-o"),
+                         _class=reminder_class,
+                         data=dict(tooltip=T("Set Reminder to Google Calendar"),
+                                   **left_tooltip_attrs))))
         tbody.append(tr)
 
     table.append(tbody)
