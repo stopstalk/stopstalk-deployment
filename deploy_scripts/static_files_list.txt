@@ -1,6 +1,5 @@
 js/bloodhound.js
 js/main.js
-js/atc.min.js
 js/jquery.js
 js/corejs-typeahead.bundle.js
 js/calendar.js

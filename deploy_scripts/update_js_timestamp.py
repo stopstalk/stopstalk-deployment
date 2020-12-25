@@ -27,9 +27,7 @@ import datetime
 
 def convert_to_min(filename):
     filename = filename.strip()
-    if filename[-7:] == ".min.js":
-        pass
-    elif filename[-3:] == ".js":
+    if filename[-3:] == ".js":
         filename = filename[:-3] + ".min.js"
     elif filename[-4:] == ".css":
         filename = filename[:-4] + ".min.css"

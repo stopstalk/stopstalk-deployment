@@ -95,22 +95,6 @@ def check_api_user(function):
     return verifier
 
 # -----------------------------------------------------------------------------
-def get_contest_reminder_button(options):
-    return DIV("Add Reminder",
-               SPAN(options["start_time"].strftime("%m/%d/%Y %H:%M"), _class="start"),
-               SPAN(options["end_time"].strftime("%m/%d/%Y %H:%M"), _class="end"),
-               SPAN("Contest at " + options["platform"].capitalize() + ": " + options["title"], _class="title"),
-               SPAN(options["url"], _class="location"),
-               SPAN("Duration: " + options["duration"] + "\n" + \
-                    "Link: " + options["url"], _class="description"),
-               SPAN("30", _class="alarm_reminder"),
-               SPAN("Asia/Calcutta", _class="timezone"),
-               data={"title": options["title"],
-                     "site": urltosite(options["url"]),
-                     "url": options["url"]},
-               _class="addeventatc")
-
-# -----------------------------------------------------------------------------
 def get_gauth_key(auth_token):
     return "g_token_" + auth_token
 
