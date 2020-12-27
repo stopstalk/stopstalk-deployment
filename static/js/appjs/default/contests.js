@@ -115,33 +115,24 @@
 
             lastDiff = diff;
 
-            var years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365));
             var days = Math.floor(diff / (1000 * 60 * 60 * 24));
             var hours = Math.floor(diff / (1000 * 60 * 60));
             var mins = Math.floor(diff / (1000 * 60));
             var secs = Math.floor(diff / 1000);
 
-            var yy = years;
-            var dd = days - years * 365;
+            var dd = days;
             var hh = hours - days * 24;
             var mm = mins - hours * 60;
             var ss = secs - mins * 60;
 
-            if (yy < 0 || dd < 0 || hh < 0 || mm < 0 || ss < 0) {
+            if (dd < 0 || hh < 0 || mm < 0 || ss < 0) {
                 // One of the contest has ended
                 thisElement.html("Contest has Ended!");
                 return diff;
             }
 
-            var displayString = "";
-            if(yy > 0) displayString += " " + yy + "y";
-            if(dd > 0) displayString += " " + dd + "d";
-            if(hh > 0) displayString += " " + hh + "h";
-            if(mm > 0) displayString += " " + mm + "m";
-            if(ss > 0) displayString += " " + ss + "s";
-
-
-            thisElement.html(displayString.trim());
+            var timeStamp = [dd, hh, mm, ss];
+            thisElement.html(timeStamp.map(formatTimeStamp).join(':'));
             return diff;
         }
 
@@ -301,6 +292,6 @@
         });
 
         /* Call Auth for Google Calendar to refresh marked contests */
-        // handleAuthorize(checkMarkedContests, false);
+        handleAuthorize(checkMarkedContests, false);
     });
 })(jQuery);

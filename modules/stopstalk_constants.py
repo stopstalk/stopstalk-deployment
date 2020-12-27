@@ -33,10 +33,13 @@ CARD_CACHE_REDIS_KEYS = {
     "curr_streak_prefix": "cards::streak_cache_"
 }
 
-CONTESTS_CACHE_KEY = "contests_page_cache"
+CONTESTS_CACHE_KEY = "upcoming_contests_cache"
 GLOBAL_LEADERBOARD_CACHE_KEY = "global_leaderboard_cache"
 
-CONTESTS_SITE_MAPPING = ["CodeChef", "CodeForces", "AtCoder", "HackerEarth", "HackerRank", "LeetCode"]
+CONTESTS_SITE_MAPPING = {"CODECHEF": "CodeChef",
+                         "CODEFORCES": "Codeforces",
+                         "HACKERRANK": "HackerRank",
+                         "HACKEREARTH": "HackerEarth"}
 
 COMMON_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.122 Safari/537.36"
 
@@ -61,5 +64,3 @@ RECOMMENDATION_STATUS = {
     "ATTEMPTED": 2,
     "SOLVED": 3
 }
-
-TIME_CONVERSION_STRING = "%Y-%m-%d %H:%M:%S"
