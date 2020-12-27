@@ -727,8 +727,8 @@ def contests():
         Show the upcoming contests
     """
 
-    ongoing, upcoming = utilities.get_contests()
-    if None in [ongoing, upcoming]:
+    contest_list = utilities.get_contests()
+    if contest_list is None:
         return dict(retrieved=False)
 
     cal = pdt.Calendar()
@@ -737,7 +737,7 @@ def contests():
     thead = THEAD(TR(TH(T("Contest Name")),
                      TH(T("Site")),
                      TH(T("Start")),
-                     TH(T("Duration/Ending")),
+                     TH(T("Duration")),
                      TH(T("Link")),
                      TH(T("Add Reminder"))))
     table.append(thead)
@@ -748,105 +748,87 @@ def contests():
     reminder_class = button_class + " orange set-reminder"
     left_tooltip_attrs = {"position": "left", "delay": "50"}
 
-    for i in ongoing:
-        if i["Platform"] not in CONTESTS_SITE_MAPPING:
-            continue
-
-        try:
-            endtime = datetime.datetime.strptime(i["EndTime"],
-                                                 "%a, %d %b %Y %H:%M")
-        except ValueError:
+    for contest in contest_list:
+        if contest["site"] not in CONTESTS_SITE_MAPPING:
             continue
 
         tr = TR()
+
+        start_time = datetime.datetime.strptime(contest["start_time"], "%Y-%m-%dT%H:%M:%S.000Z")
+        end_time = datetime.datetime.strptime(contest["end_time"], "%Y-%m-%dT%H:%M:%S.000Z")
+        start_time = start_time + datetime.timedelta(minutes=330)
+        end_time = end_time + datetime.timedelta(minutes=330)
+
         append = tr.append
-        span = SPAN(_class="green tooltipped",
-                    data={"position": "right",
-                          "delay": "50",
-                          "tooltip": "Live Contest"},
-                    _style="cursor: pointer;" + \
-                           "float:right;" + \
-                           "height:10px;" + \
-                           "width:10px;" + \
-                           "border-radius:50%;")
-        append(TD(i["Name"], span))
+        if contest["status"] == "CODING":
+            span = SPAN(_class="green tooltipped",
+                        data={"position": "right",
+                              "delay": "50",
+                              "tooltip": "Live Contest"},
+                        _style="cursor: pointer;" + \
+                               "float:right;" + \
+                               "height:10px;" + \
+                               "width:10px;" + \
+                               "border-radius:50%;")
+            append(TD(contest["name"], span))
+        else:
+            append(TD(contest["name"]))
+
         append(TD(IMG(_src=get_static_url("images/" + \
-                                          str(i["Platform"]).lower() + \
-                                          "_small.png"),
-                      _title=CONTESTS_SITE_MAPPING[i["Platform"]],
+                                          str(contest["site"].lower()) + "_small.png"),
+                      _title=contest["site"],
                       _class="parent-site-icon-small")))
-
-        append(TD("-"))
-        append(TD(str(endtime).replace("-", "/"),
-                  _class="contest-end-time"))
-        append(TD(A(I(_class="fa fa-external-link-square fa-lg"),
-                    _class=view_link_class,
-                    _href=i["url"],
-                    data=dict(tooltip=T("Contest Link"),
-                              **left_tooltip_attrs),
-                    _target="_blank")))
-        append(TD(BUTTON(I(_class="fa fa-calendar-plus-o"),
-                         _class=reminder_class + " disabled",
-                         data=dict(tooltip=T("Already started!"),
-                                   **left_tooltip_attrs))))
-        tbody.append(tr)
-
-    for i in upcoming:
-
-        if i["Platform"] not in CONTESTS_SITE_MAPPING:
-            continue
-
-        start_time = datetime.datetime.strptime(i["StartTime"],
-                                                "%a, %d %b %Y %H:%M")
-        end_time = datetime.datetime.strptime(i["EndTime"],
-                                              "%a, %d %b %Y %H:%M")
-        tr = TR()
-        append = tr.append
-        append(TD(i["Name"]))
-        append(TD(IMG(_src=get_static_url("images/" + \
-                                          str(i["Platform"]).lower() + \
-                                          "_small.png"),
-                      _title=CONTESTS_SITE_MAPPING[i["Platform"]],
-                      _class="parent-site-icon-small")))
-
-        append(TD(str(start_time), _class="stopstalk-timestamp"))
-
-        duration = i["Duration"]
-        duration = duration.replace(" days", "d")
-        duration = duration.replace(" day", "d")
-        append(TD(duration))
-        append(TD(A(I(_class="fa fa-external-link-square fa-lg"),
-                    _class=view_link_class,
-                    _href=i["url"],
-                    data=dict(tooltip=T("Contest Link"),
-                              **left_tooltip_attrs),
-                    _target="_blank")))
-        append(TD(A(I(_class="fa fa-calendar-plus-o"),
-                    _class=reminder_class,
-                    _href=URL("calendar", "u",
-                              scheme="https",
-                              host="calendar.google.com",
-                              args=["0", "r", "eventedit"],
-                              vars={"text": "Contest at " + i["Platform"].capitalize() + ": " + i["Name"],
-                                    "dates": "%s/%s" % (start_time.strftime("%Y%m%dT%H%M00"),
-                                                        end_time.strftime("%Y%m%dT%H%M00")),
-                                    "ctz": "Asia/Kolkata",
-                                    "details": "<b>Event created from <a href='https://www.stopstalk.com'>StopStalk</a></b>\n" + \
-                                               "_____________________________\n\n"
-                                               "<b>Link:</b> <a href='%s'>Contest Link</a>\n" % i["url"] + \
-                                               "<b>Site:</b> %s\n" % i["Platform"].capitalize() + \
-                                               "<b>Duration:</b> %s" % duration,
-                                    "location": i["url"],
-                                    "sf": "true",
-                                    "output": "xml"},
-                              extension=False),
-                    _target="_blank",
-                    data=dict(tooltip=T("Set Reminder to Google Calendar"),
-                              **left_tooltip_attrs))))
+        if contest["status"] == "CODING":
+            append(TD("-"))
+            append(TD(str(end_time).replace("-", "/"),
+                      _class="contest-end-time"))
+            append(TD(A(I(_class="fa fa-external-link-square fa-lg"),
+                        _class=view_link_class,
+                        _href=contest["url"],
+                        data=dict(tooltip=T("Contest Link"),
+                                  **left_tooltip_attrs),
+                        _target="_blank")))
+            append(TD(BUTTON(I(_class="fa fa-calendar-plus-o"),
+                             _class=reminder_class + " disabled",
+                             data=dict(tooltip=T("Already started!"),
+                                       **left_tooltip_attrs))))
+        else:
+            append(TD(start_time.strftime(TIME_CONVERSION_STRING)))
+            duration_string = utilities.get_duration_string(int(float(contest["duration"])))
+            append(TD(duration_string))
+            append(TD(A(I(_class="fa fa-external-link-square fa-lg"),
+                        _class=view_link_class,
+                        _href=contest["url"],
+                        data=dict(tooltip=T("Contest Link"),
+                                  **left_tooltip_attrs),
+                        _target="_blank")))
+            append(TD(A(I(_class="fa fa-calendar-plus-o"),
+                        _class=reminder_class,
+                        _href=URL("calendar", "u",
+                                  scheme="https",
+                                  host="calendar.google.com",
+                                  args=["0", "r", "eventedit"],
+                                  vars={"text": "Contest at " + contest["site"] + ": " + contest["name"],
+                                        "dates": "%s/%s" % (start_time.strftime("%Y%m%dT%H%M00"),
+                                                            end_time.strftime("%Y%m%dT%H%M00")),
+                                        "ctz": "Asia/Kolkata",
+                                        "details": "<b>Event created from <a href='https://www.stopstalk.com'>StopStalk</a></b>\n" + \
+                                                   "_____________________________\n\n"
+                                                   "<b>Link:</b> <a href='%s'>Contest Link</a>\n" % contest["url"] + \
+                                                   "<b>Site:</b> %s\n" % contest["site"] + \
+                                                   "<b>Duration:</b> %s" % duration_string,
+                                        "location": contest["url"],
+                                        "sf": "true",
+                                        "output": "xml"},
+                                  extension=False),
+                        _target="_blank",
+                        data=dict(tooltip=T("Set Reminder to Google Calendar"),
+                                  **left_tooltip_attrs))))
+        
         tbody.append(tr)
 
     table.append(tbody)
-    return dict(table=table, upcoming=upcoming, retrieved=True)
+    return dict(table=table, retrieved=True)
 
 # ------------------------------------------------------------------------------
 def privacy_policy():
