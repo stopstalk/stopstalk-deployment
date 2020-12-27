@@ -21,12 +21,12 @@
 """
 
 from urllib import urlencode
+from stopstalk_constants import *
 from .init import *
 
 PER_PAGE_LIMIT = 20
 CODECHEF_API_URL = "https://api.codechef.com"
 CODECHEF_SITE_URL = "https://www.codechef.com"
-TIME_CONVERSION_STRING = "%Y-%m-%d %H:%M:%S"
 SUBMISSION_REQUEST_PARAMS = {"year": None,
                              "username": "",
                              "limit": PER_PAGE_LIMIT,
