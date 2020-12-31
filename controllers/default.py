@@ -796,6 +796,7 @@ def contests():
         if i["Platform"] not in CONTESTS_SITE_MAPPING:
             continue
 
+        i["Name"] = i["Name"].encode("ascii", "ignore")
         start_time = datetime.datetime.strptime(i["StartTime"],
                                                 "%a, %d %b %Y %H:%M")
         end_time = datetime.datetime.strptime(i["EndTime"],
