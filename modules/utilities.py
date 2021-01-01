@@ -358,10 +358,13 @@ def get_contests():
     import requests
     disable_warnings()
 
-    response = requests.get("https://kontests.net/api/v1/all", verify=False)
+    response = requests.get("https://kontests.net/api/v1/all",
+                            timeout=5,
+                            verify=False)
 
     if response.status_code == 200:
         contest_list = response.json()
+        contest_list = sorted(contest_list, key=lambda contest: contest["start_time"])
         current.REDIS_CLIENT.set(CONTESTS_CACHE_KEY,
                                  json.dumps(contest_list),
                                  ex=ONE_HOUR)
