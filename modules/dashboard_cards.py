@@ -265,16 +265,21 @@ class UpcomingContestCard(BaseCard):
         if value:
             return value
 
-        _, upcoming = utilities.get_contests()
+        contest_list = utilities.get_contests()
         data = []
-        for contest in upcoming:
-            if contest["Platform"] not in CONTESTS_SITE_MAPPING:
+        for contest in contest_list:
+            if contest["site"] not in CONTESTS_SITE_MAPPING:
                 continue
+
+            if contest["status"] == "CODING":
+                continue
+
             data.append((
-                contest["Name"],
-                str(contest["Platform"]).lower(),
+                contest["name"],
+                str(contest["site"]).lower(),
                 contest["url"]
             ))
+
             if len(data) == 2:
                 break
 
