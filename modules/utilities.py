@@ -98,6 +98,32 @@ def check_api_user(function):
 def get_gauth_key(auth_token):
     return "g_token_" + auth_token
 
+
+def get_reminder_button(contest):
+    return A(I(_class="fa fa-calendar-plus-o"),
+             _class="btn-floating btn-small accent-4 tooltipped orange set-reminder",
+             _href=URL("calendar", "u",
+                       scheme="https",
+                       host="calendar.google.com",
+                       args=["0", "r", "eventedit"],
+                       vars={"text": "Contest at " + contest["site"] + ": " + contest["name"],
+                             "dates": "%s/%s" % (contest["start_time"].strftime("%Y%m%dT%H%M00"),
+                                                 contest["end_time"].strftime("%Y%m%dT%H%M00")),
+                             "ctz": "Asia/Kolkata",
+                             "details": "<b>Event created from <a href='https://www.stopstalk.com'>StopStalk</a></b>\n" + \
+                                        "_____________________________\n\n"
+                                        "<b>Link:</b> <a href='%s'>Contest Link</a>\n" % contest["url"] + \
+                                        "<b>Site:</b> %s\n" % contest["site"] + \
+                                        "<b>Duration:</b> %s" % get_duration_string(int(float(contest["duration"]))),
+                             "location": contest["url"],
+                             "sf": "true",
+                             "output": "xml"},
+                       extension=False),
+             _target="_blank",
+             data=dict(tooltip=current.T("Set Reminder to Google Calendar"),
+                       position="left",
+                       delay="50"))
+
 # -----------------------------------------------------------------------------
 def gauth_redirect(token):
     import requests

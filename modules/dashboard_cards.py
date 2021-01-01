@@ -238,15 +238,24 @@ class UpcomingContestCard(BaseCard):
         tbody = TBODY()
 
         for contest in contest_data:
-            tbody.append(TR(TD(contest[0]),
+            start_time = datetime.datetime.strptime(contest["start_time"], "%Y-%m-%dT%H:%M:%S.000Z")
+            end_time = datetime.datetime.strptime(contest["end_time"], "%Y-%m-%dT%H:%M:%S.000Z")
+            start_time += datetime.timedelta(minutes=330)
+            end_time += datetime.timedelta(minutes=330)
+
+            contest["start_time"] = start_time
+            contest["end_time"] = end_time
+
+            tbody.append(TR(TD(contest["name"]),
                             TD(IMG(_src=current.get_static_url(
-                                            "images/%s_small.png" % str(contest[1])
+                                            "images/%s_small.png" % str(contest["site"].lower())
                                         ),
                                    _class="parent-site-icon-small")),
                             TD(A(I(_class="fa fa-external-link-square"),
                                  _class="btn-floating btn-small accent-4 green view-contest",
-                                 _href=contest[2],
-                                 _target="_blank"))))
+                                 _href=contest["url"],
+                                 _target="_blank")),
+                            TD(utilities.get_reminder_button(contest))))
 
         card_content_table.append(tbody)
 
@@ -274,11 +283,9 @@ class UpcomingContestCard(BaseCard):
             if contest["status"] == "CODING":
                 continue
 
-            data.append((
-                contest["name"],
-                str(contest["site"]).lower(),
-                contest["url"]
-            ))
+            contest["name"] = contest["name"].encode("ascii", "ignore")
+
+            data.append(contest)
 
             if len(data) == 2:
                 break
