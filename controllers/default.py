@@ -759,6 +759,9 @@ def contests():
         start_time += datetime.timedelta(minutes=330)
         end_time += datetime.timedelta(minutes=330)
 
+        contest["start_time"] = start_time
+        contest["end_time"] = end_time
+
         contest["name"] = contest["name"].encode("ascii", "ignore")
 
         append = tr.append
@@ -797,36 +800,14 @@ def contests():
                                        **left_tooltip_attrs))))
         else:
             append(TD(start_time.strftime(TIME_CONVERSION_STRING)))
-            duration_string = utilities.get_duration_string(int(float(contest["duration"])))
-            append(TD(duration_string))
+            append(TD(utilities.get_duration_string(int(float(contest["duration"])))))
             append(TD(A(I(_class="fa fa-external-link-square fa-lg"),
                         _class=view_link_class,
                         _href=contest["url"],
                         data=dict(tooltip=T("Contest Link"),
                                   **left_tooltip_attrs),
                         _target="_blank")))
-            append(TD(A(I(_class="fa fa-calendar-plus-o"),
-                        _class=reminder_class,
-                        _href=URL("calendar", "u",
-                                  scheme="https",
-                                  host="calendar.google.com",
-                                  args=["0", "r", "eventedit"],
-                                  vars={"text": "Contest at " + contest["site"] + ": " + contest["name"],
-                                        "dates": "%s/%s" % (start_time.strftime("%Y%m%dT%H%M00"),
-                                                            end_time.strftime("%Y%m%dT%H%M00")),
-                                        "ctz": "Asia/Kolkata",
-                                        "details": "<b>Event created from <a href='https://www.stopstalk.com'>StopStalk</a></b>\n" + \
-                                                   "_____________________________\n\n"
-                                                   "<b>Link:</b> <a href='%s'>Contest Link</a>\n" % contest["url"] + \
-                                                   "<b>Site:</b> %s\n" % contest["site"] + \
-                                                   "<b>Duration:</b> %s" % duration_string,
-                                        "location": contest["url"],
-                                        "sf": "true",
-                                        "output": "xml"},
-                                  extension=False),
-                        _target="_blank",
-                        data=dict(tooltip=T("Set Reminder to Google Calendar"),
-                                  **left_tooltip_attrs))))
+            append(TD(utilities.get_reminder_button(contest)))
         
         tbody.append(tr)
 
