@@ -32,11 +32,11 @@ tokens = [(current.neverbounce_user, current.neverbounce_password, "contactstops
           (current.neverbounce_user2, current.neverbounce_password2, "raj454raj@gmail.com"),
           (current.neverbounce_user3, current.neverbounce_password3, "admin@stopstalk.com")]
 
-for i in xrange(2):
+for i in range(2):
     # Only 5 tries to get a particular token
     random.shuffle(tokens)
-    print tokens[0][2]
-    for i in xrange(5):
+    print(tokens[0][2])
+    for i in range(5):
         response = requests.post('https://api.neverbounce.com/v3/access_token',
                                  auth=HTTPBasicAuth(tokens[0][0],
                                                     tokens[0][1]),
@@ -45,7 +45,7 @@ for i in xrange(2):
                                  verify=False)
         if response.status_code == 200:
             response = response.json()
-            if response.has_key("access_token"):
+            if "access_token" in response:
                 attable.insert(value=response["access_token"],
                                type="NeverBounce access_token",
                                time_stamp=datetime.now())

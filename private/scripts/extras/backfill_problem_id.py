@@ -28,9 +28,9 @@ links = db(ptable).select(ptable.id, ptable.link)
 plink_to_id = dict([(x.link, x.id) for x in links])
 
 BATCH_SIZE = 25000
-for i in xrange(10000):
+for i in range(10000):
     rows = db(stable).select(limitby=(i * BATCH_SIZE, (i + 1) * BATCH_SIZE))
-    print rows.first().id, rows.last().id,
+    print(rows.first().id, rows.last().id, end=' ')
     updated = 0
     for srecord in rows:
         if srecord.problem_id is None and \
@@ -40,7 +40,7 @@ for i in xrange(10000):
     if updated > 0:
         db.commit()
         time.sleep(0.1)
-        print "updated", updated
+        print("updated", updated)
     else:
-        print "no updates"
+        print("no updates")
 

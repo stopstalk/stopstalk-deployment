@@ -76,7 +76,7 @@ class MetricHandler(object):
         if self.log_to_redis is False:
             return
 
-        [self.redis_client.delete(key) for key in self.redis_keys.values()]
+        [self.redis_client.delete(key) for key in list(self.redis_keys.values())]
 
     # --------------------------------------------------------------------------
     def increment_count(self, type_of_key, increment_amount=1):

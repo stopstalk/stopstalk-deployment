@@ -46,7 +46,7 @@ def find_pairs(values):
     result = []
     final_problem_id = None
     final_problem_link = None
-    print values.keys()
+    print(list(values.keys()))
     if "practice" in values:
         if len(values["practice"]) > 1:
             for problem_record in values["practice"]:
@@ -82,17 +82,17 @@ def find_pairs(values):
         final_problem_link = values["something_else"][0].link
 
     if final_problem_id is None:
-        if values.keys() == ["problem", "practice"]:
+        if list(values.keys()) == ["problem", "practice"]:
             values["problem"][0].delete_record()
             values["practice"][0].delete_record()
         else:
-            print "Couldn't find problem record for", values
+            print("Couldn't find problem record for", values)
         return
 
     for key in values:
         for problem in values[key]:
-            print problem.link, "-->", final_problem_link
-            print problem.id, "-->", final_problem_id
+            print(problem.link, "-->", final_problem_link)
+            print(problem.id, "-->", final_problem_id)
             utilities.merge_duplicate_problems(final_problem_id, problem.id)
 
 rows = db(ptable.link.contains("hackerearth.com/")).select()
@@ -104,7 +104,7 @@ for row in rows:
     else:
         similar_problems[key] = [row]
 
-print str(datetime.datetime.now()), "Starting to clean HackerEarth duplicates"
+print(str(datetime.datetime.now()), "Starting to clean HackerEarth duplicates")
 
 all_set = set([])
 for key in similar_problems:
@@ -115,7 +115,7 @@ for key in similar_problems:
                 tmp_val = re.match("https://www.hackerearth.com/.*?/",
                                    item.link).group()
             except AttributeError:
-                print "Exception in matching", item.link
+                print("Exception in matching", item.link)
                 values = {}
                 break
 
@@ -126,6 +126,6 @@ for key in similar_problems:
             else:
                 values[tmp_val] = [item]
         find_pairs(values)
-        print "__________________________________________________"
+        print("__________________________________________________")
 
-print str(datetime.datetime.now()), "End cleaning HackerEarth duplicates"
+print(str(datetime.datetime.now()), "End cleaning HackerEarth duplicates")

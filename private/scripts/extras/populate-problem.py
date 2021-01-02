@@ -36,7 +36,7 @@ problem_editorials = db(petable).select()
 link_to_id = {}
 
 for problem in problem_tags:
-    print "Inserting " + problem.problem_name
+    print("Inserting " + problem.problem_name)
     row_id = ptable.insert(name=problem.problem_name,
                            link=problem.problem_link,
                            tags=problem.tags,
@@ -47,6 +47,6 @@ db.commit()
 
 for problem in problem_editorials:
     row = ptable(link_to_id[problem.problem_link])
-    print "Updating " + row.name
+    print("Updating " + row.name)
     row.update_record(editorial_link=problem.editorial_link,
                       editorial_added_on=problem.problem_added_on)

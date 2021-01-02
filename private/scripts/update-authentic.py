@@ -34,7 +34,7 @@ result = db.executesql(sql)
 main_dict = {}
 
 for row in result:
-    if main_dict.has_key(row[0]):
+    if row[0] in main_dict:
         if row[2] > 0:
             main_dict[row[0]] += 1
     else:
@@ -43,9 +43,9 @@ for row in result:
 
 registered_users = db(atable).select(atable.id, atable.authentic)
 for user in registered_users:
-    if main_dict.has_key(user.id):
+    if user.id in main_dict:
         if main_dict[user.id] > 1 and user.authentic is False:
-            print user.id, "updated"
+            print(user.id, "updated")
             user.update_record(authentic=True)
 
 # END =========================================================================

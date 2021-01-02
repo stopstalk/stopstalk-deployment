@@ -32,7 +32,7 @@ for row in res[:50]:
     plink = row[0]
     pnames = row[1].strip(",").split(",,")
     pids = row[2].strip(",").split(",,")
-    print "_____________________________"
-    print plink
-    print ptable(int(pids[0])).solved_submissions
-    print ptable(int(pids[1])).solved_submissions
+    print("_____________________________")
+    print(plink)
+    print(ptable(int(pids[0])).solved_submissions)
+    print(ptable(int(pids[1])).solved_submissions)

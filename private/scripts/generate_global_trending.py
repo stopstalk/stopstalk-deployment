@@ -32,11 +32,11 @@ query = (stable.custom_user_id == None)
 
 start = time.time()
 last_submissions = trending_utilities.get_last_submissions_for_trending(query)
-print datetime.datetime.now(), "Got submissions for last", current.PAST_DAYS, "days in ", time.time() - start, "seconds"
-print datetime.datetime.now(), "Total submission count:", len(last_submissions)
+print(datetime.datetime.now(), "Got submissions for last", current.PAST_DAYS, "days in ", time.time() - start, "seconds")
+print(datetime.datetime.now(), "Total submission count:", len(last_submissions))
 trending_problems = trending_utilities.get_trending_problem_list(last_submissions)
 
 current.REDIS_CLIENT.set(GLOBALLY_TRENDING_PROBLEMS_CACHE_KEY,
                          str(trending_problems))
 
-print datetime.datetime.now(), "Redis set done on", GLOBALLY_TRENDING_PROBLEMS_CACHE_KEY
+print(datetime.datetime.now(), "Redis set done on", GLOBALLY_TRENDING_PROBLEMS_CACHE_KEY)

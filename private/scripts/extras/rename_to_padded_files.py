@@ -39,7 +39,7 @@ for _, _, files in os.walk("."):
 for one_file in all_files:
     if re.match("^\d+\.pdf$", one_file) is None or \
        len(one_file) == 9 + 4: # 9 digit user_id, 4 for .pdf
-        print "Skipping", one_file
+        print("Skipping", one_file)
         continue
     user_id = one_file.replace(".pdf", "")
     command = "aws s3 mv s3://%s/resumes/%s s3://%s/resumes/%s" % (S3_BUCKET, one_file, S3_BUCKET, "%.9d.pdf" % int(user_id))

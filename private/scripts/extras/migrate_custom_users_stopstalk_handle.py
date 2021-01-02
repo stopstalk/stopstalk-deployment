@@ -30,13 +30,13 @@ custom_handles = [x.stopstalk_handle for x in custom_friends]
 
 for handle in custom_handles:
     keys_for_handle = current.REDIS_CLIENT.keys("*" + handle)
-    print handle, keys_for_handle
+    print(handle, keys_for_handle)
     for key in keys_for_handle:
         current.REDIS_CLIENT.delete(key)
 
 for custom_friend in custom_friends:
     new_stopstalk_handle = "cus_" + custom_friend.stopstalk_handle
     row_count = db(stable.custom_user_id == custom_friend.id).update(stopstalk_handle=new_stopstalk_handle)
-    print custom_friend.id, "updated", row_count, "submission records"
+    print(custom_friend.id, "updated", row_count, "submission records")
     custom_friend.update_record(stopstalk_handle=new_stopstalk_handle)
     db.commit()

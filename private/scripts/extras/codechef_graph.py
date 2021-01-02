@@ -47,14 +47,13 @@ months = {"Jan": ["January", "JAN"],
           "Nov": ["November", "NOV"],
           "Dec": ["December", "DEC"]}
 
-long_ratings, long_months, short_ratings, short_months = map(lambda x: eval(x),
-                                                             data[:8][1::2])
+long_ratings, long_months, short_ratings, short_months = [eval(x) for x in data[:8][1::2]]
 
 def zero_pad(string):
     return "0" + string if len(string) == 1 else string
 
 long_contest_data = {}
-for i in xrange(len(long_ratings)):
+for i in range(len(long_ratings)):
     month, year = long_months[i].split("/")
     year = zero_pad(year)
     time_stamp = str(datetime.strptime(month + " " + year, "%b %y"))
@@ -69,7 +68,7 @@ short_contest_data = {}
 contest_iterator = -1
 flag = False
 
-for i in xrange(len(short_ratings)):
+for i in range(len(short_ratings)):
     month, year = short_months[i].split("/")
     year = zero_pad(year)
     time_stamp = str(datetime.strptime(month + " " + year, "%b %y"))
@@ -95,4 +94,4 @@ codechef_graphs = [{"graph_name": "CodeChef Long",
                     "graph_data": short_contest_data}]
 
 for graph in codechef_graphs:
-    print graph
+    print(graph)

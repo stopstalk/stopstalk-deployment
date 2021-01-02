@@ -32,7 +32,7 @@ def login_token():
         Only accesible to whitelisted Api Calls
     """
     if not utilities.is_apicall():
-        raise HTTP(400, u'Invalid API params')
+        raise HTTP(400, 'Invalid API params')
     """
         @withparameter email and password return {token : ''} if valid credentials
         @withparameter token returns the new refresh token
@@ -272,7 +272,7 @@ def add_custom_friend():
         redirect(URL("user", "profile", args=original_handle))
 
     # ID of the custom user
-    original_id = long(current_row["id"])
+    original_id = int(current_row["id"])
 
     # Delete this id as this will be incremented
     # automatically on insert
@@ -327,9 +327,9 @@ def get_graph_data():
     graphs = []
     for site in current.SITES:
         lower_site = site.lower()
-        if graph_data.has_key(lower_site + "_data"):
+        if lower_site + "_data" in graph_data:
             graphs.extend(graph_data[lower_site + "_data"])
-    graphs = filter(lambda x: x["data"] != {}, graphs)
+    graphs = [x for x in graphs if x["data"] != {}]
 
     data = dict(graphs=graphs)
     current.REDIS_CLIENT.set(redis_cache_key,
@@ -461,7 +461,7 @@ def update_friend():
     for field in form_fields:
         if record[field] is None:
             continue
-        record[field] = unicode(record[field], "utf-8").encode("utf-8")
+        record[field] = str(record[field], "utf-8").encode("utf-8")
 
     form = SQLFORM(cftable,
                    record,

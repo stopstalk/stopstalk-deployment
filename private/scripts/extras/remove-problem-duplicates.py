@@ -36,6 +36,6 @@ for row in result:
     ids = row[0].split(",")[1:]
     duplicate_ids.extend(ids)
 
-duplicate_ids = [long(x) for x in duplicate_ids]
+duplicate_ids = [int(x) for x in duplicate_ids]
 db(ptable.id.belongs(duplicate_ids)).delete()
-print "Deleted %d duplicate problem records" % len(duplicate_ids)
+print("Deleted %d duplicate problem records" % len(duplicate_ids))
