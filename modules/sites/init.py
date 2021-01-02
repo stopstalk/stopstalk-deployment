@@ -92,7 +92,7 @@ def get_request(url,
                                     cookies=cookies,
                                     verify=False)
         except Exception as e:
-            print e, url
+            print(e, url)
             request_metric_handler.increment_count("failure", 1)
             log_time_things(request_time_metric_handler, start_request_time, site)
             return SERVER_FAILURE
@@ -111,7 +111,7 @@ def get_request(url,
             request_metric_handler.increment_count("failure", 1)
             # For CodeChef API rate limiting, don't retry
             # 401 is raised when a newer access token is generated
-            print response.status_code
+            print(response.status_code)
             if url.__contains__("codechef.com") and response.status_code == 401:
                 current.REDIS_CLIENT.delete("codechef_access_token")
             return OTHER_FAILURE

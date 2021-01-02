@@ -149,7 +149,7 @@ class Profile(object):
         submissions = []
         from_id = None
         count = 1000
-        for i in xrange(1000):
+        for i in range(1000):
             initial_url = acm_link + "status.aspx?author=" + timus_id + "&count=" + str(count)
             if from_id is None:
                 url = initial_url
