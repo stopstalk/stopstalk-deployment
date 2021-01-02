@@ -202,7 +202,7 @@ class Profile(object):
         submissions = []
         next_cursor = "null"
 
-        for i in xrange(1000):
+        for i in range(1000):
 
             request_params["cursor"] = next_cursor
             response = get_request(url,

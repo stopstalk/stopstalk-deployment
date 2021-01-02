@@ -116,7 +116,7 @@ class Profile(object):
             try:
                 problem_name = uva_problem_dict[row[1]]
             except KeyError:
-                print "Problem name not found in uva problem list: " + str(row[1])
+                print("Problem name not found in uva problem list: " + str(row[1]))
                 continue
             curr_date_timestamp = str(datetime.datetime.fromtimestamp(row[4]))
             curr = time.strptime(curr_date_timestamp, "%Y-%m-%d %H:%M:%S")
@@ -125,7 +125,7 @@ class Profile(object):
 
             # Problem status
             status = row[2]
-            if submission_statuses.has_key(status):
+            if status in submission_statuses:
                 submission_status = submission_statuses[status]
             else:
                 submission_status = "OTH"
@@ -137,7 +137,7 @@ class Profile(object):
                 points = "0"
 
             if row[5] not in languages:
-                print "****************** Language: " + str(row[5]) + " not found ******************"
+                print("****************** Language: " + str(row[5]) + " not found ******************")
                 continue
 
             submissions.append((curr_date_timestamp,

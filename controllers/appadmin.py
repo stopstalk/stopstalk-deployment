@@ -508,7 +508,7 @@ def ccache():
         gae_stats['oldest'] = GetInHMS(time.time() - gae_stats['oldest_item_age'])
         total.update(gae_stats)
     else:
-        for key, value in cache.ram.storage.items():
+        for key, value in list(cache.ram.storage.items()):
             if isinstance(value, dict):
                 ram['hits'] = value['hit_total'] - value['misses']
                 ram['misses'] = value['misses']

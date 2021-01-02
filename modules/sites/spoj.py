@@ -66,7 +66,7 @@ class Profile(object):
             author = soup.find("table",
                                id="problem-meta").find_all("a")[0]["href"].replace("/users/", "")
         except:
-            print "Error occurred while getting problem setters", problem_link
+            print("Error occurred while getting problem setters", problem_link)
             return None
 
         return None if author is None else [author]
@@ -156,7 +156,7 @@ class Profile(object):
         previd = -1
         currid = 0
 
-        for i in xrange(1000):
+        for i in range(1000):
             flag = 0
             url = current.SITES[self.site] + "status/" + \
                   self.handle + \
@@ -300,18 +300,18 @@ class Profile(object):
 
                 result = response.json()
                 semaphore.acquire(timeout=5)
-                self.submissions.extend(map(_lambda_result_map,
-                                            result))
+                self.submissions.extend(list(map(_lambda_result_map,
+                                            result)))
                 semaphore.release()
             except Exception as e:
-                print "Spoj lambda request error %s %s %s" % (problem_slug,
+                print("Spoj lambda request error %s %s %s" % (problem_slug,
                                                               self.handle,
-                                                              e)
+                                                              e))
                 self.retrieval_failure = SERVER_FAILURE
 
         all_problem_names = _get_problem_names(response_text)
 
-        for i in xrange(0, len(all_problem_names), AWS_LAMBDA_CONCURRENCY):
+        for i in range(0, len(all_problem_names), AWS_LAMBDA_CONCURRENCY):
             # Parallely send requests of batch size AWS_LAMBDA_CONCURRENCY
 
             # If the previous batch failed, don't process any further
