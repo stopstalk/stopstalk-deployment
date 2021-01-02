@@ -20,7 +20,7 @@
     THE SOFTWARE.
 """
 
-from urllib import urlencode
+from urllib.parse import urlencode
 from stopstalk_constants import *
 from .init import *
 
@@ -266,7 +266,7 @@ class Profile(object):
                                      ex=TTL_TIME)
             return access_token
         else:
-            print "Error requesting CodeChef API for access token"
+            print("Error requesting CodeChef API for access token")
             return
 
     # --------------------------------------------------------------------------
@@ -287,7 +287,7 @@ class Profile(object):
         SUBMISSION_REQUEST_PARAMS["year"] = year
         SUBMISSION_REQUEST_PARAMS["offset"] = 0
         submissions = []
-        for _ in xrange(1000):
+        for _ in range(1000):
             response = get_request("%s/submissions" % CODECHEF_API_URL,
                                    headers={"Authorization": "Bearer %s" % self.access_token},
                                    params=SUBMISSION_REQUEST_PARAMS,
@@ -323,7 +323,7 @@ class Profile(object):
                 elif status == "RTE":
                     status = "RE"
                 else:
-                    print "*****************", status
+                    print("*****************", status)
                     status = "OTH"
                 language = submission["language"]
                 view_link = "%s/viewsolution/%d" % (CODECHEF_SITE_URL,
@@ -373,7 +373,7 @@ class Profile(object):
 
         self.access_token = self.__get_access_token()
         if self.access_token is None:
-            print "Access token found none"
+            print("Access token found none")
             return SERVER_FAILURE
 
         # Test for invalid handles
@@ -385,7 +385,7 @@ class Profile(object):
         SUBMISSION_REQUEST_PARAMS["username"] = self.handle
         self.submissions = []
 
-        for year in xrange(current_year, start_year - 1, -1):
+        for year in range(current_year, start_year - 1, -1):
             # Years processed in the reverse order to break out when
             # last_retrieved time_stamp is matched
 

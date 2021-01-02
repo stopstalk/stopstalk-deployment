@@ -20,11 +20,11 @@
     THE SOFTWARE.
 """
 
-import codechef
-import codeforces
-import spoj
-import hackerearth
-import hackerrank
-import uva
-import timus
-import atcoder
+from . import codechef
+from . import codeforces
+from . import spoj
+from . import hackerearth
+from . import hackerrank
+from . import uva
+from . import timus
+from . import atcoder
