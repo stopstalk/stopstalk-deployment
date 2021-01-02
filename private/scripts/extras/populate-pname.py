@@ -37,7 +37,7 @@ for problem in splinks:
     all_problems[problem["problem_link"]] = problem["problem_name"].strip()
 
 for plink in plinks:
-    if all_problems.has_key(plink) and all_problems[plink] != "":
+    if plink in all_problems and all_problems[plink] != "":
         query = (ptable.problem_link == plink)
-        print plink, "*", all_problems[plink], "*"
+        print(plink, "*", all_problems[plink], "*")
         db(query).update(problem_name=all_problems[plink])

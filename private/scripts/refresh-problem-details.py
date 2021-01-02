@@ -98,11 +98,11 @@ class TagHandler():
 
         curr_value = "['-']" if curr_value == [] else str(curr_value)
         if prev_value != curr_value and prev_value == "['-']":
-            print "Updated tags", link, prev_value, "->", curr_value
+            print("Updated tags", link, prev_value, "->", curr_value)
             return dict(tags=curr_value if curr_value != "['-']" else "['-']",
                         tags_added_on=today)
         else:
-            print "No-change in tags", link
+            print("No-change in tags", link)
             return dict()
 
     # --------------------------------------------------------------------------
@@ -156,11 +156,11 @@ class EditorialHandler():
     @staticmethod
     def update_params(link, prev_value, curr_value):
         if curr_value is not None and prev_value is None:
-            print "Updated editorial_link", link, prev_value, "->", curr_value
+            print("Updated editorial_link", link, prev_value, "->", curr_value)
             return dict(editorial_link=curr_value,
                         editorial_added_on=today)
         else:
-            print "No-change in editorial_link", link
+            print("No-change in editorial_link", link)
             return dict()
 
 
@@ -205,7 +205,7 @@ class ProblemSetterHandler():
         problem_id = problem_record.id
 
         if new_value is None:
-            print "No-change in problem_setters", problem_link
+            print("No-change in problem_setters", problem_link)
             return
 
         records = db(pstable.problem_id == problem_id).select()
@@ -219,13 +219,13 @@ class ProblemSetterHandler():
                                handle=value)
                 updated_database = True
             else:
-                print (problem_id, value), "already exists"
+                print((problem_id, value), "already exists")
 
         if updated_database:
             change_counts[column_value]["updated"] += 1
-            print "Updated problem_setters", problem_link, prev_value, "->", new_value
+            print("Updated problem_setters", problem_link, prev_value, "->", new_value)
         else:
-            print "No-change in problem_setters", problem_link
+            print("No-change in problem_setters", problem_link)
         return
 
 # ==============================================================================
@@ -249,7 +249,7 @@ def refresh_problem_details():
 
     threads = []
     workers = 10
-    for i in xrange(0, len(results), workers):
+    for i in range(0, len(results), workers):
         threads = []
         # O God I am so smart !!
         for problem_record in results[i : i + workers]:
@@ -278,7 +278,7 @@ def get_problem_details(problem_record):
                                            update_things=update_things)
     except AttributeError:
         # get_problem_details not implemented for this site
-        print "get_problem_details not implemented for", link
+        print("get_problem_details not implemented for", link)
         return
 
     for column_value in update_things:
@@ -295,4 +295,4 @@ if __name__ == "__main__":
 
     refresh_problem_details()
 
-    print change_counts
+    print(change_counts)

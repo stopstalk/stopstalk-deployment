@@ -117,7 +117,7 @@ Team StopStalk
 for row in res:
     to_id = row[0]
     from_ids = [int(x) for x in row[1].split(",")]
-    print to_id, from_ids
+    print(to_id, from_ids)
     send_message(id_to_record[to_id],
                  [id_to_record[x] for x in from_ids])
 

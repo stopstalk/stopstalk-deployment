@@ -27,13 +27,13 @@ import json
 from boto3 import client
 from socket import gethostname
 from requests.exceptions import ConnectionError
-from health_metrics import MetricHandler
+from .health_metrics import MetricHandler
 from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, I, \
                   TEXTAREA, SELECT, OPTION, URL, BUTTON, TAG
 from gluon.storage import Storage
-from stopstalk_constants import *
-from influxdb_wrapper import get_series_helper
+from .stopstalk_constants import *
+from .influxdb_wrapper import get_series_helper
 
 # -----------------------------------------------------------------------------
 def is_apicall():
@@ -181,7 +181,7 @@ def push_influx_data(measurement, points, app_name="cron"):
 
         SeriesHelperClass.commit()
     except ConnectionError:
-        print "Can't connect to influxdb"
+        print("Can't connect to influxdb")
         return
 
 # -----------------------------------------------------------------------------
@@ -352,7 +352,7 @@ def get_user_records(record_values,
 
     records = db(atable.id.belongs(to_be_fetched)).select()
     records = dict([x.id, x.as_json()] for x in records)
-    for user_id in records.keys():
+    for user_id in list(records.keys()):
         redis_key = get_user_record_cache_key(user_id)
         val = Storage(json.loads(records[user_id]))
         current.REDIS_CLIENT.set(redis_key, records[user_id],
@@ -360,7 +360,7 @@ def get_user_records(record_values,
         result[_get_result_key(val)] = val
 
     if just_one_record:
-        return result.values()[0] if len(result) else None
+        return list(result.values())[0] if len(result) else None
     else:
         return result
 
@@ -417,7 +417,7 @@ def merge_duplicate_problems(original_id, duplicate_id):
             duplicate_user_ids = ""
         final_list = list(set(original_user_ids.split(","))
                             .union(set(duplicate_user_ids.split(","))))
-        return ",".join(filter(lambda x:  x != "", final_list))
+        return ",".join([x for x in final_list if x != ""])
 
     db = current.db
     ptable = db.problem
@@ -430,28 +430,28 @@ def merge_duplicate_problems(original_id, duplicate_id):
     duplicate_row = ptable(duplicate_id)
 
     # Editorial link -----------------------------------------------------------
-    print "---------------------"
-    print original_row.editorial_link, duplicate_row.editorial_link
+    print("---------------------")
+    print(original_row.editorial_link, duplicate_row.editorial_link)
     if original_row.editorial_link in ["", None] and \
        duplicate_row.editorial_link not in ["", None]:
         original_row.update({"editorial_link": duplicate_row.editorial_link})
-    print original_row.editorial_link
+    print(original_row.editorial_link)
 
     # Problem tag --------------------------------------------------------------
-    print "---------------------"
+    print("---------------------")
     original_tags = eval(original_row.tags) if original_row.tags != "['-']" else []
-    print "original_tags", original_tags
+    print("original_tags", original_tags)
     duplicate_tags = eval(duplicate_row.tags) if duplicate_row.tags != "['-']" else []
-    print "duplicate_tags", duplicate_tags
+    print("duplicate_tags", duplicate_tags)
     original_tags = list(set(original_tags).union(set(duplicate_tags)))
     if len(original_tags) != 0:
         original_row.update({"tags": str(original_tags)})
-    print "final_tags", original_tags
+    print("final_tags", original_tags)
 
     # Submission table ---------------------------------------------------------
-    print "---------------------"
+    print("---------------------")
     updated = db(stable.problem_id == duplicate_id).update(problem_id=original_id)
-    print "Updated %d submission records" % updated
+    print("Updated %d submission records" % updated)
 
     # Problem user_ids ---------------------------------------------------------
     original_row.update({
@@ -467,10 +467,10 @@ def merge_duplicate_problems(original_id, duplicate_id):
 
     # total_submissions, solved_submissions ------------------------------------
     srows = db(stable.problem_id == original_id).select(stable.status)
-    accepted = len(filter(lambda x: x["status"] == "AC", srows))
-    print "---------------------"
-    print original_row.solved_submissions, original_row.total_submissions
-    print "accepted", accepted, "total_submissions", len(srows)
+    accepted = len([x for x in srows if x["status"] == "AC"])
+    print("---------------------")
+    print(original_row.solved_submissions, original_row.total_submissions)
+    print("accepted", accepted, "total_submissions", len(srows))
     original_row.update({"solved_submissions": accepted,
                          "total_submissions": len(srows)})
 
@@ -521,7 +521,7 @@ def get_solved_problems(user_id, custom=False):
         return None
 
     def _settify_return_value(data):
-        return map(lambda x: set(x), data)
+        return [set(x) for x in data]
 
     db = current.db
     stable = db.submission
@@ -795,7 +795,7 @@ def urltosite(url):
         @param url (String): Site URL
         @return url (String): Site
     """
-    import sites
+    from . import sites
     for site in current.SITES:
         if getattr(sites, site.lower()).Profile.is_valid_url(url):
             return site.lower()
@@ -1070,8 +1070,7 @@ def get_stopstalk_user_stats(stopstalk_handle, custom, user_submissions):
         curr_day_streak=curr_day_streak,
         max_day_streak=max_day_streak,
         solved_counts=sites_solved_count,
-        status_percentages=map(lambda x: (x[1], x[0]),
-                               status_percentages.items()),
+        status_percentages=[(x[1], x[0]) for x in list(status_percentages.items())],
         site_accuracies=site_accuracies,
         solved_problems_count=len(solved_problem_ids),
         total_problems_count=len(all_attempted_pids),
@@ -1102,7 +1101,7 @@ def get_problems_authored_by(stopstalk_handle):
         if handle:
             site_to_handle[site.lower()] = handle
 
-    records = db(pstable.handle.belongs(site_to_handle.values())).select()
+    records = db(pstable.handle.belongs(list(site_to_handle.values()))).select()
     for record in records:
         problem_record = ptable(record.problem_id)
         site = urltosite(problem_record.link)

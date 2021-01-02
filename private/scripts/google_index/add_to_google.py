@@ -29,8 +29,8 @@ import time
 import sys
 
 def log_info(message):
-    print "%s: %s" % (str(datetime.datetime.now()),
-                      message)
+    print("%s: %s" % (str(datetime.datetime.now()),
+                      message))
 
 def getHTTPObject():
     SCOPES = [ "https://www.googleapis.com/auth/indexing" ]

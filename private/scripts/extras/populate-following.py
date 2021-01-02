@@ -40,7 +40,7 @@ for row in db(ftable).select():
         insert_count += 1
         fwtable.insert(user_id=row.user_id, follower_id=row.friend_id)
 
-print "Friends table:", db(ftable).count()
-print "Friend requests table:", db(frtable).count()
-print "Following table:", db(fwtable).count()
-print "Insert count:", insert_count
+print("Friends table:", db(ftable).count())
+print("Friend requests table:", db(frtable).count())
+print("Following table:", db(fwtable).count())
+print("Insert count:", insert_count)

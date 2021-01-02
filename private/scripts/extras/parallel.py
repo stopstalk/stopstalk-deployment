@@ -42,7 +42,7 @@ def fetch(pid):
         count += 1
         if tmp.status_code == 200:
             break
-    print tmp
+    print(tmp)
 
 def synchronous():
     for i in range(1,100):
@@ -50,7 +50,7 @@ def synchronous():
 
 def asynchronous():
     threads = []
-    for i in xrange(100):
+    for i in range(100):
         threads.append(gevent.spawn(fetch, i))
     gevent.joinall(threads)
 
@@ -59,4 +59,4 @@ synchronous()
 
 print('Asynchronous:')
 asynchronous()
-print count
+print(count)

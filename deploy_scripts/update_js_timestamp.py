@@ -115,10 +115,10 @@ if __name__ == "__main__":
 
             files = all_js_css_files + all_image_files
 
-        files = map(convert_to_min, files)
+        files = list(map(convert_to_min, files))
 
     if len(files):
         current_timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         for filename in files:
-            print "Updating timestamp for", filename
+            print("Updating timestamp for", filename)
             REDIS_CLIENT.set(filename, current_timestamp)

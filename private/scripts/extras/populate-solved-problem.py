@@ -28,7 +28,7 @@ with open("problem_stats", "rb") as f:
 def build_when_string(current_problems):
     all_vars = [""] * 4
     for problem in current_problems:
-        for it in xrange(4):
+        for it in range(4):
             if it >= 2:
                 if problem[1][it] is None:
                     problem[1][it] = ""
@@ -40,7 +40,7 @@ def build_when_string(current_problems):
 
 batch_size = 700
 
-for i in xrange(0, len(final_hash), batch_size):
+for i in range(0, len(final_hash), batch_size):
     current_problems = final_hash[i : i + batch_size]
     all_vars = build_when_string(current_problems)
     all_vars.append(",".join(["'" + x[0] + "'" for x in current_problems]))

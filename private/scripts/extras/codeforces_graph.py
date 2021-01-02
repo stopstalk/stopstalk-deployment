@@ -60,4 +60,4 @@ for tr in tbody.find_all("tr"):
 codeforces_graphs = [{"graph_name": "Codeforces", "graph_data": contest_data}]
 
 for graph in codeforces_graphs:
-    print graph
+    print(graph)

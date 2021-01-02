@@ -33,7 +33,7 @@ uva_handles = dict([(x.user_id, x.handle) for x in uva_handles])
 
 users = db(atable).select()
 for record in users:
-    if uva_handles.has_key(record.id):
+    if record.id in uva_handles:
         record.update_record(uva_handle=uva_handles[record.id],
                              uva_lr=current.INITIAL_DATE,
                              rating=0,

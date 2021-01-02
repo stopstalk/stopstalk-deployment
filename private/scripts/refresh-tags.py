@@ -54,7 +54,7 @@ def refresh_tags():
     query = (ptable.tags_added_on >= before_30) & \
             (ptable.tags == "['-']")
     no_tags = db(query).select(ptable.id)
-    no_tags = map(lambda x: x.id, no_tags)
+    no_tags = [x.id for x in no_tags]
 
     today = datetime.datetime.now().strftime("%Y-%m-%d")
     threads = []
@@ -62,7 +62,7 @@ def refresh_tags():
 
     # Start retrieving tags for the problems
     # that are not in problem table
-    for i in xrange(0, len(no_tags), workers):
+    for i in range(0, len(no_tags), workers):
         threads = []
         # O God I am so smart !!
         for problem_id in no_tags[i : i + workers]:
@@ -72,9 +72,9 @@ def refresh_tags():
 
         gevent.joinall(threads)
 
-    print "Total Inserted: [%d]" % (total_inserted)
-    print "Total Updated: [%d]" % (total_updated)
-    print "Total Not-changed: [%d]" % (not_updated)
+    print("Total Inserted: [%d]" % (total_inserted))
+    print("Total Updated: [%d]" % (total_updated))
+    print("Total Not-changed: [%d]" % (not_updated))
 
 def get_tag(pid, today):
 
@@ -105,14 +105,14 @@ def get_tag(pid, today):
         if prev_tags != str(all_tags) and prev_tags == "['-']":
             row.update_record(tags=str(all_tags),
                               tags_added_on=today)
-            print "Updated", link, prev_tags, "->", all_tags
+            print("Updated", link, prev_tags, "->", all_tags)
             total_updated += 1
         else:
             not_updated += 1
-            print "No-change", link
+            print("No-change", link)
     else:
         total_inserted += 1
-        print "Inserted ", link, all_tags
+        print("Inserted ", link, all_tags)
         # Insert tags in problem table
         # Note: Tags are stored in a stringified list
         #       so that they can be used directly by eval

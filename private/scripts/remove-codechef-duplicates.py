@@ -32,8 +32,8 @@ stable = db.submission
 right_now = datetime.datetime.now()
 start_time = str(right_now - datetime.timedelta(days=5))[:-7]
 end_time = str(right_now)[:-7]
-print "Start time:", start_time, ", End time:", end_time
-print "Starting query", datetime.datetime.now()
+print("Start time:", start_time, ", End time:", end_time)
+print("Starting query", datetime.datetime.now())
 
 # Find the submissions which are duplicate in CodeChef retrieval
 # These are introduced because of time format being something like 1 hour ago...
@@ -45,25 +45,25 @@ res = db.executesql(
           site='CodeChef' AND
           time_stamp BETWEEN '%s' AND '%s'
 """ % (start_time, end_time))
-print "Query complete", datetime.datetime.now()
+print("Query complete", datetime.datetime.now())
 
 duplicate_hash = {}
 
 for row in res:
     dict_key = row[1:]
-    if duplicate_hash.has_key(dict_key):
+    if dict_key in duplicate_hash:
         duplicate_hash[dict_key].append(row[0])
     else:
         duplicate_hash[dict_key] = [row[0]]
 
-print "Hash computation complete", datetime.datetime.now()
+print("Hash computation complete", datetime.datetime.now())
 to_be_deleted = []
 for key in duplicate_hash:
     if len(duplicate_hash[key]) > 1:
-        print duplicate_hash[key]
+        print(duplicate_hash[key])
         to_be_deleted.extend(duplicate_hash[key][1:])
 
-print "To be deleted:", to_be_deleted
-print "Starting delete query", datetime.datetime.now()
+print("To be deleted:", to_be_deleted)
+print("Starting delete query", datetime.datetime.now())
 db(stable.id.belongs(to_be_deleted)).delete()
-print "Delete complete", datetime.datetime.now()
+print("Delete complete", datetime.datetime.now())

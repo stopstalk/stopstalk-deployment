@@ -57,5 +57,5 @@ for submission in submissions:
     if submission.problem_link not in plink_to_tags:
         plink_to_tags[submission.problem_link] = get_problem_tags(submission.problem_link)
     if plink_to_tags[submission.problem_link] is not None:
-        print plink_to_tags[submission.problem_link][1]
+        print(plink_to_tags[submission.problem_link][1])
     prev_link = submission.problem_link

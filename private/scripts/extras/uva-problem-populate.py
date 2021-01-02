@@ -33,7 +33,7 @@ response = get_request("http://uhunt.felix-halim.net/api/p")
 
 for problem in response.json():
     if (problem[0], problem[1]) not in problems:
-        print problem, "added"
+        print(problem, "added")
         ptable.insert(problem_id=problem[0],
                       problem_num=problem[1],
                       title=problem[2],

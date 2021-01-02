@@ -25,5 +25,5 @@ import datetime
 
 redis_key = "codechef_access_token"
 while True:
-    print str(datetime.datetime.now()), current.REDIS_CLIENT.get(redis_key), current.REDIS_CLIENT.ttl(redis_key)
+    print(str(datetime.datetime.now()), current.REDIS_CLIENT.get(redis_key), current.REDIS_CLIENT.ttl(redis_key))
     time.sleep(1)

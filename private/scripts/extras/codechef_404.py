@@ -32,7 +32,7 @@ def check_valid(handle):
     # Test for invalid handles
     while True:
         response = requests.get(domain_url + "users/" + handle)
-        print response.status_code,
+        print(response.status_code, end=' ')
         if response.status_code == 200:
             break
 
@@ -57,21 +57,21 @@ update_params = dict(codechef_lr=current.INITIAL_DATE,
                      per_day_change="0.0")
 
 for row in rows:
-    print "{",
+    print("{", end=' ')
     if check_valid(row.handle):
-        print row.handle + " VALID",
+        print(row.handle + " VALID", end=' ')
         query = (atable.codechef_handle == row.handle) & \
                 (atable.registration_key == "")
 
         users = db(query).select()
         for user in users:
-            print user.stopstalk_handle + " UPDATED",
+            print(user.stopstalk_handle + " UPDATED", end=' ')
             user.update_record(**update_params)
         custom_users = db(cftable.codechef_handle == row.handle).select()
         for custom_user in custom_users:
-            print custom_user.stopstalk_handle + " CUS UPDATED",
+            print(custom_user.stopstalk_handle + " CUS UPDATED", end=' ')
             custom_user.update_record(**update_params)
         row.delete_record()
     else:
-        print row.handle + " INVALID",
-    print "}"
+        print(row.handle + " INVALID", end=' ')
+    print("}")

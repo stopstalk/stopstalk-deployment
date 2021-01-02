@@ -44,4 +44,4 @@ for contest in contest_data:
                                           "rating": contest["rating"],
                                           "url": url,
                                           "rank": contest["rank"]}})
-    print time_stamp, name, rating, url
+    print(time_stamp, name, rating, url)
