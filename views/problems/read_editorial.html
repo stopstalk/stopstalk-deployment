@@ -8,8 +8,18 @@
   <meta name="description" content="{{=problem_name}} editorial by {{=stopstalk_handle}}">
 {{end}}
 
-<h2><a href="{{=URL('problems', 'index', vars={'pname': problem_name, 'plink': problem_link})}}">{{=problem_name}}</a> | Editorial by <a href="{{=URL('user', 'profile', args=stopstalk_handle)}}">{{=stopstalk_handle}}</a></h2>
+<h2><a href="{{=URL('problems', 'index', vars={'problem_id': problem_id})}}">{{=problem_name}}</a> | Editorial by <a href="{{=URL('user', 'profile', args=stopstalk_handle)}}">{{=stopstalk_handle}}</a></h2>
 <a id="all-editorials-button" class="btn btn-primary purple accent-4" href="{{=all_editorials_link}}">All Editorials</a>
+{{if auth.is_logged_in() and session.user_id in STOPSTALK_ADMIN_USER_IDS:}}
+  {{if ue_record.verification == "pending":}}
+    <br/><br/>
+    <button id="accept-user-editorial" data-editorial-id="{{=ue_record.id}}" class="btn btn-primary green white-text">Accept</button>
+    <button id="reject-user-editorial" data-editorial-id="{{=ue_record.id}}" class="btn btn-primary red white-text">Reject</button>
+  {{else:}}
+    <p>Already {{=ue_record.verification}}</p>
+  {{pass}}
+{{pass}}
+<br/>
 <div class="row left-align preview-editor-wrapper">
   <div class="col offset-s1 s10">
     <textarea id="preview-textarea">{{=content}}</textarea>
@@ -33,4 +43,27 @@
     toolbar: false,
     status: false
   }).togglePreview();
+
+  var updateEditorialStatus = function(status, recordId) {
+    var updateStatusURL = "{{=URL('problems', 'admin_editorial_approval')}}";
+    $.ajax({
+      url: updateStatusURL + "/" + status + "/" + recordId,
+      success: function(response) {
+        $.web2py.flash(response);
+      },
+      error: function(err) {
+        $.web2py.flash(err);
+      }
+    })
+  };
+
+  $(document).ready(function() {
+    $('#accept-user-editorial').on('click', function() {
+      updateEditorialStatus('accepted', $(this).data('editorialId'));
+    });
+
+    $('#reject-user-editorial').on('click', function() {
+      updateEditorialStatus('rejected', $(this).data('editorialId'));
+    });
+  });
 </script>

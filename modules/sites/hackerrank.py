@@ -1,5 +1,5 @@
 """
-    Copyright (c) 2015-2018 Raj Patel(raj454raj@gmail.com), StopStalk
+    Copyright (c) 2015-2020 Raj Patel(raj454raj@gmail.com), StopStalk
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@ class Profile(object):
         Class containing methods for retrieving
         submissions of user
     """
+    site_name = "HackerRank"
 
     # -------------------------------------------------------------------------
     def __init__(self, handle=""):
@@ -34,38 +35,34 @@ class Profile(object):
             @param handle (String): HackerRank handle
         """
 
-        self.site = "HackerRank"
+        self.site = Profile.site_name
         self.handle = handle
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_tags(problem_link):
+    def is_valid_url(url):
+        return url.__contains__("hackerrank.com/")
+
+    # --------------------------------------------------------------------------
+    @staticmethod
+    def is_website_down():
         """
-            Get the tags of a particular problem from its URL
-
-            @param problem_link (String): Problem URL
-            @return (List): List of tags for that problem
+            @return (Boolean): If the website is down
         """
+        return (Profile.site_name in current.REDIS_CLIENT.smembers("disabled_retrieval"))
 
-        if problem_link.__contains__("/contests/"):
-            # If the problem_link is a contest URL
-            url = problem_link.replace("https://www.hackerrank.com", "")
-            url = "https://www.hackerrank.com/rest/" + url
-        else:
-            # Practice problem URL
-            slug = problem_link.split("/")[-1]
-            url = "https://www.hackerrank.com/rest/contests/master/challenges/" + slug
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_tags(response):
+        """
+            @param response(Dict): Response json from the API
 
-        response = get_request(url)
-        if response in REQUEST_FAILURES:
-            return ["-"]
-
-        response = response.json()
-
+            @return (List): List of tags
+        """
+        all_tags = []
         model = response["model"]
         track = model["track"]
         primary_contest = model["primary_contest"]
-        all_tags = ["-"]
 
         if track:
             # If the problem is a practice problem
@@ -83,33 +80,115 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_editorial_link(problem_link):
+    def get_editorial_link(response, problem_link):
         """
-            Get editorial link given a problem link
+            @param response(Dict): Response json from the API
+            @param problem_link(String): Problem link
 
-            @param problem_link (String): Problem URL
-            @return (String/None): Editorial URL
+            @return (String/None): Editorial link
         """
+        editorial_present = response["model"]["is_editorial_available"]
+        editorial_link = problem_link + "/editorial/" if editorial_present else None
+        return editorial_link
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_problem_setters(response):
+        """
+            @param response(Dict): Response json from the API
+
+            @return (List/None): Problem authors or None
+        """
+        author = utilities.get_key_from_dict(response["model"],
+                                             "author_name",
+                                             None)
+        return None if author is None else [author]
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_problem_details(**args):
+        """
+            Get problem_details given a problem link
+
+            @param args (Dict): Dict containing problem_link
+            @return (Dict): Details of the problem returned in a dictionary
+        """
+        all_tags = []
         editorial_link = None
+        problem_link = args["problem_link"]
+        problem_setters = None
+
         if problem_link.__contains__("contests"):
             rest_url = problem_link.replace("contests/",
                                             "rest/contests/")
         else:
             rest_url = problem_link.replace("challenges/",
                                             "rest/contests/master/challenges/")
+
         response = get_request(rest_url)
         if response in REQUEST_FAILURES:
-            return editorial_link
+            return dict(tags=all_tags,
+                        editorial_link=editorial_link,
+                        problem_setters=problem_setters)
 
-        editorial_present = response.json()["model"]["is_editorial_available"]
-        return problem_link + "/editorial/" if editorial_present else None
+        response = response.json()
+
+        return dict(tags=Profile.get_tags(response),
+                    editorial_link=Profile.get_editorial_link(response, problem_link),
+                    problem_setters=Profile.get_problem_setters(response))
 
     # -------------------------------------------------------------------------
-    def get_submissions(self, last_retrieved):
+    @staticmethod
+    def is_invalid_handle(handle):
+        url = "https://www.hackerrank.com/rest/hackers/" + \
+              handle + \
+              "/recent_challenges?offset=0&limit=2"
+        response = get_request(url)
+        if response in REQUEST_FAILURES:
+            return True
+        return False
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def rating_graph_data(handle):
+        website = "https://www.hackerrank.com/"
+        url = "%srest/hackers/%s/rating_histories_elo" % (website, handle)
+        response = get_request(url)
+        if response in REQUEST_FAILURES:
+            return response
+
+        response = response.json()["models"]
+
+        hackerrank_graphs = []
+        for contest_class in response:
+            final_json = {}
+            for contest in contest_class["events"]:
+                time_stamp = contest["date"][:-5].split("T")
+                time_stamp = datetime.datetime.strptime(time_stamp[0] + " " + time_stamp[1],
+                                                        "%Y-%m-%d %H:%M:%S")
+                # Convert UTC to IST
+                time_stamp += datetime.timedelta(hours=5, minutes=30)
+                time_stamp = str(time_stamp)
+                final_json[time_stamp] = {"name": contest["contest_name"],
+                                          "url": website + contest["contest_slug"],
+                                          "rating": str(contest["rating"]),
+                                          "rank": contest["rank"]}
+
+            graph_name = "HackerRank - %s" % contest_class["category"]
+            hackerrank_graphs.append({"title": graph_name,
+                                      "data": final_json})
+
+        return hackerrank_graphs
+
+
+    # -------------------------------------------------------------------------
+    def get_submissions(self, last_retrieved, is_daily_retrieval):
         """
             Retrieve HackerRank submissions after last retrieved timestamp
 
             @param last_retrieved (DateTime): Last retrieved timestamp for the user
+            @param is_daily_retrieval (Boolean): If this call is from daily retrieval cron
+
             @return (Dict): Dictionary of submissions containing all the
                             information about the submissions
         """
@@ -126,7 +205,9 @@ class Profile(object):
         for i in xrange(1000):
 
             request_params["cursor"] = next_cursor
-            response = get_request(url, params=request_params)
+            response = get_request(url,
+                                   params=request_params,
+                                   is_daily_retrieval=is_daily_retrieval)
 
             if response in REQUEST_FAILURES:
                 return response

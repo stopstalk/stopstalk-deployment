@@ -1,5 +1,5 @@
 """
-    Copyright (c) 2015-2018 Raj Patel(raj454raj@gmail.com), StopStalk
+    Copyright (c) 2015-2020 Raj Patel(raj454raj@gmail.com), StopStalk
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@ class Profile(object):
         Class containing methods for retrieving
         submissions of user
     """
+    site_name = "UVa"
 
     # -------------------------------------------------------------------------
     def __init__(self, handle=""):
@@ -34,15 +35,41 @@ class Profile(object):
             @param handle (String): Codeforces Handle
         """
 
-        self.site = "UVa"
+        self.site = Profile.site_name
         self.handle = handle
 
     # -------------------------------------------------------------------------
-    def get_submissions(self, last_retrieved):
+    @staticmethod
+    def is_valid_url(url):
+        return url.__contains__("uva.onlinejudge.org") or \
+               url.__contains__("uhunt.felix-halim.net")
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def is_website_down():
+        """
+            @return (Boolean): If the website is down
+        """
+        return (Profile.site_name in current.REDIS_CLIENT.smembers("disabled_retrieval"))
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def is_invalid_handle(handle):
+        url = "http://uhunt.felix-halim.net/api/uname2uid/" + handle
+        response = get_request(url)
+        if response in (SERVER_FAILURE, OTHER_FAILURE) or response.text.strip() == "0":
+            return True
+        return False
+
+    # -------------------------------------------------------------------------
+    def get_submissions(self, last_retrieved, uva_problem_dict, is_daily_retrieval):
         """
             Retrieve UVa submissions after last retrieved timestamp
 
             @param last_retrieved (DateTime): Last retrieved timestamp for the user
+            @param uva_problem_dict (Dict): problem_id to problem_name mapping
+            @param is_daily_retrieval (Boolean): If this call is from daily retrieval cron
+
             @return (Dict): Dictionary of submissions containing all the
                             information about the submissions
         """
@@ -55,7 +82,7 @@ class Profile(object):
             uva_id = str(row.uva_id)
         else:
             url = "http://uhunt.felix-halim.net/api/uname2uid/" + handle
-            response = get_request(url)
+            response = get_request(url, is_daily_retrieval=is_daily_retrieval)
 
             if response in (SERVER_FAILURE, OTHER_FAILURE):
                 return response
@@ -64,14 +91,10 @@ class Profile(object):
             uva_id = response.text
 
         url = "http://uhunt.felix-halim.net/api/subs-user/" + uva_id
-        response = get_request(url)
+        response = get_request(url, is_daily_retrieval=is_daily_retrieval)
         if response in REQUEST_FAILURES:
             return response
 
-        uvadb = current.uvadb
-        ptable = uvadb.problem
-        uvaproblems = uvadb(ptable).select(ptable.problem_id, ptable.title)
-        uvaproblems = dict([(x.problem_id, x.title) for x in uvaproblems])
         submission_statuses = {90: "AC",
                                70: "WA",
                                30: "CE",
@@ -91,7 +114,7 @@ class Profile(object):
 
         for row in all_submissions:
             try:
-                problem_name = uvaproblems[row[1]]
+                problem_name = uva_problem_dict[row[1]]
             except KeyError:
                 print "Problem name not found in uva problem list: " + str(row[1])
                 continue

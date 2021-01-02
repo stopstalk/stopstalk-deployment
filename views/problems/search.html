@@ -1,0 +1,85 @@
+{{extend 'layout.html'}}
+{{block head}}
+    <title>{{=T("Problem Search")}}</title>
+    <script src="{{=URL('static', 'js/jquery.bootpag.min.js')}}"></script>
+    <script type="text/javascript">
+        var baseURL = "{{=URL('problems', 'search', host=True, scheme=True)}}";
+    </script>
+    <meta name="description" content="Search problems across all Competitive Programming websites">
+{{end}}
+
+<script src="{{=get_static_url('js/appjs/problems/search.js')}}"></script>
+<h3>{{=T("Search Problems")}}</h3>
+<form method="GET" action="">
+    <div class="row">
+        <div class="input-field col offset-s1 s4">
+            <input id="problem-name" name="name" type="text" value="{{=request.vars.get('name', '')}}"/>
+            <label for="problem-name">{{=T("Problem Name")}}</label>
+        </div>
+        <div class="input-field col s2">
+            <select id="profile-site" name="site" multiple>
+                <option value="" disabled selected>{{=T("Site")}}</option>
+                {{for site in current.SITES:}}
+                    <option value="{{=site}}">{{=site}}</option>
+                {{pass}}
+            </select>
+        </div>
+        <div class="input-field col s4">
+            <select id="orderby-problems" name="orderby">
+                <option value="" disabled selected>{{=T("Sort By")}}</option>
+                <option value="accuracy-asc">{{=T("Accuracy (Ascending)")}}</option>
+                <option value="accuracy-desc">{{=T("Accuracy (Descending)")}}</option>
+                <option value="solved-count-asc">{{=T("Solved Count (Ascending)")}}</option>
+                <option value="solved-count-desc">{{=T("Solved Count (Descending)")}}</option>
+            </select>
+        </div>
+    </div>
+    <div class="row center">
+        <div class="input-field col offset-s1 s4">
+            <input id="search" name="q" type="text" value="{{=request.vars.get('q', '')}}"/>
+            <input id="page" name="page" type="hidden" value="1"/>
+            <label for="search">{{=T("Search Site Tags...")}}</label>
+        </div>
+        <div class="col s2" style="margin-top: 2.5%;">
+            <span><i class="fa fa-long-arrow-left"></i> &nbsp;&nbsp;&nbsp; OR &nbsp;&nbsp;&nbsp; <i class="fa fa-long-arrow-right"></i></span>
+        </div>
+        <div class="input-field col s4">
+            <select id="generalized-tag-search" name="generalized_tags" multiple>
+                <option value="" disabled selected>{{=T("Generalized StopStalk tags")}}</option>
+                {{for tag in generalized_tags:}}
+                    <option value="{{=tag}}">{{=tag}}</option>
+                {{pass}}
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col offset-s3 s6">
+            {{if request.vars.get('include_editorials', '') == 'on':}}
+                <input id="include-editorials" type="checkbox" name="include_editorials" checked/>
+            {{else:}}
+                <input id="include-editorials" type="checkbox" name="include_editorials"/>
+            {{pass}}
+            <label for="include-editorials">{{=T("Only show problems with editorials")}}</label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col offset-s3 s6">
+            {{if request.vars.get('exclude_solved', '') == 'on':}}
+                <input id="exclude-solved" type="checkbox" name="exclude_solved" checked/>
+            {{else:}}
+                <input id="exclude-solved" type="checkbox" name="exclude_solved"/>
+            {{pass}}
+            <label for="exclude-solved">{{=T("Exclude my solved problems")}}</label>
+        </div>
+    </div>
+    <div class="row">
+        <button type="submit" class="blue btn waves-effect waves-light"><i class="fa fa-search"></i></button>
+    </div>
+</form>
+{{if request.vars.get("orderby", "").__contains__("accuracy"):}}
+    <h6 class="red-text">Note: HackerRank problems are not shown as their accuracy is 100% (Only solved problems are retrieved)</h6>
+{{pass}}
+<div id="page-selection" class="center"></div>
+<div class="row" id="problem-response">
+    {{=table}}
+</div>

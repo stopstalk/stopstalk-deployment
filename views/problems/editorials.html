@@ -7,15 +7,13 @@
   <title>Problem Editorial | {{=name}}</title>
   <meta name="description" content="List of editorials for {{=name}}">
   <script type="text/javascript">
-    var loveEditorialURL = "{{=URL('problems', 'love_editorial', extension='json')}}";
-    var loggedIn = ("{{=auth.is_logged_in()}}" === "True");
     var submitEditorialURL = "{{=URL('problems', 'submit_editorial')}}";
-    var deleteEditorialURL = "{{=URL('problems', 'delete_editorial')}}";
     var problemId = "{{=problem_id}}";
+    var showWriteEditorial = "{{=request.vars.write_editorial}}" === "True";
   </script>
 {{end}}
 <div id="editorial-listing">
-  <h3>Problem Editorials for <a class="problem-link-editorials-page" href="{{=URL('problems', 'index', vars={'pname': name, 'plink': link})}}" target="_blank">{{=name}}</a></h3>
+  <h3>Problem Editorials for <a class="problem-link-editorials-page" href="{{=URL('problems', 'index', vars={'problem_id': problem_id})}}" target="_blank">{{=name}}</a></h3>
   {{if editorial_link:}}
     <a id="site-editorial-link" class="btn btn-primary purple accent-4" href="{{=editorial_link}}">{{=site}} Editorial</a>
   {{pass}}
@@ -72,7 +70,7 @@
         strikethrough: false,
         underscoresBreakWords: true,
       },
-      placeholder: 'Start writing your editorial here ...',
+      placeholder: 'Start writing your editorial here. Make sure you add an explanation along with your code snippet.',
       promptURLs: true,
       renderingConfig: {
         singleLineBreaks: true,
@@ -93,18 +91,15 @@
     $('#editorial-listing').css('display', 'block');
   };
 
-  var showEditor = function() {
-    $('#editorial-listing').fadeOut(function() {
-      $('#write-editorial-div').fadeIn(function() {
-        // If refreshed the page, then the content of the textarea is not visible
-        simpleMDEObject.codemirror.refresh();
-      });
-    });
-    simpleMDEObject = getSimpleMDE();
+  var hideEditorialListing = function() {
+    $('#write-editorial-div').css('display', 'block');
+    $('#editorial-listing').css('display', 'none');
   };
 
-  var cancelEditorial = function() {
-    showEditorialListing();
+  var showEditor = function() {
+    hideEditorialListing();
+    simpleMDEObject = getSimpleMDE();
+    simpleMDEObject.codemirror.refresh();
   };
 
   var submitEditorial = function() {
@@ -125,7 +120,7 @@
           simpleMDEObject = null;
           // God forbid my Frontend sins :D
           $.web2py.flash('Editorial submitted for review');
-          window.location.href = "";
+          window.location.href = window.location.origin + window.location.pathname;
         },
         error: function(err) {
           $.web2py.flash('Error submitting editorial for verification');
@@ -136,12 +131,14 @@
   };
 
   $(document).ready(function() {
+    setEditorialVoteEventListeners();
+
     $('#show-editor').click(function() {
       showEditor();
     });
 
     $('#cancel-editorial').click(function() {
-      cancelEditorial();
+      showEditorialListing();
     });
 
     $('#submit-editorial').click(function() {
@@ -152,57 +149,9 @@
       return false;
     });
 
-    $('.delete-editorial').click(function() {
-      var result = confirm("Are you sure you want to DELETE the editorial ?")
-      if(!result) return;
-
-      var $this = $(this);
-      $.ajax({
-        url: deleteEditorialURL + '/' + $this.data('id'),
-        method: 'POST',
-        success: function(response) {
-          if (response === "SUCCESS") {
-            $this.parent().parent().fadeOut();
-            $.web2py.flash("Editorial deleted successfully!");
-          } else {
-            $.web2py.flash("Can't delete accepted Editorial!");
-          }
-        },
-        error: function(err) {
-          $.web2py.flash("Something went wrong!");
-        }
-      });
-    });
-
-    $('.love-editorial').click(function() {
-      var $this = $(this),
-          $loveCount = $($this.siblings()[0]),
-          $heartIcon = $this.children()[0];
-      if ($heartIcon.classList.contains('red-text')) {
-        $.web2py.flash('Already voted the editorial');
-      } else {
-        if (loggedIn === false) {
-          $.web2py.flash('Please login to cast your vote');
-        } else {
-          $.ajax({
-            url: loveEditorialURL + '/' + $(this).data()['id'],
-            method: 'POST',
-            success: function(response) {
-              $loveCount.html(response['love_count']);
-              $heartIcon.classList.add('red-text');
-              $.web2py.flash('Vote submitted');
-            },
-            error: function(response) {
-              if (response.status === 401) {
-                $.web2py.flash('Please login to cast your vote');
-              } else {
-                $.web2py.flash('Error submitting your vote');
-              }
-            }
-          });
-        }
-      }
-    });
+    if (showWriteEditorial) {
+      $('#show-editor').trigger('click');
+    }
   });
 
 </script>

@@ -1,5 +1,5 @@
 """
-    Copyright (c) 2015-2018 Raj Patel(raj454raj@gmail.com), StopStalk
+    Copyright (c) 2015-2020 Raj Patel(raj454raj@gmail.com), StopStalk
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -25,52 +25,93 @@ import traceback
 import gevent
 import sys
 import datetime
+import utilities
+import sites
 from gevent import monkey
+from stopstalk_constants import *
+
 gevent.monkey.patch_all(thread=False)
 
-# @ToDo: Make this generalised
-from sites import codechef, codeforces, spoj, hackerearth, hackerrank, uva
 rows = []
 problem_solved_stats = {}
 
 atable = db.auth_user
 cftable = db.custom_friend
 nrtable = db.next_retrieval
+ptable = db.problem
+stable = db.submission
 
-SERVER_FAILURE = "SERVER_FAILURE"
-NOT_FOUND = "NOT_FOUND"
-OTHER_FAILURE = "OTHER_FAILURE"
-
+TIME_CONVERSION = "%Y-%m-%d %H:%M:%S"
 INVALID_HANDLES = None
+
 failed_user_retrievals = []
 retrieval_type = None
+todays_date = datetime.datetime.today().date()
+uva_problem_dict = {}
+atcoder_problem_dict = {}
+metric_handlers = {}
+plink_to_id = {}
+todays_date_string = datetime.datetime.now().strftime("%Y-%m-%d")
+codechef_slugs = {}
 
-# -----------------------------------------------------------------------------
-def _debug(stopstalk_handle, site, custom=False):
+# ==============================================================================
+class Logger:
     """
-        Advanced logging of submissions
+        Logger class to print the retrieval status of a user site wise
     """
 
-    debug_string = stopstalk_handle + " " + site
-    if custom:
-        debug_string += " CUS"
-    print debug_string,
+    # --------------------------------------------------------------------------
+    def __init__(self, stopstalk_handle, custom):
+        """
+            @param stopstalk_handle (String): stopstalk_handle of the user
+            @param custom (Boolean): If the user is a custom user or not
+        """
+        self.stopstalk_handle = stopstalk_handle
+        self.custom_str = " CUS" if custom else ""
 
-# -----------------------------------------------------------------------------
-def insert_this_batch():
-    global rows
+    # --------------------------------------------------------------------------
+    def log(self, site, message):
+        """
+            Print the log message with the given message for the site
 
-    columns = "(`user_id`, `custom_user_id`, `stopstalk_handle`, " + \
-              "`site_handle`, `site`, `time_stamp`, `problem_name`," + \
-              "`problem_link`, `lang`, `status`, `points`, `view_link`)"
+            @param site (String): Site name of the current logline
+            @param message (String): Actual message to be logged
+        """
+        print "%s %s%s %s %s" % (str(datetime.datetime.now()),
+                                  self.stopstalk_handle,
+                                  self.custom_str,
+                                  site,
+                                  message)
 
-    if len(rows) != 0:
-        sql_query = """INSERT INTO `submission` """ + \
-                    columns + """ VALUES """ + \
-                    ",".join(rows) + """;"""
-        db.executesql(sql_query)
+    # --------------------------------------------------------------------------
+    def generic_log(self, message):
+        """
+            Print the log message with the given message
 
-# -----------------------------------------------------------------------------
+            @param message (String): Actual message to be logged
+        """
+        print "%s %s%s %s" % (str(datetime.datetime.now()),
+                               self.stopstalk_handle,
+                               self.custom_str,
+                               message)
+
+# ------------------------------------------------------------------------------
+def concurrent_submission_retrieval_handler(action, user_id, custom):
+    redis_key = "ongoing_submission_retrieval_"
+    redis_key += "custom_user_" if custom else "user_"
+    redis_key += str(user_id)
+
+    if action == "GET":
+        if current.REDIS_CLIENT.get(redis_key):
+            return "ONGOING"
+        else:
+            return "COMPLETED"
+    elif action == "SET":
+        current.REDIS_CLIENT.set(redis_key, True, ex=1 * 60 * 60)
+    elif action == "DEL":
+        current.REDIS_CLIENT.delete(redis_key)
+
+# ------------------------------------------------------------------------------
 def flush_problem_stats():
 
     global problem_solved_stats
@@ -84,8 +125,8 @@ def flush_problem_stats():
 
     # Get the existing user_ids and custom_user_ids for taking union
     ptable = db.problem
-    query = (ptable.link.belongs(problem_solved_stats.keys()))
-    existing = db(query).select(ptable.link,
+    query = (ptable.id.belongs(problem_solved_stats.keys()))
+    existing = db(query).select(ptable.id,
                                 ptable.user_ids,
                                 ptable.custom_user_ids)
 
@@ -96,109 +137,41 @@ def flush_problem_stats():
             val[0] = set([int(x) for x in row.user_ids.split(",")])
         if row.custom_user_ids:
             val[1] = set([int(x) for x in row.custom_user_ids.split(",")])
-        existing_ids[row.link] = val
+        existing_ids[row.id] = val
 
-    solved_case = ""
-    total_case = ""
-    user_ids_case = ""
-    custom_user_ids_case = ""
+    def _comma_separated(values1, values2):
+        return ",".join(_stringify(values1.union(values2)))
 
-    def _build_when(link, value, column_name=None):
-        res = ""
-        if column_name:
-            res = "WHEN '%s' THEN %s + %d\n" % (link, column_name, value)
-        else:
-            value = ",".join(_stringify(value))
-            res = "WHEN '%s' THEN '%s'\n" % (link, value)
-        return res
 
-    to_be_inserted = set([])
-    to_be_updated = set([])
-    for link in problem_solved_stats:
-        val = problem_solved_stats[link]
-        try:
-            # val[2] = user_ids who solved the problem in this retrieval
-            # existing_ids[link][0] = user_ids who have already solved the problem
-            if val[2].issubset(existing_ids[link][0]) is False:
-                user_ids_case += _build_when(link,
-                                             val[2].union(existing_ids[link][0]))
+    for problem_id in problem_solved_stats:
+        val = problem_solved_stats[problem_id]
 
-            # val[3] = custom_user_ids who solved the problem in this retrieval
-            # existing_ids[link][1] = custom_user_ids who have already solved the problem
-            if val[3].issubset(existing_ids[link][1]) is False:
-                custom_user_ids_case += _build_when(link,
-                                                    val[3].union(existing_ids[link][1]))
+        update_params = dict(
+            user_ids=_comma_separated(val[2],
+                                      existing_ids[problem_id][0]),
+            custom_user_ids=_comma_separated(val[3],
+                                             existing_ids[problem_id][1]),
+            solved_submissions=ptable.solved_submissions + val[0],
+            total_submissions=ptable.total_submissions + val[1]
+        )
 
-            # Add to the CASE statement only if there is an update
-            if val[0]:
-                solved_case += _build_when(link, val[0], "solved_submissions")
-            total_case += _build_when(link, val[1], "total_submissions")
-            to_be_updated.add(link)
-        except KeyError:
-            # Problem not in `problem` table
-            to_be_inserted.add(link)
-
-    if len(to_be_updated):
-        non_empty_components = []
-        def _build_component(column_name, value):
-            if value:
-                non_empty_components.append("""
-%s = CASE link
-%s
-     ELSE %s END""" % (column_name, value, column_name))
-
-        _build_component("solved_submissions", solved_case)
-        _build_component("total_submissions", total_case),
-        _build_component("user_ids", user_ids_case),
-        _build_component("custom_user_ids", custom_user_ids_case)
-
-        sql_query = """
-UPDATE problem
-SET
-%s
-WHERE link in (%s);
-                    """ % (",".join(non_empty_components),
-                           ",".join(["'" + x + "'" for x in to_be_updated]))
-
-        db.executesql(sql_query)
-
-    if len(to_be_inserted):
-        sql_query = ""
-        today = datetime.datetime.now().strftime("%Y-%m-%d")
-        insert_value = ""
-        value_string = "(" + ",".join(["\"%s\""] * 8) + ",%s,%s)"
-        for plink in to_be_inserted:
-            val = problem_solved_stats[plink]
-            insert_value += value_string % (plink,
-                                            val[4],
-                                            "['-']",
-                                            "",
-                                            ",".join(_stringify(val[2])),
-                                            ",".join(_stringify(val[3])),
-                                            today,
-                                            today,
-                                            val[0],
-                                            val[1])
-            insert_value += ","
-
-        insert_value = insert_value[:-1]
-        insert_query = """
-INSERT INTO problem (link, name, tags, editorial_link, user_ids, custom_user_ids, tags_added_on, editorial_added_on, solved_submissions, total_submissions)
-VALUES %s
-                       """ % (insert_value)
-
-        db.executesql(insert_query)
+        db(ptable.id == problem_id).update(**update_params)
 
     # Flush the actual dict
     problem_solved_stats = {}
 
-# -----------------------------------------------------------------------------
-def process_solved_counts(problem_link, problem_name, status, user_id, custom):
-    if problem_solved_stats.has_key(problem_link) is False:
+# ------------------------------------------------------------------------------
+def process_solved_counts(problem_id,
+                          problem_link,
+                          problem_name,
+                          status,
+                          user_id,
+                          custom):
+    if problem_id not in problem_solved_stats:
         # [solved_submissions, total_submissions, user_ids, custom_user_ids]
-        problem_solved_stats[problem_link] = [0, 0, set([]), set([]), problem_name]
+        problem_solved_stats[problem_id] = [0, 0, set([]), set([]), problem_name, problem_link]
 
-    value_list = problem_solved_stats[problem_link]
+    value_list = problem_solved_stats[problem_id]
     value_list[1] += 1
     if status == "AC":
         value_list[0] += 1
@@ -207,83 +180,87 @@ def process_solved_counts(problem_link, problem_name, status, user_id, custom):
     if len(problem_solved_stats) > 100:
         flush_problem_stats()
 
-# -----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def get_submissions(user_id,
                     handle,
                     stopstalk_handle,
                     submissions,
                     site,
-                    custom=False):
+                    custom):
     """
         Get the submissions and populate the database
     """
 
-    db = current.db
-    count = 0
+    from recommendations.problems import update_recommendation_status
 
-    if submissions == {}:
-        print "0"
-        return 0
+    submission_count = len(submissions)
 
-    global rows
+    if submission_count == 0:
+        return submission_count
 
     for submission in submissions:
-        count += 1
-        row = []
-        if custom:
-            row.extend(["--", user_id])
-        else:
-            row.extend([user_id, "--"])
+        try:
+            pname = submission[2].encode("utf-8", "ignore")
+        except UnicodeDecodeError:
+            pname = str(submission[2])
 
-        row.extend([stopstalk_handle,
-                    handle,
-                    site,
-                    submission[0],
-                    submission[2],
-                    submission[1],
-                    submission[5],
-                    submission[3],
-                    submission[4],
-                    submission[6]])
-
-        encoded_row = []
-        for x in row:
-            if isinstance(x, basestring):
-                try:
-                    tmp = x.encode("utf-8", "ignore")
-                except UnicodeDecodeError:
-                    tmp = str(tmp)
-
-                # @ToDo: Dirty hack! Do something with
-                #        replace and escaping quotes
-                tmp = tmp.replace("\"", "").replace("'", "")
-                if tmp == "--":
-                    tmp = "NULL"
+        pname = pname.replace("\"", "").replace("'", "")
+        plink = submission[1]
+        pid = None
+        if plink not in plink_to_id:
+            is_codechef_url = utilities.urltosite(plink) == "codechef"
+            if is_codechef_url:
+                slug = sites.codechef.Profile.get_slug(plink)
+                if slug in codechef_slugs:
+                    pid = codechef_slugs[slug]
                 else:
-                    tmp = "\"" + tmp + "\""
-                encoded_row.append(tmp)
-            else:
-                encoded_row.append(str(x))
+                    pid = None
 
-        process_solved_counts(encoded_row[7].strip("\""),
-                              encoded_row[6].strip("\""),
-                              encoded_row[9].strip("\""),
+            if pid is None:
+                pid = ptable.insert(name=pname,
+                                    link=plink,
+                                    editorial_link=None,
+                                    tags="['-']",
+                                    editorial_added_on=todays_date_string,
+                                    tags_added_on=todays_date_string,
+                                    user_ids="",
+                                    custom_user_ids="")
+                plink_to_id[plink] = pid
+
+            if is_codechef_url and pid is not None:
+                codechef_slugs[slug] = pid
+        else:
+            pid = plink_to_id[plink]
+
+        utilities.add_language_to_cache(submission[5])
+
+        submission_insert_dict = {
+            "user_id": user_id if not custom else None,
+            "custom_user_id": user_id if custom else None,
+            "stopstalk_handle": stopstalk_handle,
+            "site_handle": handle,
+            "site": site,
+            "time_stamp": submission[0],
+            "problem_id": pid,
+            "lang": submission[5],
+            "status": submission[3],
+            "points": submission[4],
+            "view_link": submission[6]
+        }
+        stable.insert(**submission_insert_dict)
+        process_solved_counts(pid,
+                              plink,
+                              pname,
+                              submission[3],
                               user_id,
                               custom)
 
-        rows.append("(" + ", ".join(encoded_row) + ")")
-        if len(rows) > 1000:
-            insert_this_batch()
-            rows = []
+        update_recommendation_status(user_id, pid, submission)
 
-    if count != 0:
-        print str(count)
-    else:
-        print "0"
-    return count
+    return submission_count
 
-# ----------------------------------------------------------------------------
-def handle_not_found(site, site_handle):
+# ------------------------------------------------------------------------------
+def new_handle_not_found(site, site_handle):
     """
         Add this handle to the invalid_handle table
 
@@ -291,109 +268,260 @@ def handle_not_found(site, site_handle):
         @param site_handle (String): Site handle which returned 404
     """
 
+    metric_handlers[site.lower()]["new_invalid_handle"].increment_count("total", 1)
     db.invalid_handle.insert(site=site, handle=site_handle)
 
-# ----------------------------------------------------------------------------
-def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
+# ------------------------------------------------------------------------------
+def reorder_leaderboard_data(data):
+    """
+        @param data (List of List): Each item represent a row in global leaderboard
+
+        @return (List of List): Re-order rows according to rating and assigned ranks
+    """
+    result = []
+    rank = 1
+
+    data = sorted(data, key=lambda x: x[3], reverse=True)
+    for row in data:
+        result.append((row[0],
+                       row[1],
+                       row[2],
+                       row[3],
+                       row[4],
+                       row[5],
+                       row[6],
+                       rank))
+        rank += 1
+
+    return result
+
+# ------------------------------------------------------------------------------
+def update_stopstalk_rating(user_id, stopstalk_handle, custom):
+    atable = db.auth_user
+    cftable = db.custom_friend
+
+    column_name = "custom_user_id" if custom else "user_id"
+    query = """
+    SELECT time_stamp, problem_link, status, site, problem_id
+    FROM submission
+    WHERE %(column_name)s = %(user_id)d
+    ORDER BY time_stamp
+            """ % {"column_name": column_name, "user_id": user_id}
+    all_submissions = db.executesql(query)
+
+    user_submissions = []
+    for submission in all_submissions:
+        user_submissions.append({column_name: user_id,
+                                 "time_stamp": submission[0],
+                                 "problem_link": submission[1],
+                                 "status": submission[2],
+                                 "site": submission[3],
+                                 "problem_id": submission[4]})
+
+    final_rating = utilities.get_stopstalk_user_stats(stopstalk_handle,
+                                                      custom,
+                                                      user_submissions)["rating_history"]
+    final_rating = dict(final_rating)
+    today = str(datetime.datetime.now().date())
+    current_rating = int(sum(final_rating[today]))
+    update_params = dict(stopstalk_rating=current_rating)
+    record = None
+
+    if custom:
+        record = cftable(user_id)
+    else:
+        record = atable(user_id)
+        current.REDIS_CLIENT.delete(utilities.get_user_record_cache_key(user_id))
+
+    record.update_record(**update_params)
+
+    db.commit()
+
+    if custom == True:
+        # Don't need to do anything on global_leaderboard_cache if custom is true
+        return current_rating
+
+    # Update global leaderboard cache
+    current_value = current.REDIS_CLIENT.get(GLOBAL_LEADERBOARD_CACHE_KEY)
+    if current_value is None:
+        # Global leaderboard cache not present
+        return current_rating
+
+    import json
+    current_value = json.loads(current_value)
+    reorder_leaderboard = False
+    for row in current_value:
+        if row[1] == stopstalk_handle:
+            row[3] = current_rating
+            reorder_leaderboard = True
+            break
+
+    if not reorder_leaderboard:
+        reorder_leaderboard = True
+        cf_count = db(cftable.user_id == record.id).count()
+        current_value.append((record.first_name + " " + record.last_name,
+                              record.stopstalk_handle,
+                              record.institute,
+                              record.stopstalk_rating,
+                              float(record.per_day_change),
+                              utilities.get_country_details(record.country),
+                              cf_count,
+                              0))
+
+    current_value = reorder_leaderboard_data(current_value)
+    current.REDIS_CLIENT.set(GLOBAL_LEADERBOARD_CACHE_KEY,
+                             json.dumps(current_value),
+                             ex=ONE_HOUR)
+    return current_rating
+
+# ------------------------------------------------------------------------------
+def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codechef_retrieval=False):
     """
         Retrieve submissions that are not already in the database
     """
 
     global INVALID_HANDLES
     global failed_user_retrievals
+    global todays_date
+    global metric_handlers
 
-    time_conversion = "%Y-%m-%d %H:%M:%S"
+    if concurrent_submission_retrieval_handler("GET", record.id, custom) == "ONGOING":
+        print "Already ongoing retrieval for", record.id, custom
+        return
+    else:
+        concurrent_submission_retrieval_handler("SET", record.id, custom)
+
+    stopstalk_retrieval_start_time = time.time()
+    sites_retrieval_timings = 0
     list_of_submissions = []
     retrieval_failures = []
-    plink_to_id = {}
+    should_clear_cache = False
     nrtable = db.next_retrieval
     user_column_name = "custom_user_id" if custom else "user_id"
     nrtable_record = db(nrtable[user_column_name] == record.id).select().first()
     skipped_retrieval = set([])
+
+    is_daily_retrieval = (retrieval_type == "daily_retrieve")
+    logger = Logger(record.stopstalk_handle, custom)
+
     if nrtable_record is None:
-        print "Record not found", user_column_name, record.id 
+        print "Record not found", user_column_name, record.id
         nrtable.insert(**{user_column_name: record.id})
         nrtable_record = db(nrtable[user_column_name] == record.id).select().first()
 
-    disabled_sites = current.REDIS_CLIENT.smembers("disabled_retrieval")
-    for site in disabled_sites:
-        if site in all_sites:
+    for site in all_sites:
+        Site = getattr(sites, site.lower())
+        if Site.Profile.is_website_down():
             all_sites.remove(site)
 
-    if "CodeForces" in all_sites:
-        ptable = db.problem
-        query = ptable.link.contains("codeforces")
-        problem_records = db(query).select(ptable.id,
-                                           ptable.link,
-                                           ptable.tags)
-        for problem_record in problem_records:
-            plink_to_id[problem_record.link] = (problem_record.tags,
-                                                problem_record.id)
+    common_influx_params = dict(stopstalk_handle=record.stopstalk_handle,
+                                retrieval_type=retrieval_type,
+                                value=1)
 
     for site in all_sites:
 
-        site_handle = record[site.lower() + "_handle"]
-        site_lr = site.lower() + "_lr"
-        site_delay = site.lower() + "_delay"
+        common_influx_params["site"] = site
+        lower_site = site.lower()
+        site_handle = record[lower_site + "_handle"]
+        site_lr = lower_site + "_lr"
+        site_delay = lower_site + "_delay"
         last_retrieved = record[site_lr]
 
         # Rocked it totally ! ;)
-        if retrieval_type == "daily_retrieve" and \
-           datetime.timedelta(days=nrtable_record[site_delay] / 5 + 1) + \
-           last_retrieved.date() > datetime.datetime.today().date():
-            print "Skipping " + site + " for " + record.stopstalk_handle
+        if is_daily_retrieval and \
+           datetime.timedelta(days=nrtable_record[site_delay] / 3 + 1) + \
+           last_retrieved.date() > todays_date:
+            utilities.push_influx_data("retrieval_stats",
+                                       dict(kind="skipped",
+                                            **common_influx_params))
+            logger.log(site, "skipped")
+            metric_handlers[lower_site]["skipped_retrievals"].increment_count("total", 1)
             skipped_retrieval.add(site)
             continue
 
-        last_retrieved = time.strptime(str(last_retrieved), time_conversion)
+        last_retrieved = time.strptime(str(last_retrieved), TIME_CONVERSION)
 
         if (site_handle, site) in INVALID_HANDLES:
-            print "Not found %s %s" % (site_handle, site)
+            logger.log(site, "not found:" + site_handle)
+            utilities.push_influx_data("retrieval_stats",
+                                       dict(kind="not_found",
+                                            **common_influx_params))
+            metric_handlers[lower_site]["handle_not_found"].increment_count("total", 1)
             record.update({site_lr: datetime.datetime.now()})
+            should_clear_cache = True
             continue
 
         if site_handle:
-            Site = globals()[site.lower()]
+            Site = getattr(sites, site.lower())
             P = Site.Profile(site_handle)
 
             # Retrieve submissions from the profile site
             site_method = P.get_submissions
-            if site == "CodeForces":
-                submissions = site_method(last_retrieved, plink_to_id)
+            start_retrieval_time = time.time()
+            if site == "UVa":
+                submissions = site_method(last_retrieved, uva_problem_dict, is_daily_retrieval)
+            elif site == "AtCoder":
+                submissions = site_method(last_retrieved, atcoder_problem_dict, is_daily_retrieval)
             else:
-                submissions = site_method(last_retrieved)
+                submissions = site_method(last_retrieved, is_daily_retrieval)
+            total_retrieval_time = time.time() - start_retrieval_time
+            sites_retrieval_timings += total_retrieval_time
+            metric_handlers[lower_site]["retrieval_times"].add_to_list("list", total_retrieval_time)
             if submissions in (SERVER_FAILURE, OTHER_FAILURE):
-                print "%s %s %s" % (submissions, site, record.stopstalk_handle)
+                utilities.push_influx_data("retrieval_stats",
+                                           dict(kind=submissions.lower(),
+                                                **common_influx_params))
+                logger.log(site, submissions)
+
+                metric_handlers[lower_site]["retrieval_count"].increment_count("failure", 1)
                 # Add the failure sites for inserting data into failed_retrieval
                 retrieval_failures.append(site)
+                should_clear_cache = True
+                current.REDIS_CLIENT.sadd("website_down_" + site.lower(), record.stopstalk_handle)
             elif submissions == NOT_FOUND:
-                print "New invalid handle %s %s" % (site_handle, site)
-                handle_not_found(site, site_handle)
+                utilities.push_influx_data("retrieval_stats",
+                                           dict(kind="new_invalid_handle",
+                                                **common_influx_params))
+                logger.log(site, "new invalid handle:" + site_handle)
+                new_handle_not_found(site, site_handle)
                 # Update the last retrieved of an invalid handle as we don't
                 # want new_user script to pick this user again and again
                 record.update({site_lr: datetime.datetime.now()})
+                should_clear_cache = True
             else:
+                utilities.push_influx_data("retrieval_stats",
+                                           dict(kind="success",
+                                                **common_influx_params))
+                submission_len = len(submissions)
+                metric_handlers[lower_site]["retrieval_count"].increment_count("success", 1)
+                metric_handlers[lower_site]["submission_count"].increment_count("total", submission_len)
+
+                logger.log(site, submission_len)
                 list_of_submissions.append((site, submissions))
                 # Immediately update the last_retrieved of the record
                 # Note: Only the record object is updated & not reflected in DB
                 record.update({site_lr: datetime.datetime.now()})
+                should_clear_cache = True
         else:
             # Update this time so that this user is not picked
             # up again and again by new_user cron
             record.update({site_lr: datetime.datetime.now()})
+            should_clear_cache = True
             if retrieval_type == "daily_retrieve":
                 nrtable_record.update({site_delay: 100000})
 
+    total_submissions_retrieved = 0
     for submissions in list_of_submissions:
         site = submissions[0]
-        _debug(record.stopstalk_handle, site, custom)
-        site_delay = site.lower() + "_delay"
+        lower_site = site.lower()
+        site_delay = lower_site + "_delay"
         submissions_count = get_submissions(record.id,
-                                            record[site.lower() + "_handle"],
+                                            record[lower_site + "_handle"],
                                             record.stopstalk_handle,
                                             submissions[1],
                                             site,
                                             custom)
+        total_submissions_retrieved += submissions_count
         if retrieval_type == "daily_retrieve" and \
            site not in skipped_retrieval and \
            site not in retrieval_failures:
@@ -405,6 +533,10 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
             # If retrieval failed for the user, then reset the delay so that
             # the details can be retrieved the next day
             nrtable_record.update({site_delay: 0})
+
+    # Clear the profile page cache in case there is atleast one submission retrieved
+    if should_clear_cache:
+        utilities.clear_profile_page_cache(record.stopstalk_handle)
 
     # To reflect all the updates to record into DB
     record.update_record()
@@ -428,7 +560,21 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys()):
                                                                 "NULL",
                                                                 site))
 
-# ----------------------------------------------------------------------------
+    # Keep committing the updates to the db to avoid lock wait timeouts
+    db.commit()
+    if total_submissions_retrieved > 0 and not custom:
+        log_message = "Rating updated from %f to " % record.stopstalk_rating
+        new_rating = update_stopstalk_rating(record.id,
+                                             record.stopstalk_handle,
+                                             custom)
+        log_message += str(new_rating)
+        logger.generic_log(log_message)
+
+    concurrent_submission_retrieval_handler("DEL", record.id, custom)
+    total_retrieval_time = time.time() - stopstalk_retrieval_start_time
+    metric_handlers["overall"]["just_stopstalk_code_time"].add_to_list("list", total_retrieval_time - sites_retrieval_timings)
+
+# ------------------------------------------------------------------------------
 def new_users():
     """
         Get the user_ids and custom_user_ids whose any of the last_retrieved
@@ -438,13 +584,17 @@ def new_users():
                           Dict - (custom_user_id, list of sites))
     """
 
+    disabled_sites = current.REDIS_CLIENT.smembers("disabled_retrieval")
     def _get_initial_query(table):
         query = False
         for site in current.SITES:
-            query |= (table[site.lower() + "_lr"] == current.INITIAL_DATE)
+            if site in disabled_sites:
+                continue
+            query |= ((table[site.lower() + "_lr"] == current.INITIAL_DATE) & \
+                      (table[site.lower() + "_handle"] != ""))
         return query
 
-    max_limit = 5
+    max_limit = 10
     query = _get_initial_query(atable) & \
             (atable.blacklisted == False) & \
             (atable.registration_key == "") # Unverified email
@@ -469,7 +619,7 @@ def new_users():
 
     return (users, cusers)
 
-# ----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def daily_retrieve():
     """
         Get the user_ids and custom_user_ids for daily retrieval
@@ -485,12 +635,13 @@ def daily_retrieve():
             (atable.registration_key == "") # Unverified email
     registered_users = db(query).select()
 
-    query = (cftable.id % M == N) & (cftable.duplicate_cu == None)
-    custom_users = db(query).select()
+    # query = (cftable.id % M == N) & (cftable.duplicate_cu == None)
+    # custom_users = db(query).select()
+    custom_users = []
 
     return (registered_users, custom_users)
 
-# ----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def re_retrieve():
     """
         Get the user_ids and custom_user_ids whose retrieval was
@@ -520,8 +671,8 @@ def re_retrieve():
 
     return (users, custom_users)
 
-# ----------------------------------------------------------------------------
-def specific_user():
+# ------------------------------------------------------------------------------
+def specific_users():
     """
         Get the user_ids and custom_user_ids whose retrieval was
         failed
@@ -529,16 +680,16 @@ def specific_user():
         @return (Tuple): (list of user_ids, list of custom_user_ids)
     """
     custom = (sys.argv[2] == "custom") # Else "normal"
-    user_id = int(sys.argv[3])
+    user_ids = [int(x) for x in sys.argv[3].split(",")]
     users = []
     custom_users = []
     if custom:
-        custom_users.append(cftable(user_id))
+        custom_users.extend([cftable(user_id) for user_id in user_ids])
     else:
-        users.append(atable(user_id))
+        users.extend([atable(user_id) for user_id in user_ids])
     return (users, custom_users)
 
-# ----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def refreshed_users():
     """
         Get the user_ids and custom_user_ids who requested for updates
@@ -562,20 +713,28 @@ def refreshed_users():
     users = [atable(user_id) for user_id in users]
     custom_users = [cftable(user_id) for user_id in custom_users]
 
-    update_fields = dict([(site.lower() + "_delay", 0) for site in current.SITES])
-    for user in users:
-        record = db(nrtable.user_id == user.id).select().first()
-        record.update_record(**update_fields)
-
-    for custom_user in custom_users:
-        record = db(nrtable.custom_user_id == custom_user.id).select().first()
-        record.update_record(**update_fields)
-
     return (users, custom_users)
+
+# ------------------------------------------------------------------------------
+def codechef_new_retrievals():
+    query = (cftable.codechef_handle != "") & \
+            (cftable.codechef_lr == current.INITIAL_DATE)
+    custom_friend = db(query).select(orderby="<random>").first()
+    if custom_friend is not None:
+        return ([], [custom_friend])
+    else:
+        query = (atable.codechef_lr == current.INITIAL_DATE) & \
+                (atable.codechef_handle != "") & \
+                (atable.blacklisted == False) & \
+                (atable.registration_key == "") # Unverified email
+
+        users = db(query).select(orderby="<random>", limitby=(0, 5))
+        return (users, [])
 
 if __name__ == "__main__":
 
     retrieval_type = sys.argv[1]
+    metric_handlers = utilities.init_metric_handlers((retrieval_type == "daily_retrieve"))
 
     if retrieval_type == "new_users":
         users, custom_users = new_users()
@@ -583,13 +742,28 @@ if __name__ == "__main__":
         users, custom_users = daily_retrieve()
     elif retrieval_type == "re_retrieve":
         users, custom_users = re_retrieve()
-    elif retrieval_type == "specific_user":
-        users, custom_users = specific_user()
+    elif retrieval_type == "specific_users":
+        users, custom_users = specific_users()
     elif retrieval_type == "refreshed_users":
         users, custom_users = refreshed_users()
+    elif retrieval_type == "codechef_new_retrievals":
+        users, custom_users = codechef_new_retrievals()
     else:
         print "Invalid arguments"
         sys.exit()
+
+    uva_problem_dict = utilities.get_problem_mappings(uvadb,
+                                                      uvadb.problem,
+                                                      ["problem_id", "title"])
+    atcoder_problem_dict = utilities.get_problem_mappings(db,
+                                                          db.atcoder_problems,
+                                                          ["problem_identifier",
+                                                           "name"])
+    links = db(ptable).select(ptable.id, ptable.link)
+    for row in links:
+        plink_to_id[row.link] = row.id
+        if row.link.__contains__("www.codechef.com/PRACTICE"):
+            codechef_slugs[row.link.split("/")[-1]] = row.id
 
     # Get the handles which returned 404 before
     INVALID_HANDLES = db(db.invalid_handle).select()
@@ -600,19 +774,21 @@ if __name__ == "__main__":
         for user_id in users:
             retrieve_submissions(atable(user_id),
                                  False,
-                                 users[user_id])
+                                 users[user_id],
+                                 current.SITES.keys())
         for custom_user_id in custom_users:
             retrieve_submissions(cftable(custom_user_id),
                                  True,
-                                 custom_users[custom_user_id])
+                                 custom_users[custom_user_id],
+                                 current.SITES.keys())
     else:
+        codechef_retrieval = (retrieval_type == "codechef_new_retrievals")
         for record in users:
-            retrieve_submissions(record, False)
+            retrieve_submissions(record, False, current.SITES.keys(), codechef_retrieval)
         for record in custom_users:
-            retrieve_submissions(record, True)
+            retrieve_submissions(record, True, current.SITES.keys(), codechef_retrieval)
 
     # Just in case the last batch has some residue
-    insert_this_batch()
     flush_problem_stats()
 
     # Insert user_ids and custom_user_ids into failed_retrieval
@@ -622,4 +798,4 @@ if __name__ == "__main__":
         sql_query = "%s %s;" % (insert_query, ",".join(failed_user_retrievals))
         db.executesql(sql_query)
 
-# END =========================================================================
+# END ==========================================================================

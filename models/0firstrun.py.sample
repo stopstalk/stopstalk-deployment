@@ -1,5 +1,5 @@
 """
-    Copyright (c) 2015-2018 Raj Patel(raj454raj@gmail.com), StopStalk
+    Copyright (c) 2015-2019 Raj Patel(raj454raj@gmail.com), StopStalk
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -32,6 +32,13 @@ current.mysql_uvadbname = "uvajudge"
 current.redis_server = "localhost"
 current.redis_port = 6379
 
+# Configure InfluxDB server
+current.influxdb_server = "localhost"
+current.influxdb_port = 8086
+
+current.influxdb_user = "<admin_user>"
+current.influxdb_password = "<admin_password>"
+
 # Configure mail options
 current.smtp_server = "logging"
 current.sender_mail = ""
@@ -40,6 +47,7 @@ current.sender_password = ""
 # Configure mail options
 current.bulk_smtp_server = "logging"
 current.bulk_sender_mail = ""
+current.bulk_sender_user = ""
 current.bulk_sender_password = ""
 
 # Google Analytics ID
@@ -66,4 +74,29 @@ current.s3_bucket = ""
 current.s3_access_key_id = ""
 current.s3_secret_access_key = ""
 
+current.pushover_api_token = ""
+current.pushover_user_token = ""
+
+# AWS API Gateway url for Spoj retrieval lambda function
+current.spoj_lambda_url = ""
+
+# Codechef API credentials
+current.codechef_client_id = ""
+current.codechef_client_secret = ""
+
+# codeforces request details
+current.codeforces_cookies = {}
+
+current.codeforces_headers = {}
+
+#app auth token
+current.api_tokens = []
+
+#user verification JWT secret
+current.jwt_secret = ""
+
+#gauth Credentials
+current.CLIENT_ID=""
+current.CLIENT_SECRET=""
+current.REDIRECT_URI="http://127.0.0.1:8001/default/googleauth"
 # =============================================================================

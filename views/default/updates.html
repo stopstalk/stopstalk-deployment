@@ -1,11 +1,6 @@
 {{extend 'layout.html'}}
 {{block head}}
     <title>{{=T("Updates")}}</title>
-    <style>
-        .card-content a {
-            color: darkturquoise;
-        }
-    </style>
     <meta name="description" content="List of important updates on StopStalk">
 {{end}}
 <h1>
@@ -13,7 +8,77 @@
 </h1>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
+            <div class="card-content white-text">
+                <span class="card-title">
+                    Problem setters on StopStalk!
+                </span>
+                <p>
+                    You can now see the problem setters of the problems across CodeChef, CodeForces, Spoj, HackerEarth, Hackerrank and Timus. You can also view the problems authored by a particular StopStalker on their profile page.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col offset-s3 s6">
+        <div class="card updates-page-card">
+            <div class="card-content white-text">
+                <span class="card-title">
+                    Updates in StopStalk Rating formula
+                </span>
+                <p>
+                    We have updated our Rating formula to handle users submitting for same problem again and again. This will ensure fair leaderboards and not skew the numbers and make sure people stay motivated to code everyday on various different problems.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col offset-s3 s6">
+        <div class="card updates-page-card">
+            <div class="card-content white-text">
+                <span class="card-title">
+                    Editorial contributions to your Profile page
+                </span>
+                <p>
+                    We are now also counting your contributions towards writing Editorials in the calendar graph of your profile page. More reasons to contribute to the community and have a deedy profile!
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col offset-s3 s6">
+        <div class="card updates-page-card">
+            <div class="card-content white-text">
+                <span class="card-title">
+                    Tag Search Page is now Problem Search Page
+                </span>
+                <p>
+                    We have added important filters like listing problems with editorials and name filter along with tags filter to help you find what you're looking for - {{=A("Problem Search page", _href=URL("problems", "search"))}}.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col offset-s3 s6">
+        <div class="card updates-page-card">
+            <div class="card-content white-text">
+                <span class="card-title">
+                    Timus added as a profile site
+                </span>
+                <p>
+                    We have now added <a href="http://acm.timus.ru" target="_blank">acm.timus.ru</a> to StopStalk. Update your Timus ID on <a href="{{=URL('user', 'update_details')}}">Update Details</a> page to get your submissions from Timus.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col offset-s3 s6">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Users can now write editorials
@@ -27,7 +92,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Heuristic submission retrieval
@@ -41,7 +106,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     List of solved / unsolved problems of a user on Profile Page
@@ -55,7 +120,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     We have created a Facebook Group for discussions
@@ -69,7 +134,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Update in the rating formula
@@ -83,7 +148,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Instantly retrieve your submissions on StopStalk
@@ -97,7 +162,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Revamped StopStalk Navigation bar experience
@@ -111,7 +176,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     View list of Custom Users of a User
@@ -125,7 +190,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Generalized Tag search page
@@ -140,7 +205,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Contest Rating Graph to your Profile Page
@@ -154,7 +219,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Revised StopStalk Rating Formula
@@ -168,7 +233,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Country-wise Leaderboards
@@ -182,7 +247,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Problem selection made easier
@@ -196,7 +261,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Custom users no longer shown in the Leaderboards
@@ -210,7 +275,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Acceptance Graph added to User Profile page
@@ -225,7 +290,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Add problems to your ToDo List
@@ -239,7 +304,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     StopStalk can now be viewed in Russian :)
@@ -252,7 +317,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     View your friends at one place
@@ -266,7 +331,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Last updated on your Profile Page
@@ -280,7 +345,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Search problems by Profile Site name
@@ -294,7 +359,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     UVa Online Judge added as a profile site
@@ -308,7 +373,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     More Handle details on Profile Page
@@ -322,7 +387,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Follower - Followed relationship among friends
@@ -337,7 +402,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Crowdsourcing problem tags from users
@@ -351,7 +416,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Tabs instead of Switch in problem page
@@ -367,7 +432,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Sweet User Interface for tables
@@ -382,7 +447,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     No separate friend request page
@@ -397,7 +462,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     'Show tags' button instead of giving a Spoiler ;)
@@ -412,7 +477,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Mark contests whose reminder is already added
@@ -427,7 +492,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Partially Solved Problems treated separately
@@ -441,7 +506,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Editorial Links added
@@ -455,7 +520,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Opensearch for Chrome added
@@ -474,7 +539,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Solved and unsolved problems marked
@@ -488,7 +553,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     Localized timestamps
@@ -502,7 +567,7 @@
 </div>
 <div class="row">
     <div class="col offset-s3 s6">
-        <div class="card purple">
+        <div class="card updates-page-card">
             <div class="card-content white-text">
                 <span class="card-title">
                     View / Download / Copy submission code

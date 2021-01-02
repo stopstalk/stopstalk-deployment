@@ -1,5 +1,5 @@
 """
-    Copyright (c) 2015-2018 Raj Patel(raj454raj@gmail.com), StopStalk
+    Copyright (c) 2015-2020 Raj Patel(raj454raj@gmail.com), StopStalk
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -20,6 +20,8 @@
     THE SOFTWARE.
 """
 
+import datetime
+
 atable = db.auth_user
 query = (atable.registration_key != "") & \
         (atable.blacklisted == False)
@@ -27,11 +29,11 @@ emails = db(query).select(atable.email)
 unverified_emails = set([x.email for x in emails])
 
 rows = db(db.queue.status == "pending").select(orderby="<random>",
-                                               limitby=(0, 80))
+                                               limitby=(0, 600))
 
 count = 0
 for row in rows:
-    if count == 40:
+    if count == 500:
         break
     if row.email in unverified_emails:
         continue
@@ -40,14 +42,13 @@ for row in rows:
                      subject=row.subject,
                      message=row.message):
         row.update_record(status="sent")
-        print "Sent to %s %s" % (row.email, row.subject)
+        print str(datetime.datetime.now()), "Sent to %s %s" % (row.email, row.subject)
     else:
         print "ERROR: " + str(bulkmail.error)
         if str(bulkmail.error).__contains__("Mail rate exceeded limit") is False:
             # Email sending failed with some other reason
             row.update_record(status="failed")
-            print "Email sending to %s failed with: %s" % (row.email,
-                                                           bulkmail.error)
+            print str(datetime.datetime.now()), "Email sending to %s failed with: %s" % (row.email, bulkmail.error)
         else:
             # Email sending failed due to Mail rate
             break

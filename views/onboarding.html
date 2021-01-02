@@ -1,0 +1,95 @@
+<h2>Get started with StopStalk</h2>
+<p>Please read the following to make best use of this platform :)</p>
+<div class="row">
+  <div class="col offset-s2 s8">
+    <ul class="list-onboarding-things collapsible" data-collapsible="expandable">
+      <li>
+        <div class="collapsible-header" data-analytics-label="Onboarding expandable - Add your friends"><i class="fa fa-users"></i><b>Add your friends</b></div>
+        <div class="collapsible-body justify-text">
+          <span>
+            Search your friends on StopStalk from <a id="onboarding-page-friend-search" href="{{=URL('default', 'search')}}" target="_blank">this page</a> and add them so that you can track their progress and stay motivated. Don't worry if your friend is not on StopStalk - either invite them to register or just add a <a id="onboarding-page-custom-friend" href="{{=URL('user', 'custom_friend')}}" target="_blank">Custom friend</a> on StopStalk.<br/>
+            Adding friends is beneficial for a lot of reasons -
+            <ol>
+              <li>You can check if a friend has solved a problem and seek help in case you get stuck.</li>
+              <li>View their submissions to improve your code.</li>
+              <li>See what kind of problems they are solving and follow a similar path.</li>
+              <li>You can see <a id="onboarding-page-friend-trending" href="{{=URL('problems', 'trending')}}" target="_blank">Trending problems</a> amongst your friends.</li>
+              <li>Go to a separate <a id="onboarding-page-friend-leaderboard" href="{{=URL('default', 'leaderboard', vars={'global': 'False'})}}" target="_blank">Friends' Leaderboard</a> and compare your progress with each other.</li>
+              <li>And many more ...</li>
+            </ol>
+          </span>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header" data-analytics-label="Onboarding expandable - ToDo list"><i class="fa fa-list-alt"></i><b>Add problems to a unified ToDo List</b></div>
+        <div class="collapsible-body justify-text">
+          <span>
+            Till now you used to remember two or three problems that you need to solve. Every time going to the site then searching for the problem that you remembered is painful. Now with StopStalk you have problems across various websites which makes it one-stop place to aggregate every problem that needs to be solved at one place. Click on any <i class="fa fa-check-square-o"></i> icon besides a problem and find the problem on the <a id="onboarding-page-todo" href="{{=URL('default', 'todo')}}" target="_blank">ToDo List page</a>.
+          </span>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header" data-analytics-label="Onboarding expandable - Search Problems"><i class="fa fa-search"></i><b>Search problems with various important filters</b></div>
+        <div class="collapsible-body justify-text">
+          <span>
+            Most important part in practicing for Competitive programming is finding what problems to solve. Either you rely on some friend of yours telling you "This is an interesting problem to solve!" or you go on a site and depending on your mood pick up a problem. Now, why just go on one of the Competitive Programming site when your motive is to find a problem regardless of the site. Head over to the <a id="onboarding-page-problem-search" href="{{=URL('problems', 'search')}}" target="_blank">Problem Search page</a> and apply the filters to find just what you're looking for.<br/><br/>
+            Two very important features on this page - <br/>
+            <ol>
+              <li>As you might know every site may have different tags for the same category. For example: Dynamic Programming is represented as <b>dp</b> in CodeForces and <b>dynamic-prog</b> or <b>dynamic-programming</b> in CodeChef. Just select <b>Dynamic Programming</b> from the generalized tags dropdown and we will do the rest for you :)</li>
+              <li>Sometimes you feel like solving problems which have editorial written for it because you don't want to get stuck. Just tick "Only show Problems with Editorials" and we will only show the problems which have an editorial.</li>
+            </ol>
+          </span>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header" data-analytics-label="Onboarding expandable - Write editorials"><i class="fa fa-pencil"></i><b>Write editorials for the community</b></div>
+        <div class="collapsible-body justify-text">
+          <span>
+            Go to any of the problem page and find <div class="chip deep-purple darken-1 white-text"><i class="fa fa-book"></i> Editorials</div> button. You will find the site editorial link there and also any other editorials contributed by StopStalkers on that page. You can also write editorials if you've solved that problem and can explain that problem.
+          </span>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header" data-analytics-label="Onboarding expandable - Trending problems"><i class="fa fa-line-chart"></i><b>Trending problems</b></div>
+        <div class="collapsible-body justify-text">
+          <span>
+            Get a list of Trending problems across all the users and amongst your friends on StopStalk. Head over to <a id="onboarding-page-trending-problems" href="{{=URL('problems', 'trending')}}" target="_blank">this page</a> and you might want to add any problem to your ToDo list.
+            </ol>
+          </span>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header" data-analytics-label="Onboarding expandable - Upcoming contests"><i class="fa fa-calendar-plus-o"></i><b>Upcoming contests and reminders</b></div>
+        <div class="collapsible-body justify-text">
+          <span>
+            We have a <a id="onboarding-page-contests" href="{{=URL('default', 'contests')}}" target="_blank">page</a> to list down all the Upcoming contests on major Competitive programming websites. Also we have an option to add a reminder to Google Calendar to remind you 30 minutes before the contest starts.
+          </span>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header" data-analytics-label="Onboarding expandable - User profile page"><i class="fa fa-user"></i><b>User Profile page</b></div>
+        <div class="collapsible-body justify-text">
+          <span style="line-height: 2em;">
+            An accumulated deedy profile compiled from your list of submissions across various websites. We update the submissions database <a id="onboarding-page-retrieval-logic" href="{{=URL('default', 'retrieval_logic')}}" target="_blank">heuristically</a> based on how frequently you submit on a particular site. Also if you just want to fetch your submissions instantly just click on <button class="btn-floating btn-small waves-effect waves-light" style="background-color: deepskyblue;"><i class="fa fa-refresh" style="white-text"></i></button> and we will get your submissions from all the sites in maximum of 5 minutes. Check your <a id="onboarding-page-user-profile" href="{{=URL('user', 'profile')}}" target="_blank">profile page</a> now.
+          </span>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header" data-analytics-label="Onboarding expandable - Leaderboard"><i class="fa fa-bar-chart"></i><b>Leaderboard</b></div>
+        <div class="collapsible-body justify-text">
+          <span style="line-height: 2em;">
+            We have designed a unique formula to compute StopStalk Rating which takes into consideration things like accuracy, current streak, number of solved problems, etc to keep you motivated to climb the leaderboard. Click on any of the Institute name to get the leaderboard for that institute and click on any of the Country flag to get Country-wise leaderboard.
+          </span>
+        </div>
+      </li>
+      <li>
+        <div class="collapsible-header" data-analytics-label="Onboarding expandable - Problem Tags"><i class="fa fa-tag"></i><b>Problem Tags</b></div>
+        <div class="collapsible-body justify-text">
+          <span>
+            We retrieve problem tags from the respective sites and show them on the Problem Page. Click on <a class="chip orange darken-1"><i class="fa fa-tag"></i> Show Tags</a> to reveal the tags of that problem. You can also contribute to the community by suggesting tags to help other people find the problem easily - just click on the <button class="green chip waves-light waves-effect btn btn-default" style="color: white; margin-top: 7px;"><i class="fa fa-plus"></i></button> and add your tags.
+          </span>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>

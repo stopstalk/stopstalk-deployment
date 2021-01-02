@@ -10,13 +10,15 @@
     <script src="{{=get_static_url('js/bloodhound.js')}}" type="text/javascript"></script>
     <script type="text/javascript">
         var problemName = '{{=problem_name}}';
+        var problemId = '{{=problem_id}}';
         var problemLink = '{{=problem_link}}'.replace(/&amp;/g, '&');
         var submissionType = '{{=submission_type}}';
-        var globalSubmissionURL = '{{=URL("problems", "index", vars={"pname": problem_name, "plink": problem_link, "submission_type": "global"})}}'.replace(/&amp;/g, '&');
-        var friendsSubmissionURL = '{{=URL("problems", "index", vars={"pname": problem_name, "plink": problem_link, "submission_type": "friends"})}}'.replace(/&amp;/g, '&');
-        var mySubmissionURL = '{{=URL("problems", "index", vars={"pname": problem_name, "plink": problem_link, "submission_type": "my"})}}'.replace(/&amp;/g, '&');
-        var isLoggedIn = '{{=auth.is_logged_in()}}';
-        var openModal = ('{{=request.vars.open_modal}}' === 'True');
+        var globalSubmissionURL = '{{=URL("problems", "index", vars={"submission_type": "global", "problem_id": problem_id})}}'.replace(/&amp;/g, '&');
+        var friendsSubmissionURL = '{{=URL("problems", "index", vars={"submission_type": "friends", "problem_id": problem_id})}}'.replace(/&amp;/g, '&');
+        var mySubmissionURL = '{{=URL("problems", "index", vars={"submission_type": "my", "problem_id": problem_id})}}'.replace(/&amp;/g, '&');
+        var openSuggestTagsModal = '{{=request.vars.suggest_tag}}' === 'True';
+        var openProblemDifficultyModal = '{{=request.vars.suggest_difficulty}}' === 'True';
+        var getProblemSubmissionsURL = '{{=URL("problems", "get_submissions_list")}}';
     </script>
     <script type="text/javascript">
         // Callback that creates and populates a data table,
@@ -42,7 +44,7 @@
                 method: 'POST',
                 url: '/problems/pie_chart_helper.json',
                 data: {
-                    'plink': problemLink,
+                    'pid': problemId,
                     'submission_type': submissionType
                 }
             }).done(function(data) {
@@ -121,6 +123,15 @@
                     // Instantiate and draw our chart, passing in some options.
                     var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
                     chart.draw(data, options);
+                } else {
+                    var $chartDiv = $('#chart_div');
+                    $chartDiv.css({
+                        'position': 'absolute',
+                        'margin-left': '50%',
+                        'margin-top': '7%',
+                        'color': 'grey'
+                    });
+                    $chartDiv.html('<h6>Not enough data to display graph</h6>');
                 }
             });
         }
@@ -140,7 +151,7 @@
     {{if auth.is_logged_in():}}
         <div class="modal" id="suggest-tags-modal">
             <div class="modal-content">
-                <h4>{{=T("Suggest tags")}}</h4>
+                <h4>{{=T("Suggest tags")}} for {{=problem_name}}</h4>
                 <div class="row center">
                     <div class="col s8 offset-s2">
                         <input class="center" data-role="materialtags" id="tag-suggests" placeholder="Add tags..." type="text"/>
@@ -228,4 +239,4 @@
     <div id="friend" class="col s12"></div>
     <div id="global" class="col s12"></div>
 </div>
-{{=table}}
+<div class="problem-submissions-list"></div>

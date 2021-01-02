@@ -1,5 +1,5 @@
 """
-    Copyright (c) 2015-2018 Raj Patel(raj454raj@gmail.com), StopStalk
+    Copyright (c) 2015-2020 Raj Patel(raj454raj@gmail.com), StopStalk
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,96 @@
 import utilities
 import time
 import datetime
+import json
+
+# ------------------------------------------------------------------------------
+@utilities.check_api_token
+def login_token():
+    """
+        Only accesible to whitelisted Api Calls
+    """
+    if not utilities.is_apicall():
+        raise HTTP(400, u'Invalid API params')
+    """
+        @withparameter email and password return {token : ''} if valid credentials
+        @withparameter token returns the new refresh token
+    """
+    request.vars.token = utilities.get_jwt_token_from_request()
+    auth_jwt.verify_expiration = False
+    return auth_jwt.jwt_token_manager()
+
+# ------------------------------------------------------------------------------
+def fill_details():
+    """
+        Fill the details after google registration 
+    """
+    auth_token = request.vars.get("g_token")
+
+    # verify parameters
+    if not auth_token:
+        session.flash = "Invalid request parameters!"
+        raise HTTP(400, "Invalid parameters")
+        return
+
+    gauth_redis_key = utilities.get_gauth_key(auth_token)
+    redis_value = current.REDIS_CLIENT.get(gauth_redis_key)
+
+    if not redis_value:
+        session.flash = "Token not found, please try again!"
+        raise HTTP(401, "Invalid credentials")
+        return
+
+    # verify credentials
+    user_info = json.loads(redis_value)
+    if auth_token != user_info["g_token"]:
+        session.flash = "Invalid token!"
+        raise HTTP(401, "Invalid credentials")
+        return
+    
+    # create form
+    form_fields = ["first_name",
+                   "last_name",
+                   "email",
+                   "institute",
+                   "country",
+                   "stopstalk_handle",
+                   "referrer"]
+
+    for site in current.SITES:
+        form_fields.append(site.lower() + "_handle")
+
+    atable = db.auth_user
+    stable = db.submission
+
+    # Set defaults
+    atable.email.readable = True
+    atable.email.writable = False
+
+    atable.email.default = user_info["email"]
+    atable.first_name.default = user_info["first_name"]
+    atable.last_name.default = user_info["last_name"]
+
+    form = SQLFORM(db.auth_user,
+                   fields=form_fields,
+                   showid=False)
+
+    form.vars.email = user_info["email"]
+
+    if form.process(onvalidation=current.sanitize_fields).accepted:
+        current.REDIS_CLIENT.delete(gauth_redis_key)
+        user = db.auth_user(**{"email": user_info["email"]})
+        current.register_callback(form, "google_auth")
+        current.notify_institute_users(user)
+        current.create_next_retrieval_record(user)
+        current.append_user_to_refreshed_users(user)
+        auth.login_user(user)
+        return redirect(URL("default","dashboard"))
+    elif form.errors:
+        response.flash = T("Form has errors")
+    else:
+        response.flash = T("Please update your details to continue")
+
+    return dict(form=form)
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()
@@ -39,6 +129,74 @@ def uva_handle():
 
     session.flash = T("Update your UVa handle")
     redirect(URL("user", "update_details"))
+
+# ------------------------------------------------------------------------------
+@auth.requires_login()
+def recheck_handle_details():
+    if session.user_id not in STOPSTALK_ADMIN_USER_IDS:
+        return "Don't be here"
+
+    response = ""
+    email = request.vars.email
+    site = request.vars.site
+
+    if site is None or email is None:
+        return "site and email param is required"
+
+    atable = db.auth_user
+    stable = db.submission
+    ihtable = db.invalid_handle
+
+    user_record = db(atable.email == email).select().first()
+
+    if user_record is None:
+        return "User with that email not found"
+
+    handle = user_record[site.lower() + "_handle"]
+    invalid_handles = db((ihtable.handle == handle) & \
+                         (ihtable.site == site)).delete()
+    response += "Deleted %d handles\n" % invalid_handles
+
+    query = (stable.user_id == user_record.id) & \
+            (stable.site == site)
+    submission_records = db(query).delete()
+    response += "Deleted %d submission records\n" % submission_records
+
+    user_record.update_record(**{site.lower() + "_lr": current.INITIAL_DATE})
+    response += "User record updated for last retrieved to INITIAL_DATE\n"
+
+    current.REDIS_CLIENT.rpush("next_retrieve_user", user_record.id)
+    response += "User added to next refresh queue\n"
+
+    utilities.clear_profile_page_cache(user_record.stopstalk_handle)
+    response += "Profile page cache deleted\n"
+    return response
+
+# ------------------------------------------------------------------------------
+@auth.requires_login()
+def blacklist_user():
+    if session.user_id not in STOPSTALK_ADMIN_USER_IDS:
+        return "Don't be here"
+
+    stopstalk_handle = request.vars.stopstalk_handle
+
+    if stopstalk_handle is None:
+        return "Please pass stopstalk_handle"
+
+    stable = db.submission
+    atable = db.auth_user
+
+    row = db(atable.stopstalk_handle == stopstalk_handle).select().first()
+    if row is None:
+        return "Stopstalk handle not found"
+
+    row.update_record(stopstalk_rating=0,
+                      per_day=0,
+                      per_day_change=0.0,
+                      blacklisted=True)
+
+    srecords = db(stable.user_id == row.id).delete()
+    return "Deleted %d submission records" % srecords
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()
@@ -59,11 +217,16 @@ def add_custom_friend():
     atable = db.auth_user
     cftable = db.custom_friend
 
-    stopstalk_handle = post_vars["stopstalk_handle"]
-    # Modify(Prepare) this dictionary for inserting it again
-    # @ToDo: Need a better method. Major security flaw
-    current_row = eval(post_vars["row"])
+    stopstalk_handle = "cus_" + post_vars["stopstalk_handle"]
+    # Modify (Prepare) this dictionary for inserting it again
+    current_row = json.loads(post_vars["row"])
     original_handle = current_row["stopstalk_handle"]
+
+    if not utilities.is_valid_stopstalk_handle(original_handle):
+        # @ToDo: Change the message when cus_ is the reason of invalid handle
+        session.flash = T("Expected alphanumeric (Underscore allowed)")
+        redirect(URL("user", "profile", args=original_handle))
+        return
 
     stopstalk_handles = []
     rows = db(atable).select(atable.stopstalk_handle)
@@ -141,9 +304,19 @@ def get_graph_data():
     if user_id is None or custom is None:
         return empty_dict
 
+    custom = (custom == "True")
+
+    stopstalk_handle = utilities.get_stopstalk_handle(user_id, custom)
+    redis_cache_key = "get_graph_data_" + stopstalk_handle
+
+    # Check if data is present in REDIS
+    data = current.REDIS_CLIENT.get(redis_cache_key)
+    if data:
+        return json.loads(data)
+
     file_path = "./applications/%s/graph_data/%s" % (request.application,
                                                      user_id)
-    if custom == "True":
+    if custom:
         file_path += "_custom.pickle"
     else:
         file_path += ".pickle"
@@ -151,10 +324,18 @@ def get_graph_data():
         return empty_dict
 
     graph_data = pickle.load(open(file_path, "rb"))
-    graphs = sum([graph_data[site.lower() + "_data"] for site in current.SITES], [])
+    graphs = []
+    for site in current.SITES:
+        lower_site = site.lower()
+        if graph_data.has_key(lower_site + "_data"):
+            graphs.extend(graph_data[lower_site + "_data"])
     graphs = filter(lambda x: x["data"] != {}, graphs)
 
-    return dict(graphs=graphs)
+    data = dict(graphs=graphs)
+    current.REDIS_CLIENT.set(redis_cache_key,
+                             json.dumps(data, separators=JSON_DUMP_SEPARATORS),
+                             ex=1 * 60 * 60)
+    return data
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()
@@ -175,7 +356,12 @@ def update_details():
 
     atable = db.auth_user
     stable = db.submission
-    record = atable(session.user_id)
+    record = utilities.get_user_records([session.user_id], "id", "id", True)
+
+    for field in form_fields:
+        if record[field] is None:
+            continue
+        record[field] = record[field].encode("utf-8")
 
     # Do not allow to modify stopstalk_handle and email
     atable.stopstalk_handle.writable = False
@@ -190,17 +376,20 @@ def update_details():
                    fields=form_fields,
                    showid=False)
 
-    form.vars.email = record.email
-    form.vars.stopstalk_handle = record.stopstalk_handle
-
     if form.process(onvalidation=current.sanitize_fields).accepted:
+        current.REDIS_CLIENT.delete(utilities.get_user_record_cache_key(session.user_id))
         session.flash = T("User details updated")
 
         updated_sites = utilities.handles_updated(record, form)
         if updated_sites != []:
+            utilities.clear_profile_page_cache(record.stopstalk_handle)
             site_lrs = {}
+            nrtable = db.next_retrieval
             submission_query = (stable.user_id == session.user_id)
-            nrtable_record = db(db.next_retrieval.user_id == session.user_id).select().first()
+            nrtable_record = db(nrtable.user_id == session.user_id).select().first()
+            if nrtable_record is None:
+                nid = nrtable.insert(user_id=session.user_id)
+                nrtable_record = nrtable(nid)
             for site in updated_sites:
                 site_lrs[site.lower() + "_lr"] = current.INITIAL_DATE
                 nrtable_record.update({site.lower() + "_delay": 0})
@@ -229,7 +418,8 @@ def update_details():
             db(submission_query).delete()
 
         session.auth.user = db.auth_user(session.user_id)
-        redirect(URL("default", "submissions", args=[1]))
+        current.REDIS_CLIENT.delete(CARD_CACHE_REDIS_KEYS["more_accounts_prefix"] + str(session.user_id))
+        redirect(URL("default", "index"))
     elif form.errors:
         response.flash = T("Form has errors")
 
@@ -268,18 +458,25 @@ def update_friend():
     for site in current.SITES:
         form_fields.append(site.lower() + "_handle")
 
+    for field in form_fields:
+        if record[field] is None:
+            continue
+        record[field] = unicode(record[field], "utf-8").encode("utf-8")
+
     form = SQLFORM(cftable,
                    record,
                    fields=form_fields,
                    deletable=True,
                    showid=False)
 
-    form.vars.stopstalk_handle = record.stopstalk_handle
+    form.vars.stopstalk_handle = record.stopstalk_handle.replace("cus_", "")
 
     if form.validate(onvalidation=current.sanitize_fields):
+        form.vars.stopstalk_handle = record.stopstalk_handle
         pickle_file_path = "./applications/stopstalk/graph_data/" + \
                            str(record.id) + "_custom.pickle"
         import os
+        utilities.clear_profile_page_cache(record.stopstalk_handle)
 
         if form.deleted:
             ## DELETE
@@ -316,7 +513,11 @@ def update_friend():
                 submission_query = (stable.custom_user_id == int(request.args[0]))
                 reset_sites = current.SITES if record.duplicate_cu else updated_sites
 
+                nrtable = db.next_retrieval
                 nrtable_record = db(db.next_retrieval.custom_user_id == int(request.args[0])).select().first()
+                if nrtable_record is None:
+                    nid = nrtable.insert(custom_user_id=int(request.args[0]))
+                    nrtable_record = nrtable(nid)
                 for site in reset_sites:
                     form.vars[site.lower() + "_lr"] = current.INITIAL_DATE
                     nrtable_record.update({site.lower() + "_delay": 0})
@@ -342,155 +543,26 @@ def update_friend():
             redirect(URL("user", "custom_friend"))
 
     elif form.errors:
+        form.vars.stopstalk_handle = record.stopstalk_handle
         response.flash = T("Form has errors")
 
     return dict(form=form)
 
 # ------------------------------------------------------------------------------
-def get_dates():
-    """
-        Return a dictionary containing count of submissions
-        on each date
-    """
-
-    if request.vars.user_id and request.vars.custom:
-        user_id = int(request.vars.user_id)
-        custom = (request.vars.custom == "True")
-    else:
-        raise HTTP(400, "Bad request")
-        return
-
-    if custom:
-        attribute = "submission.custom_user_id"
-    else:
-        attribute = "submission.user_id"
-
-    sql_query = """
-                    SELECT status, time_stamp, COUNT(*)
-                    FROM submission
-                    WHERE %s=%d
-                    GROUP BY DATE(submission.time_stamp), submission.status;
-                """ % (attribute, user_id)
-
-    row = db.executesql(sql_query)
-    total_submissions = {}
-
-    # For day streak
-    streak = max_streak = 0
-    prev = curr = None
-
-    # For accepted solutions streak
-    curr_accepted_streak = utilities.get_accepted_streak(user_id, custom)
-    max_accepted_streak = utilities.get_max_accepted_streak(user_id, custom)
-
-    for i in row:
-
-        if prev is None and streak == 0:
-            prev = time.strptime(str(i[1]), "%Y-%m-%d %H:%M:%S")
-            prev = datetime.date(prev.tm_year, prev.tm_mon, prev.tm_mday)
-            streak = 1
-        else:
-            curr = time.strptime(str(i[1]), "%Y-%m-%d %H:%M:%S")
-            curr = datetime.date(curr.tm_year, curr.tm_mon, curr.tm_mday)
-
-            if (curr - prev).days == 1:
-                streak += 1
-            elif curr != prev:
-                streak = 1
-
-            prev = curr
-
-        if streak > max_streak:
-            max_streak = streak
-
-        sub_date = str(i[1]).split()[0]
-        if total_submissions.has_key(sub_date):
-            total_submissions[sub_date][i[0]] = i[2]
-            total_submissions[sub_date]["count"] += i[2]
-        else:
-            total_submissions[sub_date] = {}
-            total_submissions[sub_date][i[0]] = i[2]
-            total_submissions[sub_date]["count"] = i[2]
-
-    today = datetime.datetime.today().date()
-
-    # Check if the last streak is continued till today
-    if prev is None or (today - prev).days > 1:
-        streak = 0
-
-    return dict(total=total_submissions,
-                max_streak=max_streak,
-                curr_streak=streak,
-                curr_accepted_streak=curr_accepted_streak,
-                max_accepted_streak=max_accepted_streak)
-
-# ------------------------------------------------------------------------------
-def get_solved_counts():
-    """
-        Get the number of solved and attempted problems
-    """
-
-    if request.extension != "json" or \
-       request.vars["user_id"] is None or \
-       request.vars["custom"] is None:
-        raise HTTP(400, "Bad request")
-        return
-
-    stable = db.submission
-    if request.vars.custom == "True":
-        query = (stable.custom_user_id == int(request.vars.user_id))
-    elif request.vars.custom == "False":
-        query = (stable.user_id == int(request.vars.user_id))
-    else:
-        return dict(total_problems=0, solved_problems=0)
-
-    total_problems = db(query).count(distinct=stable.problem_link)
-    query &= (stable.status == "AC")
-    solved_problems = db(query).count(distinct=stable.problem_link)
-    return dict(total_problems=total_problems, solved_problems=solved_problems)
-
-# ------------------------------------------------------------------------------
-def get_stats():
-    """
-        Get statistics of the user
-    """
-
-    if request.extension != "json":
-        raise HTTP(400, "Bad request")
-        return
-
-    if request.vars.user_id and request.vars.custom:
-        user_id = int(request.vars.user_id)
-        custom = (request.vars.custom == "True")
-    else:
-        raise HTTP(400, "Bad request")
-        return
-
-    stable = db.submission
-    count = stable.id.count()
-    query = (stable.user_id == user_id)
-    if custom:
-        query = (stable.custom_user_id == user_id)
-    row = db(query).select(stable.status,
-                           count,
-                           groupby=stable.status)
-    return dict(row=row)
-
-# ------------------------------------------------------------------------------
 def get_activity():
 
-    if request.extension != "json":
-        return dict(table="")
-
-    if request.vars.user_id and request.vars.custom:
-        user_id = int(request.vars.user_id)
-        custom = (request.vars.custom == "True")
-    else:
+    if request.extension != "json" or \
+       request.vars.user_id is None or \
+       request.vars.custom is None:
         raise HTTP(400, "Bad request")
         return
-        redirect(URL("default", "index"))
+
+    user_id = int(request.vars.user_id)
+    custom = (request.vars.custom == "True")
 
     stable = db.submission
+    uetable = db.user_editorials
+
     post_vars = request.post_vars
     date = post_vars["date"]
     if date is None:
@@ -501,50 +573,82 @@ def get_activity():
     query = (stable.time_stamp >= start_time) & \
             (stable.time_stamp <= end_time)
 
+    ue_query = (uetable.added_on >= start_time) & \
+               (uetable.added_on <= end_time)
+
+    if custom is False and auth.is_logged_in() and session.user_id == user_id:
+        ue_query &= True
+    else:
+        ue_query &= (uetable.verification == "accepted")
+
     if custom:
         query &= (stable.custom_user_id == user_id)
+        ue_query &= False
     else:
         query &= (stable.user_id == user_id)
+        ue_query &= (uetable.user_id == user_id)
+
     submissions = db(query).select(orderby=~stable.time_stamp)
+    user_editorials = db(ue_query).select(orderby=~uetable.id)
+    editorials_table = utilities.render_user_editorials_table(user_editorials,
+                                                              user_id,
+                                                              session.user_id if auth.is_logged_in() else None,
+                                                              "read-editorial-user-profile-page")
 
-    if len(submissions) > 0:
-        table = utilities.render_table(submissions, [], session.user_id)
-        table = DIV(H3(T("Activity on") + " " + date), table)
+    if len(submissions) > 0 or len(user_editorials):
+        div_element = DIV(H3(T("Activity on") + " " + date))
+        if len(submissions) > 0:
+            table = utilities.render_table(submissions, [], session.user_id)
+            div_element.append(table)
+
+            if len(user_editorials) > 0:
+                div_element.append(BR())
+
+        if len(user_editorials) > 0:
+            div_element.append(editorials_table)
     else:
-        table = H5(T("No activity on") + " " + date)
+        div_element = H5(T("No activity on") + " " + date)
 
-    return dict(table=table)
+    return dict(table=div_element)
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()
 def mark_read():
-    from json import dumps, loads
     ratable = db.recent_announcements
     rarecord = db(ratable.user_id == session.user_id).select().first()
-    data = loads(rarecord.data)
+    if rarecord is None:
+        ratable.insert(user_id=session.user_id)
+        rarecord = db(ratable.user_id == session.user_id).select().first()
+    data = json.loads(rarecord.data)
     data[request.vars.key] = True
-    rarecord.update_record(data=dumps(data))
+    rarecord.update_record(data=json.dumps(data, separators=JSON_DUMP_SEPARATORS))
     return dict()
 
 # ------------------------------------------------------------------------------
 def handle_details():
-    import json
     atable = db.auth_user
     cftable = db.custom_friend
     ihtable = db.invalid_handle
-    handle = request.vars["handle"]
+    handle = request.vars.handle
 
-    row = db(atable.stopstalk_handle == handle).select().first()
+    row = utilities.get_user_records([handle], "stopstalk_handle", "stopstalk_handle", True)
     if row is None:
         row = db(cftable.stopstalk_handle == handle).select().first()
         if row is None:
             # Invalid handle in the get params
             return dict()
 
+    redis_cache_key = "handle_details_" + row.stopstalk_handle
+
+    # Check if data is present in REDIS
+    data = current.REDIS_CLIENT.get(redis_cache_key)
+    if data:
+        return data
+
     query = False
     for site in current.SITES:
-        query |= (ihtable.site == site) & \
-                 (ihtable.handle == row[site.lower() + "_handle"])
+        query |= ((ihtable.site == site) & \
+                  (ihtable.handle == row[site.lower() + "_handle"]))
     ihandles = db(query).select()
     invalid_sites = set([])
     for record in ihandles:
@@ -565,19 +669,24 @@ def handle_details():
         if row[smallsite + "_handle"] == "":
             response[smallsite] = "not-provided"
 
-    return json.dumps(response)
+    result = json.dumps(response, separators=JSON_DUMP_SEPARATORS)
+    current.REDIS_CLIENT.set(redis_cache_key,
+                             result,
+                             ex=24 * 60 * 60)
+    return result
 
 # ------------------------------------------------------------------------------
 def get_solved_unsolved():
-    if request.extension != "json":
-        return dict()
 
-    user_id = request.vars.get("user_id", None)
-    custom = request.vars.get("custom", None)
-    if user_id is None and custom is None:
-        return dict(error="Something went wrong")
+    if request.extension != "json" or \
+       request.vars.user_id is None or \
+       request.vars.custom is None:
+        raise HTTP(400, "Bad request")
+        return
 
-    custom = (custom == "True")
+    user_id = int(request.vars.user_id)
+    custom = (request.vars.custom == "True")
+
     solved_problems, unsolved_problems = utilities.get_solved_problems(user_id, custom)
     if auth.is_logged_in() and session.user_id == user_id and not custom:
         user_solved_problems, user_unsolved_problems = solved_problems, unsolved_problems
@@ -595,7 +704,7 @@ def get_solved_unsolved():
     all_tags = db(ttable).select()
     all_tags = dict([(tag.id, tag.value) for tag in all_tags])
 
-    query = ptable.link.belongs(solved_problems.union(unsolved_problems))
+    query = ptable.id.belongs(solved_problems.union(unsolved_problems))
     # id => [problem_link, problem_name, problem_class]
     # problem_class =>
     #    0 (Logged in user has solved the problem)
@@ -607,16 +716,16 @@ def get_solved_unsolved():
         pids.append(problem.id)
 
         problem_status = 2
-        if problem.link in user_unsolved_problems:
+        if problem.id in user_unsolved_problems:
             # Checking for unsolved first because most of the problem links
             # would be found here instead of a failed lookup in solved_problems
             problem_status = 1
-        elif problem.link in user_solved_problems:
+        elif problem.id in user_solved_problems:
             problem_status = 0
 
-        problem_details[problem.id] = [problem.link, problem.name, problem_status]
+        problem_details[problem.id] = [problem.link, problem.name, problem_status, problem.id]
 
-        if problem.link in solved_problems:
+        if problem.id in solved_problems:
             solved_ids.append(problem.id)
         else:
             unsolved_ids.append(problem.id)
@@ -638,7 +747,7 @@ def get_solved_unsolved():
                   "Graphs": set([4, 5, 15, 22, 23, 24, 26]),
                   "Algorithms": set([12, 14, 27, 29, 35, 36, 37, 38, 44, 51]),
                   "Data Structures": set([2, 3, 7, 8, 33, 34, 49]),
-                  "Math": set([16, 30, 39, 40, 41, 43, 45, 50]),
+                  "Math": set([16, 30, 39, 40, 41, 43, 45, 50, 54]),
                   "Implementation": set([13, 18, 19]),
                   "Miscellaneous": set([46, 47, 48, 52])}
     ordered_categories = ["Dynamic Programming",
@@ -672,7 +781,7 @@ def get_solved_unsolved():
                 if not category_found:
                     this_category = "Miscellaneous"
             pdetails = problem_details[pid]
-            plink, pname, _ = pdetails
+            plink, pname, _, _ = pdetails
             psite = utilities.urltosite(plink)
             if (pname, psite) not in displayed_problems:
                 displayed_problems.add((pname, psite))
@@ -681,9 +790,43 @@ def get_solved_unsolved():
 
     return dict(solved_problems=_get_categorized_json(solved_ids),
                 unsolved_problems=_get_categorized_json(unsolved_ids),
-                solved_html_widget=utilities.problem_widget("", "", "solved-problem", "Solved problem"),
-                unsolved_html_widget=utilities.problem_widget("", "", "unsolved-problem", "Unsolved problem"),
-                unattempted_html_widget=utilities.problem_widget("", "", "unattempted-problem", "Unattempted problem"))
+                solved_html_widget=str(utilities.problem_widget("", "", "solved-problem", "Solved problem", None)),
+                unsolved_html_widget=str(utilities.problem_widget("", "", "unsolved-problem", "Unsolved problem", None)),
+                unattempted_html_widget=str(utilities.problem_widget("", "", "unattempted-problem", "Unattempted problem", None)))
+
+# ------------------------------------------------------------------------------
+def get_stopstalk_user_stats():
+    if request.extension != "json":
+        raise HTTP(400)
+        return
+
+    user_id = request.vars.get("user_id", None)
+    custom = request.vars.get("custom", None)
+
+    final_data = dict(
+        rating_history=[],
+        curr_accepted_streak=0,
+        max_accepted_streak=0,
+        curr_day_streak=0,
+        max_day_streak=0,
+        solved_counts={},
+        status_percentages=[],
+        site_accuracies={},
+        solved_problems_count=0,
+        total_problems_count=0,
+        calendar_data={}
+    )
+
+    if user_id in[None, ""] or custom in [None, ""]:
+        return final_data
+
+    user_id = int(user_id)
+    custom = (custom == "True")
+
+    result = utilities.get_rating_information(user_id,
+                                              custom,
+                                              auth.is_logged_in())
+    return result
 
 # ------------------------------------------------------------------------------
 def profile():
@@ -697,16 +840,20 @@ def profile():
             redirect(URL("user", "profile", args=str(session.handle)))
             return
         else:
-            redirect(URL("default", "user", "login", vars={"_next": URL("user", "profile")}))
+            redirect(URL("default", "user", "login",
+                         vars={"_next": URL("user", "profile")}))
+            return
     else:
         handle = str(request.args[0])
+
     http_referer = request.env.http_referer
     if auth.is_logged_in() and \
        session.welcome_shown is None and \
        http_referer is not None and \
        http_referer.__contains__("/user/login"):
-       response.flash = T("Welcome StopStalker!!")
-       session.welcome_shown = True
+
+        response.flash = T("Welcome StopStalker!!")
+        session.welcome_shown = True
 
     query = (db.auth_user.stopstalk_handle == handle)
     rows = db(query).select()
@@ -741,7 +888,7 @@ def profile():
                 original_row = cftable(row.duplicate_cu)
                 if auth.is_logged_in():
                     output["show_refresh_now"] = (row.user_id == session.user_id)
-                output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).total_seconds() > 3600
+                output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).total_seconds() > current.REFRESH_INTERVAL
                 actual_handle = row.stopstalk_handle
                 handle = original_row.stopstalk_handle
                 original_row["first_name"] = row.first_name
@@ -752,7 +899,7 @@ def profile():
                 output["user_id"] = row.duplicate_cu
                 row = original_row
             else:
-                output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).total_seconds() > 3600
+                output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).total_seconds() > current.REFRESH_INTERVAL
                 if auth.is_logged_in():
                     output["show_refresh_now"] = (row.user_id == session.user_id)
                 output["user_id"] = row.id
@@ -760,7 +907,7 @@ def profile():
     else:
         row = rows.first()
         output["user_id"] = row.id
-        output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).total_seconds() > 3600
+        output["can_update"] = (datetime.datetime.now() - row.refreshed_timestamp).total_seconds() > current.REFRESH_INTERVAL
         output["row"] = row
         if auth.is_logged_in():
             output["show_refresh_now"] = (row.id == session.user_id)
@@ -800,40 +947,11 @@ def profile():
 
     output["flag"] = flag
 
-    rows = db(user_query).select(stable.site,
-                                 stable.status,
-                                 stable.id.count(),
-                                 groupby=[stable.site, stable.status])
-
-    data = {}
-    for site in current.SITES:
-        data[site] = [0, 0]
-
-    for i in rows:
-        submission = i.as_dict()
-        cnt = submission["_extra"]["COUNT(submission.id)"]
-        status = submission["submission"]["status"]
-        site = submission["submission"]["site"]
-
-        if status == "AC":
-            data[site][0] += cnt
-        data[site][1] += cnt
-
-    efficiency = {}
-    for i in data:
-        if data[i][0] == 0 or data[i][1] == 0:
-            efficiency[i] = "-"
-            continue
-        else:
-            efficiency[i] = "%.3f" % (data[i][0] * 100.0 / data[i][1])
-
-    output["efficiency"] = efficiency
-
     profile_urls = {}
     for site in current.SITES:
-        profile_urls[site] = current.get_profile_url(site,
-                                                     row[site.lower() + \
-                                                         '_handle'])
+        profile_urls[site] = utilities.get_profile_url(site,
+                                                       row[site.lower() + \
+                                                           '_handle'])
     output["profile_urls"] = profile_urls
     if custom is False:
         cf_count = db(cftable.user_id == row.id).count()
@@ -847,10 +965,12 @@ def profile():
 def add_to_refresh_now():
     custom = request.vars.get("custom", None)
     stopstalk_handle = request.vars.get("stopstalk_handle", None)
-    if None in (custom, stopstalk_handle):
+    if stopstalk_handle is None or custom is None:
         return "FAILURE"
 
-    db_table = db.custom_friend if custom == "True" else db.auth_user
+    custom = (custom == "True")
+
+    db_table = db.custom_friend if custom else db.auth_user
     nrtable = db.next_retrieval
     row = db(db_table.stopstalk_handle == stopstalk_handle).select().first()
     if row is None:
@@ -858,27 +978,28 @@ def add_to_refresh_now():
 
     authorized = False
     user_id = row.id
-    if custom == "True":
+    if custom:
         authorized |= row.user_id == session.user_id
         user_id = row.duplicate_cu if row.duplicate_cu else row.id
     else:
         authorized |= row.id == session.user_id
 
-    authorized &= (datetime.datetime.now() - row.refreshed_timestamp).total_seconds() > 3600
+    authorized &= (datetime.datetime.now() - row.refreshed_timestamp).total_seconds() > current.REFRESH_INTERVAL
 
     if not authorized:
         return "FAILURE"
     else:
-        if custom == "True":
+        if custom:
             current.REDIS_CLIENT.rpush("next_retrieve_custom_user", user_id)
         else:
             current.REDIS_CLIENT.rpush("next_retrieve_user", user_id)
 
-    row.update_record(refreshed_timestamp=datetime.datetime.now())
+    row.update_record(refreshed_timestamp=datetime.datetime.now(),
+                      graph_data_retrieved=False)
     update_params = {}
     for site in current.SITES:
         update_params[site.lower() + "_delay"] = 1
-    if custom == "True":
+    if custom:
         db(nrtable.custom_user_id == user_id).update(**update_params)
     else:
         db(nrtable.user_id == user_id).update(**update_params)
@@ -906,8 +1027,7 @@ def submissions():
             redirect(URL("default", "index"))
     else:
         handle = request.args[0]
-        query = (atable.stopstalk_handle == handle)
-        row = db(query).select(atable.id, atable.first_name).first()
+        row = utilities.get_user_records([handle], "stopstalk_handle", "stopstalk_handle", True)
         if row is None:
             query = (cftable.stopstalk_handle == handle)
             row = db(query).select().first()
@@ -923,10 +1043,15 @@ def submissions():
         else:
             user_id = row.id
 
-    if request.vars["page"]:
-        page = request.vars["page"]
+    if request.vars.page:
+        page = request.vars.page
     else:
         page = "1"
+
+    if int(page) > current.USER_PAGINATION_LIMIT and not auth.is_logged_in():
+        session.flash = T("Please enter a valid page")
+        redirect(URL("default", "index"))
+        return
 
     stable = db.submission
 
@@ -938,6 +1063,13 @@ def submissions():
 
     if request.extension == "json":
         total_submissions = db(query).count()
+        if not auth.is_logged_in() and \
+           total_submissions > current.USER_PAGINATION_LIMIT * PER_PAGE:
+            total_submissions = current.USER_PAGINATION_LIMIT * PER_PAGE
+        else:
+            # User is logged in or total_submissions are less than our public
+            # view limit of submissions
+            pass
         page_count = total_submissions / PER_PAGE
 
         if total_submissions % PER_PAGE:
@@ -979,9 +1111,7 @@ def custom_friend():
     total_referrals = db(query).count()
 
     # Retrieve the total allowed custom users from auth_user table
-    query = (atable.id == session.user_id)
-    row = db(query).select(atable.referrer,
-                           atable.allowed_cu).first()
+    row = utilities.get_user_records([session.user_id], "id", "id", True)
     default_allowed = row.allowed_cu
     referrer = 0
     # If a valid referral is applied then award 1 extra CU
@@ -1045,16 +1175,81 @@ def custom_friend():
 
     # Set the hidden field
     form.vars.user_id = session.user_id
-    form.process(onvalidation=current.sanitize_fields)
+    form.process(onvalidation=[current.sanitize_fields,
+                               utilities.prepend_custom_identifier])
 
     if form.accepted:
         session.flash = T("Submissions will be added in some time")
         current.create_next_retrieval_record(form.vars, custom=True)
-        redirect(URL("default", "submissions", args=[1]))
+        redirect(URL("default", "dashboard"))
 
     return dict(form=form,
                 table=table,
                 allowed=allowed_custom_friends,
                 total_referrals=total_referrals)
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
+def get_friend_list():
+    """
+        Gets the friend list of a specific user and compares with the friend
+        list of the logged in user.
+    """
+
+    profile_user_id = int(request.vars["user_id"])
+    user_friends, _ = utilities.get_friends(session.user_id)
+    profile_friends, _ = utilities.get_friends(profile_user_id)
+
+    if not profile_friends:
+        return dict(table='No friends added yet.')
+
+    atable = db.auth_user
+    cftable = db.custom_friend
+
+    table = TABLE(_class="bordered centered")
+    tbody = TBODY()
+
+    user_records = utilities.get_user_records(profile_friends, "id", "id", False)
+
+    for friend_id in profile_friends:
+        row = user_records[friend_id]
+
+        friend_name = " ".join([row.first_name.capitalize(), row.last_name.capitalize()])
+        profile_url = URL("user", "profile",
+                          args=[row.stopstalk_handle],
+                          extension=False)
+
+        if friend_id == session.user_id:
+            tr = TR(TD(A(friend_name + " (You)",
+                         _href=profile_url,
+                         _target="_blank")),
+                    TD(),
+                    _style="height: 87px")
+            tbody.append(tr)
+            continue
+
+        friend_button_data = {"user-id": str(friend_id), "position": "left", "delay": "100"}
+
+        if friend_id in user_friends:
+            button_color, fa_icon = ("black", "fa-user-times")
+            friend_button_data["tooltip"] = T("Unriend")
+            friend_button_data["type"] = "unfriend"
+        else:
+            button_color, fa_icon = ("green", "fa-user-plus")
+            friend_button_data["tooltip"] = T("Add Friend")
+            friend_button_data["type"] = "add-friend"
+
+        tr = TR(TD(A(friend_name,
+                     _href=profile_url,
+                     _target="_blank")),
+                TD(BUTTON(I(_class="fa fa-3x " + fa_icon),
+                          _class="tooltipped btn-floating btn-large waves-effect " +
+                                 "waves-light friends-button " + button_color,
+                          data=friend_button_data)))
+        tbody.append(tr)
+
+    table.append(tbody)
+
+    return dict(table=table)
 
 # ==============================================================================

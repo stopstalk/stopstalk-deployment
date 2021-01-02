@@ -3,7 +3,7 @@
 """
 
 """
-    Copyright (c) 2015-2018 Raj Patel(raj454raj@gmail.com), StopStalk
+    Copyright (c) 2015-2020 Raj Patel(raj454raj@gmail.com), StopStalk
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -33,12 +33,14 @@ from collections import OrderedDict
 # Site Name => Site website url
 # OrderedDict is used to maintain the order of insertion
 current.SITES = OrderedDict()
-current.SITES["CodeChef"] = "http://www.codechef.com/"
+current.SITES["CodeChef"] = "https://www.codechef.com/"
 current.SITES["CodeForces"] = "http://www.codeforces.com/"
 current.SITES["Spoj"] = "https://www.spoj.com/"
+current.SITES["AtCoder"] = "https://atcoder.jp/"
 current.SITES["HackerEarth"] = "https://www.hackerearth.com/"
 current.SITES["HackerRank"] = "https://www.hackerrank.com/"
 current.SITES["UVa"] = "https://uva.onlinejudge.org/"
+current.SITES["Timus"] = "http://acm.timus.ru/"
 
 # If you are under a PROXY uncomment this and comment the next line
 #current.PROXY = {"http": "http://proxy.iiit.ac.in:8080/",
@@ -64,5 +66,8 @@ current.PROBLEMS_PER_PAGE = 15
 
 # Number of days in the past that should be considered for trending problems
 current.PAST_DAYS = 10
+
+# Number of pages to show for user submissions page
+current.USER_PAGINATION_LIMIT = 5
 
 # =============================================================================

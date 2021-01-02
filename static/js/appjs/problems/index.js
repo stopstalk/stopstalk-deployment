@@ -55,6 +55,23 @@
         });
     };
 
+    var populateSubmissionsList = function() {
+        var $submissionThrobber = $("#view-submission-preloader").clone();
+        $submissionThrobber.attr('id', 'problems-page-submission-preloader');
+        $submissionThrobber.css('margin-top', '5%');
+        $('.problem-submissions-list').html($submissionThrobber);
+
+        $.ajax({
+            url: getProblemSubmissionsURL,
+            data: {problem_id: problemId, submission_type: submissionType},
+            success: function(response) {
+                setTimeout(function() {
+                    $(".problem-submissions-list").html(response);
+                }, 2000);
+            }
+        })
+    };
+
     $(document).ready(function() {
 
         $('.tooltipped').tooltip({
@@ -62,6 +79,14 @@
         });
 
         handleSubmissionTabs();
+
+        setTimeout(function() {
+            $('#problem-page-editorial-button').removeClass('pulse');
+        }, 10 * 1000);
+
+        var $pieThrobber = $("#view-submission-preloader").clone();
+        $pieThrobber.attr('id', 'problemsPagePieThrobber');
+        $('#chart_div').html($pieThrobber);
 
         $('#show-tags').click(function() {
             var problemTags = $(this).data('tags');
@@ -89,19 +114,24 @@
 
         $('.modal').modal();
 
-        if (isLoggedIn == "True") {
-            if (openModal)
-                $('#suggest-tags-modal').modal('open');
+        populateSubmissionsList();
+
+        if (isLoggedIn) {
+            if (openSuggestTagsModal) $('.suggest-tags-plus').trigger('click');
+            if (openProblemDifficultyModal) {
+                setTimeout(function() {
+                    $('#problem-page-difficulty-button').trigger('click')
+                }, 10);
+            }
 
             $('#submit-tags').click(function() {
                 var submittedTags = $('#tag-suggests').val();
                 $('#suggest-tags-modal').modal('close');
                 $.ajax({
                     method: 'POST',
-                    url: '/problems/add_suggested_tags/',
+                    url: '/problems/add_suggested_tags',
                     data: {
-                        pname: problemName,
-                        plink: problemLink,
+                        problem_id: problemId,
                         tags: submittedTags
                     }
                 }).done(function(response) {

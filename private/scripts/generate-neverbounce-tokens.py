@@ -1,5 +1,5 @@
 """
-    Copyright (c) 2015-2018 Raj Patel(raj454raj@gmail.com), StopStalk
+    Copyright (c) 2015-2020 Raj Patel(raj454raj@gmail.com), StopStalk
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -24,10 +24,14 @@ import requests
 from requests.auth import HTTPBasicAuth
 from datetime import datetime, timedelta
 import random
+import urllib3
+urllib3.disable_warnings()
 
+attable = db.access_tokens
 tokens = [(current.neverbounce_user, current.neverbounce_password, "contactstopstalk@gmail.com"),
           (current.neverbounce_user2, current.neverbounce_password2, "raj454raj@gmail.com"),
           (current.neverbounce_user3, current.neverbounce_password3, "admin@stopstalk.com")]
+
 for i in xrange(2):
     # Only 5 tries to get a particular token
     random.shuffle(tokens)
@@ -37,16 +41,16 @@ for i in xrange(2):
                                  auth=HTTPBasicAuth(tokens[0][0],
                                                     tokens[0][1]),
                                  data={"grant_type": "client_credentials",
-                                       "scope": "basic user"})
+                                       "scope": "basic user"},
+                                 verify=False)
         if response.status_code == 200:
             response = response.json()
             if response.has_key("access_token"):
-                print response["access_token"]
-                db.access_tokens.insert(value=response["access_token"],
-                                        type="NeverBounce access_token",
-                                        time_stamp=datetime.now())
+                attable.insert(value=response["access_token"],
+                               type="NeverBounce access_token",
+                               time_stamp=datetime.now())
                 break
 
-attable = db.access_tokens
-n = db(attable.time_stamp < datetime.now() - timedelta(days=2)).delete()
-print "Deleted", n, "Access Tokens"
+query = (attable.time_stamp < datetime.now() - timedelta(days=2)) & \
+        (attable.type == "NeverBounce access_token")
+db(query).delete()

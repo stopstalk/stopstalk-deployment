@@ -1,0 +1,8 @@
+service influxdb status
+service influxdb stop
+service influxdb start
+service influxdb restart
+/etc/init.d/influxdb - Service file which is executed on the above operations
+/var/log/influxdb/influxd.log - Influxd logs (http server logs)
+/etc/influxdb/influxdb.conf - Main config file for influxdb
+/usr/lib/influxdb/scripts/influxdb.service - One more file where user/group are changed according to machine config

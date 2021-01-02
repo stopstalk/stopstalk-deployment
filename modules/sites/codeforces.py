@@ -1,5 +1,5 @@
 """
-    Copyright (c) 2015-2018 Raj Patel(raj454raj@gmail.com), StopStalk
+    Copyright (c) 2015-2020 Raj Patel(raj454raj@gmail.com), StopStalk
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -27,58 +27,72 @@ class Profile(object):
         Class containing methods for retrieving
         submissions of user
     """
+    site_name = "CodeForces"
 
-    # -------------------------------------------------------------------------
+    # --------------------------------------------------------------------------
     def __init__(self, handle=""):
         """
             @param handle (String): Codeforces Handle
         """
 
-        self.site = "CodeForces"
+        self.site = Profile.site_name
         self.handle = handle
+
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_tags(problem_link):
+    def is_valid_url(url):
+        return url.__contains__("codeforces.com/")
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def is_website_down():
         """
-            Get the tags of a particular problem from its URL
+            @return (Boolean): If the website is down
+        """
+        return (Profile.site_name in current.REDIS_CLIENT.smembers("disabled_retrieval"))
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_contest_id(problem_link):
+        """
+            Get contest ID from a problem_link
 
             @param problem_link (String): Problem URL
-            @return (List): List of tags for that problem
+            @return (Integer): Contest ID from the URL
         """
+        return problem_link.split("/")[-2]
 
-        if problem_link.__contains__("gymProblem"):
-            return ["-"]
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_url_parts(problem_link=None, parts=None):
+        if parts is None:
+            parts = problem_link.split("/")[-2:]
 
-        response = get_request(problem_link)
-        if response in REQUEST_FAILURES:
-            return ["-"]
+        return "problem_" + "_".join(parts)
 
-        tags = BeautifulSoup(response.text, "lxml").find_all("span",
-                                                             class_="tag-box")
-
-        return map(lambda tag: tag.contents[0].strip(), tags)
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def make_codeforces_request(url):
+        return get_request(url,
+                           headers=current.codeforces_headers,
+                           cookies=current.codeforces_cookies)
 
     # -------------------------------------------------------------------------
     @staticmethod
     def get_editorial_link(problem_link):
         """
-            Get editorial link given a problem link
+            @param problem_link(String): Problem link of the page
 
-            @param problem_link (String): Problem URL
-            @return (String/None): Editorial URL
+            @return (String/None): Editorial link
         """
-        if problem_link.__contains__("gymProblem"):
-            return None
-
         editorial_link = None
-        response = get_request(problem_link)
+        response = Profile.make_codeforces_request(problem_link)
         if response in REQUEST_FAILURES:
-            return None
+            return editorial_link
 
         soup = BeautifulSoup(response.text, "lxml")
         all_as = soup.find_all("a")
-
         for link in all_as:
             url = link.contents[0]
             if url.__contains__("Tutorial"):
@@ -93,11 +107,190 @@ class Profile(object):
         return editorial_link
 
     # -------------------------------------------------------------------------
-    def get_submissions(self, last_retrieved, plink_to_id):
+    @staticmethod
+    def get_tags(problem_link):
+        """
+            @param problem_link(String): Problem link of the page
+
+            @return (List): List of tags
+        """
+
+        value = current.REDIS_CLIENT.hgetall("codeforces_problem_tag_mapping")
+        if len(value) == 0:
+            response = get_request("https://codeforces.com/api/problemset.problems")
+            if response in REQUEST_FAILURES:
+                return []
+
+            result = response.json()["result"]["problems"]
+            redis_dict = {}
+            for problem in result:
+                redis_key = Profile.get_url_parts(parts=[str(problem["contestId"]),
+                                                         problem["index"]])
+                redis_dict[redis_key] = problem["tags"]
+
+            current.REDIS_CLIENT.hmset("codeforces_problem_tag_mapping",
+                                       redis_dict)
+
+            value = redis_dict
+
+        redis_key = Profile.get_url_parts(problem_link=problem_link)
+        if redis_key in value:
+            from ast import literal_eval
+            return literal_eval(value[redis_key])
+        else:
+            return []
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_problem_setters(problem_link):
+        """
+            @param problem_link(String): Problem link of the page
+
+            @return (List/None): Problem authors or None
+        """
+        import json
+        mappings = current.REDIS_CLIENT.get(CODEFORCES_PROBLEM_SETTERS_KEY)
+        if mappings is None:
+            file_path = "./applications/stopstalk/problem_setters/codeforces_metadata.json"
+            try:
+                file_obj = open(file_path, "r")
+            except IOError:
+                return None
+
+            mappings = json.loads(file_obj.read())
+            current.REDIS_CLIENT.set(CODEFORCES_PROBLEM_SETTERS_KEY,
+                                     json.dumps(mappings))
+            file_obj.close()
+
+        mappings = json.loads(mappings)
+        contest_id = Profile.get_contest_id(problem_link)
+        if contest_id in mappings["normal"]:
+            return mappings["normal"][contest_id]
+        elif contest_id in mappings["gym"]:
+            return mappings["gym"][contest_id]
+        else:
+            return None
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def get_problem_details(**args):
+        """
+            Get problem_details given a problem link
+
+            @param args (Dict): Dict containing problem_link
+            @return (Dict): Details of the problem returned in a dictionary
+        """
+
+        all_tags = []
+        editorial_link = None
+        problem_link = args["problem_link"]
+        problem_setters = None
+        if problem_link.__contains__("gymProblem"):
+            return dict(editorial_link=editorial_link,
+                        tags=all_tags,
+                        problem_setters=problem_setters)
+
+        if "problem_setters" in args["update_things"]:
+            problem_setters = Profile.get_problem_setters(problem_link)
+
+        if "editorial_link" in args["update_things"]:
+            editorial_link = Profile.get_editorial_link(problem_link)
+
+        if "tags" in args["update_things"]:
+            all_tags = Profile.get_tags(problem_link)
+
+        return dict(editorial_link=editorial_link,
+                    tags=all_tags,
+                    problem_setters=problem_setters)
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def is_invalid_handle(handle):
+        response = get_request("http://www.codeforces.com/api/user.status?handle=" + \
+                               handle + "&from=1&count=2")
+        if response in REQUEST_FAILURES:
+            return True
+        return False
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def download_submission(view_link):
+        if Profile.is_website_down():
+            return -1
+
+        response = Profile.make_codeforces_request(view_link)
+        if response in REQUEST_FAILURES:
+            return -1
+
+        try:
+            return BeautifulSoup(response.text, "lxml").find("pre").text
+        except:
+            return -1
+
+    # -------------------------------------------------------------------------
+    @staticmethod
+    def rating_graph_data(handle):
+        website = "http://www.codeforces.com/"
+
+        url = "%sapi/contest.list" % website
+        response = get_request(url)
+        if response in REQUEST_FAILURES:
+            return response
+
+        contest_list = response.json()["result"]
+        all_contests = {}
+
+        for contest in contest_list:
+            all_contests[contest["id"]] = contest
+
+        url = "%scontests/with/%s" % (website, handle)
+        response = Profile.make_codeforces_request(url)
+
+        if response in REQUEST_FAILURES:
+            return response
+
+        soup = BeautifulSoup(response.text, "lxml")
+        try:
+            tbody = soup.find("table", class_="tablesorter").find("tbody")
+        except AttributeError:
+            print "AttributeError for Codeforces handle: " + handle
+            return SERVER_FAILURE
+
+        contest_data = {}
+        for tr in tbody.find_all("tr"):
+            all_tds = tr.find_all("td")
+            contest_id = int(all_tds[1].find("a")["href"].split("/")[-1])
+            if all_tds[3].find("a"):
+                # For some users there is no rank for some contests
+                # Example http://codeforces.com/contests/with/cjoa (Contest number 3)
+                rank = int(all_tds[3].find("a").contents[0].strip())
+            else:
+                # @Todo: Will this create any issues as rank is assumed to be an int
+                rank = ""
+            solved_count = int(all_tds[4].find("a").contents[0].strip())
+            rating_change = int(all_tds[5].find("span").contents[0].strip())
+            new_rating = int(all_tds[6].contents[0].strip())
+            contest = all_contests[contest_id]
+            time_stamp = str(datetime.datetime.fromtimestamp(contest["startTimeSeconds"]))
+            contest_data[time_stamp] = {"name": contest["name"],
+                                        "url": "%scontest/%d" % (website,
+                                                                 contest_id),
+                                        "rating": str(new_rating),
+                                        "ratingChange": rating_change,
+                                        "rank": rank,
+                                        "solvedCount": solved_count}
+
+        return [{"title": "Codeforces",
+                 "data": contest_data}]
+
+    # -------------------------------------------------------------------------
+    def get_submissions(self, last_retrieved, is_daily_retrieval):
         """
             Retrieve CodeForces submissions after last retrieved timestamp
 
             @param last_retrieved (DateTime): Last retrieved timestamp for the user
+            @param is_daily_retrieval (Boolean): If this call is from daily retrieval cron
+
             @return (Dict): Dictionary of submissions containing all the
                             information about the submissions
         """
@@ -117,8 +310,8 @@ class Profile(object):
             url += "&count=50000"
 
         tmp = get_request(url,
-                          headers={"User-Agent": user_agent},
-                          timeout=timeout)
+                          timeout=timeout,
+                          is_daily_retrieval=is_daily_retrieval)
 
         if tmp in REQUEST_FAILURES:
             return tmp
@@ -140,34 +333,25 @@ class Profile(object):
             if curr <= last_retrieved:
                 return submissions
 
-            arg = "problem/"
-            if len(str(row["contestId"])) > 3:
-                arg = "gymProblem/"
+            if row.has_key("contestId") == False:
+                try:
+                    problem_link = "http://www.codeforces.com/problemsets/" + \
+                                   row["problem"]["problemsetName"] + \
+                                   "/problem/99999/" + str(row["problem"]["index"])
+                except Exception as e:
+                    print "Unable to create problem_link for", row
+                    continue
+            else:
+                arg = "problem/"
+                if int(row["contestId"]) > 90000:
+                    arg = "gymProblem/"
 
-            # Problem Name/URL
-            problem_link = "http://www.codeforces.com/problemset/" + arg + \
-                           str(row["contestId"]) + "/" + \
-                           row["problem"]["index"]
+                # Problem Name/URL
+                problem_link = "http://www.codeforces.com/problemset/" + arg + \
+                               str(row["contestId"]) + "/" + \
+                               row["problem"]["index"]
 
             problem_name = row["problem"]["name"]
-
-            # Problem tags
-            tags = row["problem"]["tags"]
-            if tags == []:
-                tags = ["-"]
-
-            if plink_to_id.has_key(problem_link):
-                this_value = plink_to_id[problem_link]
-                if tags != ["-"] and this_value[0] == "['-']":
-                    print "Codeforces tag updated", problem_link, tags
-                    db(ptable.id == this_value[1]).update(tags=str(tags))
-            else:
-                print "Codeforces tag inserted", problem_link, tags
-                rid = ptable.insert(link=problem_link,
-                                    name=problem_name,
-                                    tags=str(tags),
-                                    tags_added_on=today)
-                plink_to_id[problem_link] = (str(tags), rid)
 
             # Problem status
             try:
@@ -203,7 +387,8 @@ class Profile(object):
                 points = "0"
 
             # View code link
-            if problem_link.__contains__("gymProblem"):
+            if problem_link.__contains__("gymProblem") or \
+               row.has_key("contestId") == False:
                 view_link = ""
             else:
                 view_link = "http://www.codeforces.com/contest/" + \
