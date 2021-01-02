@@ -37,14 +37,14 @@ FROM submission
 GROUP BY  problem_link, newstatus;
             """
 
-print "Executing Count SQL query ..."
+print("Executing Count SQL query ...")
 result = db.executesql(sql_query)
-print "Count SQL Query finished ..."
+print("Count SQL Query finished ...")
 
 final_hash = {}
 
 for problem in result:
-    if final_hash.has_key(problem[0]):
+    if problem[0] in final_hash:
         if problem[1] == "AC":
             final_hash[problem[0]][0] = problem[2]
         final_hash[problem[0]][1] += problem[2]
@@ -72,15 +72,15 @@ WHERE status="AC"
 GROUP BY problem_link;
             """
 
-print "Executing Solved IDs query ..."
+print("Executing Solved IDs query ...")
 result = db.executesql(sql_query)
-print "Solved IDs query finished..."
+print("Solved IDs query finished...")
 
 for problem in result:
     final_hash[problem[0]][-2:] = [problem[1], problem[2]]
 
-print "Final hash completely populated ..."
+print("Final hash completely populated ...")
 
 # Serialize the dict for populating it to `problem` table
 with open("problem_stats", "wb") as f:
-    pickle.dump(final_hash.items(), f)
+    pickle.dump(list(final_hash.items()), f)

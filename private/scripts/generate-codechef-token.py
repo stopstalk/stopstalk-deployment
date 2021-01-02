@@ -38,7 +38,7 @@ if response.status_code == 200 and json_data["status"] == "OK":
                    type="CodeChef access_token",
                    time_stamp=datetime.now())
 else:
-    print "Error requesting CodeChef API for access token"
+    print("Error requesting CodeChef API for access token")
 
 query = (attable.time_stamp < datetime.now() - timedelta(days=2)) & \
         (attable.type == "CodeChef access_token")

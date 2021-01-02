@@ -112,27 +112,27 @@ for problem in problems:
     flag = False
 
     for final_tag in current_set:
-        if (1L, problem.id, all_tags[final_tag]) not in current_suggested_tags:
+        if (1, problem.id, all_tags[final_tag]) not in current_suggested_tags:
             flag = True
-            sttable.insert(user_id=1L,
+            sttable.insert(user_id=1,
                            tag_id=all_tags[final_tag],
                            problem_id=problem.id)
     if flag:
-        print problem.id, problem.tags, "-->", current_set
+        print(problem.id, problem.tags, "-->", current_set)
 
     for final_tag in this_tags:
-        if untagged.has_key(final_tag):
+        if final_tag in untagged:
             untagged[final_tag] += 1
         else:
             untagged[final_tag] = 1
 
 db.commit()
 
-print "\n\n\n=========================== Untagged ===========================\n"
+print("\n\n\n=========================== Untagged ===========================\n")
 
-for a, b in sorted(untagged.items(), key=lambda (k, v): (v, k), reverse=True):
+for a, b in sorted(list(untagged.items()), key=lambda k_v: (k_v[1], k_v[0]), reverse=True):
     try:
-        print unicode(a), unicode(b)
+        print(str(a), str(b))
     except UnicodeEncodeError:
-        print "Can't print this tag"
+        print("Can't print this tag")
         pass

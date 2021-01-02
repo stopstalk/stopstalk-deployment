@@ -20,7 +20,7 @@
     THE SOFTWARE.
 """
 
-from utilities import *
+from .utilities import *
 
 # ----------------------------------------------------------------------------
 def render_trending_table(caption, problems, column_name, user_id):
@@ -97,7 +97,7 @@ def get_trending_problem_list(submissions_list):
         else:
             pdict["custom_users"].add(cid)
 
-    trending_problems = sorted(problems_dict.items(),
+    trending_problems = sorted(list(problems_dict.items()),
                                key=custom_compare,
                                reverse=True)
 

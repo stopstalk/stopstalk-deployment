@@ -30,20 +30,20 @@ HAVING count(*) > 2;
 """
 institute_to_country = dict(db.executesql(sql_query))
 for institute in institute_to_country:
-    print institute, "->", institute_to_country[institute]
+    print(institute, "->", institute_to_country[institute])
 
 atable = db.auth_user
 cftable = db.custom_friend
 
 updated_count = 0
-for record in db(atable.institute.belongs(institute_to_country.keys())).select():
+for record in db(atable.institute.belongs(list(institute_to_country.keys()))).select():
     if not record.country:
         record.update_record(country=institute_to_country[record.institute])
         updated_count += 1
 
-for record in db(cftable.institute.belongs(institute_to_country.keys())).select():
+for record in db(cftable.institute.belongs(list(institute_to_country.keys()))).select():
     if not record.country:
         record.update_record(country=institute_to_country[record.institute])
         updated_count += 1
 
-print "Total updated:", updated_count
+print("Total updated:", updated_count)

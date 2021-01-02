@@ -21,9 +21,9 @@
 """
 
 import json
-import utilities
+from . import utilities
 import datetime
-from stopstalk_constants import *
+from .stopstalk_constants import *
 
 from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, B, \
                   TBODY, TR, TH, TD, A, SPAN, INPUT, I, P, FORM, \
@@ -390,7 +390,7 @@ class RecentSubmissionsCard(BaseCard):
                     final_hash[row[0]][row[1]] = int(row[2])
                     final_hash[row[0]]["total"] += int(row[2])
 
-                final_data = sorted(final_hash.items(),
+                final_data = sorted(list(final_hash.items()),
                                     key=lambda x: x[1]["total"],
                                     reverse=True)[:3]
             else:
@@ -666,7 +666,7 @@ class TrendingProblemsCard(BaseCard):
     def get_html(self):
         trending_problems = self.get_data()
 
-        from trending_utilities import draw_trending_table
+        from .trending_utilities import draw_trending_table
         trending_table = draw_trending_table(trending_problems,
                                              None,
                                              self.user_id)

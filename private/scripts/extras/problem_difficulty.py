@@ -46,7 +46,7 @@ tag_difficulty = {
     "Hard": 4.5
 }
 
-tags = tag_difficulty.keys()
+tags = list(tag_difficulty.keys())
 
 difficulty = defaultdict(list)
 
@@ -89,7 +89,7 @@ for pid, score in res:
 
 # Compute average difficulty from all types of problem difficulties.
 write_count = 0
-for pid, difficulties in difficulty.items():
+for pid, difficulties in list(difficulty.items()):
     if write_count >= 100:
         db.commit()
         write_count = 0
@@ -100,7 +100,7 @@ for pid, difficulties in difficulty.items():
     avg_difficulty = float("{0:.3f}".format(avg_difficulty))
     precord = ptable(pid)
     if precord.difficulty != avg_difficulty:
-        print "updating problem difficulty for", pid, ":", precord.difficulty, "->", avg_difficulty
+        print("updating problem difficulty for", pid, ":", precord.difficulty, "->", avg_difficulty)
         precord.update_record(difficulty=avg_difficulty)
 
 db.commit()

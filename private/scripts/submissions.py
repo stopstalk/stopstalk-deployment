@@ -77,11 +77,11 @@ class Logger:
             @param site (String): Site name of the current logline
             @param message (String): Actual message to be logged
         """
-        print "%s %s%s %s %s" % (str(datetime.datetime.now()),
+        print("%s %s%s %s %s" % (str(datetime.datetime.now()),
                                   self.stopstalk_handle,
                                   self.custom_str,
                                   site,
-                                  message)
+                                  message))
 
     # --------------------------------------------------------------------------
     def generic_log(self, message):
@@ -90,10 +90,10 @@ class Logger:
 
             @param message (String): Actual message to be logged
         """
-        print "%s %s%s %s" % (str(datetime.datetime.now()),
+        print("%s %s%s %s" % (str(datetime.datetime.now()),
                                self.stopstalk_handle,
                                self.custom_str,
-                               message)
+                               message))
 
 # ------------------------------------------------------------------------------
 def concurrent_submission_retrieval_handler(action, user_id, custom):
@@ -125,7 +125,7 @@ def flush_problem_stats():
 
     # Get the existing user_ids and custom_user_ids for taking union
     ptable = db.problem
-    query = (ptable.id.belongs(problem_solved_stats.keys()))
+    query = (ptable.id.belongs(list(problem_solved_stats.keys())))
     existing = db(query).select(ptable.id,
                                 ptable.user_ids,
                                 ptable.custom_user_ids)
@@ -375,7 +375,7 @@ def update_stopstalk_rating(user_id, stopstalk_handle, custom):
     return current_rating
 
 # ------------------------------------------------------------------------------
-def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codechef_retrieval=False):
+def retrieve_submissions(record, custom, all_sites=list(current.SITES.keys()), codechef_retrieval=False):
     """
         Retrieve submissions that are not already in the database
     """
@@ -386,7 +386,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
     global metric_handlers
 
     if concurrent_submission_retrieval_handler("GET", record.id, custom) == "ONGOING":
-        print "Already ongoing retrieval for", record.id, custom
+        print("Already ongoing retrieval for", record.id, custom)
         return
     else:
         concurrent_submission_retrieval_handler("SET", record.id, custom)
@@ -405,7 +405,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
     logger = Logger(record.stopstalk_handle, custom)
 
     if nrtable_record is None:
-        print "Record not found", user_column_name, record.id
+        print("Record not found", user_column_name, record.id)
         nrtable.insert(**{user_column_name: record.id})
         nrtable_record = db(nrtable[user_column_name] == record.id).select().first()
 
@@ -657,12 +657,12 @@ def re_retrieve():
     rows = db(frtable).select(limitby=(0, 20))
     for record in rows:
         if record.user_id:
-            if users.has_key(record.user_id):
+            if record.user_id in users:
                 users[record.user_id].add(record.site)
             else:
                 users[record.user_id] = set([record.site])
         elif record.custom_user_id:
-            if custom_users.has_key(record.custom_user_id):
+            if record.custom_user_id in custom_users:
                 custom_users[record.custom_user_id].add(record.site)
             else:
                 custom_users[record.custom_user_id] = set([record.site])
@@ -749,7 +749,7 @@ if __name__ == "__main__":
     elif retrieval_type == "codechef_new_retrievals":
         users, custom_users = codechef_new_retrievals()
     else:
-        print "Invalid arguments"
+        print("Invalid arguments")
         sys.exit()
 
     uva_problem_dict = utilities.get_problem_mappings(uvadb,
@@ -775,18 +775,18 @@ if __name__ == "__main__":
             retrieve_submissions(atable(user_id),
                                  False,
                                  users[user_id],
-                                 current.SITES.keys())
+                                 list(current.SITES.keys()))
         for custom_user_id in custom_users:
             retrieve_submissions(cftable(custom_user_id),
                                  True,
                                  custom_users[custom_user_id],
-                                 current.SITES.keys())
+                                 list(current.SITES.keys()))
     else:
         codechef_retrieval = (retrieval_type == "codechef_new_retrievals")
         for record in users:
-            retrieve_submissions(record, False, current.SITES.keys(), codechef_retrieval)
+            retrieve_submissions(record, False, list(current.SITES.keys()), codechef_retrieval)
         for record in custom_users:
-            retrieve_submissions(record, True, current.SITES.keys(), codechef_retrieval)
+            retrieve_submissions(record, True, list(current.SITES.keys()), codechef_retrieval)
 
     # Just in case the last batch has some residue
     flush_problem_stats()

@@ -47,4 +47,4 @@ for contest_class in response:
                               "graph_data": final_json})
 
 for graph in hackerrank_graphs:
-    print graph
+    print(graph)

@@ -17,12 +17,12 @@ with open("institute_to_country.csv", "wb") as csvfile:
                     thislist += [i["long_name"], i["short_name"]]
                     break
             if len(thislist) == 3:
-                print thislist
+                print(thislist)
                 writer.writerow(thislist)
             else:
-                print institute, "skipped"
+                print(institute, "skipped")
                 skipped.append(institute)
         except:
-            print institute, "skipped"
+            print(institute, "skipped")
             skipped.append(institute)
-    print skipped
+    print(skipped)

@@ -22,4 +22,4 @@
 """
 
 rows = db(db.user_editorials).select()
-print rows
+print(rows)

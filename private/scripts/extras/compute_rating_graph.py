@@ -51,23 +51,23 @@ def compute_prev_day_rating(date):
              (total_submissions - solved) * 15 + \
              curr_per_day * 8000
              #per_day * 2000
-    print "Previous date:", str(date)
-    print "#Solved:", solved
-    print "Total Submissions:", total_submissions
-    print "Current streak:", curr_streak
-    print "Maximum streak:", max_streak
-    print "curr_per_day:", curr_per_day
-    print "Rating: ", rating
-    print "*****************************************************"
+    print("Previous date:", str(date))
+    print("#Solved:", solved)
+    print("Total Submissions:", total_submissions)
+    print("Current streak:", curr_streak)
+    print("Maximum streak:", max_streak)
+    print("curr_per_day:", curr_per_day)
+    print("Rating: ", rating)
+    print("*****************************************************")
     final_rating[str(date)] = rating
 
 
 for row in rows:
     curr_date = row["time_stamp"].date()
     number_of_dates = (curr_date - prev_date).days
-    for cnt in xrange(number_of_dates):
+    for cnt in range(number_of_dates):
         compute_prev_day_rating(prev_date + datetime.timedelta(days=cnt))
-    print "____________________", row.time_stamp, row.problem_link, row.status, "____________________________"
+    print("____________________", row.time_stamp, row.problem_link, row.status, "____________________________")
     if prev_date != curr_date:
         if prev_date is not None and (curr_date - prev_date).days == 1:
             curr_streak += 1
@@ -83,8 +83,8 @@ for row in rows:
     prev_date = curr_date
 
 number_of_dates = (datetime.datetime.now().date() - prev_date).days
-for cnt in xrange(number_of_dates):
+for cnt in range(number_of_dates):
     compute_prev_day_rating(prev_date + datetime.timedelta(days=cnt))
 # print final_rating
 for key in final_rating:
-    print key, final_rating[key]
+    print(key, final_rating[key])

@@ -56,7 +56,7 @@ user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36
 
 # ==============================================================================
 def log_line(message):
-    print str(datetime.now()) + " " + message
+    print(str(datetime.now()) + " " + message)
 
 # ==============================================================================
 class User:
@@ -146,7 +146,7 @@ class User:
     def update_graph_data(self, sites):
         threads = []
         for site in sites:
-            if self.handles.has_key(site + "_handle") and self.handles[site + "_handle"] != "":
+            if site + "_handle" in self.handles and self.handles[site + "_handle"] != "":
                 threads.append(gevent.spawn(getattr(self,
                                                     "fetch_site_rating_history"),
                                             site))

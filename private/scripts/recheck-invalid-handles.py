@@ -49,14 +49,14 @@ if __name__ == "__main__":
         handle_to_row[site] = {}
 
     impossiblehandle = "thisreallycantbeahandle308"
-    assert(all(map(lambda site: get_invalid_handle_method(site)(impossiblehandle), current.SITES.keys())))
+    assert(all([get_invalid_handle_method(site)(impossiblehandle) for site in list(current.SITES.keys())]))
 
     def populate_handle_to_row(table):
         for row in db(table).select():
             for site in current.SITES:
                 site_handle = row[site.lower() + "_handle"]
                 if site_handle:
-                    if handle_to_row[site].has_key(site_handle):
+                    if site_handle in handle_to_row[site]:
                         handle_to_row[site][site_handle].append(row)
                     else:
                         handle_to_row[site][site_handle] = [row]
@@ -87,11 +87,11 @@ if __name__ == "__main__":
             continue
 
         # If not an invalid handle anymore
-        if handle_to_row[row.site].has_key(row.handle) and mapping[row.site](row.handle) is False:
+        if row.handle in handle_to_row[row.site] and mapping[row.site](row.handle) is False:
             cnt += 1
-            print row.site, row.handle, "deleted"
+            print(row.site, row.handle, "deleted")
             for row_obj in handle_to_row[row.site][row.handle]:
-                print "\t", row_obj.stopstalk_handle, "updated"
+                print("\t", row_obj.stopstalk_handle, "updated")
                 update_dict[row.site.lower() + "_lr"] = current.INITIAL_DATE
                 row_obj.update_record(**update_dict)
                 if "user_id" in row_obj:

@@ -40,7 +40,7 @@ rows = db(trtable).select()
 added_unfriended = {}
 
 for row in rows:
-    if added_unfriended.has_key(row.user_id):
+    if row.user_id in added_unfriended:
         if row.transaction_type == "add":
             added_unfriended[row.user_id][0].add(row.follower_id)
         else:
@@ -117,7 +117,7 @@ for user_id in added_unfriended:
             log_string += " A:" + ",".join(str(x) for x in curr_list[0])
         if len(curr_list[1]):
             log_string += " U:" + ",".join(str(x) for x in curr_list[1])
-        print log_string
+        print(log_string)
         current.send_mail(to=user_details[user_id]["email"],
                           subject="Friendship activity from StopStalk",
                           message=mail_content,

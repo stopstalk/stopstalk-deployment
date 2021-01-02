@@ -33,7 +33,7 @@ def pie_chart_helper():
     problem_id = int(request.post_vars["pid"])
     submission_type = "friends"
 
-    if request.vars.has_key("submission_type"):
+    if "submission_type" in request.vars:
         if request.vars["submission_type"] == "global":
             submission_type = "global"
         elif request.vars["submission_type"] == "my":
@@ -170,7 +170,7 @@ def add_suggested_tags():
 @auth.requires_login()
 def problem_difficulty():
     if request.env.request_method != "POST" or request.extension != "json":
-        raise(HTTP(405, "Method not allowed"))
+        raise HTTP
         return dict()
 
     problem_id = int(request.vars["problem_id"])
@@ -248,7 +248,7 @@ def get_suggested_tags():
 
 # ----------------------------------------------------------------------------
 def get_submissions_list():
-    if request.vars.has_key("problem_id") is False:
+    if ("problem_id" in request.vars) is False:
         # Disables direct entering of a URL
         session.flash = T("Please click on a Problem Link")
         redirect(URL("default", "index"))
@@ -262,7 +262,7 @@ def get_submissions_list():
         return
 
     submission_type = "friends"
-    if request.vars.has_key("submission_type"):
+    if "submission_type" in request.vars:
         if request.vars["submission_type"] == "global":
             submission_type = "global"
         elif request.vars["submission_type"] == "my":
@@ -311,7 +311,7 @@ def index():
     """
     from json import dumps
 
-    if request.vars.has_key("problem_id") is False:
+    if ("problem_id" in request.vars) is False:
         # Disables direct entering of a URL
         session.flash = T("Please click on a Problem Link")
         redirect(URL("default", "index"))
@@ -325,7 +325,7 @@ def index():
         return
 
     submission_type = "friends"
-    if request.vars.has_key("submission_type"):
+    if "submission_type" in request.vars:
         if request.vars["submission_type"] == "global":
             submission_type = "global"
         elif request.vars["submission_type"] == "my":
@@ -459,13 +459,12 @@ def editorials():
     atable = db.auth_user
     query = (uetable.problem_id == record.id)
     user_editorials = db(query).select(orderby=~uetable.added_on)
-    accepted_count = len(filter(lambda x: (x.verification == "accepted" or \
+    accepted_count = len([x for x in user_editorials if (x.verification == "accepted" or \
                                            (auth.is_logged_in() and \
                                             (x.user_id == session.user_id or \
                                              session.user_id in STOPSTALK_ADMIN_USER_IDS)
                                              )
-                                            ),
-                                user_editorials))
+                                            )])
     if accepted_count == 0:
         if auth.is_logged_in():
             table_contents = T("No editorials found! Please contribute to the community by writing an editorial if you've solved the problem.")
@@ -496,12 +495,12 @@ def editorials():
 @auth.requires_login()
 def delete_editorial():
     if len(request.args) < 1:
-        raise(HTTP(400, "Bad request"))
+        raise HTTP
         return
 
     ue_record = db.user_editorials(int(request.args[0]))
     if ue_record is None or session.user_id != ue_record.user_id:
-        raise(HTTP(400, "Bad request"))
+        raise HTTP
         return
 
     if ue_record.verification == "accepted":
@@ -657,7 +656,7 @@ def submit_editorial():
 @auth.requires_login()
 def admin_editorial_approval():
     if session.user_id != 1 or len(request.args) < 2:
-        raise(HTTP(401, "Why are you here ?"))
+        raise HTTP
         return
 
     uetable = db.user_editorials
@@ -993,7 +992,7 @@ def recommendations():
 def update_recommendation_status():
     from recommendations.problems import update_recommendation_status
 
-    pid = long(request.args[0])
+    pid = int(request.args[0])
     update_recommendation_status(session.user_id, pid)
 
 # ==============================================================================

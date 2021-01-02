@@ -61,4 +61,4 @@ for user in all_users:
         if claimable:
             valid_friends += 1
 
-    print user.email, valid_friends / 3
+    print(user.email, valid_friends / 3)
