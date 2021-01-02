@@ -17,13 +17,13 @@ apt-get install python-dev libxml2-dev libxslt1-dev zlib1g-dev
 Install the required packages by running:
 
 ```
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 Also, pip doesn't respect proxy while installing packages from the requirements file. So if you are using a proxy in your terminal you MAY use:
 
 ```
-pip install -r requirements.txt --proxy=<proxy address>
+pip3 install -r requirements.txt --proxy=<proxy address>
 ```
 
 2. To deploy the code, uglify-js and uglifycss needs to be installed
@@ -127,7 +127,7 @@ npm install uglifycss -g
 
     ```
     $ cd web2py
-    $ python web2py.py -a yourPassword // Choose any password
+    $ python3 web2py.py -a yourPassword // Choose any password
     ```
 
 11. Open the browser and go to the URL -
