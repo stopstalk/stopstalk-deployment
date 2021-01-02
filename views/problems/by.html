@@ -1,0 +1,15 @@
+{{extend 'layout.html'}}
+{{block head}}
+  <title>{{=T("Problems authored by")}} {{=stopstalk_handle}}</title>
+  <meta name="description" content="Competitive programming problems authored by {{=stopstalk_handle}}">
+  <script src="{{=get_static_url('js/appjs/problems/by.js')}}"></script>
+{{end}}
+
+<h2>{{=T("Problems authored by")}} {{=A(stopstalk_handle, _href=URL("user", "profile", args=stopstalk_handle), _target="_blank")}}</h2>
+{{if problems_count == 0:}}
+  <h6>No problems set by user with StopStalk handle <b>{{=stopstalk_handle}}</b> across {{=", ".join(current.SITES.keys())}}</h6>
+{{else:}}
+  <div class="row" id="problem-setter-page-table">
+    {{=table}}
+  </div>
+{{pass}}

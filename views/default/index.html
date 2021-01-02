@@ -4,6 +4,12 @@
     <link href="{{=get_static_url('css/style.css')}}" rel="stylesheet"/>
     <meta name="description" content="A tool to analyse and improve your Competitive Programming Progress">
 {{end}}
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<div id="g_id_onload"
+     data-client_id="{{=current.CLIENT_ID}}"
+     data-auto_select="false"
+     data-login_uri="{{=current.REDIRECT_URI}}">
+</div>
 <h1 class="center">
     StopStalk
 </h1>

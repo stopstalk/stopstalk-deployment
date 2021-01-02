@@ -1,5 +1,5 @@
 """
-    Copyright (c) 2015-2018 Raj Patel(raj454raj@gmail.com), StopStalk
+    Copyright (c) 2015-2020 Raj Patel(raj454raj@gmail.com), StopStalk
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -51,8 +51,14 @@ for row in rows:
         else:
             added_unfriended[row.user_id] = [set([]), set([row.follower_id])]
 
-def get_html_content(user_id, add_unfriend_list):
+base_utm_params = base_utm_params = {
+  "utm_source": "email",
+  "utm_medium": "email",
+  "utm_campaign": "friendship_activity"
+}
 
+def get_html_content(user_id, add_unfriend_list):
+    utm_params = base_utm_params.copy()
     added, unfriended = add_unfriend_list
     if len(added) + len(unfriended) == 0:
         return "FAILURE"
@@ -60,24 +66,36 @@ def get_html_content(user_id, add_unfriend_list):
     html_message = "<html>Hey %s,<br/><br/>" % user_details[user_id]["stopstalk_handle"]
 
     if len(added):
+        utm_params.update({"utm_content": "profile_link",
+                           "utm_term": "added"})
         html_message += "%s" % (", ".join([str(A(user_details[x]["name"],
                                                  _href=URL("user",
                                                            "profile",
                                                            args=user_details[x]["stopstalk_handle"],
                                                            scheme="https",
+                                                           vars=utm_params,
                                                            host="www.stopstalk.com"))) for x in added]))
-        html_message += " added you as a friend<br/><br/>"
+        html_message += " added you as a friend on StopStalk.<br/><br/>"
+
     if len(unfriended):
+        utm_params.update({"utm_content": "profile_link",
+                           "utm_term": "unfriended"})
         html_message += "%s" % (", ".join([str(A(user_details[x]["name"],
                                                  _href=URL("user",
                                                            "profile",
                                                            args=user_details[x]["stopstalk_handle"],
                                                            scheme="https",
+                                                           vars=utm_params,
                                                            host="www.stopstalk.com"))) for x in unfriended]))
-        html_message += " unfriended you <br/><br/>"
+        html_message += " unfriended you on StopStalk.<br/><br/>"
+
+    utm_params.update({
+        "utm_term": "unsubscribe",
+        "utm_content": "unsubscribe_link"
+    })
 
     html_message += """
-Adjust your email preferences %s<br/>
+Adjust your email preferences %s.<br/>
 Cheers,<br/>
 Team StopStalk
 </html>
@@ -85,8 +103,10 @@ Team StopStalk
                              _href=URL("default",
                                        "unsubscribe",
                                        scheme="https",
+                                       vars=utm_params,
                                        host="www.stopstalk.com")))
-    return html_message
+
+    return html_message.replace("&amp;", "&")
 
 for user_id in added_unfriended:
     mail_content = get_html_content(user_id, added_unfriended[user_id])

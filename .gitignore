@@ -8,6 +8,8 @@
 /graph_data/*.pickle
 /rating_history/users/*.txt
 /rating_history/custom_users/*.txt
+/static/minified_files/*
+/private/scripts/google_index/service-account.json
 .~lock.*.csv#
 *.log
 *.pyc
@@ -18,3 +20,5 @@
 .idea
 .sass-cache
 dump.rdb
+.DS_Store
+/problem_setters/codeforces_metadata.json

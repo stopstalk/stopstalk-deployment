@@ -1,3 +1,41 @@
+var setEditorialVoteEventListeners = function() {
+    $(document).on('click', '.love-editorial', function() {
+        var $this = $(this),
+            $loveCount = $($this.siblings()[0]),
+            $heartIcon = $this.children()[0];
+        if ($heartIcon.classList.contains('red-text')) {
+            $.web2py.flash('Already voted the editorial');
+        } else {
+            if (isLoggedIn === false) {
+                $.web2py.flash('Please login to cast your vote');
+            } else {
+                $.ajax({
+                    url: loveEditorialURL + '/' + $(this).data()['id'],
+                    method: 'POST',
+                    success: function(response) {
+                        $loveCount.html(response['love_count']);
+                        $heartIcon.classList.add('red-text');
+                        $.web2py.flash('Vote submitted');
+                    },
+                    error: function(response) {
+                        if (response.status === 401) {
+                            $.web2py.flash('Please login to cast your vote');
+                        } else {
+                            $.web2py.flash('Error submitting your vote');
+                        }
+                    }
+                });
+            }
+        }
+    });
+};
+
+var initTooltips = function() {
+    $('.tooltipped').tooltip({
+        delay: 50
+    });
+};
+
 (function($) {
     "use strict";
 
@@ -72,7 +110,112 @@
         if (!results) return null;
         if (!results[2]) return '';
         return decodeURIComponent(results[2].replace(/\+/g, " "));
-    }
+    };
+
+    var markPulseButtonClick = function(elementID, key) {
+        if (isLoggedIn && !clickedButton[key]) {
+            $.ajax({
+                url: markReadURL,
+                data: {key: key},
+                success: function() {
+                    clickedButton[key] = true;
+                    $('#' + elementID).removeClass('pulse');
+                }
+            });
+        }
+    };
+
+    var problemDifficultyResponseHandler = function(response) {
+        if(response["score"]) $(".difficulty-list-item input[value='" + response["score"] + "']").prop("checked", true);
+        $("#problem-difficulty-modal-form").attr("data-problem", response["problem_id"]);
+    };
+
+    var getNextProblem = function(explicitClick, problemId) {
+        explicitClick = explicitClick || false;
+        problemId = problemId || null;
+
+        if(explicitClick) $('#problem-difficulty-modal-form').trigger('reset');
+
+        $.ajax({
+            url: getNextProblemURL,
+            method: 'GET',
+            data: {problem_id: problemId},
+            success: function(response) {
+                if(response["result"] == "all_caught") {
+                    $('#problem-difficulty-actual-content').addClass("hide");
+                    $('#problem-difficulty-all-caught-up').removeClass("hide");
+                } else {
+                    $('#problem-difficulty-actual-content').removeClass("hide");
+                    $('#problem-difficulty-all-caught-up').addClass("hide");
+                    $('#problem-difficulty-title').html("How difficult is " + response["plink"] + "?");
+                    problemDifficultyResponseHandler(response);
+                }
+                $('#problem-difficulty-modal').modal('open');
+                problemDifficultyModalOpen = true;
+            },
+            error: function(e) {
+                console.log("Failed to get the next problem", e);
+            }
+        });
+    };
+
+    var openProblemDifficultyModal = function(explicitClick, problemId) {
+        var cacheValue = localStorage.getItem("lastShowedProblemDifficulty");
+        if (!isLoggedIn ||
+            (cacheValue &&
+             (Date.now() - cacheValue < 72 * 60 * 60 * 1000) && !explicitClick)) {
+            // Modal showed less than 72 hours before;
+            return;
+        }
+
+        getNextProblem(explicitClick, problemId);
+    };
+
+    var initProblemDifficultySubmitHandler = function() {
+        $(document).on("change", "input[type=radio][name=problem_difficulty_value]", function() {
+            var $thisForm = $('#problem-difficulty-modal-form'),
+                $thisTitle = $('#problem-difficulty-title'),
+                $thisProblemLink = $("#problem-details-link");
+
+            $.ajax({
+                method: 'POST',
+                url: problemDifficultySubmitURL + '.json',
+                data: {
+                    "score":  $("input[name='problem_difficulty_value']:checked").val(),
+                    "problem_id": $("#problem-difficulty-modal-form").attr("data-problem")
+                },
+                success: function(response) {
+                    if(response["result"] == "all_caught") {
+                        $('#problem-difficulty-actual-content').addClass("hide");
+                        $('#problem-difficulty-all-caught-up').removeClass("hide");
+                        return;
+                    }
+                    setTimeout(function() {
+                        $('#problem-difficulty-actual-content').removeClass("hide");
+                        $('#problem-difficulty-all-caught-up').addClass("hide");
+                        problemDifficultyResponseHandler(response);
+                        $('#problem-difficulty-modal-submit-button').val('Submit');
+                        $('#problem-difficulty-modal-submit-button').removeClass('disabled');
+
+                        $thisForm.trigger('reset');
+
+                        $thisForm.fadeOut(function() {
+                            $thisForm.fadeIn();
+                        });
+
+                        $thisTitle.fadeOut(function() {
+                            $thisTitle.html("How difficult is " + response["plink"] + "?");
+                            $thisTitle.fadeIn();
+                        });
+                    }, 100);
+                },
+                error: function(err) {
+                    console.log(err);
+                }
+            });
+            e.preventDefault();
+        });
+    };
 
     $(document).ready(function() {
 
@@ -97,8 +240,45 @@
 
         $('select').material_select();
 
-        $('.tooltipped').tooltip({
-            delay: 50
+        $('#problem-difficulty-modal').modal({
+            dismissible: true,
+            complete: function() {
+                localStorage.setItem("lastShowedProblemDifficulty", Date.now());
+                problemDifficultyModalOpen = false;
+            }
+        });
+
+        $(document).on('click', '#problem-difficulty-title .problem-listing', function() {
+            localStorage.setItem("lastShowedProblemDifficulty", Date.now());
+        });
+
+        $(document).on('click', '#skip-this-problem', function() {
+            getNextProblem(true);
+        });
+
+        initTooltips();
+
+        if(loggedInUserId < thresholdUserId)  openProblemDifficultyModal();
+
+        initProblemDifficultySubmitHandler();
+
+        $(document).on('click', '#explain-problem-difficulty', function() {
+            if (!isLoggedIn) {
+                $.web2py.flash("Login to suggest problem difficulty!");
+                return;
+            } else {
+                showProblemDifficultyOnboarding = "False";
+                openProblemDifficultyModal(true);
+                $.ajax({
+                    url: markReadURL,
+                    data: {key: "problem_difficulty"}
+                });
+            }
+        });
+
+        $(document).on('click', '#problem-page-difficulty-button', function() {
+            openProblemDifficultyModal(true, problemId);
+            $("#problem-difficulty-modal-form").attr("data-problem", problemId);
         });
 
         $('#open-side-nav').click(function() {
@@ -119,12 +299,19 @@
             document.activeElement.blur();
         }
 
-        $(document).on('mouseenter', '.submissions-table tr', function() {
+        var todoTrSelectors = ".submissions-table tr," +
+                              ".user-editorials-table tr," +
+                              "#problem-setter-page-table tr," +
+                              "#problem-response tr," +
+                              ".trendings-html-table tr," +
+                              ".todo-list-icon";
+
+        $(document).on('mouseenter', todoTrSelectors, function() {
             var todoIcon = $(this).find('.add-to-todo-list');
-            todoIcon.show();
+            todoIcon.css("display", "inline-flex");
         });
 
-        $(document).on('mouseleave', '.submissions-table tr', function() {
+        $(document).on('mouseleave', todoTrSelectors, function() {
             var todoIcon = $(this).find('.add-to-todo-list');
             todoIcon.hide();
         });
@@ -133,11 +320,12 @@
             var stopstalkLink = this.parentElement.firstChild["href"],
                 problemLink = getParameterByName("plink", stopstalkLink),
                 thisElement = this,
-                $thisElement = $(this);
+                $thisElement = $(this),
+                problemId = $thisElement.data()["pid"];
             $.ajax({
                 url: addTodoURL,
                 method: 'POST',
-                data: {link: problemLink},
+                data: {pid: problemId},
                 success: function(response) {
                     var tooltipID = thisElement.getAttribute("data-tooltip-id");
                     $thisElement.remove();
@@ -146,6 +334,27 @@
                 },
                 error: function(e) {
                     $.web2py.flash("Some error occurred");
+                }
+            });
+        });
+
+        $(document).on('click', '.delete-editorial', function() {
+            var result = confirm("Are you sure you want to DELETE the editorial ?")
+            if(!result) return;
+            var $this = $(this);
+            $.ajax({
+                url: deleteEditorialURL + '/' + $this.data('id'),
+                method: 'POST',
+                success: function(response) {
+                    if (response === "SUCCESS") {
+                        $this.parent().parent().fadeOut();
+                        $.web2py.flash("Editorial deleted successfully!");
+                    } else {
+                        $.web2py.flash("Can't delete accepted Editorial!");
+                    }
+                },
+                error: function(err) {
+                    $.web2py.flash("Something went wrong!");
                 }
             });
         });
@@ -194,7 +403,7 @@
                 if (response != -1) {
                     solutionText = htmlifySubmission(response);
                 } else {
-                    solutionText = "// Unable to retrieve submission from " + site + "\n" + "/* Possible reasons :-\n\t * The submission is from an ongoing contest\n\t * There was some error from our side. \n\t   Please write to us (https://www.stopstalk.com/contact_us)\n */";
+                    solutionText = "// Unable to retrieve submission from " + site + "\n" + "/* Possible reasons :-\n\t * " + site + " is down\n\t * The submission is from an ongoing contest\n\t * There was some error from our side. \n\t   Please write to us (https://www.stopstalk.com/contact_us)\n */";
                 }
 
                 $viewPre.html(solutionText);
@@ -230,6 +439,14 @@
                     $.web2py.flash("Unable to Download");
                 }
             });
+        });
+
+        $(document).on('click', '#heart-button', function() {
+            markPulseButtonClick('heart-button', 'heart_button');
+        });
+
+        $(document).on('click', '#onboarding-button', function() {
+            markPulseButtonClick('onboarding-button', 'onboarding_button');
         });
 
         $(document).on('click', '.download-submission-button', function() {

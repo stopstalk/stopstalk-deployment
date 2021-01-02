@@ -1,5 +1,5 @@
 """
-    Copyright (c) 2015-2018 Raj Patel(raj454raj@gmail.com), StopStalk
+    Copyright (c) 2015-2020 Raj Patel(raj454raj@gmail.com), StopStalk
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -26,9 +26,9 @@ db = current.db
 atable = db.auth_user
 cftable = db.custom_friend
 
-today = datetime.today().date()
-start = datetime.strptime(current.INITIAL_DATE,
-                          "%Y-%m-%d %H:%M:%S").date()
+today = datetime.datetime.today().date()
+start = datetime.datetime.strptime(current.INITIAL_DATE,
+                                   "%Y-%m-%d %H:%M:%S").date()
 total_days = (today - start).days
 
 sql_query = """

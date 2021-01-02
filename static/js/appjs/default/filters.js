@@ -36,10 +36,10 @@
     }
 
     $(document).ready(function() {
+        var params = getVars();
         $('#submission-switch').click(function() {
             var global = this.checked;
             var redirectURL = null;
-            var params = getVars();
             var currentURL = window.location.href;
             if (global) {
                 params['global'] = 'True';
@@ -48,6 +48,15 @@
             }
             window.location.href = currentURL.split('?')[0] + '?' + $.param(params);
         });
+
+        $("#name").val(params["name"]);
+        $("#problem_name").val(params["pname"]);
+        $("#submission-status").val(params["status"]);
+        $("#submission-site").val(params["site"]);
+        $("#submission-language").val(params["language"]);
+        $("#start_date").val(params["start_date"]);
+        $("#end_date").val(params["end_date"]);
+        $("select").material_select();
 
         $('.datepicker').pickadate({
             selectMonths: true, // Creates a dropdown to control month

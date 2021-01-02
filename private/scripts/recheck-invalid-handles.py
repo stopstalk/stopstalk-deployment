@@ -1,5 +1,5 @@
 """
-    Copyright (c) 2015-2018 Raj Patel(raj454raj@gmail.com), StopStalk
+    Copyright (c) 2015-2020 Raj Patel(raj454raj@gmail.com), StopStalk
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,8 @@
     THE SOFTWARE.
 """
 
-import requests
+import requests, bs4
+import sites
 
 # Constants to be used in case of request failures
 SERVER_FAILURE = "SERVER_FAILURE"
@@ -28,86 +29,10 @@ NOT_FOUND = "NOT_FOUND"
 OTHER_FAILURE = "OTHER_FAILURE"
 REQUEST_FAILURES = (SERVER_FAILURE, NOT_FOUND, OTHER_FAILURE)
 
-# -----------------------------------------------------------------------------
-def get_request(url, headers={}, timeout=current.TIMEOUT):
-    """
-        Make a HTTP GET request to a url
-
-        @param url (String): URL to make get request to
-        @param headers (Dict): Headers to be passed along
-                               with the request headers
-
-        @return: Response object or -1 or {}
-    """
-
-    i = 0
-    while i < current.MAX_TRIES_ALLOWED:
-        try:
-            response = requests.get(url,
-                                    headers=headers,
-                                    proxies=current.PROXY,
-                                    timeout=timeout)
-        except Exception as e:
-            print e, url
-            return SERVER_FAILURE
-
-        if response.status_code == 200:
-            return response
-        elif response.status_code == 404 or response.status_code == 400:
-            # User not found
-            # 400 for CodeForces users
-            return NOT_FOUND
-        i += 1
-
-    # Request unsuccessful even after MAX_TRIES_ALLOWED
-    return OTHER_FAILURE
-
-def codechef_invalid(handle):
-    # CodeChef is very flaky
-    return True
-    response = get_request("https://www.codechef.com/users/" + handle)
-    if (response in REQUEST_FAILURES) or response.url.__contains__("teams/view"):
-        return True
-    return False
-
-def codeforces_invalid(handle):
-    response = get_request("http://codeforces.com/api/user.status?handle=" + \
-                           handle + "&from=1&count=2")
-    if response in REQUEST_FAILURES:
-        return True
-    return False
-
-def spoj_invalid(handle):
-    response = get_request("http://www.spoj.com/users/" + handle)
-    if response in REQUEST_FAILURES:
-        return True
-    # Bad but correct way of checking if the handle exists
-    if response.text.find("History of submissions") == -1:
-        return True
-    return False
-
-def hackerearth_invalid(handle):
-    url = "https://www.hackerearth.com/submissions/" + handle
-    response = get_request(url)
-    if response in REQUEST_FAILURES:
-        return True
-    return False
-
-def hackerrank_invalid(handle):
-    url = "https://www.hackerrank.com/rest/hackers/" + \
-          handle + \
-          "/recent_challenges?offset=0&limit=2"
-    response = get_request(url)
-    if response in REQUEST_FAILURES:
-        return True
-    return False
-
-def uva_invalid(handle):
-    url = "http://uhunt.felix-halim.net/api/uname2uid/" + handle
-    response = get_request(url)
-    if response in (SERVER_FAILURE, OTHER_FAILURE) or response.text.strip() == "0":
-        return True
-    return False
+def get_invalid_handle_method(site):
+    site_class = getattr(sites, site.lower())
+    invalid_handle_method = getattr(site_class.Profile, "is_invalid_handle")
+    return invalid_handle_method
 
 if __name__ == "__main__":
 
@@ -120,16 +45,11 @@ if __name__ == "__main__":
     handle_to_row = {}
 
     for site in current.SITES:
-        mapping[site] = globals()[site.lower() + "_invalid"]
+        mapping[site] = get_invalid_handle_method(site)
         handle_to_row[site] = {}
 
     impossiblehandle = "thisreallycantbeahandle308"
-    assert(codechef_invalid(impossiblehandle) and \
-           codeforces_invalid(impossiblehandle) and \
-           spoj_invalid(impossiblehandle) and \
-           hackerrank_invalid(impossiblehandle) and \
-           hackerearth_invalid(impossiblehandle) and \
-           uva_invalid(impossiblehandle) == True)
+    assert(all(map(lambda site: get_invalid_handle_method(site)(impossiblehandle), current.SITES.keys())))
 
     def populate_handle_to_row(table):
         for row in db(table).select():
@@ -158,7 +78,14 @@ if __name__ == "__main__":
 
     final_delete_query = False
     cnt = 0
-    for row in db(ihtable).select():
+    for row in db(ihtable).iterselect():
+        if row.handle and \
+           IS_URL(mode="generic",
+                  allowed_schemes=["http",
+                                   "https"])(row.handle)[1] is None:
+            # print "Skipping invalid check for", row.handle, row.site
+            continue
+
         # If not an invalid handle anymore
         if handle_to_row[row.site].has_key(row.handle) and mapping[row.site](row.handle) is False:
             cnt += 1

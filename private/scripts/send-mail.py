@@ -1,5 +1,5 @@
 """
-    Copyright (c) 2015-2018 Raj Patel(raj454raj@gmail.com), StopStalk
+    Copyright (c) 2015-2020 Raj Patel(raj454raj@gmail.com), StopStalk
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -27,25 +27,28 @@ query = (atable.registration_key == "") & \
 rows = db(query).select(atable.stopstalk_handle, atable.email)
 
 for row in rows:
-    subject = "UVa Online Judge added on StopStalk"
+    subject = "10 more days to contribute and get Amazon vouchers!"
     message = """
 <html>
 Hello %s,<br/><br/>
 
-As many of you have requested us to add UVa to StopStalk - here we are with the announcement
-that we have successfully added <b>UVa Online Judge</b> to StopStalk.
-To update your StopStalk profile with UVa submissions - Add your UVa username / handle <a href="https://www.stopstalk.com/user/update_details">here</a>. <br/>
-For your custom users you can update the handles <a href="https://www.stopstalk.com/user/custom_friend">here</a><br/>
-Climb the StopStalk leaderboard now ;) <br/><br/>
+As you might know from our previous mail, we are offering Amazon Vouchers for contributing editorials<br/>
+to problems on StopStalk. We have received a great response from you guys and <a style='color: blue;' href="https://www.stopstalk.com/user_editorials?utm_source=newsletter&utm_medium=email&utm_campaign=user-editorials-10-days&utm_content=leaderboard">Leaderboard</a> is already<br/>
+heated up. Keep getting votes on your editorials too by sharing it with your friends, we will use them<br/>
+for a tiebreaker. The contest ends on 31st March midnight.<br/><br/>
 
-Also, its been a while since we have conducted a survey to understand your use-cases better and incorporate them to improve StopStalk. <br/>
-Please take some minutes to fill out the <a href="https://goo.gl/oeLZHd">Survey Form</a><br/><br/>
-Adjust your email preferences <a href="https://www.stopstalk.com/unsubscribe">here</a><br/><br/>
+Happy StopStalking!! <br/><br/>
+
 Cheers,<br/>
-Team StopStalk
+Team StopStalk<br/><br/>
+<div style='font-size: 10px;color: grey;'>
+--------------------------------<br/>
+Adjust your email preferences <a style='text-decoration: none; color: grey;' href="https://www.stopstalk.com/unsubscribe?utm_source=newsletter&utm_medium=email&utm_campaign=user-editorials-10-days&utm_content=unsubscribe"><u>here</u></a>.<br/><br/>
+</div>
 </html>
-              """ % (row.stopstalk_handle)
+              """ % row.stopstalk_handle
     current.send_mail(to=row.email,
                       subject=subject,
                       message=message,
-                      mail_type="feature_updates")
+                      mail_type="feature_updates",
+                      bulk=True)

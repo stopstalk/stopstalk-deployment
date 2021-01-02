@@ -1,83 +1,17 @@
 {{extend 'layout.html'}}
 {{block head}}
-    <title>{{=T("Recent submissions")}}</title>
+    <title>{{=T("Recent submissions") if total_rows else T("Get Started")}}</title>
     <meta name="description" content="List of recent submissions of your friends">
 {{end}}
 <script type="text/javascript">
     var pageURL = '{{=URL("default", "submissions")}}';
-    var facebookGroup = '{{=recent_announcements.has_key("facebook_group") and recent_announcements["facebook_group"]}}';
-
-    $(document).ready(function() {
-        if ('{{=country}}' === 'not-available') {
-            $('#fill-country-modal').modal();
-            $('#fill-country-modal').modal('open');
-        }
-
-        if (facebookGroup === 'False') {
-            $('#recent_announcements').modal({
-                complete: function() {
-                    $.ajax({
-                        url: '{{=URL("user", "mark_read")}}',
-                        data: {key: "facebook_group"}
-                    });
-                }
-            });
-            $('#recent_announcements').modal('open');
-        }
-    });
 </script>
-<div id="fill-country-modal" class="modal">
-    <div class="modal-content">
-        <h4>{{=T("Update your Country")}}</h4>
-        <p>Please update your Country, we have added Country-wise Leaderboards :)</p>
-        {{=country_form}}
-    </div>
-</div>
-
-<div id="recent_announcements" class="modal">
-  <div class="modal-content">
-    <h4>Our new Facebook Group</h4>
-    <p>We have created a Facebook Group for discussions</p>
-    <p>You can post your doubts / feedback / feature requests there and we can discuss and get other users' views</p>
-    <p>Please add your Programmer friends to the group.</p>
-    <b>Let's learn collectively :)</b>
-    <h5>Link to the Facebook group: <a target="_blank" style="color: #3B5998;" href="https://www.facebook.com/groups/2445127375713225/"><i class="fa fa-facebook-official"></i></a></h5>
-  </div>
-</div>
 
 {{if total_rows:}}
-    <script src="{{=get_static_url('js/jquery.bootpag.min.js')}}"></script>
+    <script src="{{=URL('static', 'js/jquery.bootpag.min.js')}}"></script>
     <script src="{{=get_static_url('js/appjs/default/submissions.js')}}"></script>
     <h1>{{=T("Recent submissions")}}</h1>
-    {{if len(current.REDIS_CLIENT.smembers("disabled_retrieval")):}}
-        <h7 class="red-text"> Disabled retrieval for {{=utilities.pretty_string(current.REDIS_CLIENT.smembers("disabled_retrieval"))}} due to their downtime. </h7>
-    {{pass}}
-    <h6> <b>[New Feature]:</b> Add your editorials to StopStalk - {{=A("Know more", _href=URL("default", "updates"), _id="know-more", _target="_blank")}}</h6>
-    <p>Please take some time to fill out this {{=A("Survey Form", _href="http://goo.gl/oeLZHd", _target="_blank")}}</p>
-
     <div id="page-selection" class="center"></div>
     <div id="content"></div>
     {{=table}}
-{{else:}}
-    <br /><br />
-    <h4>{{=T("Welcome to StopStalk!")}}</h4><br />
-    {{if len(current.REDIS_CLIENT.smembers("disabled_retrieval")):}}
-        <h7 class="red-text"> Disabled retrieval for {{=utilities.pretty_string(current.REDIS_CLIENT.smembers("disabled_retrieval"))}} due to their downtime. </h7>
-    {{pass}}
-    <h6> <b>[New Feature]:</b> Add your editorials to StopStalk - {{=A("Know more", _href=URL("default", "updates"), _id="know-more", _target="_blank")}}</h6>
-    <p>Please take some time to fill out this {{=A("Survey Form", _href="http://goo.gl/oeLZHd", _target="_blank")}}</p>
-
-    <h5>{{=T("You do not have any friends on StopStalk yet!")}}</h5>
-    <h5>
-        {{=T("Try adding friends on StopStalk")}} &nbsp;
-        <a id="first-friend-search" href="{{=URL('default', 'search')}}" target="_blank">
-            <i class="fa fa-long-arrow-right"></i>
-        </a>
-    </h5>
-    <h5>
-        {{=T("You can also add Custom Users if your friend is not on StopStalk")}} &nbsp;
-        <a id="first-custom-friend" href="{{=URL('user', 'custom_friend')}}" target="_blank">
-            <i class="fa fa-long-arrow-right"></i>
-        </a>
-    </h5>
 {{pass}}

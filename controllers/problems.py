@@ -1,5 +1,5 @@
 """
-    Copyright (c) 2015-2018 Raj Patel(raj454raj@gmail.com), StopStalk
+    Copyright (c) 2015-2020 Raj Patel(raj454raj@gmail.com), StopStalk
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@ def pie_chart_helper():
         submission status of a problem
     """
 
-    problem_link = request.post_vars["plink"]
+    problem_id = int(request.post_vars["pid"])
     submission_type = "friends"
 
     if request.vars.has_key("submission_type"):
@@ -44,7 +44,7 @@ def pie_chart_helper():
 
     stable = db.submission
     count = stable.id.count()
-    query = (stable.problem_link == problem_link)
+    query = (stable.problem_id == problem_id)
 
     # Show stats only for friends and logged-in user
     if submission_type in ("my", "friends"):
@@ -65,12 +65,43 @@ def pie_chart_helper():
                 query &= (stable.user_id == session.user_id)
         else:
             return dict(row=[])
+
     row = db(query).select(stable.status,
                            count,
                            groupby=stable.status)
     return dict(row=row)
 
-# ----------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+def by():
+    if len(request.args) < 1:
+        session.flash = "Invalid URL!"
+        redirect(URL("default", "index"))
+
+    stopstalk_handle = request.args[0]
+
+    atable = db.auth_user
+    pstable = db.problem_setters
+    ptable = db.problem
+
+    return_val = dict(stopstalk_handle=stopstalk_handle,
+                      problems_count=0)
+
+    table = TABLE(_class="bordered centered")
+    thead = THEAD(TR(TH("Problem")))
+
+    problems = utilities.get_problems_authored_by(stopstalk_handle)
+    if len(problems) == 0:
+        return return_val
+
+    return_val["table"] = utilities.get_problems_table(problems,
+                                                       session.user_id,
+                                                       "problems-authored",
+                                                       None)
+
+    return_val["problems_count"] = len(problems)
+    return return_val
+
+# ------------------------------------------------------------------------------
 @auth.requires_login()
 def get_tag_values():
     ttable = db.tag
@@ -81,17 +112,21 @@ def get_tag_values():
     return dict(tags=tags)
 
 # ----------------------------------------------------------------------------
-@auth.requires_login()
+@utilities.check_api_userauth
 def add_todo_problem():
-    link = request.vars["link"]
+    problem_id = request.vars["pid"]
+
     tltable = db.todo_list
-    query = (tltable.problem_link == link) & \
+    ptable = db.problem
+
+    precord = ptable(problem_id)
+    query = (tltable.problem_link == precord.link) & \
             (tltable.user_id == session.user_id)
     row = db(query).select().first()
     if row:
         return T("Problem already in ToDo List")
     else:
-        tltable.insert(problem_link=link, user_id=session.user_id)
+        tltable.insert(problem_link=precord.link, user_id=session.user_id)
 
     return T("Problem added to ToDo List")
 
@@ -103,15 +138,12 @@ def add_suggested_tags():
     ptable = db.problem
     ttable = db.tag
 
-    plink = request.vars["plink"]
-    pname = request.vars["pname"]
+    problem_id = int(request.vars["problem_id"])
     tags = request.vars["tags"]
 
     today = datetime.datetime.now().strftime("%Y-%m-%d")
-    problem = db(ptable.link == plink).select().first()
-    if problem:
-        problem_id = problem.id
-    else:
+    problem = ptable(problem_id)
+    if not problem:
         return T("Problem not found")
 
     # Delete previously added tags for the same problem by the user
@@ -133,6 +165,38 @@ def add_suggested_tags():
                            tag_id=tag_id)
 
     return T("Tags added successfully!")
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
+def problem_difficulty():
+    if request.env.request_method != "POST" or request.extension != "json":
+        raise(HTTP(405, "Method not allowed"))
+        return dict()
+
+    problem_id = int(request.vars["problem_id"])
+    score = int(request.vars["score"])
+    pdtable = db.problem_difficulty
+    ptable = db.problem
+
+    query = (pdtable.user_id == session.user_id) & \
+            (pdtable.problem_id == problem_id)
+    pdrecord = db(query).select().first()
+    if pdrecord is None:
+        pdtable.insert(problem_id=problem_id,
+                       score=score,
+                       user_id=session.user_id)
+    else:
+        pdrecord.update_record(score=score)
+
+    problem_details = utilities.get_next_problem_to_suggest(session.user_id)
+
+    return problem_details
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
+def get_next_problem_to_suggest():
+    return utilities.get_next_problem_to_suggest(session.user_id,
+                                                 request.vars.get("problem_id", None))
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
@@ -183,18 +247,19 @@ def get_suggested_tags():
                 tag_counts=tag_counts)
 
 # ----------------------------------------------------------------------------
-def index():
-    """
-        The main problem page
-    """
-    from json import dumps
-
-    if request.vars.has_key("pname") is False or \
-       request.vars.has_key("plink") is False:
-
+def get_submissions_list():
+    if request.vars.has_key("problem_id") is False:
         # Disables direct entering of a URL
         session.flash = T("Please click on a Problem Link")
         redirect(URL("default", "index"))
+        return
+
+    try:
+        problem_id = int(request.vars["problem_id"])
+    except ValueError:
+        session.flash = T("Invalid problem!")
+        redirect(URL("default", "index"))
+        return
 
     submission_type = "friends"
     if request.vars.has_key("submission_type"):
@@ -208,12 +273,7 @@ def index():
         submission_type = "global"
 
     stable = db.submission
-    ptable = db.problem
-
-    problem_name = request.vars["pname"]
-    problem_link = request.vars["plink"]
-
-    query = (stable.problem_link == problem_link)
+    query = (stable.problem_id == problem_id)
     cusfriends = []
 
     if submission_type in ("my", "friends"):
@@ -235,8 +295,57 @@ def index():
         else:
             response.flash = T("Login to view your/friends' submissions")
 
-    submissions = db(query).select(orderby=~stable.time_stamp)
-    problem_record = db(ptable.link == problem_link).select().first()
+    submissions = db(query).select(orderby=~stable.time_stamp,
+                                   limitby=(0, 200))
+
+    if len(submissions):
+        table = utilities.render_table(submissions, cusfriends, session.user_id)
+    else:
+        table = DIV(T("No submissions found"))
+    return table
+
+# ----------------------------------------------------------------------------
+def index():
+    """
+        The main problem page
+    """
+    from json import dumps
+
+    if request.vars.has_key("problem_id") is False:
+        # Disables direct entering of a URL
+        session.flash = T("Please click on a Problem Link")
+        redirect(URL("default", "index"))
+        return
+
+    try:
+        problem_id = int(request.vars["problem_id"])
+    except ValueError:
+        session.flash = T("Invalid problem!")
+        redirect(URL("default", "index"))
+        return
+
+    submission_type = "friends"
+    if request.vars.has_key("submission_type"):
+        if request.vars["submission_type"] == "global":
+            submission_type = "global"
+        elif request.vars["submission_type"] == "my":
+            submission_type = "my"
+
+    if auth.is_logged_in() is False and submission_type != "global":
+        response.flash = T("Login to view your/friends' submissions")
+        submission_type = "global"
+
+    ptable = db.problem
+    pstable = db.problem_setters
+
+    problem_record = ptable(problem_id)
+    if problem_record is None:
+        session.flash = T("Please click on a Problem Link")
+        redirect(URL("default", "index"))
+
+    setters = db(pstable.problem_id == problem_id).select(pstable.handle)
+    setters = [x.handle for x in setters]
+
     try:
         all_tags = problem_record.tags
         if all_tags:
@@ -246,44 +355,50 @@ def index():
     except AttributeError:
         all_tags = ["-"]
 
-    site = utilities.urltosite(problem_link).capitalize()
+    lower_site = utilities.urltosite(problem_record.link)
+    site = utilities.get_actual_site(lower_site)
     problem_details = DIV(_class="row")
     details_table = TABLE(_style="font-size: 140%; float: left; width: 50%;")
     problem_class = ""
 
-    link_class = utilities.get_link_class(problem_link, session.user_id)
-    link_title = (" ".join(link_class.split("-"))).capitalize()
+    link_class, link_title = utilities.get_link_class(problem_id, session.user_id)
 
     tbody = TBODY()
     tbody.append(TR(TD(),
                     TD(STRONG(T("Problem Name") + ":")),
-                    TD(utilities.problem_widget(problem_name,
-                                                problem_link,
+                    TD(utilities.problem_widget(problem_record.name,
+                                                problem_record.link,
                                                 link_class,
                                                 link_title,
-                                                anchor=False),
+                                                problem_id,
+                                                anchor=False,
+                                                disable_todo=True),
                        _id="problem_name")))
     tbody.append(TR(TD(),
                     TD(STRONG(T("Site") + ":")),
                     TD(site)))
 
     links = DIV(DIV(A(I(_class="fa fa-link"), " " + T("Problem"),
-                      _href=problem_link,
+                      _href=problem_record.link,
                       _class="problem-page-site-link",
                       _style="color: black;",
                       _target="blank"),
-                    _class="chip lime accent-3"))
+                    _class="chip lime accent-3"),
+                " ",
+                DIV(A(I(_class="fa fa-book"), " " + T("Editorials"),
+                      _href=URL("problems", "editorials", args=problem_record.id),
+                      _class="problem-page-editorials",
+                      _style="color: white;",
+                      _target="_blank"),
+                    _class="chip deep-purple darken-1",
+                    _id="problem-page-editorial-button"))
 
-    row = db(ptable.link == problem_link).select().first()
-    if row:
-        links.append(" ")
-        links.append(DIV(A(I(_class="fa fa-book"), " " + T("Editorials"),
-                           _href=URL("problems", "editorials", args=row.id),
-                           _class="problem-page-editorials",
-                           _style="color: white;",
-                           _target="_blank"),
-                         _class="chip deep-purple darken-1"))
-
+    if auth.is_logged_in():
+        links.append(DIV(A(I(_class="fa fa-edit"), " " + T("Suggest Difficulty"),
+                             _style="color: white;"),
+                         _class="chip",
+                         _style="background-color: #9b4da9; cursor: pointer;",
+                         _id="problem-page-difficulty-button"))
     tbody.append(TR(TD(),
                     TD(STRONG(T("Links") + ":")),
                     links))
@@ -313,20 +428,24 @@ def index():
                                   _id=suggest_tags_id,
                                   data=suggest_tags_data)))))
 
+    if len(setters) > 0:
+        tbody.append(TR(TD(),
+                        TD(STRONG(T("Problem setters") + ":")),
+                        TD(DIV(utilities.problem_setters_widget(setters,
+                                                                site)))))
+
     details_table.append(tbody)
     problem_details.append(details_table)
-    problem_details.append(DIV(_style="width: 50%; margin-top: 3%",
+    problem_details.append(DIV(_style="width: 50%; height: 200px; margin-top: 3%",
                                _id="chart_div",
                                _class="right"))
 
-    table = utilities.render_table(submissions, cusfriends, session.user_id)
-
     return dict(site=site,
                 problem_details=problem_details,
-                problem_name=problem_name,
-                problem_link=problem_link,
-                submission_type=submission_type,
-                table=table)
+                problem_name=problem_record.name,
+                problem_link=problem_record.link,
+                problem_id=problem_id,
+                submission_type=submission_type)
 
 # ----------------------------------------------------------------------------
 def editorials():
@@ -339,87 +458,32 @@ def editorials():
     uetable = db.user_editorials
     atable = db.auth_user
     query = (uetable.problem_id == record.id)
-    if auth.is_logged_in():
-        # Show only accepted editorials not made by the logged-in user and
-        # all the editorials submitted by the logged-in user
-        query &= (((uetable.verification == "accepted") & \
-                   (uetable.user_id != session.user_id)) | \
-                  (uetable.user_id == session.user_id))
-    else:
-        query &= (uetable.verification == "accepted")
     user_editorials = db(query).select(orderby=~uetable.added_on)
-    table = TABLE(_class="centered")
-    thead = THEAD(TR(TH(T("Problem")),
-                     TH(T("Editorial By")),
-                     TH(T("Added on")),
-                     TH(T("Votes")),
-                     TH(T("Actions"))))
-    color_mapping = {"accepted": "green",
-                     "rejected": "red",
-                     "pending": "blue"}
-
-    tbody = TBODY()
-    for editorial in user_editorials:
-        user = atable(editorial.user_id)
-        number_of_votes = len(editorial.votes.split(",")) if editorial.votes else 0
-        tr = TR(TD(A(record.name,
-                     _href=URL("problems",
-                               "index",
-                               vars={"pname": record.name,
-                                     "plink": record.link},
-                               extension=False))))
-        if auth.is_logged_in() and user.id == session.user_id:
-            tr.append(TD(A(user.first_name + " " + user.last_name,
-                         _href=URL("user",
-                                   "profile",
-                                   args=user.stopstalk_handle)),
-                         " ",
-                         DIV(editorial.verification.capitalize(),
-                             _class="verification-badge " + \
-                                    color_mapping[editorial.verification])))
+    accepted_count = len(filter(lambda x: (x.verification == "accepted" or \
+                                           (auth.is_logged_in() and \
+                                            (x.user_id == session.user_id or \
+                                             session.user_id in STOPSTALK_ADMIN_USER_IDS)
+                                             )
+                                            ),
+                                user_editorials))
+    if accepted_count == 0:
+        if auth.is_logged_in():
+            table_contents = T("No editorials found! Please contribute to the community by writing an editorial if you've solved the problem.")
         else:
-            tr.append(TD(A(user.first_name + " " + user.last_name,
-                           _href=URL("user",
-                                     "profile",
-                                     args=user.stopstalk_handle))))
+            table_contents = T("No editorials found! Please login if you want to write an editorial.")
 
-        tr.append(TD(editorial.added_on))
-        vote_class = ""
-        if auth.is_logged_in() and str(session.user_id) in set(editorial.votes.split(",")):
-            vote_class = "red-text"
-        tr.append(TD(DIV(SPAN(I(_class="fa fa-heart " + vote_class),
-                              _class="love-editorial",
-                              data={"id": editorial.id}),
-                         " ",
-                         DIV(number_of_votes,
-                             _class="love-count",
-                             _style="margin-left: 5px;"),
-                         _style="display: inline-flex;")))
+        return dict(name=record.name,
+                    link=record.link,
+                    editorial_link=record.editorial_link,
+                    table=DIV(BR(), H6(table_contents)),
+                    problem_id=record.id,
+                    site=utilities.urltosite(record.link))
 
-        actions_td = TD(A(I(_class="fa fa-eye fa-2x"),
-                          _href=URL("problems",
-                                    "read_editorial",
-                                    args=editorial.id),
-                          _class="btn btn-primary tooltipped",
-                          _style="background-color: #13AA5F;",
-                          data={"position": "bottom",
-                                "delay": 40,
-                                "tooltip": T("Read Editorial")}))
-        if auth.is_logged_in() and \
-           user.id == session.user_id and \
-           editorial.verification != "accepted":
-            actions_td.append(BUTTON(I(_class="fa fa-trash fa-2x"),
-                                     _style="margin-left: 2%;",
-                                     _class="red tooltipped delete-editorial",
-                                     data={"position": "bottom",
-                                           "delay": 40,
-                                           "tooltip": T("Delete Editorial"),
-                                           "id": editorial.id}))
-        tr.append(actions_td)
-        tbody.append(tr)
-
-    table.append(thead)
-    table.append(tbody)
+    user_id = session.user_id if auth.is_logged_in() else None
+    table = utilities.render_user_editorials_table(user_editorials,
+                                                   user_id,
+                                                   user_id,
+                                                   "read-editorial-problem-editorials-page")
 
     return dict(name=record.name,
                 link=record.link,
@@ -470,7 +534,7 @@ def read_editorial():
     if ue_record is None:
         session.flash = "Invalid editorial URL"
         redirect(URL("default", "index"))
-    elif auth.is_logged_in() and session.user_id == 1:
+    elif auth.is_logged_in() and session.user_id in STOPSTALK_ADMIN_USER_IDS:
         # Admin user
         pass
     elif auth.is_logged_in() and session.user_id != ue_record.user_id and ue_record.verification != "accepted":
@@ -508,11 +572,13 @@ def read_editorial():
 
     return dict(problem_name=problem.name,
                 problem_link=problem.link,
+                problem_id=problem.id,
                 stopstalk_handle=user.stopstalk_handle,
                 content=content,
                 all_editorials_link=URL("problems",
                                         "editorials",
-                                        args=problem.id))
+                                        args=problem.id),
+                ue_record=ue_record)
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
@@ -595,17 +661,25 @@ def admin_editorial_approval():
         return
 
     uetable = db.user_editorials
+    ptable = db.problem
+    atable = db.auth_user
+
     uetable_record = uetable(request.args[1])
-    user = db.auth_user(uetable_record.user_id)
+    if uetable_record.verification != "pending":
+        return "Status is already updated"
+
+    ptable_record = ptable(uetable_record.problem_id)
+    user = atable(uetable_record.user_id)
+
     if request.args[0] == "accepted":
         current.send_mail(to=user.email,
-                          subject="Your editorial on StopStalk is Published",
+                          subject="Your editorial for %s on StopStalk is published!" % ptable_record.name,
                           message="""
 <html>
 Hello %s,<br/><br/>
 
 Your <a href="%s">editorial</a> on StopStalk is <b>Approved</b>. Thank you for your valuable contribution to the community.<br/>
-Please share your editorial link on our Official <a href="https://www.facebook.com/groups/stopstalk/">Facebook Group</a> to help other Competitive Programmers.
+Please share your editorial link on Social Media platforms or Competitive programming blogs to help other fellow friends struggling with the problem.
 <br/><br/>
 
 Cheers,<br/>
@@ -621,10 +695,13 @@ Team StopStalk
         mail_type="admin",
         bulk=True)
         uetable_record.update_record(verification="accepted")
+        current.REDIS_CLIENT.delete("get_dates_" + user.stopstalk_handle)
         return "ACCEPTED"
-    else:
+    elif request.args[0] == "rejected":
         uetable_record.update_record(verification="rejected")
         return "REJECTED"
+    else:
+        return "INVALID_PARAMS"
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
@@ -651,38 +728,51 @@ def tag():
         Tag search page
     """
 
-    table = TABLE(_class="bordered centered")
-    thead = THEAD(TR(TH(T("Problem Name")),
-                     TH(T("Problem URL")),
-                     TH(T("Site")),
-                     TH(T("Accuracy")),
-                     TH(T("Users solved")),
-                     TH(T("Tags"))))
-    table.append(thead)
+    redirect(URL("problems", "search", vars=request.vars))
+    return
 
+# ----------------------------------------------------------------------------
+@utilities.check_api_user
+def search():
+    """
+        Search page for problems
+    """
+    api_call = utilities.is_apicall()
     ttable = db.tag
+    uetable = db.user_editorials
+
+    problem_name = request.vars.get("name", None)
+    orderby = request.vars.get("orderby", None)
+    clubbed_tags = request.vars.get("generalized_tags", None)
+    q = request.vars.get("q", None)
+    sites = request.vars.get("site", None)
+    include_editorials = request.vars.get("include_editorials", "")
+    exclude_solved = request.vars.get("exclude_solved", None)
+
     generalized_tags = db(ttable).select(ttable.value, orderby=ttable.value)
     generalized_tags = [x.value for x in generalized_tags]
 
-    # If URL does not have vars containing q
-    # then remain at the search page and return
-    # an empty table
-    q = request.vars.get("q", None)
-    clubbed_tags = request.vars.get("generalized_tags", None)
+    if any([problem_name, orderby, clubbed_tags, q, sites]) is False:
+        if api_call:
+            return response.json({'generalized_tags': generalized_tags})
+        if request.extension == "json":
+            return dict(total_pages=0)
+        else:
+            if len(request.get_vars):
+                # No filter is applied
+                response.flash = "No filter is applied"
+            return dict(table=DIV(), generalized_tags=generalized_tags)
+
     clubbed_tags = None if clubbed_tags == "" else clubbed_tags
-    if q is None and not clubbed_tags:
-        return dict(table=table, generalized_tags=generalized_tags)
 
     try:
-        sites = request.vars.get("site", "")
-        if sites == "":
+        if sites == None or sites == "":
             sites = []
         elif isinstance(sites, str):
             sites = [sites]
     except:
         sites = []
 
-    orderby = request.vars.get("orderby", None)
     if orderby not in ("accuracy-asc", "accuracy-desc",
                        "solved-count-asc", "solved-count-desc"):
         orderby = None
@@ -696,6 +786,9 @@ def tag():
     ptable = db.problem
     query = True
 
+    rows = db(uetable.verification == "accepted").select(uetable.problem_id)
+    problem_with_user_editorials = set([x["problem_id"] for x in rows])
+
     if q is not None and not clubbed_tags:
         # Enables multiple space seperated tag search
         q = q.split(" ")
@@ -706,7 +799,7 @@ def tag():
             # & => Search for problem containing all these tags
             # | => Search for problem containing one of the tags
             query &= ptable.tags.contains(tag)
-    else:
+    elif clubbed_tags:
         clubbed_tags = [clubbed_tags] if isinstance(clubbed_tags, str) else clubbed_tags
         ttable = db.tag
         sttable = db.suggested_tags
@@ -719,6 +812,21 @@ def tag():
 
         query &= ptable.id.belongs(problem_ids)
 
+    if problem_name:
+        query &= ptable.name.contains(problem_name)
+
+    if include_editorials:
+        # Check if the site editorial link is present or the problem id exists
+        # in user_editorials table with accepted status
+        query &= (((ptable.editorial_link != None) & \
+                   (ptable.editorial_link != "")) | \
+                  (ptable.id.belongs(problem_with_user_editorials)))
+
+    if exclude_solved and auth.is_logged_in():
+        solved_pids, _ = utilities.get_solved_problems(session.user_id, False)
+        query &= ~ptable.id.belongs(solved_pids)
+    elif exclude_solved and request.extension == "html":
+        response.flash = T("Login to apply this filter")
 
     site_query = None
     for site in sites:
@@ -745,17 +853,17 @@ def tag():
     query &= (ptable.user_ids != None)
     query &= (ptable.custom_user_ids != None)
 
-    total_problems = db(query).count()
-    total_pages = total_problems / PER_PAGE
-    if total_problems % PER_PAGE != 0:
-        total_pages = total_problems / PER_PAGE + 1
+    if request.extension == "json" and not api_call:
+        total_problems = db(query).count()
 
-    if request.extension == "json":
+        total_pages = total_problems / PER_PAGE
+        if total_problems % PER_PAGE != 0:
+            total_pages = total_problems / PER_PAGE + 1
+
         return dict(total_pages=total_pages)
 
     if orderby and orderby.__contains__("solved-count"):
-        all_problems = db(query).select(cache=(cache.ram, 3600),
-                                        cacheable=True).as_list()
+        all_problems = db(query).select().as_list()
         all_problems.sort(key=lambda x: x["user_count"] + \
                                         x["custom_user_count"],
                           reverse=kwargs["reverse"])
@@ -764,84 +872,19 @@ def tag():
         # No need of caching here
         all_problems = db(query).select(**kwargs)
 
-    tbody = TBODY()
-    for problem in all_problems:
-        tr = TR()
-        link_class = utilities.get_link_class(problem["link"], session.user_id)
-        link_title = (" ".join(link_class.split("-"))).capitalize()
-
-        tr.append(TD(utilities.problem_widget(problem["name"],
-                                              problem["link"],
-                                              link_class,
-                                              link_title)))
-        tr.append(TD(A(I(_class="fa fa-link"),
-                       _href=problem["link"],
-                       _class="tag-problem-link",
-                       _target="_blank")))
-        tr.append(TD(IMG(_src=get_static_url("images/" + \
-                                             utilities.urltosite(problem["link"]) + \
-                                             "_small.png"),
-                         _style="height: 30px; width: 30px;")))
-        tr.append(TD("%.2f" % (problem["solved_submissions"]  * 100.0 / \
-                               problem["total_submissions"])))
-        tr.append(TD(problem["user_count"] + problem["custom_user_count"]))
-
-        td = TD()
-        all_tags = eval(problem["tags"])
-        for tag in all_tags:
-            td.append(DIV(A(tag,
-                            _href=URL("problems",
-                                      "tag",
-                                      vars={"q": tag.encode("utf8"), "page": 1}),
-                            _class="tags-chip",
-                            _style="color: white;",
-                            _target="_blank"),
-                          _class="chip"))
-            td.append(" ")
-        tr.append(td)
-        tbody.append(tr)
-
-    table.append(tbody)
-
-    return dict(table=table, generalized_tags=generalized_tags)
-
+    if api_call:
+        return response.json({'problems': all_problems})
+    
+    return dict(table=utilities.get_problems_table(all_problems,
+                                                   session.user_id,
+                                                   "problem-search",
+                                                   problem_with_user_editorials),
+                generalized_tags=generalized_tags)
 
 # ----------------------------------------------------------------------------
-def _get_total_users(trending_problems,
-                     friends,
-                     cusfriends,
-                     start_date,
-                     end_date):
-
-    if friends == []:
-        friends = ["-1"]
-    if cusfriends == []:
-        cusfriends = ["-1"]
-
-    for problem in trending_problems:
-        sql = """
-                 SELECT COUNT(id)
-                 FROM `submission`
-                 WHERE ((problem_link = '%s')
-                   AND ((user_id IN (%s))
-                     OR (custom_user_id IN (%s)))
-                   AND  ((time_stamp >= '%s')
-                     AND (time_stamp <= '%s')))
-                 GROUP BY user_id, custom_user_id
-              """ % (problem["submission"]["problem_link"],
-                     ", ".join(friends),
-                     ", ".join(cusfriends),
-                     start_date,
-                     end_date)
-
-        res = db.executesql(sql)
-        problem["unique"] = len(res)
-
-    return trending_problems
-
-# ----------------------------------------------------------------------------
-@auth.requires_login()
+@utilities.check_api_userauth
 def friends_trending():
+    import trending_utilities
     friends, cusfriends = utilities.get_friends(session.user_id)
 
     # The Original IDs of duplicate custom_friends
@@ -854,35 +897,29 @@ def friends_trending():
 
     friends, custom_friends = set(friends), set(custom_friends)
     stable = db.submission
-    today = datetime.datetime.today()
-    # Consider submissions only after PAST_DAYS(customizable)
-    # for trending problems
-    start_date = str(today - datetime.timedelta(days=current.PAST_DAYS))
-    query = (stable.time_stamp >= start_date) & \
-            (stable.user_id.belongs(friends) | \
+    query = (stable.user_id.belongs(friends) | \
              stable.custom_user_id.belongs(custom_friends))
-    last_submissions = db(query).select(stable.problem_name,
-                                        stable.problem_link,
-                                        stable.user_id,
-                                        stable.custom_user_id)
+    last_submissions = trending_utilities.get_last_submissions_for_trending(query)
+     
+    # for api
+    if utilities.is_apicall():
+        problems = trending_utilities.get_trending_problem_list(last_submissions)
+        return response.json(dict(problems=problems))
 
-    return utilities.compute_trending_table(last_submissions,
-                                            "friends",
-                                            session.user_id)
+    return trending_utilities.compute_trending_table(last_submissions,
+                                                     "friends",
+                                                     session.user_id)
 
 # ----------------------------------------------------------------------------
+@utilities.check_api_token
 def global_trending():
-    stable = db.submission
-    today = datetime.datetime.today()
-    # Consider submissions only after PAST_DAYS(customizable)
-    # for trending problems
-    start_date = str(today - datetime.timedelta(days=current.PAST_DAYS))
-    query = (stable.time_stamp >= start_date)
-    last_submissions = db(query).select(stable.problem_name,
-                                        stable.problem_link,
-                                        stable.user_id,
-                                        stable.custom_user_id)
-    return utilities.compute_trending_table(last_submissions, "global")
+    from trending_utilities import draw_trending_table
+    trending_problems = current.REDIS_CLIENT.get(GLOBALLY_TRENDING_PROBLEMS_CACHE_KEY)
+    trending_problems = eval(trending_problems)
+    # for api
+    if utilities.is_apicall():
+        return response.json(dict(problems=trending_problems))
+    return draw_trending_table(trending_problems, "global", session.user_id)
 
 # ----------------------------------------------------------------------------
 def trending():
@@ -894,7 +931,7 @@ def trending():
         # Show table with trending problems amongst friends
         div = DIV(DIV("",
                       _id="friends-trending-table",
-                      _class="col offset-s1 s4 z-depth-2",
+                      _class="col offset-s1 s4 z-depth-2 trendings-html-table",
                       _style="padding: 200px;"),
                   DIV("",
                       _id="global-trending-table",
@@ -905,10 +942,58 @@ def trending():
         # Show table with globally trending problems
         div = DIV(DIV("",
                       _id="global-trending-table",
-                      _class="col offset-s3 s6 z-depth-2",
+                      _class="col offset-s3 s6 z-depth-2 trendings-html-table",
                       _style="padding: 200px;"),
                   _class="row center")
 
     return dict(div=div)
+
+# ----------------------------------------------------------------------------
+@utilities.check_api_userauth
+def recommendations():
+    """
+        Problem recommendations for the user.
+    """
+    import recommendations.problems as recommendations
+
+    ptable = db.problem
+    rtable = db.problem_recommendations
+    user_id = session.user_id
+    refresh = request.vars.get("refresh", "false") == "true"
+
+    output = {}
+    recommendation_pids = []
+
+    rows = db(rtable.user_id == user_id).select()
+    if len(rows) == 0:
+        refresh = True
+
+    if refresh:
+        recommendation_pids = recommendations.generate_recommendations(user_id)
+    else:
+        recommendation_pids, _ = recommendations.retrieve_past_recommendations(user_id)
+
+    output["recommendations_length"] = len(recommendation_pids)
+    if len(recommendation_pids) > 0:
+        problem_details = db(ptable.id.belongs(recommendation_pids)).select()
+        if utilities.is_apicall():
+            output["problems"] = problem_details
+            return output
+        output["table"] = utilities.get_problems_table(problem_details,
+                                                       user_id,
+                                                       "recommendation",
+                                                       None)
+
+    output["can_update"] = recommendations.can_refresh_recommendations(user_id)
+
+    return output
+
+# ----------------------------------------------------------------------------
+@auth.requires_login()
+def update_recommendation_status():
+    from recommendations.problems import update_recommendation_status
+
+    pid = long(request.args[0])
+    update_recommendation_status(session.user_id, pid)
 
 # ==============================================================================

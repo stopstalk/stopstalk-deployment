@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    Copyright (c) 2015-2018 Raj Patel(raj454raj@gmail.com), StopStalk
+    Copyright (c) 2015-2020 Raj Patel(raj454raj@gmail.com), StopStalk
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,7 @@
 from gluon.contrib.appconfig import AppConfig
 from gluon.tools import Mail
 
+import json as json_for_views
 ## once in production, remove reload=True to gain full speed
 myconf = AppConfig(reload=True)
 
@@ -38,8 +39,10 @@ if not request.env.web2py_runtime_gae:
                        ':' + current.mysql_password + \
                        '@' + current.mysql_server
 
-    db = DAL(mysql_connection + '/' + current.mysql_dbname)
-    uvadb = DAL(mysql_connection + '/' + current.mysql_uvadbname)
+    db = DAL(mysql_connection + '/' + current.mysql_dbname,
+             table_hash="stopstalkdb")
+    uvadb = DAL(mysql_connection + '/' + current.mysql_uvadbname,
+                table_hash="uvajudge")
 
 #    db = DAL(myconf.take('db.uri'), pool_size=myconf.take('db.pool_size', cast=int), check_reserved=['all'])
 else:
@@ -74,11 +77,13 @@ response.form_label_separator = myconf.take('forms.separator')
 ## (more options discussed in gluon/tools.py)
 #########################################################################
 
-from gluon.tools import Auth, Service, PluginManager
-from datetime import datetime, timedelta
-from utilities import materialize_form
+from gluon.tools import Auth, Service, PluginManager, AuthJWT
+import datetime
+import utilities
+from stopstalk_constants import *
 
 auth = Auth(db)
+auth_jwt = AuthJWT(auth, secret_key=current.jwt_secret, user_param="email")
 service = Service()
 plugins = PluginManager()
 
@@ -93,7 +98,7 @@ country_name_list.sort()
 # http://www.web2py.com/books/default/chapter/29/04#Translating-variables
 T.is_writable = False
 
-initial_date = datetime.strptime(current.INITIAL_DATE, "%Y-%m-%d %H:%M:%S")
+initial_date = datetime.datetime.strptime(current.INITIAL_DATE, "%Y-%m-%d %H:%M:%S")
 
 db.define_table("institutes",
                 Field("name", label=T("Name")))
@@ -118,7 +123,8 @@ extra_fields = [Field("institute",
                       default=""),
                 Field("stopstalk_handle",
                       label=T("StopStalk handle"),
-                      requires=[IS_NOT_IN_DB(db,
+                      requires=[IS_NOT_EMPTY(error_message=auth.messages.is_empty),
+                                IS_NOT_IN_DB(db,
                                              "auth_user.stopstalk_handle",
                                              error_message=T("Handle taken")),
                                 IS_NOT_IN_DB(db,
@@ -196,11 +202,21 @@ mail.settings.login = current.sender_mail + ":" + current.sender_password
 bulkmail = Mail()
 bulkmail.settings.server = current.bulk_smtp_server
 bulkmail.settings.sender = "Team StopStalk <" + current.bulk_sender_mail + ">"
-bulkmail.settings.login = current.bulk_sender_mail + ":" + current.bulk_sender_password
+bulkmail.settings.login = current.bulk_sender_user + ":" + current.bulk_sender_password
 
 from redis import Redis
+from influxdb import InfluxDBClient
+
 # REDIS CLIENT
 current.REDIS_CLIENT = Redis(host=current.redis_server, port=current.redis_port, db=0)
+
+# INFLUX CLIENT
+current.INFLUXDB_CLIENT = InfluxDBClient(current.influxdb_server,
+                                         current.influxdb_port,
+                                         current.influxdb_user,
+                                         current.influxdb_password,
+                                         INFLUX_DBNAME)
+
 
 # -----------------------------------------------------------------------------
 def send_mail(to, subject, message, mail_type, bulk=False):
@@ -238,14 +254,14 @@ current.send_mail = send_mail
 ## configure auth policy
 auth.settings.registration_requires_verification = True
 auth.settings.reset_password_requires_verification = True
-auth.settings.formstyle = materialize_form
+auth.settings.formstyle = utilities.materialize_form
 auth.settings.login_next = URL("default", "index")
 
 auth.messages.email_sent = T("Verification Email sent")
 auth.messages.logged_out = T("Successfully logged out")
 auth.messages.invalid_login = T("Invalid login credentials")
 auth.messages.label_remember_me = T("Remember credentials")
-auth.settings.long_expiration = 3600 * 24 * 366 # Remember me for a year
+auth.settings.long_expiration = 3600 * 24 * 60 # Remember me for two months
 
 # -----------------------------------------------------------------------------
 def validate_email(email):
@@ -259,6 +275,9 @@ def validate_email(email):
     if email.strip() == "":
         return False
 
+    if email.__contains__("@iiita.ac.in"):
+	return True
+
     import requests
 
     def _fallback_email_validation(email):
@@ -270,14 +289,17 @@ def validate_email(email):
         """
         domain = email.split("@")[-1]
         try:
-            response = requests.get("http://" + domain, timeout=3)
+            response = requests.get("http://" + domain,
+                                    headers={"User-Agent": COMMON_USER_AGENT},
+                                    timeout=3)
             return (response.status_code == 200)
         except:
             return False
 
     attable = db.access_tokens
-    query = attable.time_stamp > (datetime.datetime.now() - \
-                                  datetime.timedelta(minutes=55))
+    query = (attable.time_stamp > (datetime.datetime.now() - \
+                                   datetime.timedelta(minutes=55))) & \
+            (attable.type == "NeverBounce access_token")
     row = db(query).select(orderby="<random>").first()
     if row:
         access_token = row.value
@@ -301,15 +323,17 @@ def sanitize_fields(form):
     """
         Display errors for the following:
 
-        1. Strip whitespaces from all the fields
-        2. Remove @ from the HackerEarth
-        3. Lowercase the handles
-        4. Fill the institute field with "Other" if empty
-        5. Email address entered is from a valid domain
-        6. Email address instead of handles
-        7. Spoj follows a specific convention for handle naming
-        8. stopstalk_handle is alphanumeric
-        9. Country field is compulsary
+        1.  Strip whitespaces from all the fields
+        2.  Remove @ from the HackerEarth
+        3.  Lowercase the handles
+        4.  Fill the institute field with "Other" if empty
+        5.  Email address entered is from a valid domain
+        6.  Email address instead of handles
+        7.  Spoj follows a specific convention for handle naming
+        8.  stopstalk_handle is alphanumeric
+        9.  Country field is compulsory
+        10. Only positive ints allowed in Timus field
+        11. HackerRank handle should not be containing hr_r=1
 
         @param form (FORM): Registration / Add Custom friend form
     """
@@ -318,13 +342,8 @@ def sanitize_fields(form):
 
     if form.vars.stopstalk_handle:
         # 8.
-        stopstalk_handle_error = T("Expected alphanumeric (Underscore allowed)")
-        try:
-            group = match("[0-9a-zA-Z_]*", form.vars.stopstalk_handle).group()
-            if group != form.vars.stopstalk_handle:
-                form.errors.stopstalk_handle = stopstalk_handle_error
-        except AttributeError:
-            form.errors.stopstalk_handle = stopstalk_handle_error
+        if not utilities.is_valid_stopstalk_handle(form.vars.stopstalk_handle):
+            form.errors.stopstalk_handle = T("Expected alphanumeric (Underscore allowed)")
 
     def _remove_at_symbol(site_name):
         if site_name in current.SITES:
@@ -341,7 +360,7 @@ def sanitize_fields(form):
     handle_fields = ["stopstalk"]
     handle_fields.extend([x.lower() for x in current.SITES.keys()])
 
-    # 1. and 6.
+    # 1, 6 and 11
     for field in handle_fields:
         field_handle = field + "_handle"
         if form.vars[field_handle]:
@@ -349,8 +368,8 @@ def sanitize_fields(form):
                 form.errors[field_handle] = T("White spaces not allowed")
             elif IS_EMAIL(error_message="check")(form.vars[field_handle])[1] != "check":
                 form.errors[field_handle] = T("Email address instead of handle")
-            elif IS_URL(error_message="check")(form.vars[field_handle])[1] != "check":
-                form.errors[field_handle] = T("Just handle is required")
+            elif field == "hackerrank" and form.vars[field_handle].__contains__("hr_r=1"):
+                form.errors[field_handle] = T("Please enter only the handle")
 
     # 2.
     _remove_at_symbol("HackerEarth")
@@ -364,11 +383,11 @@ def sanitize_fields(form):
     # 3.
     for site in handle_fields:
         site_handle = site + "_handle"
-        if site == "hackerrank" or site == "uva" or site == "stopstalk":
+        if site in ["hackerrank", "uva", "stopstalk", "atcoder"]:
             continue
         if form.vars[site_handle] and \
            form.vars[site_handle] != form.vars[site_handle].lower():
-            form.errors[site_handle] = T("Please enter in lower case")
+            form.vars[site_handle] = form.vars[site_handle].lower()
 
     # 4.
     if form.vars.institute == "":
@@ -383,6 +402,15 @@ def sanitize_fields(form):
         if validate_email(form.vars.email) is False:
             form.errors.email = T("Invalid email address")
 
+    # 10.
+    if form.vars.timus_handle:
+        try:
+            timus_id = int(form.vars.timus_handle)
+            if timus_id <= 0:
+                form.errors.timus_handle = "Timus handle / ID should be a number"
+        except ValueError:
+            form.errors.timus_handle = "Timus handle / ID should be a number"
+
     if form.errors:
         response.flash = T("Form has errors")
 
@@ -396,6 +424,7 @@ def notify_institute_users(record):
     """
 
     atable = db.auth_user
+    iutable = db.institute_user
     query = (atable.institute == record.institute) & \
             (atable.email != record.email) & \
             (atable.institute != "Other") & \
@@ -404,8 +433,10 @@ def notify_institute_users(record):
 
     rows = db(query).select(atable.id)
     if len(rows):
-        query_values = ",".join([str((int(x.id), int(record.id))) for x in rows]).replace(" ", "")
-        db.executesql("INSERT INTO institute_user(send_to_id,user_registered_id) VALUES %s;" % query_values)
+        for row in rows:
+            iutable.insert(send_to_id=row.id,
+                           user_registered_id=record.id)
+            db.commit()
 
 def create_next_retrieval_record(record, custom=False):
     """
@@ -419,8 +450,16 @@ def create_next_retrieval_record(record, custom=False):
     else:
         db.next_retrieval.insert(user_id=record.id)
 
+def append_user_to_refreshed_users(record):
+    """
+        Add the user in refreshed list to retrieve submissions asap
+
+        @param record (Row): Record with the new user details
+    """
+    current.REDIS_CLIENT.rpush("next_retrieve_user", record.id)
+
 # -----------------------------------------------------------------------------
-def register_callback(form):
+def register_callback(form, register_type="normal"):
     """
         Send mail to raj454raj@gmail.com about all the users who register
 
@@ -436,12 +475,14 @@ def register_callback(form):
     message = """
 Name: %s %s
 Email: %s
+Register Type: %s
 Institute: %s
 Country: %s
 StopStalk handle: %s
 Referrer: %s\n""" % (form.vars.first_name,
                      form.vars.last_name,
                      form.vars.email,
+                     register_type,
                      form.vars.institute,
                      form.vars.country,
                      form.vars.stopstalk_handle,
@@ -454,10 +495,16 @@ Referrer: %s\n""" % (form.vars.first_name,
 auth.settings.register_onvalidation = [sanitize_fields]
 auth.settings.register_onaccept.append(register_callback)
 auth.settings.verify_email_onaccept.extend([notify_institute_users,
-                                            create_next_retrieval_record])
+                                            create_next_retrieval_record,
+                                            append_user_to_refreshed_users])
 current.auth = auth
-current.response.formstyle = materialize_form
+current.auth_jwt = auth_jwt
+current.response.formstyle = utilities.materialize_form
 current.sanitize_fields = sanitize_fields
+current.register_callback = register_callback
+current.notify_institute_users = notify_institute_users
+current.create_next_retrieval_record = create_next_retrieval_record
+current.append_user_to_refreshed_users = append_user_to_refreshed_users
 current.create_next_retrieval_record = create_next_retrieval_record
 
 #########################################################################
@@ -540,30 +587,6 @@ db.define_table("custom_friend",
                 format="%(first_name)s %(last_name)s (%(id)s)",
                 *custom_friend_fields)
 
-db.define_table("submission",
-                Field("user_id", "reference auth_user"),
-                Field("custom_user_id", "reference custom_friend"),
-                Field("stopstalk_handle"),
-                Field("site_handle"),
-                Field("site"),
-                Field("time_stamp", "datetime"),
-                Field("problem_name"),
-                Field("problem_link"),
-                Field("lang"),
-                Field("status"),
-                Field("points"),
-                Field("view_link",
-                      default=""))
-
-db.define_table("following",
-                Field("user_id", "reference auth_user"),
-                Field("follower_id", "reference auth_user"))
-
-db.define_table("todays_requests",
-                Field("user_id", "reference auth_user"),
-                Field("follower_id", "reference auth_user"),
-                Field("transaction_type"))
-
 def _count_users_lambda(row):
     if row.problem.user_ids in (None, ""):
         return 0
@@ -589,9 +612,35 @@ db.define_table("problem",
                 Field("total_submissions", "integer", default=0),
                 Field("user_ids", "text", default=""),
                 Field("custom_user_ids", "text", default=""),
+                Field("difficulty", "float"),
                 Field.Virtual("user_count", _count_users_lambda),
                 Field.Virtual("custom_user_count", _count_custom_users_lambda),
                 format="%(name)s %(id)s")
+
+db.define_table("submission",
+                Field("user_id", "reference auth_user"),
+                Field("custom_user_id", "reference custom_friend"),
+                Field("stopstalk_handle"),
+                Field("site_handle"),
+                Field("site"),
+                Field("time_stamp", "datetime"),
+                Field("problem_id", "reference problem"),
+                Field("problem_name"),
+                Field("problem_link"),
+                Field("lang"),
+                Field("status"),
+                Field("points"),
+                Field("view_link",
+                      default=""))
+
+db.define_table("following",
+                Field("user_id", "reference auth_user"),
+                Field("follower_id", "reference auth_user"))
+
+db.define_table("todays_requests",
+                Field("user_id", "reference auth_user"),
+                Field("follower_id", "reference auth_user"),
+                Field("transaction_type"))
 
 db.define_table("tag",
                 Field("value"),
@@ -712,6 +761,43 @@ db.define_table("user_editorials",
                 Field("votes", "text"),
                 Field("verification", default="pending"))
 
+db.define_table("resume_data",
+                Field("user_id", "reference auth_user"),
+                Field("resume_file_s3_path"),
+                Field("will_relocate", "boolean"),
+                Field("github_profile"),
+                Field("linkedin_profile"),
+                Field("join_from", "datetime"),
+                Field("graduation_year"),
+                Field("experience"),
+                Field("fulltime_or_internship"),
+                Field("contact_number"),
+                Field("can_contact", "boolean"),
+                Field("expected_salary"))
+
+db.define_table("problem_difficulty",
+                Field("user_id", "reference auth_user"),
+                Field("problem_id", "reference problem"),
+                Field("score", "integer", default=0))
+
+db.define_table("problem_setters",
+                Field("problem_id", "reference problem"),
+                Field("handle"))
+
+db.define_table("atcoder_problems",
+                Field("problem_identifier"),
+                Field("contest_id"),
+                Field("name"))
+
+db.define_table("problem_recommendations",
+                Field("user_id", "reference auth_user"),
+                Field("problem_id", "reference problem"),
+                # The possible states of a recommendation are:
+                # 0 - Recommended, 1 - Viewed, 2 - Attempted, 3 - Solved
+                Field("state", "integer", default=0),
+                Field("is_active", "boolean"),
+                Field("generated_at", "date"))
+
 uvadb.define_table("problem",
                    Field("problem_id", "integer"),
                    Field("problem_num", "integer"),
@@ -729,42 +815,55 @@ if session["auth"]:
 current.db = db
 current.uvadb = uvadb
 
-def get_profile_url(site, handle):
-    if handle == "":
-        return "NA"
+current.WEIGHTING_FACTORS = {
+    "curr_day_streak": 40 * 10,
+    "max_day_streak": 20 * 10,
+    "solved": 1 * 23,
+    "accuracy": 5 * 35,
+    "attempted": 2 * 2,
+    "curr_per_day": 1000 * 20
+}
+current.REFRESH_INTERVAL = 120 * 60
 
-    if site == "CodeChef":
-        return "http://www.codechef.com/users/" + handle
-    elif site == "CodeForces":
-        return "http://www.codeforces.com/profile/" + handle
-    elif site == "Spoj":
-        return "http://www.spoj.com/users/" + handle
-    elif site == "HackerEarth":
-        return "https://www.hackerearth.com/users/" + handle
-    elif site == "HackerRank":
-        return "https://www.hackerrank.com/" + handle
-    elif site == "UVa":
-        import requests
-        utable = uvadb.usernametoid
-        row = uvadb(utable.username == handle).select().first()
-        if row is None:
-            response = requests.get("http://uhunt.felix-halim.net/api/uname2uid/" + handle)
-            if response.status_code == 200 and response.text != "0":
-                utable.insert(username=handle, uva_id=response.text.strip())
-                return "http://uhunt.felix-halim.net/id/" + response.text
-            else:
-                return "NA"
+# ----------------------------------------------------------------------------
+def get_static_file_version(file_path):
+    if current.environment == "production":
+        new_file_path = file_path
+        static_dir = "static/minified_files"
+        if file_path[-3:] == ".js":
+            new_file_path = file_path[:-3] + ".min.js"
+        elif file_path[-4:] == ".css":
+            new_file_path = file_path[:-4] + ".min.css"
         else:
-            return "http://uhunt.felix-halim.net/id/" + row.uva_id
-    return "NA"
+            static_dir = "static"
+            new_file_path = file_path
+    else:
+        new_file_path = file_path
+        static_dir = "static"
 
-current.get_profile_url = get_profile_url
+    return static_dir, new_file_path, current.REDIS_CLIENT.get(new_file_path)
 
+# ----------------------------------------------------------------------------
 def get_static_url(file_path):
-  return URL("static",
-             file_path,
-             vars={'_rev': current.REDIS_CLIENT.get(file_path)},
-             extension=False)
+    """
+        Get the link to the minified static file with versioning
+        @params file_path (String): Relative path of the static file
 
+        @return (String): URL of the minified static resource with versioning
+    """
+
+    if current.environment == "production":
+        static_dir, file_path, revision = get_static_file_version(file_path)
+        return URL(static_dir,
+                   file_path,
+                   vars={"_rev": revision},
+                   extension=False)
+    else:
+        return URL("static",
+                   file_path,
+                   extension=False)
+
+current.get_static_file_version = get_static_file_version
 current.get_static_url = get_static_url
+
 # =============================================================================

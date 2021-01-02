@@ -1,7 +1,7 @@
 {{extend 'layout.html'}}
 {{block head}}
   <title>{{=heading}}</title>
-  <link rel="stylesheet" href="{{=get_static_url('flag-icon/css/flag-icon.min.css')}}"/>
+  <link rel="stylesheet" href="{{=URL('static', 'flag-icon/css/flag-icon.min.css')}}">
   <script type="text/javascript">
     var getCustomUserURL = "{{=URL('default', 'get_custom_users', extension='json')}}";
     var headerPlaceHolder = "{{=T('List of custom users created by ')}}";
@@ -46,7 +46,8 @@
             <th class="center-align">{{=T("Per Day Changes")}}</th>
         </tr>
     </thead>
-    <tbody></tbody>
+    <tbody>
+    </tbody>
 </table>
 <div id="leaderboard-preloader">
     <br/><br/><br/><br/>

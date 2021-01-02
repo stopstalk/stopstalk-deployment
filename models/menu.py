@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    Copyright (c) 2015-2018 Raj Patel(raj454raj@gmail.com), StopStalk
+    Copyright (c) 2015-2020 Raj Patel(raj454raj@gmail.com), StopStalk
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@ response.title = request.application.replace('_',' ').title()
 response.subtitle = ''
 
 response.meta.author = 'StopStalk admin@stopstalk.com'
-response.meta.keywords = 'stopstalk, raj454raj, competitive programming, algorithms, algorithmic progress'
+response.meta.keywords = 'stopstalk, raj454raj, competitive programming, algorithms, algorithmic progress, codechef, codeforces, spoj, uva, timus, atcoder, hackerearth, hackerrank'
 response.meta.generator = ''
 
 response.google_analytics_id = None
@@ -42,19 +42,15 @@ def get_menu_tuple(icon_class, tooltip, button_label, url, new_item=False):
                   url,
                   ""]
     if new_item:
-        item_tuple[4] = SPAN(_class="new badge")
+        item_tuple[4] = SPAN(_class="new badge pulse")
     return item_tuple
 
 if session.user_id:
-    response.menu += [get_menu_tuple("fa-bell-o",
-                                     T("Notifications"),
-                                     "Nav Notifications",
-                                     URL("default", "notifications")),
-                      get_menu_tuple("fa-user-secret",
+    response.menu += [get_menu_tuple("fa-user-secret",
                                      T("Custom Friend"),
                                      "Nav Custom Friend",
                                      URL("user", "custom_friend")),
-                      get_menu_tuple("fa-users",
+                      get_menu_tuple("fa-user-plus",
                                      T("Your Friends"),
                                      "Nav Friends",
                                      URL("default", "friends")),
@@ -63,7 +59,11 @@ if session.user_id:
                                      "Nav Todo",
                                      URL("default", "todo"))]
 
-response.menu += [get_menu_tuple("fa-search",
+response.menu += [get_menu_tuple("fa-users",
+                                 T("User Editorials"),
+                                 "Nav User editorials",
+                                 URL("default", "user_editorials")),
+                  get_menu_tuple("fa-search",
                                  T("Search Friends"),
                                  "Nav Search",
                                  URL("default", "search")),
@@ -71,6 +71,10 @@ response.menu += [get_menu_tuple("fa-search",
                                  T("Upcoming Contests"),
                                  "Nav Contests",
                                  URL("default", "contests")),
+                  get_menu_tuple("fa-tag",
+                                 T("Search Problems"),
+                                 "Nav Problem Search",
+                                 URL("problems", "search")),
                   get_menu_tuple("fa-bar-chart",
                                  T("Leaderboard"),
                                  "Nav Leaderboard",
@@ -83,20 +87,14 @@ response.menu += [get_menu_tuple("fa-search",
                                  T("Submission Filters"),
                                  "Nav Filters",
                                  URL("default", "filters")),
-                  get_menu_tuple("fa-tag",
-                                 T("Search by tags"),
-                                 "Nav Tag Search",
-                                 URL("problems", "tag")),
                   get_menu_tuple("fa-heart",
                                  T("Testimonials"),
                                  "Nav Testimonials",
-                                 URL("testimonials", "index"),
-                                 True),
+                                 URL("testimonials", "index")),
                   get_menu_tuple("fa-bullhorn",
                                  T("Feature Updates"),
                                  "Nav Feature Updates",
-                                 URL("default", "updates"),
-                                 True)]
+                                 URL("default", "updates"))]
 
 if "auth" in locals(): auth.wikimenu()
 

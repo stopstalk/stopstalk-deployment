@@ -1,3 +1,138 @@
+input.form-control {
+    width: 50%;
+    text-align:  center;
+}
+
+.pagination li.active{
+    background-color: #259b24;
+}
+
+#welcome {
+    min-width: 180px;
+}
+
+#welcome > li > a {
+    color: #424242;
+}
+
+.problem-setter-href {
+    text-decoration: none;
+    margin-left: 5px;
+    cursor: pointer;
+    font-size: large;
+    white-space: nowrap;
+}
+
+.problem-setter-href a {
+    color: #424242;
+}
+
+.problem-setter-on-stopstalk {
+    border-bottom: 2px solid #d61e95;
+}
+
+.problem-setter-on-profile-site {
+    border-bottom: 2px solid #f7ba0f;
+}
+
+.problem-setter-text {
+    text-decoration: none;
+    border-bottom: 2px solid #cabfbf;
+    margin-left: 5px;
+    color: black;
+    font-size: large;
+    white-space: nowrap;
+}
+
+body {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: default;
+}
+
+.Site {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+.Site-content {
+    flex: 1;
+}
+
+iframe {
+    visibility: block;
+}
+
+div.error {
+    color: red;
+}
+
+.solved-problem {
+    color: green;
+    font-weight: bolder;
+}
+
+.unsolved-problem {
+    color: #D9071D;
+    font-weight: bolder;
+}
+
+.status-icon {
+    height: 25px;
+    width: 25px;
+}
+
+.prettyprint {
+    -webkit-touch-callout: text;
+    -webkit-user-select: text;
+    -khtml-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+    cursor: text;
+    overflow: hidden;
+}
+
+/* desert scheme ported from vim to google prettify */
+pre.prettyprint { display: block; background-color: #333 }
+pre .nocode { background-color: none; color: #000 }
+pre .str { color: #ffa0a0 } /* string  - pink */
+pre .kwd { color: #f0e68c; font-weight: bold }
+pre .com { color: #87ceeb } /* comment - skyblue */
+pre .typ { color: #98fb98 } /* type    - lightgreen */
+pre .lit { color: #cd5c5c } /* literal - darkred */
+pre .pun { color: #fff }    /* punctuation */
+pre .pln { color: #fff }    /* plaintext */
+pre .tag { color: #f0e68c; font-weight: bold } /* html/xml tag    - lightyellow */
+pre .atn { color: #bdb76b; font-weight: bold } /* attribute name  - khaki */
+pre .atv { color: #ffa0a0 } /* attribute value - pink */
+pre .dec { color: #98fb98 } /* decimal         - lightgreen */
+
+/* Specify class=linenums on a pre to get line numbering */
+ol.linenums { margin-top: 0; margin-bottom: 0; color: #AEAEAE } /* IE indents via margin-left */
+li.L0,li.L1,li.L2,li.L3,li.L5,li.L6,li.L7,li.L8 { list-style-type: none }
+/* Alternate shading for lines */
+li.L1,li.L3,li.L5,li.L7,li.L9 { }
+
+@media print {
+    pre.prettyprint { background-color: none }
+    pre .str, code .str { color: #060 }
+    pre .kwd, code .kwd { color: #006; font-weight: bold }
+    pre .com, code .com { color: #600; font-style: italic }
+    pre .typ, code .typ { color: #404; font-weight: bold }
+    pre .lit, code .lit { color: #044 }
+    pre .pun, code .pun { color: #440 }
+    pre .pln, code .pln { color: #000 }
+    pre .tag, code .tag { color: #006; font-weight: bold }
+    pre .atn, code .atn { color: #404 }
+    pre .atv, code .atv { color: #060 }
+}
+
 .remove-from-todo:hover {
     cursor: pointer;
 }
@@ -79,6 +214,23 @@ a {
     opacity: 1;
 }
 
+.user-blacklist-button {
+    background-color: #f5f5f5;
+    height: 20px;
+    width: 20px;
+    line-height: 15px;
+}
+
+.user-blacklist-button:hover, .user-blacklist-button:focus {
+    opacity: 0.8;
+    background-color: #f5f5f5;
+}
+
+.user-blacklist-button:visited {
+    background-color: #f5f5f5;
+    opacity: 1;
+}
+
 .dropdown-content li > a, .dropdown-content li > span {
     color: #536dfe;
 }
@@ -155,7 +307,6 @@ textarea.materialize-textarea:focus:not([readonly]) + label {
 
 [type="checkbox"] + label:before {
     left: 0px;
-    margin-top: -2px;
 }
 
 [type="checkbox"]:checked + label:before {
@@ -296,6 +447,7 @@ nav ul a:hover {
 
 .side-nav span.badge {
     margin-top: 19px;
+    margin-right: 8px;
     background-color: mediumvioletred;
 }
 
@@ -386,4 +538,136 @@ nav ul a:hover {
     text-align: left;
     border: 0.5px solid #FEFEFE;
     overflow-x: scroll;
+}
+
+.leaderboard-stopstalk-handle, .leaderboard-institute {
+    cursor: pointer;
+}
+
+#leaderboard-table td:nth-child(1),
+#leaderboard-table td:nth-child(2),
+#leaderboard-table td:nth-child(6),
+#leaderboard-table td:nth-child(7) {
+    text-align: center;
+}
+
+.left-text {
+    text-align: left;
+}
+
+.right-text {
+    text-align: right;
+}
+
+.justify-text {
+    text-align: justify;
+}
+
+#recent_announcements .modal-content {
+    padding-bottom: 0px;
+}
+
+.profile-page-site-profile-url, #show-info-contributions-leaderboard, #show-tc-editorials-contest {
+    cursor: pointer;
+}
+
+.profile-page-site-profile-url {
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.preview-editor-wrapper {
+    cursor: text;
+    user-select: text;
+}
+
+#march-contest-countdown {
+    color: lavender;
+    font-weight: bold;
+    font-size: x-large;
+}
+
+.updates-page-card {
+    background-color: darkslateblue;
+}
+
+.updates-page-card a {
+    color: gold;
+}
+
+.difficulty-list-item {
+    padding: 30px;
+}
+
+#problem-difficulty-modal-form label {
+    color: black;
+    font-weight: 400;
+}
+
+#problem-difficulty-modal .modal-content {
+    padding: 24px 10px 5px 10px;
+}
+
+.tap-target {
+    background-color: #f0ff03e8;
+}
+
+.add-to-todo-list.chip {
+    height: 20px;
+    line-height: 20px;
+    color: white;
+    font-size: 12px;
+    margin-left: 6px;
+    background-color: #190c88;
+    padding-left: 10px;
+    display: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.problem-search-tags-column {
+    text-align: left !important;
+    max-width: 450px;
+}
+
+.left-align-problem {
+    text-align: left !important;
+}
+
+.problem-search-name-column {
+    text-align: left !important;
+    padding-left: 10px;
+}
+
+.w2p-form-button {
+    margin-left: 10px;
+}
+
+.stopstalk-dashboard-card-cta {
+    margin-left: 10px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.stopstalk-dashboard-card .card-content {
+    font-size: 17px;
+}
+
+.parent-site-icon-small {
+    height: 30px;
+    width: 30px;
+}
+
+.parent-site-icon-very-small {
+    height: 18px;
+    width: 18px;
+    margin-bottom: -4px;
+}
+#gauth-login-divider {
+    border-top: 2px dashed #b1abab;
+    margin-top: 35px; margin-bottom: 20px;
+    width: 50%;
+}
+#recommendation-table {
+    padding-left: 5%;
 }
