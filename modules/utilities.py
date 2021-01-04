@@ -106,7 +106,7 @@ def get_reminder_button(contest):
                        scheme="https",
                        host="calendar.google.com",
                        args=["0", "r", "eventedit"],
-                       vars={"text": "Contest at " + contest["site"] + ": " + contest["name"],
+                       vars={"text": "Contest at " + str(contest["site"]) + ": " + str(contest["name"]),
                              "dates": "%s/%s" % (contest["start_time"].strftime("%Y%m%dT%H%M00"),
                                                  contest["end_time"].strftime("%Y%m%dT%H%M00")),
                              "ctz": "Asia/Kolkata",
@@ -274,7 +274,10 @@ def pick_a_problem(user_id, custom=False, **args):
         query &= ptable.id.belongs(pids)
         record = db(query).select(ptable.id, orderby="<random>").first()
 
-    return record.id
+    if record is not None:
+        return record.id
+    else:
+        return 0
 
 # ------------------------------------------------------------------------------
 def get_user_record_cache_key(user_id):
@@ -1421,7 +1424,7 @@ def get_profile_url(site, handle):
         @return (String): URL of the user profile on the site
     """
 
-    if handle == "":
+    if handle == "" or handle is None:
         return "NA"
 
     site = get_actual_site(site)

@@ -358,10 +358,12 @@ def update_details():
     stable = db.submission
     record = utilities.get_user_records([session.user_id], "id", "id", True)
 
+    """"
     for field in form_fields:
         if record[field] is None:
             continue
         record[field] = record[field].encode("utf-8")
+    """
 
     # Do not allow to modify stopstalk_handle and email
     atable.stopstalk_handle.writable = False
