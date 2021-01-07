@@ -170,7 +170,7 @@ def add_suggested_tags():
 @auth.requires_login()
 def problem_difficulty():
     if request.env.request_method != "POST" or request.extension != "json":
-        raise HTTP
+        raise HTTP(405, "Method not allowed")
         return dict()
 
     problem_id = int(request.vars["problem_id"])
@@ -495,12 +495,12 @@ def editorials():
 @auth.requires_login()
 def delete_editorial():
     if len(request.args) < 1:
-        raise HTTP
+        raise HTTP(400, "Bad request")
         return
 
     ue_record = db.user_editorials(int(request.args[0]))
     if ue_record is None or session.user_id != ue_record.user_id:
-        raise HTTP
+        raise HTTP(400, "Bad request")
         return
 
     if ue_record.verification == "accepted":
@@ -656,7 +656,7 @@ def submit_editorial():
 @auth.requires_login()
 def admin_editorial_approval():
     if session.user_id != 1 or len(request.args) < 2:
-        raise HTTP
+        raise HTTP(401, "Why are you here ?")
         return
 
     uetable = db.user_editorials
