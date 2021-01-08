@@ -65,8 +65,6 @@ def check_api_userauth(function):
     """
         API Token with userauth Checking Decorator
     """
-    if is_apicall():
-        current.request.ajax = True
     @current.auth_jwt.allows_jwt()
     @check_api_token
     @current.auth.requires_login()  
