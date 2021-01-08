@@ -100,6 +100,32 @@ def check_api_user(function):
 def get_gauth_key(auth_token):
     return "g_token_" + auth_token
 
+
+def get_reminder_button(contest):
+    return A(I(_class="fa fa-calendar-plus-o"),
+             _class="btn-floating btn-small accent-4 tooltipped orange set-reminder",
+             _href=URL("calendar", "u",
+                       scheme="https",
+                       host="calendar.google.com",
+                       args=["0", "r", "eventedit"],
+                       vars={"text": "Contest at " + contest["site"] + ": " + contest["name"],
+                             "dates": "%s/%s" % (contest["start_time"].strftime("%Y%m%dT%H%M00"),
+                                                 contest["end_time"].strftime("%Y%m%dT%H%M00")),
+                             "ctz": "Asia/Kolkata",
+                             "details": "<b>Event created from <a href='https://www.stopstalk.com'>StopStalk</a></b>\n" + \
+                                        "_____________________________\n\n"
+                                        "<b>Link:</b> <a href='%s'>Contest Link</a>\n" % contest["url"] + \
+                                        "<b>Site:</b> %s\n" % contest["site"] + \
+                                        "<b>Duration:</b> %s" % get_duration_string(int(float(contest["duration"]))),
+                             "location": contest["url"],
+                             "sf": "true",
+                             "output": "xml"},
+                       extension=False),
+             _target="_blank",
+             data=dict(tooltip=current.T("Set Reminder to Google Calendar"),
+                       position="left",
+                       delay="50"))
+
 # -----------------------------------------------------------------------------
 def gauth_redirect(token):
     import requests
@@ -136,8 +162,9 @@ def get_jwt_token_from_request():
 # -----------------------------------------------------------------------------
 def push_influx_data(measurement, points, app_name="cron"):
 
-    if current.environment != "production":
-        return
+    # if current.environment != "production":
+    # Temporarily commenting out the data insert for disk issues
+    return
 
     try:
         SeriesHelperClass = get_series_helper(
@@ -256,6 +283,29 @@ def get_user_record_cache_key(user_id):
     return "auth_user_cache::user_" + str(user_id)
 
 # ------------------------------------------------------------------------------
+def get_duration_string(seconds):
+    years = seconds / (365 * 24 * 3600)
+    days = seconds / (24 * 3600)
+    seconds = seconds % (24 * 3600) 
+    hours = seconds / 3600
+    seconds %= 3600
+    minutes = seconds / 60
+    seconds %= 60
+
+    result = ""
+    if years > 0:
+        result += " " + str(years) + "y"
+    if days > 0:
+        result += " " + str(days) + "d"
+    if hours > 0:
+        result += " " + str(hours) + "h"
+    if minutes > 0:
+        result += " " + str(minutes) + "m"
+    if seconds > 0:
+        result += " " + str(seconds) + "s"
+    return result.strip()
+
+# ------------------------------------------------------------------------------
 def get_user_records(record_values,
                      search_key="id",
                      dict_key="id",
@@ -332,26 +382,23 @@ def get_contests():
     today = datetime.datetime.today()
     today = datetime.datetime.strptime(str(today)[:-7],
                                        "%Y-%m-%d %H:%M:%S")
-
-    start_date = today.date()
-    end_date = start_date + datetime.timedelta(90)
-    url = "https://contesttrackerapi.herokuapp.com/"
-
     from urllib3 import disable_warnings
     import requests
     disable_warnings()
 
-    response = requests.get(url, verify=False)
-    if response.status_code == 200:
-        response = response.json()["result"]
-        current.REDIS_CLIENT.set(CONTESTS_CACHE_KEY,
-                                 json.dumps([response["ongoing"],
-                                             response["upcoming"]]),
-                                 ex=ONE_HOUR)
-    else:
-        return None, None
+    response = requests.get("https://kontests.net/api/v1/all",
+                            timeout=5,
+                            verify=False)
 
-    return response["ongoing"], response["upcoming"]
+    if response.status_code == 200:
+        contest_list = response.json()
+        contest_list = sorted(contest_list, key=lambda contest: contest["start_time"])
+        current.REDIS_CLIENT.set(CONTESTS_CACHE_KEY,
+                                 json.dumps(contest_list),
+                                 ex=ONE_HOUR)
+        return contest_list
+    else:
+        return None
 
 # ------------------------------------------------------------------------------
 def merge_duplicate_problems(original_id, duplicate_id):
