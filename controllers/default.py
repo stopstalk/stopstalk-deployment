@@ -1260,7 +1260,7 @@ def filters():
                 global_submissions=global_submissions)
 
 # ----------------------------------------------------------------------------
-@auth.requires_login()
+@utilities.check_api_userauth
 def mark_friend():
     """
         Add a friend on StopStalk
@@ -1583,7 +1583,7 @@ def download_submission():
         return -1
 
 # ----------------------------------------------------------------------------
-@auth.requires_login()
+@utilities.check_api_userauth
 def unfriend():
     """
         Unfriend the user
@@ -1631,7 +1631,7 @@ def unfriend():
         return T("Successfully unfriended")
 
 # ----------------------------------------------------------------------------
-@auth.requires_login()
+@utilities.check_api_userauth
 def submissions():
     """
         Retrieve submissions of the logged-in user
@@ -1668,7 +1668,7 @@ def submissions():
 
     PER_PAGE = current.PER_PAGE
 
-    if request.extension == "json":
+    if request.extension == "json" and not utilities.is_apicall():
         total_count = db(query).count()
         count = total_count / PER_PAGE
         if total_count % PER_PAGE:
@@ -1681,6 +1681,9 @@ def submissions():
     # Retrieve only some number of submissions from the offset
     rows = db(query).select(orderby=~db.submission.time_stamp,
                             limitby=(offset, offset + PER_PAGE))
+    
+    if utilities.is_apicall():
+        return response.json(dict(submissions=rows))
 
     table = utilities.render_table(rows, cusfriends, session.user_id)
 
