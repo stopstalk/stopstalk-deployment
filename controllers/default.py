@@ -1683,6 +1683,8 @@ def submissions():
                             limitby=(offset, offset + PER_PAGE))
     
     if utilities.is_apicall():
+        for row in rows:
+            row['problem_details'] = utilities.get_problem_details(row['problem_id'])
         return response.json(dict(submissions=rows))
 
     table = utilities.render_table(rows, cusfriends, session.user_id)
