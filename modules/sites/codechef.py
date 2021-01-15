@@ -30,7 +30,6 @@ CODECHEF_SITE_URL = "https://www.codechef.com"
 SUBMISSION_REQUEST_PARAMS = {"year": None,
                              "username": "",
                              "limit": PER_PAGE_LIMIT,
-                             "offset": 0,
                              "result": "",
                              "language": "",
                              "problemCode": "",
@@ -285,7 +284,6 @@ class Profile(object):
     # --------------------------------------------------------------------------
     def __process_year_submissions(self, year, last_retrieved):
         SUBMISSION_REQUEST_PARAMS["year"] = year
-        SUBMISSION_REQUEST_PARAMS["offset"] = 0
         submissions = []
         for _ in xrange(1000):
             response = get_request("%s/submissions" % CODECHEF_API_URL,
@@ -335,10 +333,10 @@ class Profile(object):
                                     points,
                                     language,
                                     view_link))
+                SUBMISSION_REQUEST_PARAMS["after"] = submission["id"]
+
             if len(json_response["result"]["data"]["content"]) < PER_PAGE_LIMIT:
                 break
-
-            SUBMISSION_REQUEST_PARAMS["offset"] += PER_PAGE_LIMIT
 
         return submissions
 
