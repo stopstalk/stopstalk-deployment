@@ -208,8 +208,17 @@ class Profile(object):
     def is_invalid_handle(handle):
         response = get_request("http://www.codeforces.com/api/user.status?handle=" + \
                                handle + "&from=1&count=2")
+
         if response in REQUEST_FAILURES:
             return True
+
+        response = response.json()
+
+        if response["status"] != "ok":
+            return True
+        else:
+            return False
+
         return False
 
     # -------------------------------------------------------------------------
@@ -324,7 +333,10 @@ class Profile(object):
         submissions = []
         all_submissions = tmp.json()
         if all_submissions["status"] != "OK":
-            return submissions
+            if "not found" in all_submissions["comment"]:
+                return NOT_FOUND
+            else:
+                return SERVER_FAILURE
         all_submissions = all_submissions["result"]
 
         for row in all_submissions:
