@@ -146,6 +146,20 @@ def gauth_redirect(token):
     current.auth.login_user(user)
     return URL("default", "dashboard")
 
+#--------------------------------------------------------------------------------
+def get_jwt_gauth_app(token):
+    import requests
+    resp = requests.post("https://oauth2.googleapis.com/tokeninfo", data={"id_token": token})
+    if resp.status_code != 200:
+        return None
+    data = resp.json()
+    user_email = data["email"]
+    user = current.db.auth_user(**{"email": user_email})
+    if not user:
+        return None
+    current.auth.login_user(user)
+    return current.auth_jwt.jwt_token_manager()
+
 # -----------------------------------------------------------------------------
 def get_jwt_token_from_request():
     """
