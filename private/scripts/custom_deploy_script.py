@@ -33,7 +33,7 @@ def update_handles(table):
             update_params["atcoder_lr"] = current.INITIAL_DATE
 
         if len(update_params) > 0:
-            print row.stopstalk_handle, update_params
+            print(row.stopstalk_handle, update_params)
             row.update_record(**update_params)
 
 

@@ -26,12 +26,12 @@ cftable = db.custom_friend
 
 rows = db(atable).select()
 for row in rows:
-    print "Updating for", row.stopstalk_handle
+    print("Updating for", row.stopstalk_handle)
     row.update_record(stopstalk_rating=int(row.rating),
                       stopstalk_prev_rating=int(row.prev_rating))
 
 rows = db(cftable).select()
 for row in rows:
-    print "Updating for", row.stopstalk_handle
+    print("Updating for", row.stopstalk_handle)
     row.update_record(stopstalk_rating=int(row.rating),
                       stopstalk_prev_rating=int(row.prev_rating))

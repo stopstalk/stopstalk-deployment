@@ -30,7 +30,7 @@ from bs4 import BeautifulSoup
 def retrieve_pname(problem_link):
     response = requests.get(problem_link)
     if response.status_code != 200:
-        print problem_link, response.status_code
+        print(problem_link, response.status_code)
         return -1
     soup = BeautifulSoup(response.text, "lxml")
     title = soup.find("title").contents[0]
@@ -59,29 +59,29 @@ for submission in res:
         elif submission.custom_user_id:
             custom_users.add(submission.custom_user_id)
         else:
-            print "Something is wrong",
+            print("Something is wrong", end=' ')
     else:
-        print "{",
-        if name_dict.has_key(submission.problem_link):
+        print("{", end=' ')
+        if submission.problem_link in name_dict:
             submission.update_record(problem_name=name_dict[submission.problem_link])
-            print submission.problem_link, name_dict[submission.problem_link],
+            print(submission.problem_link, name_dict[submission.problem_link], end=' ')
         else:
             pname = retrieve_pname(submission.problem_link)
-            print submission.problem_link, "*", pname, "*",
+            print(submission.problem_link, "*", pname, "*", end=' ')
             if pname != -1 and pname != "problem moved":
                 submission.update_record(problem_name=pname)
                 name_dict[submission.problem_link] = pname
             elif pname == "problem moved":
-                print "Deleted", submission,
+                print("Deleted", submission, end=' ')
                 submission.delete_record()
-        print "}"
+        print("}")
 
-query = (ptable.problem_link.belongs(name_dict.keys())) & \
+query = (ptable.problem_link.belongs(list(name_dict.keys()))) & \
         (ptable.problem_name == "")
 
 db(query).delete()
 
-print users, custom_users
+print(users, custom_users)
 # Initialize the users back to initial state
 attrs = dict(last_retrieved=current.INITIAL_DATE,
              rating=0,

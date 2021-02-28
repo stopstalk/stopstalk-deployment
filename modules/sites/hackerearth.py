@@ -120,7 +120,7 @@ class Profile(object):
             else:
                 return problem_link + "editorial/"
         except Exception as e:
-            print "Exception in HackerEarth Editorial retrieval", problem_link, str(e)
+            print("Exception in HackerEarth Editorial retrieval", problem_link, str(e))
             return editorial_link
 
     # -------------------------------------------------------------------------
@@ -146,7 +146,7 @@ class Profile(object):
             author = BeautifulSoup(response.text,
                                    "lxml").find_all("a")[0]["href"].split("@")[1]
         except:
-            print "HackerEarth Author is none", problem_link, url
+            print("HackerEarth Author is none", problem_link, url)
             author = None
 
         return author if author is None else [author]
@@ -242,7 +242,7 @@ class Profile(object):
         headers = Profile.get_headers(response, url)
 
         submissions = []
-        for page_number in xrange(1, 1000):
+        for page_number in range(1, 1000):
             url = "https://www.hackerearth.com/AJAX/feed/newsfeed/submission/user/" + handle + "/?page=" + str(page_number)
 
             tmp = get_request(url,

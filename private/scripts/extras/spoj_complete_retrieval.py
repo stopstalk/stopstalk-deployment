@@ -35,7 +35,7 @@ for td in tds:
     except:
         pass
 
-print all_problem_names
+print(all_problem_names)
 
 
 #for problem_name in all_problem_names:

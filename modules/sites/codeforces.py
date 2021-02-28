@@ -262,7 +262,7 @@ class Profile(object):
         try:
             tbody = soup.find("table", class_="tablesorter").find("tbody")
         except AttributeError:
-            print "AttributeError for Codeforces handle: " + handle
+            print("AttributeError for Codeforces handle: " + handle)
             return SERVER_FAILURE
 
         contest_data = {}
@@ -345,13 +345,13 @@ class Profile(object):
             if curr <= last_retrieved:
                 return submissions
 
-            if row.has_key("contestId") == False:
+            if ("contestId" in row) == False:
                 try:
                     problem_link = "http://www.codeforces.com/problemsets/" + \
                                    row["problem"]["problemsetName"] + \
                                    "/problem/99999/" + str(row["problem"]["index"])
                 except Exception as e:
-                    print "Unable to create problem_link for", row
+                    print("Unable to create problem_link for", row)
                     continue
             else:
                 arg = "problem/"
@@ -400,7 +400,7 @@ class Profile(object):
 
             # View code link
             if problem_link.__contains__("gymProblem") or \
-               row.has_key("contestId") == False:
+               ("contestId" in row) == False:
                 view_link = ""
             else:
                 view_link = "http://www.codeforces.com/contest/" + \

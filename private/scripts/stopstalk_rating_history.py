@@ -70,7 +70,7 @@ def update_stopstalk_rating(user_id, user_submissions, custom):
     final_rating = utilities.get_stopstalk_user_stats(user_submissions)["rating_history"]
     final_rating = dict(final_rating)
     if final_rating == {}:
-        print user_id, custom, "No submissions"
+        print(user_id, custom, "No submissions")
         return
 
     atable = db.auth_user
@@ -79,7 +79,7 @@ def update_stopstalk_rating(user_id, user_submissions, custom):
     today = str(datetime.datetime.now().date())
     current_rating = sum(final_rating[today])
 
-    print user_id, custom, current_rating
+    print(user_id, custom, current_rating)
 
     update_params = dict(stopstalk_rating=int(current_rating))
     if custom:
@@ -98,7 +98,7 @@ def compute_group_ratings(last_id, custom):
     column_name = "custom_user_id" if custom else "user_id"
     start = 0
 
-    for i in xrange(last_id / BATCH_SIZE + 1):
+    for i in range(last_id / BATCH_SIZE + 1):
         res = get_sql_result(i * BATCH_SIZE,
                              (i + 1) * BATCH_SIZE,
                              custom)
@@ -140,4 +140,4 @@ if __name__ == "__main__":
         custom = (sys.argv[3] == "custom")
         compute_single_rating(user_id, custom)
     else:
-        print "Invalid command line arguments"
+        print("Invalid command line arguments")

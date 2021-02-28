@@ -236,7 +236,7 @@ def user_editorials():
             # This problem has an official editorial - don't count in leaderboard
             continue
 
-        if user_id_pid_map.has_key((row.user_editorials.user_id, row.user_editorials.problem_id)):
+        if (row.user_editorials.user_id, row.user_editorials.problem_id) in user_id_pid_map:
             # This is to handle multiple accepted editorials of same user on same problem
             continue
 
@@ -256,7 +256,7 @@ def user_editorials():
     for key in user_id_pid_map:
         value = user_id_pid_map[key]
         vote_count = 0 if value.votes.strip() == "" else len(value.votes.split(","))
-        if editorial_count_dict.has_key(value.user_id):
+        if value.user_id in editorial_count_dict:
             update_value = editorial_count_dict[value.user_id]
             update_value["count"] += 1
             update_value["votes"] += vote_count
@@ -838,7 +838,7 @@ def leaderboard():
     cftable = db.custom_friend
 
     global_leaderboard = False
-    if request.vars.has_key("global"):
+    if "global" in request.vars:
         if request.vars["global"] == "True":
             global_leaderboard = True
         else:
@@ -872,14 +872,14 @@ def leaderboard():
     # Do not display blacklisted users in the leaderboard
     aquery &= (atable.blacklisted == False)
 
-    if request.vars.has_key("q") and request.vars["q"]:
-        from urllib import unquote
+    if "q" in request.vars and request.vars["q"]:
+        from urllib.parse import unquote
         institute = unquote(request.vars["q"])
         specific_institute = True
         heading = "StopStalk Leaderboard - " + institute
         aquery &= (atable.institute == institute)
 
-    if request.vars.has_key("country") and request.vars["country"]:
+    if "country" in request.vars and request.vars["country"]:
         country = None
         if request.vars["country"] not in reverse_country_mapping:
             if request.vars["country"] in current.all_countries:
@@ -907,7 +907,7 @@ def leaderboard():
             users = json.loads(user_ratings)
             logged_in_row = None
             if auth.is_logged_in():
-                logged_in_row = filter(lambda x: x[1] == session.handle, users)
+                logged_in_row = [x for x in users if x[1] == session.handle]
                 logged_in_row = None if len(logged_in_row) == 0 else logged_in_row[0]
 
             resp = dict(users=users, logged_in_row=logged_in_row)
@@ -1036,7 +1036,7 @@ def filters():
 
     table = None
     global_submissions = False
-    if get_vars.has_key("global") and get_vars["global"] == "True":
+    if "global" in get_vars and get_vars["global"] == "True":
         global_submissions = True
 
     # If form is not submitted
@@ -1050,7 +1050,7 @@ def filters():
     # these fields should be passed in
     # the URL with empty value
     compulsory_keys = ["pname", "name", "end_date", "start_date"]
-    if set(compulsory_keys).issubset(get_vars.keys()) is False:
+    if set(compulsory_keys).issubset(list(get_vars.keys())) is False:
         session.flash = T("Invalid URL parameters")
         redirect(URL("default", "filters"))
 
@@ -1206,11 +1206,11 @@ def filters():
     def _get_values_list(param_name):
 
         values_list = []
-        if get_vars.has_key(param_name):
+        if param_name in get_vars:
             values_list = get_vars[param_name]
             if isinstance(values_list, str) and values_list != "":
                 values_list = [values_list]
-        elif get_vars.has_key(param_name + "[]"):
+        elif param_name + "[]" in get_vars:
             values_list = get_vars[param_name + "[]"]
             if isinstance(values_list, str):
                 values_list = [values_list]
@@ -1272,7 +1272,7 @@ def mark_friend():
 
     ftable = db.following
     try:
-        friend_id = long(request.args[0])
+        friend_id = int(request.args[0])
     except ValueError:
         raise HTTP(400, "Bad request")
         return T("Invalid user argument!")
@@ -1409,7 +1409,7 @@ def search():
         all_institutes = [x.name.strip("\"") for x in all_institutes]
         all_institutes.append("Other")
 
-        country_name_list = current.all_countries.keys()
+        country_name_list = list(current.all_countries.keys())
         country_name_list.sort()
 
         resp = dict(all_institutes=all_institutes,
@@ -1597,7 +1597,7 @@ def unfriend():
         return _invalid_url()
     else:
         try:
-            friend_id = long(request.args[0])
+            friend_id = int(request.args[0])
         except ValueError:
             return _invalid_url()
 
@@ -1705,7 +1705,7 @@ def faq():
             data={"collapsible": "expandable"})
 
     faqs = db(db.faq).select()
-    for i in xrange(len(faqs)):
+    for i in range(len(faqs)):
         li = LI(DIV(B(str(i + 1) + ". " + faqs[i].question),
                     _class="collapsible-header"),
                 DIV(MARKMIN(faqs[i].answer),

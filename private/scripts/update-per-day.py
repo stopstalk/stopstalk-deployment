@@ -51,7 +51,7 @@ users = db(atable).select()
 custom_users = db(cftable).select()
 
 for user in users:
-    if user_submissions.has_key(user.id):
+    if user.id in user_submissions:
         curr_per_day = user_submissions[user.id] * 1.0 / total_days
         change = "%0.5f" % (curr_per_day - user.per_day)
         user.update_record(per_day_change=change)
@@ -60,7 +60,7 @@ for custom_user in custom_users:
     cid = custom_user.id
     if custom_user.duplicate_cu:
         cid = custom_user.duplicate_cu
-    if custom_user_submissions.has_key(cid):
+    if cid in custom_user_submissions:
         curr_per_day = custom_user_submissions[cid] * 1.0 / total_days
         change = "%0.5f" % (curr_per_day - custom_user.per_day)
         custom_user.update_record(per_day_change=change)

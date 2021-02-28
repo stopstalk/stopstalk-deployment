@@ -29,7 +29,7 @@ solved_list = []
 accuracy_list = []
 
 last_id = db(atable).select(orderby=~atable.id).first().id
-for i in xrange(1, last_id):
+for i in range(1, last_id):
     solved, unsolved = utilities.get_solved_problems(i)
     solved = len(solved)
     unsolved = len(unsolved)
@@ -42,12 +42,12 @@ for i in xrange(1, last_id):
     attempted_list.append(unsolved)
     solved_list.append(solved)
     accuracy_list.append(accuracy)
-    print i, solved, unsolved, accuracy
+    print(i, solved, unsolved, accuracy)
 
-print "_______________________________"
-print attempted_list
-print "_______________________________"
-print solved_list
-print "_______________________________"
-print accuracy_list
-print "_______________________________"
+print("_______________________________")
+print(attempted_list)
+print("_______________________________")
+print(solved_list)
+print("_______________________________")
+print(accuracy_list)
+print("_______________________________")

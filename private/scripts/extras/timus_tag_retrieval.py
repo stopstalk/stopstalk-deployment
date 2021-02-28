@@ -23,15 +23,15 @@
 import bs4, requests
 from time import sleep
 tags = set([])
-for i in xrange(1900, 2111):
+for i in range(1900, 2111):
     url = "http://acm.timus.ru/problem.aspx?space=1&num=%d&locale=en" % i
     response = requests.get(url)
     soup = bs4.BeautifulSoup(response.text, "lxml")
     all_as = soup.find("div",
                        class_="problem_links").previous_sibling.find_all("a")[:-1]
-    print i, [x.text for x in all_as]
+    print(i, [x.text for x in all_as])
     for tmp in all_as:
         tags.add(tmp.text)
     sleep(1)
 
-print tags
+print(tags)

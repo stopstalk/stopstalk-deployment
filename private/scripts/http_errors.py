@@ -28,18 +28,18 @@ errors = db(hetable).select(orderby=hetable.status_code)
 if len(errors) == 0:
     sys.exit()
 
-print str(datetime.datetime.now()), "________________"
+print(str(datetime.datetime.now()), "________________")
 
 all_errors = {}
 for error in errors:
-    if all_errors.has_key(error.status_code):
+    if error.status_code in all_errors:
         all_errors[error.status_code].append((error.user_id, error.content))
     else:
         all_errors[error.status_code] = [(error.user_id, error.content)]
 
 for code in all_errors:
-    print code
+    print(code)
     for error in all_errors[code]:
-        print error[0], error[1]
+        print(error[0], error[1])
 
 hetable.truncate()

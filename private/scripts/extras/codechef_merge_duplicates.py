@@ -34,7 +34,7 @@ result = db.executesql("""
     HAVING COUNT(*) > 1;
 """)
 
-print "Evaluating", len(result), "duplicate records"
+print("Evaluating", len(result), "duplicate records")
 
 for row in result:
 
@@ -70,12 +70,12 @@ for row in result:
 
     if final_problem_id is not None:
         for duplicate_id in duplicates:
-            print problem_records[duplicate_id].link, "-->", final_problem_link
+            print(problem_records[duplicate_id].link, "-->", final_problem_link)
             utilities.merge_duplicate_problems(final_problem_id, duplicate_id)
     else:
-        print problem_ids, "no original found"
+        print(problem_ids, "no original found")
 
     time.sleep(1)
 
-    print "******************************"
+    print("******************************")
 

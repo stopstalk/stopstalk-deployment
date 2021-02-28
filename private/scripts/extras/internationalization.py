@@ -27,7 +27,7 @@ atable = db.auth_user
 start = int(sys.argv[1])
 end = int(sys.argv[2])
 
-for user_id in xrange(start, end + 1):
+for user_id in range(start, end + 1):
     row = db(atable.id == user_id).select(atable.first_name,
                                           atable.last_name,
                                           atable.email,
@@ -49,4 +49,4 @@ Cheers,
 Team StopStalk
                       """ % row.stopstalk_handle,
                       mail_type="feature_updates")
-    print "Mail sent to: %s" % (row.first_name + " " + row.last_name)
+    print("Mail sent to: %s" % (row.first_name + " " + row.last_name))

@@ -38,7 +38,7 @@ plinktoid = {}
 
 suggested_tags = db(sttable).select()
 for row in suggested_tags:
-    if new_tags.has_key(row.problem_id):
+    if row.problem_id in new_tags:
         new_tags[row.problem_id].add(tags[row.tag_id])
     else:
         new_tags[row.problem_id] = set([tags[row.tag_id]])
@@ -57,6 +57,6 @@ for row in pids:
 
 for plink in problem_links:
     try:
-        print new_tags[plinktoid[plink]]
+        print(new_tags[plinktoid[plink]])
     except KeyError:
-        print []
+        print([])

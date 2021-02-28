@@ -31,7 +31,7 @@ for record in db(query).iterselect():
     new_link = previous_link.replace("codechef.com/problems/", "codechef.com/PRACTICE/problems/")
     new_link = new_link.replace("http://www", "https://www")
     record.update_record(problem_link=new_link)
-    print previous_link, new_link
+    print(previous_link, new_link)
 
 query = (ptable.link.contains("codechef.com/") & \
          (ptable.link.contains("codechef.com/problems/") | \
@@ -41,4 +41,4 @@ for record in db(query).iterselect():
     new_link = previous_link.replace("codechef.com/problems/", "codechef.com/PRACTICE/problems/")
     new_link = new_link.replace("http://www", "https://www")
     record.update_record(link=new_link)
-    print previous_link, new_link
+    print(previous_link, new_link)

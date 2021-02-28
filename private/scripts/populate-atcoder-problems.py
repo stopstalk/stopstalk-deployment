@@ -32,11 +32,11 @@ response = get_request("https://kenkoooo.com/atcoder/resources/problems.json")
 problems = response.json()
 
 if len(problems) > row_count:
-    print str(datetime.datetime.now()), "Row counts is different db:", row_count, " api:", len(problems)
+    print(str(datetime.datetime.now()), "Row counts is different db:", row_count, " api:", len(problems))
     aptable.truncate()
     for row in problems:
         aptable.insert(contest_id=row["contest_id"],
                        problem_identifier=row["id"],
                        name=row["title"])
 else:
-    print str(datetime.datetime.now()), "Row count is same as in db", row_count
+    print(str(datetime.datetime.now()), "Row count is same as in db", row_count)

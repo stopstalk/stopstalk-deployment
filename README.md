@@ -17,13 +17,13 @@ apt-get install python-dev libxml2-dev libxslt1-dev zlib1g-dev
 Install the required packages by running:
 
 ```
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 Also, pip doesn't respect proxy while installing packages from the requirements file. So if you are using a proxy in your terminal you MAY use:
 
 ```
-pip install -r requirements.txt --proxy=<proxy address>
+pip3 install -r requirements.txt --proxy=<proxy address>
 ```
 
 2. To deploy the code, uglify-js and uglifycss needs to be installed
@@ -70,7 +70,7 @@ npm install uglifycss -g
 
    Note: Web2Py does not allow appname to contain hyphens.
 
-4. Install MySQL - [here](http://dev.mysql.com/downloads/)
+4. Install MySQL (v5.6) - [here](http://dev.mysql.com/downloads/)
    Make sure you remember the root password for mysql server.
 
 5. Create a database in MySQL
@@ -119,7 +119,7 @@ npm install uglifycss -g
 
    In case if you want to send emails - Install `postfix` for your respective OS and configure the above smtp server accordingly.
 
-8. Install Redis - [here](https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-redis-on-ubuntu-18-04)
+8. Install and start Redis - [here](https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-redis-on-ubuntu-18-04)
 
 9. Install InfluxDB (1.7) - [here](https://docs.influxdata.com/influxdb/v1.7/introduction/installation/)
 
@@ -127,7 +127,7 @@ npm install uglifycss -g
 
     ```
     $ cd web2py
-    $ python web2py.py -a yourPassword // Choose any password
+    $ python3 web2py.py -a yourPassword // Choose any password
     ```
 
 11. Open the browser and go to the URL -

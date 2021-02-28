@@ -42,12 +42,12 @@ def get_gym_problem_authors():
                            timeout=10,
                            headers={"User-Agent": COMMON_USER_AGENT})
     if response in REQUEST_FAILURES:
-        print "[get_gym_problem_authors]: Error while requesting API", response
+        print("[get_gym_problem_authors]: Error while requesting API", response)
         return
 
     response = response.json()
     if response["status"] != "OK":
-        print "[get_gym_problem_authors]: status not OK", response
+        print("[get_gym_problem_authors]: status not OK", response)
 
     for row in response["result"]:
         if row["id"] not in contest_to_authors["gym"] and \
@@ -70,7 +70,7 @@ def get_normal_problem_authors():
         response = get_request(url,
                                headers={"User-Agent": COMMON_USER_AGENT})
         if response in REQUEST_FAILURES:
-            print "[get_normal_problem_authors]: Failure for url", url, response
+            print("[get_normal_problem_authors]: Failure for url", url, response)
             break
 
         soup = bs4.BeautifulSoup(response.text, "lxml")
@@ -89,7 +89,7 @@ def get_normal_problem_authors():
 
             temp_data = tds[1].text.strip()
             if temp_data == "":
-                print "[get_normal_problem_authors]: No authors for", contest_id
+                print("[get_normal_problem_authors]: No authors for", contest_id)
                 continue
 
             authors = temp_data.split("\n")
@@ -136,11 +136,11 @@ def write_authors_to_file():
 
 if __name__ == "__main__":
     if codeforces.Profile.is_website_down():
-        print "Codeforces is down for now"
+        print("Codeforces is down for now")
         sys.exit(0)
 
     get_initial_authors()
     get_gym_problem_authors()
     get_normal_problem_authors()
     write_authors_to_file()
-    print contest_to_authors
+    print(contest_to_authors)

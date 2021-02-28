@@ -36,20 +36,20 @@ def is_problem(path):
     if path[0] != "i":
         return "someother"
     params = dict([tuple(x.split("=")) for x in path[10:].split("&")])
-    if params.has_key("problem"):
-        if problem_dict.has_key(int(params["problem"])):
+    if "problem" in params:
+        if int(params["problem"]) in problem_dict:
             problem_dict[int(params["problem"])].append((int(params["Itemid"]),
                                                          int(params["category"])))
         else:
             problem_dict[int(params["problem"])] = [(int(params["Itemid"]),
                                                      int(params["category"]))]
-    return params.has_key("problem")
+    return "problem" in params
 
 def recurse(tabs, path):
     ret = is_problem(path)
     if ret == "someother":
         return
-    print "\t" * tabs, path
+    print("\t" * tabs, path)
     if ret:
         return
     response = requests.get(judgeurl + path)
@@ -61,7 +61,7 @@ def recurse(tabs, path):
         recurse(tabs + 1, link["href"])
 
 recurse(0, "index.php?option=com_onlinejudge&Itemid=8")
-print "******************************"
+print("******************************")
 
 for key in problem_dict:
-    print "[" + str(key) + ", " + str(problem_dict[key]) + "]"
+    print("[" + str(key) + ", " + str(problem_dict[key]) + "]")
