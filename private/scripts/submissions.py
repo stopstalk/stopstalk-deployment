@@ -462,6 +462,8 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
                 submissions = site_method(last_retrieved, uva_problem_dict, is_daily_retrieval)
             elif site == "AtCoder":
                 submissions = site_method(last_retrieved, atcoder_problem_dict, is_daily_retrieval)
+            elif site == "CodeChef":
+                submissions, latest_retrieved_timestamp = site_method(last_retrieved, is_daily_retrieval)
             else:
                 submissions = site_method(last_retrieved, is_daily_retrieval)
             total_retrieval_time = time.time() - start_retrieval_time
@@ -498,9 +500,20 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
 
                 logger.log(site, submission_len)
                 list_of_submissions.append((site, submissions))
-                # Immediately update the last_retrieved of the record
-                # Note: Only the record object is updated & not reflected in DB
-                record.update({site_lr: datetime.datetime.now()})
+                if site == "CodeChef":
+                    record.update({site_lr: datetime.datetime(
+                                                latest_retrieved_timestamp.tm_year,
+                                                latest_retrieved_timestamp.tm_mon,
+                                                latest_retrieved_timestamp.tm_mday,
+                                                latest_retrieved_timestamp.tm_hour,
+                                                latest_retrieved_timestamp.tm_min,
+                                                latest_retrieved_timestamp.tm_sec
+                                            )
+                    })
+                else:
+                    # Immediately update the last_retrieved of the record
+                    # Note: Only the record object is updated & not reflected in DB
+                    record.update({site_lr: datetime.datetime.now()})
                 should_clear_cache = True
         else:
             # Update this time so that this user is not picked

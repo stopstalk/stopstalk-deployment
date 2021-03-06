@@ -54,6 +54,7 @@ class Profile(object):
         self.submissions = []
         self.access_token = None
         self.is_daily_retrieval = False
+        self.latest_retrieved_timestamp = None
         self.last_retrieved_reached = False
 
     # -------------------------------------------------------------------------
@@ -306,6 +307,9 @@ class Profile(object):
                     self.last_retrieved_reached = True
                     return submissions
 
+                if curr > self.latest_retrieved_timestamp:
+                    self.latest_retrieved_timestamp = curr
+
                 problem_link = self.__get_problem_link(submission["contestCode"],
                                                        submission["problemCode"])
                 problem_name = submission["problemCode"]
@@ -351,16 +355,18 @@ class Profile(object):
                             information about the submissions
         """
 
+        self.latest_retrieved_timestamp = last_retrieved
+
         if current.environment == "development":
             # Locally client credentials for CodeChef API wouldn't be valid and
             # there is no other fallback method which can be used for retrieval
-            return SERVER_FAILURE
+            return SERVER_FAILURE, self.latest_retrieved_timestamp
 
         self.is_daily_retrieval = is_daily_retrieval
         try:
             # If the handle is a URL return NOT_FOUND
             re.match("https?://.*\.com", self.handle).group()
-            return NOT_FOUND
+            return NOT_FOUND, self.latest_retrieved_timestamp
         except AttributeError:
             pass
 
@@ -372,13 +378,13 @@ class Profile(object):
         self.access_token = self.__get_access_token()
         if self.access_token is None:
             print "Access token found none"
-            return SERVER_FAILURE
+            return SERVER_FAILURE, self.latest_retrieved_timestamp
 
         # Test for invalid handles
         if  last_retrieved == str_init_time:
             response = self.__validate_handle()
             if response in REQUEST_FAILURES:
-                return response
+                return response, self.latest_retrieved_timestamp
 
         SUBMISSION_REQUEST_PARAMS["username"] = self.handle
         self.submissions = []
@@ -389,12 +395,12 @@ class Profile(object):
 
             result = self.__process_year_submissions(year, last_retrieved)
             if result in REQUEST_FAILURES:
-                return result
+                return result, self.latest_retrieved_timestamp
             else:
                 self.submissions.extend(result)
                 if self.last_retrieved_reached:
-                    return self.submissions
+                    return self.submissions, self.latest_retrieved_timestamp
 
-        return self.submissions
+        return self.submissions, self.latest_retrieved_timestamp
 
 # =============================================================================
