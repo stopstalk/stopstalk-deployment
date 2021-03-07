@@ -1,0 +1,4 @@
+# Function dependencies, for example:
+# package>=version
+requests==2.24.0
+beautifulsoup4==4.4.1
