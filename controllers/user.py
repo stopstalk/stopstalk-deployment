@@ -42,6 +42,22 @@ def login_token():
     return auth_jwt.jwt_token_manager()
 
 # ------------------------------------------------------------------------------
+@utilities.check_api_token
+def app_google_login_token():
+    """
+        @withparameter token issued from google return {token : ''} if valid credentials
+    """
+    gauth_token = request.vars.get("gauth_token")
+    if gauth_token is None:
+        raise HTTP(400, "Invalid API params")
+        return
+    jwt_token = utilities.get_jwt_gauth_app(gauth_token)
+    if jwt_token is None:
+        raise HTTP(401, "Invalid credentials")
+        return
+    return jwt_token
+
+# ------------------------------------------------------------------------------
 def fill_details():
     """
         Fill the details after google registration 
