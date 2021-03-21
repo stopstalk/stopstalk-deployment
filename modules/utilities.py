@@ -41,7 +41,8 @@ def is_apicall():
         Check whether the request has an API Token
         If it has an api_token then requset its an API Call
     """
-    return 'api_token' in current.request.vars
+    api_token = current.request.vars.get("api_token", None)
+    return api_token in current.api_tokens
 
 # -----------------------------------------------------------------------------
 def check_api_token(function):
