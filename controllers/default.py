@@ -273,9 +273,15 @@ def user_editorials():
 
     table_rows = sorted(table_rows, key=lambda x: (x[0], x[1]), reverse=True)
 
-    return dict(table_rows=table_rows[:10],
+    res = dict(table_rows=table_rows[:10],
                 recent_editorials_table=table,
                 pending_count=pending_count)
+    
+    # for api request
+    if utilities.is_apicall():
+        return response.json(res)
+
+    return res
 
 # ----------------------------------------------------------------------------
 def user_wise_editorials():
@@ -748,6 +754,8 @@ def contests():
     reminder_class = button_class + " orange set-reminder"
     left_tooltip_attrs = {"position": "left", "delay": "50"}
 
+    api_resp = []
+
     for contest in contest_list:
         if contest["site"] not in CONTESTS_SITE_MAPPING:
             continue
@@ -763,6 +771,8 @@ def contests():
         contest["end_time"] = end_time
 
         contest["name"] = contest["name"].encode("ascii", "ignore")
+
+        api_resp.append(contest)
 
         append = tr.append
 
@@ -810,6 +820,9 @@ def contests():
             append(TD(utilities.get_reminder_button(contest)))
         
         tbody.append(tr)
+
+    if utilities.is_apicall():
+        return response.json(dict(contests=api_resp))
 
     table.append(tbody)
     return dict(table=table, retrieved=True)
