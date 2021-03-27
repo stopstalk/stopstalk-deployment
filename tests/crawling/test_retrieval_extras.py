@@ -56,7 +56,7 @@ class RetrievalTest:
                 },
                 "HackerEarth": {
                     "plink": "https://www.hackerearth.com/practice/algorithms/dynamic-programming/2-dimensional/practice-problems/algorithm/candy-distribution/",
-                    "tags": [u'Dynamic Programming', u'Math', u'Number Theory']
+                    "tags": [u'Approved', u'Dynamic Programming', u'Math', u'Medium', u'Number Theory', u'Open']
                 },
                 "HackerRank": {
                     "plink": "https://www.hackerrank.com/challenges/print-the-elements-of-a-linked-list",
@@ -161,8 +161,8 @@ class RetrievalTest:
                     "problem_setters": ["djm03178", "nong"]
                 },
                 "HackerEarth": {
-                    "plink": "https://www.hackerearth.com/problem/algorithm/level-selections/",
-                    "problem_setters": ["akileshreddy40950"]
+                    "plink": "https://www.hackerearth.com/problem/approximate/lots-of-circles/",
+                    "problem_setters": ["lg52931"]
                 },
                 "HackerRank": {
                     "plink": "https://www.hackerrank.com/challenges/candles-2",
@@ -179,7 +179,7 @@ class RetrievalTest:
             },
             "without_problem_setters": {
                 "CodeForces": "http://www.codeforces.com/problemset/problem/1212/C",
-                "HackerEarth": "https://www.hackerearth.com/challenges/college/engineers-day-nit-silchar-challenge/algorithm/valentines-day/"
+                "HackerEarth": "https://www.hackerearth.com/problem/algorithm/level-selections/"
             }
         }
         for site in sites_with_problem_setters:

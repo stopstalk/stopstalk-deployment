@@ -75,81 +75,27 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_tags(soup):
-        """
-            @param soup(BeautifulSoup): Soup object of the main problem page html
-
-            @return (List): List of tags
-        """
-        all_tags = []
-        try:
-            tags = soup.find_all("div", class_="problem-tags")[0]
-        except IndexError:
-            return all_tags
-
-        lis = tags.find_all("span")
-        for li in lis:
-            if li.contents[0] != "No tags":
-                all_tags.append(li.text.strip(", "))
-
-        return all_tags
+    def get_tags(response):
+        tags = response["tags"].split(",")
+        if len(tags) == 1 and tags[0] == '':
+            tags = []
+        return tags
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_editorial_link(problem_link, soup, response):
-        """
-            @param problem_link(String): Problem link
-            @param soup(BeautifulSoup): Soup object of the main problem page html
-            @param response(Response): Response object of the main problem page
-
-            @return (String/None): Editorial link
-        """
-
-        editorial_link = None
-        try:
-            ajax_url = soup.find(id="editorial").div["ajax"][1:]
-            headers = Profile.get_headers(response,
-                                          problem_link + "description/")
-            response = get_request(current.SITES["HackerEarth"] + ajax_url,
-                                   headers=headers)
-            if response in REQUEST_FAILURES:
-                return editorial_link
-
-            if response.text.__contains__("This problem doesn\'t have an editorial yet"):
-                return None
-            else:
-                return problem_link + "editorial/"
-        except Exception as e:
-            print "Exception in HackerEarth Editorial retrieval", problem_link, str(e)
-            return editorial_link
+    def get_editorial_link(problem_link, response):
+        if response["editorial"] == "":
+            editorial_link = None
+        else:
+            editorial_link = problem_link + "editorial/"
+        return editorial_link
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_problem_setters(problem_link, should_update):
-        """
-            @param problem_link(String): Problem link
-            @param should_update(Boolean): If should call the API to get problem_setters
-
-            @return (List/None): Problem authors or None
-        """
-        if should_update is False:
-            return None
-
-        problem_setters = None
-        url = "https://www.hackerearth.com/pagelets/problem-author-tester/" + \
-              "/".join(problem_link.split("/")[-3:])
-        response = get_request(url)
-        if response in REQUEST_FAILURES:
-            return problem_setters
-
-        try:
-            author = BeautifulSoup(response.text,
-                                   "lxml").find_all("a")[0]["href"].split("@")[1]
-        except:
-            print "HackerEarth Author is none", problem_link, url
-            author = None
-
-        return author if author is None else [author]
+    def get_problem_setters(response):
+        author_url = response["author"]
+        problem_setters = None if author_url is None else [author_url["profile_url"][2:]]
+        return problem_setters
 
     # -------------------------------------------------------------------------
     @staticmethod
@@ -161,28 +107,21 @@ class Profile(object):
             @return (Dict): Details of the problem returned in a dictionary
         """
         problem_link = args["problem_link"]
+        api_link = "https://www.hackerearth.com/practice/api/problems/" + \
+                   "/".join(problem_link.split("/")[-3:-1]) + "/"
 
-        problem_setters = Profile.get_problem_setters(
-                            problem_link,
-                            "problem_setters" in args["update_things"]
-                          )
-
-        tags = []
-        editorial_link = None
-        response = get_request(problem_link)
+        response = get_request(api_link)
         if response in REQUEST_FAILURES:
-            tags = []
-            editorial_link = None
-        else:
-            soup = BeautifulSoup(response.text, "lxml")
-            tags = Profile.get_tags(soup)
-            editorial_link = Profile.get_editorial_link(problem_link,
-                                                        soup,
-                                                        response)
-
-        return dict(tags=tags,
+            return dict(tags=tags,
                     editorial_link=editorial_link,
                     problem_setters=problem_setters)
+
+        response = response.json()
+
+        return dict(tags=Profile.get_tags(response),
+                    editorial_link=Profile.get_editorial_link(problem_link,
+                                                              response),
+                    problem_setters=Profile.get_problem_setters(response))
 
     # -------------------------------------------------------------------------
     @staticmethod
