@@ -158,7 +158,7 @@ class RetrievalTest:
                 },
                 "CodeForces": {
                     "plink": "http://www.codeforces.com/problemset/problem/1200/B",
-                    "problem_setters": ["djm03178", "nong"]
+                    "problem_setters": ["djm03178", "no_ng"]
                 },
                 "HackerEarth": {
                     "plink": "https://www.hackerearth.com/problem/approximate/lots-of-circles/",
@@ -321,6 +321,8 @@ class RetrievalTest:
                 submissions = site_method(last_retrieved, uva_problem_dict, False)
             elif site == "AtCoder":
                 submissions = site_method(last_retrieved, atcoder_problem_dict, False)
+            elif site == "CodeChef":
+                submissions, _ = site_method(last_retrieved, False)
             else:
                 submissions = site_method(last_retrieved, False)
 
