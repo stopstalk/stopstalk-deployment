@@ -813,8 +813,10 @@ def get_solved_unsolved():
 # ------------------------------------------------------------------------------
 def get_stopstalk_user_stats():
     if request.extension != "json":
-        raise HTTP(400)
-        return
+        # for api request
+        if not utilities.is_apicall():
+            raise HTTP(400)
+            return
 
     user_id = request.vars.get("user_id", None)
     custom = request.vars.get("custom", None)
@@ -842,6 +844,11 @@ def get_stopstalk_user_stats():
     result = utilities.get_rating_information(user_id,
                                               custom,
                                               auth.is_logged_in())
+
+    # for api request
+    if utilities.is_apicall():
+        return response.json(result)
+
     return result
 
 # ------------------------------------------------------------------------------
@@ -973,6 +980,10 @@ def profile():
         cf_count = db(cftable.user_id == row.id).count()
 
     output["cf_count"] = cf_count
+
+    # for api request
+    if utilities.is_apicall():
+        return response.json(output)
 
     return output
 
