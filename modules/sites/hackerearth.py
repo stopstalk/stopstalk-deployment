@@ -75,20 +75,24 @@ class Profile(object):
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_tags(response):
-        tags = response["tags"].split(",")
+    def get_tags(meta_data):
+        if "tags" not in meta_data:
+            return []
+
+        tags = meta_data["tags"].split(",")
+
         if len(tags) == 1 and tags[0] == '':
-            tags = []
-        return tags
+            return []
+        else:
+            return tags
 
     # -------------------------------------------------------------------------
     @staticmethod
-    def get_editorial_link(problem_link, response):
-        if response["editorial"] == "":
-            editorial_link = None
+    def get_editorial_link(meta_data, problem_link):
+        if "editorial" in meta_data and meta_data["editorial"] != "":
+            return problem_link + "editorial/"
         else:
-            editorial_link = problem_link + "editorial/"
-        return editorial_link
+            return None
 
     # -------------------------------------------------------------------------
     @staticmethod
@@ -106,22 +110,49 @@ class Profile(object):
             @param args (Dict): Dict containing problem link
             @return (Dict): Details of the problem returned in a dictionary
         """
+        tags = []
+        editorial_link = None
+        problem_setters = None
         problem_link = args["problem_link"]
-        api_link = "https://www.hackerearth.com/practice/api/problems/" + \
-                   "/".join(problem_link.split("/")[-3:-1]) + "/"
 
-        response = get_request(api_link)
-        if response in REQUEST_FAILURES:
-            return dict(tags=tags,
+        if "tags" in args["update_things"] or \
+           "editorial_link" in args["update_things"]:
+            response = get_request(problem_link)
+            if response in REQUEST_FAILURES:
+                return dict(tags=tags,
+                            editorial_link=None,
+                            problem_setters=None)
+
+            import re, json
+            try:
+                meta_data_json = re.search("problemData: .*}",
+                                           response.text).group().replace("problemData: ", "")
+                meta_data = json.loads(meta_data_json)
+            except Exception as e:
+                print "Exception in re parsing", e
+                return dict(tags=tags,
+                            editorial_link=None,
+                            problem_setters=None)
+
+            tags = Profile.get_tags(meta_data)
+            editorial_link = Profile.get_editorial_link(meta_data, problem_link)
+
+        if "problem_setters" in args["update_things"]:
+            api_link = "https://www.hackerearth.com/practice/api/problems/" + \
+                       "/".join(problem_link.split("/")[-3:-1]) + "/"
+
+            response = get_request(api_link)
+            if response in REQUEST_FAILURES:
+                return dict(tags=tags,
+                            editorial_link=None,
+                            problem_setters=None)
+
+            response = response.json()
+            problem_setters = Profile.get_problem_setters(response)
+
+        return dict(tags=tags,
                     editorial_link=editorial_link,
                     problem_setters=problem_setters)
-
-        response = response.json()
-
-        return dict(tags=Profile.get_tags(response),
-                    editorial_link=Profile.get_editorial_link(problem_link,
-                                                              response),
-                    problem_setters=Profile.get_problem_setters(response))
 
     # -------------------------------------------------------------------------
     @staticmethod
