@@ -1023,13 +1023,6 @@ def add_to_refresh_now():
 
     row.update_record(refreshed_timestamp=datetime.datetime.now(),
                       graph_data_retrieved=False)
-    update_params = {}
-    for site in current.SITES:
-        update_params[site.lower() + "_delay"] = 1
-    if custom:
-        db(nrtable.custom_user_id == user_id).update(**update_params)
-    else:
-        db(nrtable.user_id == user_id).update(**update_params)
 
     return "Successfully submitted request"
 
