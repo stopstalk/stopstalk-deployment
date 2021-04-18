@@ -1456,7 +1456,7 @@ def get_profile_url(site, handle):
         row = uvadb(utable.username == handle).select().first()
         if row is None:
             import requests
-            response = requests.get("http://uhunt.felix-halim.net/api/uname2uid/" + handle)
+            response = requests.get("http://uhunt.felix-halim.net/api/uname2uid/" + handle, verify=False)
             if response.status_code == 200 and response.text != "0":
                 utable.insert(username=handle, uva_id=response.text.strip())
                 return "http://uhunt.felix-halim.net/id/" + response.text
