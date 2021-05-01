@@ -81,18 +81,19 @@ class Profile(object):
 
         tags = meta_data["tags"].split(",")
 
-        if len(tags) == 1 and tags[0] == '':
+        if len(tags) == 1 and tags[0].strip() == '':
             return []
         else:
-            return tags
+            return [x.strip() for x in tags]
 
     # -------------------------------------------------------------------------
     @staticmethod
     def get_editorial_link(meta_data, problem_link):
-        if "editorial" in meta_data and meta_data["editorial"] != "":
-            return problem_link + "editorial/"
-        else:
+        if "editorial" not in meta_data or meta_data["editorial"] == "" or \
+           meta_data["editorial"]["state"] == "do-not-exist":
             return None
+        else:
+            return problem_link + "editorial/"
 
     # -------------------------------------------------------------------------
     @staticmethod
