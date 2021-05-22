@@ -115,6 +115,7 @@
         addEventListener('#know-more-dashboard-page', 'Know more - Dashboard page', false);
 
         addEventListener('#problem-recommendations-cta', 'Find me problems - Problem recommendations', false);
+        addEventListener('#job-profile-cta', 'StopStalk Job profile CTA', false);
     };
 
     var addProblemPageButtonsToGA = function() {

@@ -798,7 +798,6 @@ class RecommendationsPageCard(BaseCard):
         if self.stale_recommendations:
             self.card_title = "New problems to solve!"
             card_content = TAG[""](SPAN("It has been more than a week since you last generated problem recommendations. Generate new ones and keep getting better by solving them."))
-            card_color = "#fdf3e6"
             self.ctas = [
                 dict(btn_url=URL("problems",
                                  "recommendations"),
@@ -814,7 +813,6 @@ class RecommendationsPageCard(BaseCard):
                                    B("'Find me problems'"),
                                    " ",
                                    SPAN("button on the top and keep increasing your level gradually!"))
-            card_color = "#f7f1fa"
             self.ctas = [
                 dict(btn_url=URL("problems",
                                  "recommendations"),
@@ -826,8 +824,7 @@ class RecommendationsPageCard(BaseCard):
                        card_title=self.card_title,
                        card_content=card_content,
                        cta_links=self.get_cta_html(),
-                       card_style="background-color: " + card_color,
-                       card_color_class="",
+                       card_color_class="white",
                        card_text_color_class="black-text"
                     ))
         return card_html
