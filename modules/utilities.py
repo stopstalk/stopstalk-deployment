@@ -1613,10 +1613,9 @@ def get_category_wise_problems(solved_problems, unsolved_problems,
 # ----------------------------------------------------------------------------
 def get_contest_graph_data(user_id, custom):
     import os, pickle
+    custom = (custom == "True")
 
     stopstalk_handle = get_stopstalk_handle(user_id, custom)
-
-    custom = (custom == "True")
     redis_cache_key = "get_graph_data_" + stopstalk_handle
 
     # Check if data is present in REDIS
