@@ -310,7 +310,6 @@ def add_custom_friend():
 
 # ------------------------------------------------------------------------------
 def get_graph_data():
-    import os, pickle
     user_id = request.get_vars.get("user_id", None)
     custom = request.get_vars.get("custom", None)
     empty_dict = dict(graphs=[])
@@ -320,38 +319,7 @@ def get_graph_data():
     if user_id is None or custom is None:
         return empty_dict
 
-    custom = (custom == "True")
-
-    stopstalk_handle = utilities.get_stopstalk_handle(user_id, custom)
-    redis_cache_key = "get_graph_data_" + stopstalk_handle
-
-    # Check if data is present in REDIS
-    data = current.REDIS_CLIENT.get(redis_cache_key)
-    if data:
-        return json.loads(data)
-
-    file_path = "./applications/%s/graph_data/%s" % (request.application,
-                                                     user_id)
-    if custom:
-        file_path += "_custom.pickle"
-    else:
-        file_path += ".pickle"
-    if not os.path.exists(file_path):
-        return empty_dict
-
-    graph_data = pickle.load(open(file_path, "rb"))
-    graphs = []
-    for site in current.SITES:
-        lower_site = site.lower()
-        if graph_data.has_key(lower_site + "_data"):
-            graphs.extend(graph_data[lower_site + "_data"])
-    graphs = filter(lambda x: x["data"] != {}, graphs)
-
-    data = dict(graphs=graphs)
-    current.REDIS_CLIENT.set(redis_cache_key,
-                             json.dumps(data, separators=JSON_DUMP_SEPARATORS),
-                             ex=1 * 60 * 60)
-    return data
+    return utilities.get_contest_graph_data(user_id, custom)
 
 # ------------------------------------------------------------------------------
 @auth.requires_login()
@@ -712,100 +680,14 @@ def get_solved_unsolved():
         else:
             user_solved_problems, user_unsolved_problems = set([]), set([])
 
+    category_wise_solved_problems, category_wise_unsolved_problems = \
+        utilities.get_category_wise_problems(solved_problems,
+                                             unsolved_problems,
+                                             user_solved_problems,
+                                             user_unsolved_problems)
 
-    solved_ids, unsolved_ids = [], []
-    ptable = db.problem
-    sttable = db.suggested_tags
-    ttable = db.tag
-    all_tags = db(ttable).select()
-    all_tags = dict([(tag.id, tag.value) for tag in all_tags])
-
-    query = ptable.id.belongs(solved_problems.union(unsolved_problems))
-    # id => [problem_link, problem_name, problem_class]
-    # problem_class =>
-    #    0 (Logged in user has solved the problem)
-    #    1 (Logged in user has attemted the problem)
-    #    2 (User not logged in or not attempted the problem)
-    problem_details = {}
-    pids = []
-    for problem in db(query).select(ptable.id, ptable.link, ptable.name):
-        pids.append(problem.id)
-
-        problem_status = 2
-        if problem.id in user_unsolved_problems:
-            # Checking for unsolved first because most of the problem links
-            # would be found here instead of a failed lookup in solved_problems
-            problem_status = 1
-        elif problem.id in user_solved_problems:
-            problem_status = 0
-
-        problem_details[problem.id] = [problem.link, problem.name, problem_status, problem.id]
-
-        if problem.id in solved_problems:
-            solved_ids.append(problem.id)
-        else:
-            unsolved_ids.append(problem.id)
-
-    problem_tags = {}
-    query = (sttable.problem_id.belongs(pids)) & \
-            (sttable.user_id == 1)
-    for prow in db(query).select(sttable.tag_id, sttable.problem_id):
-        if prow.problem_id not in problem_tags:
-            problem_tags[prow.problem_id] = set([])
-        problem_tags[prow.problem_id].add(prow.tag_id)
-
-    categories = {"Dynamic Programming": set([1]),
-                  "Greedy": set([28]),
-                  "Strings": set([20]),
-                  "Hashing": set([32]),
-                  "Bit Manipulation": set([21, 42]),
-                  "Trees": set([6, 9, 10, 11, 17, 31]),
-                  "Graphs": set([4, 5, 15, 22, 23, 24, 26]),
-                  "Algorithms": set([12, 14, 27, 29, 35, 36, 37, 38, 44, 51]),
-                  "Data Structures": set([2, 3, 7, 8, 33, 34, 49]),
-                  "Math": set([16, 30, 39, 40, 41, 43, 45, 50, 54]),
-                  "Implementation": set([13, 18, 19]),
-                  "Miscellaneous": set([46, 47, 48, 52])}
-    ordered_categories = ["Dynamic Programming",
-                          "Greedy",
-                          "Strings",
-                          "Hashing",
-                          "Bit Manipulation",
-                          "Trees",
-                          "Graphs",
-                          "Algorithms",
-                          "Data Structures",
-                          "Math",
-                          "Implementation",
-                          "Miscellaneous"]
-
-    displayed_problems = set([])
-    def _get_categorized_json(problem_ids):
-        result = dict([(category, []) for category in ordered_categories])
-        for pid in problem_ids:
-            this_category = None
-            if pid not in problem_tags:
-                this_category = "Miscellaneous"
-            else:
-                ptags = problem_tags[pid]
-                category_found = False
-                for category in ordered_categories:
-                    if len(categories[category].intersection(ptags)) > 0:
-                        this_category = category
-                        category_found = True
-                        break
-                if not category_found:
-                    this_category = "Miscellaneous"
-            pdetails = problem_details[pid]
-            plink, pname, _, _ = pdetails
-            psite = utilities.urltosite(plink)
-            if (pname, psite) not in displayed_problems:
-                displayed_problems.add((pname, psite))
-                result[this_category].append(problem_details[pid])
-        return result
-
-    return dict(solved_problems=_get_categorized_json(solved_ids),
-                unsolved_problems=_get_categorized_json(unsolved_ids),
+    return dict(solved_problems=category_wise_solved_problems,
+                unsolved_problems=category_wise_unsolved_problems,
                 solved_html_widget=str(utilities.problem_widget("", "", "solved-problem", "Solved problem", None)),
                 unsolved_html_widget=str(utilities.problem_widget("", "", "unsolved-problem", "Unsolved problem", None)),
                 unattempted_html_widget=str(utilities.problem_widget("", "", "unattempted-problem", "Unattempted problem", None)))
