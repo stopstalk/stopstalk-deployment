@@ -48,8 +48,8 @@ def get_menu_tuple(icon_class, tooltip, button_label, url, new_item=False):
 if session.user_id:
     response.menu += [get_menu_tuple("fa-lightbulb-o",
                                      T("Recommendations"),
-                                     "Nav Custom Friend",
-                                     URL("user", "custom_friend")),
+                                     "Nav Recommendations",
+                                     URL("problems", "recommendations")),
                       get_menu_tuple("fa-user-secret",
                                      T("Custom Friend"),
                                      "Nav Custom Friend",
