@@ -350,10 +350,10 @@ pushover_message = ""
 for method_name in [
                     "test_tag_retrieval",
                     "test_editorial_retrieval",
-                    # "test_invalid_handle",
-                    # "test_download_submission",
+                    "test_invalid_handle",
+                    "test_download_submission",
                     "test_rating_graph",
-                    # "test_submissions",
+                    "test_submissions",
                     "test_problem_setters_retrieval"
                     ]:
     res = test_retrieval(rt, method_name)
