@@ -245,7 +245,7 @@ class Profile(object):
                                                time_stamp.tm_hour,
                                                time_stamp.tm_min,
                                                time_stamp.tm_sec) + \
-                                               datetime.timedelta(minutes=690)
+                                               datetime.timedelta(minutes=330)
                 curr = time.strptime(str(time_stamp), "%Y-%m-%d %H:%M:%S")
 
                 if curr <= last_retrieved:
