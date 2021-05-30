@@ -946,7 +946,20 @@ def get_stopstalk_user_stats(stopstalk_handle, custom, user_submissions):
         problems_authored_count = len(get_problems_authored_by(stopstalk_handle))
 
     if len(user_submissions) == 0:
-        return {"problems_authored_count": problems_authored_count}
+        return dict(
+                    rating_history=[],
+                    curr_accepted_streak=0,
+                    max_accepted_streak=0,
+                    curr_day_streak=0,
+                    max_day_streak=0,
+                    solved_counts={},
+                    status_percentages={},
+                    site_accuracies={},
+                    solved_problems_count=0,
+                    total_problems_count=0,
+                    calendar_data={},
+                    problems_authored_count=0
+                )
 
     INITIAL_DATE = datetime.datetime.strptime(current.INITIAL_DATE,
                                               "%Y-%m-%d %H:%M:%S").date()
