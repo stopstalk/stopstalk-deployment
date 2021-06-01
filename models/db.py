@@ -371,6 +371,11 @@ def sanitize_fields(form):
             elif field == "hackerrank" and form.vars[field_handle].__contains__("hr_r=1"):
                 form.errors[field_handle] = T("Please enter only the handle")
 
+            if form.vars[field_handle].__contains__("http:") or \
+                 form.vars[field_handle].__contains__("https:") or \
+                 form.vars[field_handle].__contains__("www."):
+                form.errors[field_handle] = T("Please enter only the handle")
+
     # 2.
     _remove_at_symbol("HackerEarth")
 
