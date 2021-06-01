@@ -188,6 +188,7 @@ class Profile(object):
         long_contest_data = {}
         cookoff_contest_data = {}
         ltime_contest_data = {}
+        starters_contest_data = {}
 
         for contest in ratings:
             this_obj = None
@@ -197,6 +198,8 @@ class Profile(object):
             elif contest["code"].__contains__("LTIME"):
                 # Lunchtime contest
                 this_obj = ltime_contest_data
+            elif contest["code"].__contains__("START"):
+                this_obj = starters_contest_data
             else:
                 # Long contest
                 this_obj = long_contest_data
@@ -212,7 +215,9 @@ class Profile(object):
                 {"title": "CodeChef Cook-off",
                  "data": cookoff_contest_data},
                 {"title": "CodeChef Lunchtime",
-                 "data": ltime_contest_data}]
+                 "data": ltime_contest_data},
+                {"title": "CodeChef Starters",
+                 "data": starters_contest_data}]
 
     # --------------------------------------------------------------------------
     def __validate_handle(self):
