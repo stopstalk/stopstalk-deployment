@@ -786,16 +786,9 @@ def get_problems_table(all_problems,
 
         td = TD(_class="left-align-problem")
         all_tags = eval(problem["tags"])
-        for tag in all_tags:
-            td.append(DIV(A(tag,
-                            _href=URL("problems",
-                                      "tag",
-                                      vars={"q": tag.encode("utf8"), "page": 1}),
-                            _class=generate_page_specific_class(page_prefix, "tags-chip") + " tags-chip",
-                            _style="color: white;",
-                            _target="_blank"),
-                          _class="chip"))
-            td.append(" ")
+        td.append(SPAN(A(I(_class="fa fa-tag"), " Show Tags",
+                         _class="show-recommended-problem-tags chip orange darken-1",
+                         data={"tags": json.dumps(all_tags)})))
         tr.append(td)
         tbody.append(tr)
 

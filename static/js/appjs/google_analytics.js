@@ -243,6 +243,7 @@
         addEventListener('.recommendation-tag-problem-link', 'Recommendations page tags link', false);
         addEventListener('.recommendation-tags-chip', 'Recommendations page tags chip', false);
         addEventListener('.recommendation-editorial-link', 'Recommendations page editorial link', false);
+        addEventListener('.show-recommended-problem-tags', 'Recommendations page - show tags button', false);
     };
 
     var addProblemsAuthoredPageToGA = function() {

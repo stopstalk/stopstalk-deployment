@@ -3,6 +3,30 @@
     $(document).ready(function() {
         $('#recommendation-refresh-modal').modal();
 
+        $('.show-recommended-problem-tags').click(function() {
+            var problemTags = $(this).data('tags');
+            var $tagsSpan = $('<span>');
+            if (problemTags.length === 1 && problemTags[0] === '-') {
+                $tagsSpan.append('No Tags Available');
+            } else {
+                var $sampleTag = $('<div>', {
+                        'class': 'chip'
+                    }),
+                    $thisTag,
+                    $thisAnchor;
+                $sampleTag.append('<a class="recommendation-tags-chip" href="" style="color: white;" target="_blank"></a>');
+                $.each(problemTags, function(index, tag) {
+                    $thisTag = $sampleTag.clone();
+                    $thisAnchor = $($thisTag.children()[0]);
+                    $thisAnchor.html(tag);
+                    $thisAnchor.attr('href', '/problems/tag/' + '?page=1&q=' + encodeURIComponent(tag));
+                    $tagsSpan.append($thisTag);
+                    $tagsSpan.append(" ");
+                });
+            }
+            $(this).parent().hide().html($tagsSpan).fadeIn("slow");
+        });
+
         $('#confirm-refresh-recommendations').click(function() {
             var $this = $(this);
             $.ajax({
