@@ -455,6 +455,9 @@ def create_next_retrieval_record(record, custom=False):
     else:
         db.next_retrieval.insert(user_id=record.id)
 
+    keyname = utilities.get_codechef_last_retrieved_key(record.id, custom)
+    current.REDIS_CLIENT.set(keyname, current.INITIAL_DATE)
+
 def append_user_to_refreshed_users(record):
     """
         Add the user in refreshed list to retrieve submissions asap
@@ -510,7 +513,6 @@ current.register_callback = register_callback
 current.notify_institute_users = notify_institute_users
 current.create_next_retrieval_record = create_next_retrieval_record
 current.append_user_to_refreshed_users = append_user_to_refreshed_users
-current.create_next_retrieval_record = create_next_retrieval_record
 
 #########################################################################
 ## Define your tables below (or better in another model file) for example

@@ -99,7 +99,11 @@ def check_api_user(function):
 def get_gauth_key(auth_token):
     return "g_token_" + auth_token
 
+# -----------------------------------------------------------------------------
+def get_codechef_last_retrieved_key(record_id, custom):
+    return "codechef:last_retrieved:%d:%s" % (record_id, str(custom))
 
+# -----------------------------------------------------------------------------
 def get_reminder_button(contest):
     return A(I(_class="fa fa-calendar-plus-o"),
              _class="btn-floating btn-small accent-4 tooltipped orange set-reminder",

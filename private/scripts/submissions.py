@@ -26,6 +26,7 @@ import gevent
 import sys
 import datetime
 import utilities
+import json
 import sites
 from gevent import monkey
 from stopstalk_constants import *
@@ -347,7 +348,6 @@ def update_stopstalk_rating(user_id, stopstalk_handle, custom):
         # Global leaderboard cache not present
         return current_rating
 
-    import json
     current_value = json.loads(current_value)
     reorder_leaderboard = False
     for row in current_value:
@@ -375,6 +375,38 @@ def update_stopstalk_rating(user_id, stopstalk_handle, custom):
     return current_rating
 
 # ------------------------------------------------------------------------------
+def get_next_retrieval_record(user_column_name, record_id):
+    nrtable_record = db(nrtable[user_column_name] == record_id).select().first()
+    if nrtable_record is None:
+        print "Record not found", user_column_name, record_id
+        nrtable.insert(**{user_column_name: record.id})
+        nrtable_record = db(nrtable[user_column_name] == record_id).select().first()
+
+    return nrtable_record
+
+# ------------------------------------------------------------------------------
+def should_skip_retrieval(site, site_delay, last_retrieved, record, is_daily_retrieval):
+    # Rocked it totally ! ;)
+    if is_daily_retrieval and \
+       datetime.timedelta(days=site_delay / 3 + 1) + \
+       last_retrieved.date() > todays_date:
+        return True
+    return False
+
+# ------------------------------------------------------------------------------
+def populate_codechef_last_retrieved(record_id, custom):
+    keyname = get_codechef_last_retrieved_key(record_id, custom)
+    redis_val = current.REDIS_CLIENT.get(keyname)
+    if redis_val is None:
+        user_column_name = "custom_user_id" if custom else "user_id"
+        query = (stable[user_column_name] == record_id)
+        submission_record = db(query).select(stable.time_stamp,
+                                             orderby=~stable.time_stamp,
+                                             limitby=(0, 1)).first()
+        if submission_record is not None:
+            current.REDIS_CLIENT.set(keyname, str(submission_record.time_stamp))
+
+# ------------------------------------------------------------------------------
 def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codechef_retrieval=False):
     """
         Retrieve submissions that are not already in the database
@@ -398,16 +430,12 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
     should_clear_cache = False
     nrtable = db.next_retrieval
     user_column_name = "custom_user_id" if custom else "user_id"
-    nrtable_record = db(nrtable[user_column_name] == record.id).select().first()
     skipped_retrieval = set([])
 
     is_daily_retrieval = (retrieval_type == "daily_retrieve")
     logger = Logger(record.stopstalk_handle, custom)
 
-    if nrtable_record is None:
-        print "Record not found", user_column_name, record.id
-        nrtable.insert(**{user_column_name: record.id})
-        nrtable_record = db(nrtable[user_column_name] == record.id).select().first()
+    nrtable_record = get_next_retrieval_record(user_column_name, record.id)
 
     for site in all_sites:
         Site = getattr(sites, site.lower())
@@ -427,7 +455,18 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
         site_delay = lower_site + "_delay"
         last_retrieved = record[site_lr]
 
-        # Rocked it totally ! ;)
+        if should_skip_retrieval(site, nrtable_record[site_delay], last_retrieved, record, is_daily_retrieval):
+            utilities.push_influx_data("retrieval_stats",
+                                       dict(kind="skipped",
+                                            **common_influx_params))
+            logger.log(site, "skipped")
+            metric_handlers[lower_site]["skipped_retrievals"].increment_count("total", 1)
+            skipped_retrieval.add(site)
+            continue
+
+        if site == "CodeChef":
+            populate_codechef_last_retrieved(record.id, custom)
+
         if is_daily_retrieval and \
            datetime.timedelta(days=nrtable_record[site_delay] / 3 + 1) + \
            last_retrieved.date() > todays_date:
@@ -501,15 +540,16 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
                 logger.log(site, submission_len)
                 list_of_submissions.append((site, submissions))
                 if site == "CodeChef":
-                    record.update({site_lr: datetime.datetime(
-                                                latest_retrieved_timestamp.tm_year,
-                                                latest_retrieved_timestamp.tm_mon,
-                                                latest_retrieved_timestamp.tm_mday,
-                                                latest_retrieved_timestamp.tm_hour,
-                                                latest_retrieved_timestamp.tm_min,
-                                                latest_retrieved_timestamp.tm_sec
-                                            )
-                    })
+                    last_retrieved_timestamp = datetime.datetime(
+                                                    latest_retrieved_timestamp.tm_year,
+                                                    latest_retrieved_timestamp.tm_mon,
+                                                    latest_retrieved_timestamp.tm_mday,
+                                                    latest_retrieved_timestamp.tm_hour,
+                                                    latest_retrieved_timestamp.tm_min,
+                                                    latest_retrieved_timestamp.tm_sec
+                                               )
+                    current.REDIS_CLIENT.set(get_codechef_last_retrieved_key(record.id, custom), str(last_retrieved_timestamp))
+                    record.update({site_lr: last_retrieved_timestamp})
                 else:
                     # Immediately update the last_retrieved of the record
                     # Note: Only the record object is updated & not reflected in DB

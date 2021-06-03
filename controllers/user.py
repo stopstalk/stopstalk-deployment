@@ -376,6 +376,9 @@ def update_details():
                 nrtable_record = nrtable(nid)
             for site in updated_sites:
                 site_lrs[site.lower() + "_lr"] = current.INITIAL_DATE
+                if site == "CodeChef":
+                    keyname = utilities.get_codechef_last_retrieved_key(record.id, False)
+                    current.REDIS_CLIENT.set(keyname, current.INITIAL_DATE)
                 nrtable_record.update({site.lower() + "_delay": 0})
 
             nrtable_record.update_record()
@@ -504,6 +507,9 @@ def update_friend():
                     nrtable_record = nrtable(nid)
                 for site in reset_sites:
                     form.vars[site.lower() + "_lr"] = current.INITIAL_DATE
+                    if site == "CodeChef":
+                        keyname = utilities.get_codechef_last_retrieved_key(record.id, True)
+                        current.REDIS_CLIENT.set(keyname, current.INITIAL_DATE)
                     nrtable_record.update({site.lower() + "_delay": 0})
 
                 nrtable_record.update_record()
