@@ -395,7 +395,7 @@ def should_skip_retrieval(site, site_delay, last_retrieved, record, is_daily_ret
 
 # ------------------------------------------------------------------------------
 def populate_codechef_last_retrieved(record_id, custom):
-    keyname = get_codechef_last_retrieved_key(record_id, custom)
+    keyname = utilities.get_codechef_last_retrieved_key(record_id, custom)
     redis_val = current.REDIS_CLIENT.get(keyname)
     if redis_val is None:
         user_column_name = "custom_user_id" if custom else "user_id"
@@ -548,7 +548,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
                                                     latest_retrieved_timestamp.tm_min,
                                                     latest_retrieved_timestamp.tm_sec
                                                )
-                    current.REDIS_CLIENT.set(get_codechef_last_retrieved_key(record.id, custom), str(last_retrieved_timestamp))
+                    current.REDIS_CLIENT.set(utilities.get_codechef_last_retrieved_key(record.id, custom), str(last_retrieved_timestamp))
                     record.update({site_lr: last_retrieved_timestamp})
                 else:
                     # Immediately update the last_retrieved of the record
