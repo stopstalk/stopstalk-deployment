@@ -275,8 +275,8 @@ def validate_email(email):
     if email.strip() == "":
         return False
 
-    if email.__contains__("@iiita.ac.in"):
-	return True
+    if email.__contains__(".ac.in"):
+        return True
 
     import requests
 
