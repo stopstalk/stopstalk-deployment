@@ -394,7 +394,7 @@ def should_skip_retrieval(site, site_delay, last_retrieved, record, is_daily_ret
     return False
 
 # ------------------------------------------------------------------------------
-def populate_codechef_last_retrieved(record_id, custom):
+def populate_and_get_codechef_lr(record_id, custom):
     keyname = utilities.get_codechef_last_retrieved_key(record_id, custom)
     redis_val = current.REDIS_CLIENT.get(keyname)
     if redis_val is None:
@@ -405,6 +405,12 @@ def populate_codechef_last_retrieved(record_id, custom):
                                              limitby=(0, 1)).first()
         if submission_record is not None:
             current.REDIS_CLIENT.set(keyname, str(submission_record.time_stamp))
+            redis_val = str(submission_record.time_stamp)
+        else:
+            current.REDIS_CLIENT.set(keyname, current.INITIAL_DATE)
+            redis_val = current.INITIAL_DATE
+
+    return time.strptime(redis_val, TIME_CONVERSION)
 
 # ------------------------------------------------------------------------------
 def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codechef_retrieval=False):
@@ -464,19 +470,8 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
             skipped_retrieval.add(site)
             continue
 
-        if site == "CodeChef":
-            populate_codechef_last_retrieved(record.id, custom)
-
-        if is_daily_retrieval and \
-           datetime.timedelta(days=nrtable_record[site_delay] / 3 + 1) + \
-           last_retrieved.date() > todays_date:
-            utilities.push_influx_data("retrieval_stats",
-                                       dict(kind="skipped",
-                                            **common_influx_params))
-            logger.log(site, "skipped")
-            metric_handlers[lower_site]["skipped_retrievals"].increment_count("total", 1)
-            skipped_retrieval.add(site)
-            continue
+        if site == "CodeChef" and site_handle:
+            codechef_last_retrieved = populate_and_get_codechef_lr(record.id, custom)
 
         last_retrieved = time.strptime(str(last_retrieved), TIME_CONVERSION)
 
@@ -502,7 +497,7 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
             elif site == "AtCoder":
                 submissions = site_method(last_retrieved, atcoder_problem_dict, is_daily_retrieval)
             elif site == "CodeChef":
-                submissions, latest_retrieved_timestamp = site_method(last_retrieved, is_daily_retrieval)
+                submissions, latest_retrieved_timestamp = site_method(codechef_last_retrieved, is_daily_retrieval)
             else:
                 submissions = site_method(last_retrieved, is_daily_retrieval)
             total_retrieval_time = time.time() - start_retrieval_time
@@ -539,7 +534,8 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
 
                 logger.log(site, submission_len)
                 list_of_submissions.append((site, submissions))
-                if site == "CodeChef":
+
+                if site == "CodeChef" and submission_len != 0:
                     last_retrieved_timestamp = datetime.datetime(
                                                     latest_retrieved_timestamp.tm_year,
                                                     latest_retrieved_timestamp.tm_mon,
@@ -549,11 +545,10 @@ def retrieve_submissions(record, custom, all_sites=current.SITES.keys(), codeche
                                                     latest_retrieved_timestamp.tm_sec
                                                )
                     current.REDIS_CLIENT.set(utilities.get_codechef_last_retrieved_key(record.id, custom), str(last_retrieved_timestamp))
-                    record.update({site_lr: last_retrieved_timestamp})
-                else:
-                    # Immediately update the last_retrieved of the record
-                    # Note: Only the record object is updated & not reflected in DB
-                    record.update({site_lr: datetime.datetime.now()})
+
+                # Immediately update the last_retrieved of the record
+                # Note: Only the record object is updated & not reflected in DB
+                record.update({site_lr: datetime.datetime.now()})
                 should_clear_cache = True
         else:
             # Update this time so that this user is not picked
