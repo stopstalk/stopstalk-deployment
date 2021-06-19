@@ -596,8 +596,8 @@
                 StopStalk.userStats.rating_history = data['rating_history'];
                 StopStalk.userStats.calendar_data = data['calendar_data'];
                 StopStalk.userStats.status_percentages = data['status_percentages'];
-                google.load('visualization', '1.1', {'packages': ['corechart', 'calendar', 'bar'],
-                                                     'callback': drawCharts});
+                google.charts.load('49', {'packages':['corechart', 'calendar', 'bar'],
+                                               'callback': drawCharts});
             });
         } else {
             $('#user-details').css('margin-left', '32%');
