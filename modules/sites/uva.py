@@ -58,7 +58,7 @@ class Profile(object):
     def is_invalid_handle(handle):
         url = "https://uhunt.onlinejudge.org/api/uname2uid/" + handle
         response = get_request(url)
-        if response in (SERVER_FAILURE, OTHER_FAILURE) or response.text.strip() == "0":
+        if response in REQUEST_FAILURES or response.text.strip() == "0":
             return True
         return False
 
@@ -85,7 +85,7 @@ class Profile(object):
             url = "https://uhunt.onlinejudge.org/api/uname2uid/" + handle
             response = get_request(url, is_daily_retrieval=is_daily_retrieval)
 
-            if response in (SERVER_FAILURE, OTHER_FAILURE):
+            if response in REQUEST_FAILURES:
                 return response
             if response.text.strip() == "0":
                 return NOT_FOUND
