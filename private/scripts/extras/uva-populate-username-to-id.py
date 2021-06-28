@@ -43,7 +43,7 @@ all_uva_handles = all_uva_handles.union(set([x.uva_handle for x in handles]))
 import requests
 
 for handle in (all_uva_handles - current_handles):
-    response = get_request("http://uhunt.felix-halim.net/api/uname2uid/" + handle)
+    response = get_request("https://uhunt.onlinejudge.org/api/uname2uid/" + handle)
     if response.status_code == 200 and response.text.strip() != "0":
         print handle, response.text, "added"
         u2idtable.insert(username=handle,

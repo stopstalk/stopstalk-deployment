@@ -42,7 +42,8 @@ class Profile(object):
     @staticmethod
     def is_valid_url(url):
         return url.__contains__("uva.onlinejudge.org") or \
-               url.__contains__("uhunt.felix-halim.net")
+               url.__contains__("uhunt.felix-halim.net") or \
+               url.__contains__("uhunt.onlinejudge.org")
 
     # -------------------------------------------------------------------------
     @staticmethod
@@ -55,7 +56,7 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def is_invalid_handle(handle):
-        url = "http://uhunt.felix-halim.net/api/uname2uid/" + handle
+        url = "https://uhunt.onlinejudge.org/api/uname2uid/" + handle
         response = get_request(url)
         if response in (SERVER_FAILURE, OTHER_FAILURE) or response.text.strip() == "0":
             return True
@@ -81,7 +82,7 @@ class Profile(object):
         if row:
             uva_id = str(row.uva_id)
         else:
-            url = "http://uhunt.felix-halim.net/api/uname2uid/" + handle
+            url = "https://uhunt.onlinejudge.org/api/uname2uid/" + handle
             response = get_request(url, is_daily_retrieval=is_daily_retrieval)
 
             if response in (SERVER_FAILURE, OTHER_FAILURE):
@@ -90,7 +91,7 @@ class Profile(object):
                 return NOT_FOUND
             uva_id = response.text
 
-        url = "http://uhunt.felix-halim.net/api/subs-user/" + uva_id
+        url = "https://uhunt.onlinejudge.org/api/subs-user/" + uva_id
         response = get_request(url, is_daily_retrieval=is_daily_retrieval)
         if response in REQUEST_FAILURES:
             return response

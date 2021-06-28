@@ -68,7 +68,7 @@ def check_api_userauth(function):
     """
     @current.auth_jwt.allows_jwt()
     @check_api_token
-    @current.auth.requires_login()  
+    @current.auth.requires_login()
     def verifier(*args, **kwargs):
         if current.session.user_id is None:
             current.session.user_id = current.auth.user_id
@@ -303,7 +303,7 @@ def get_user_record_cache_key(user_id):
 def get_duration_string(seconds):
     years = seconds / (365 * 24 * 3600)
     days = seconds / (24 * 3600)
-    seconds = seconds % (24 * 3600) 
+    seconds = seconds % (24 * 3600)
     hours = seconds / 3600
     seconds %= 3600
     minutes = seconds / 60
@@ -1466,14 +1466,14 @@ def get_profile_url(site, handle):
         row = uvadb(utable.username == handle).select().first()
         if row is None:
             import requests
-            response = requests.get("http://uhunt.felix-halim.net/api/uname2uid/" + handle, verify=False)
+            response = requests.get("https://uhunt.onlinejudge.org/api/uname2uid/" + handle, verify=False)
             if response.status_code == 200 and response.text != "0":
                 utable.insert(username=handle, uva_id=response.text.strip())
-                return "http://uhunt.felix-halim.net/id/" + response.text
+                return "https://uhunt.onlinejudge.org/id/" + response.text
             else:
                 return "NA"
         else:
-            return "http://uhunt.felix-halim.net/id/" + row.uva_id
+            return "https://uhunt.onlinejudge.org/id/" + row.uva_id
 
     else:
         return "%s%s%s" % (current.SITES[site], url_mappings[site], handle)
