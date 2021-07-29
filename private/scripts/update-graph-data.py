@@ -31,16 +31,25 @@
 #   * new_user - Retrieve contest data for all the users whose graph_data_retrieved is not True
 # python web2py.py -S stopstalk -M -R applications/stopstalk/private/scripts/update-graph-data.py -A codechef,codeforces,hackerrank,hackerearth batch 5 100
 
-import requests, re, os, sys, json, gevent, pickle
-import sites as all_site_profiles
+import json
+import os
+import pickle
+import re
+import sys
 from getpass import getuser
-import utilities
 from pwd import getpwnam
+
+import gevent
+import requests
+import sites as all_site_profiles
+import utilities
 from gevent import monkey
+
 gevent.monkey.patch_all(thread=False)
 
-from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
+
+from bs4 import BeautifulSoup
 
 atable = db.auth_user
 cftable = db.custom_friend
@@ -214,6 +223,7 @@ if __name__ == "__main__":
 
     for user_object in user_objects:
         user_object.update_graph_data(sites)
+        db.commit()
 
     if getuser() == "root":
         dir_stats = os.stat(DIR_PATH)
