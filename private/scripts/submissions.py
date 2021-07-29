@@ -20,14 +20,15 @@
     THE SOFTWARE.
 """
 
+import datetime
+import json
+import sys
 import time
 import traceback
+
 import gevent
-import sys
-import datetime
-import utilities
-import json
 import sites
+import utilities
 from gevent import monkey
 from stopstalk_constants import *
 
@@ -379,7 +380,7 @@ def get_next_retrieval_record(user_column_name, record_id):
     nrtable_record = db(nrtable[user_column_name] == record_id).select().first()
     if nrtable_record is None:
         print "Record not found", user_column_name, record_id
-        nrtable.insert(**{user_column_name: record.id})
+        nrtable.insert(**{user_column_name: record_id})
         nrtable_record = db(nrtable[user_column_name] == record_id).select().first()
 
     return nrtable_record
