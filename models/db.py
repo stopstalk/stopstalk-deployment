@@ -25,11 +25,13 @@
 ## be redirected to HTTPS, uncomment the line below:
 # request.requires_https()
 
+import json as json_for_views
+import re
+
 ## app configuration made easy. Look inside private/appconfig.ini
 from gluon.contrib.appconfig import AppConfig
 from gluon.tools import Mail
 
-import json as json_for_views
 ## once in production, remove reload=True to gain full speed
 myconf = AppConfig(reload=True)
 
@@ -77,9 +79,10 @@ response.form_label_separator = myconf.take('forms.separator')
 ## (more options discussed in gluon/tools.py)
 #########################################################################
 
-from gluon.tools import Auth, Service, PluginManager, AuthJWT
 import datetime
+
 import utilities
+from gluon.tools import Auth, AuthJWT, PluginManager, Service
 from stopstalk_constants import *
 
 auth = Auth(db)
@@ -204,8 +207,8 @@ bulkmail.settings.server = current.bulk_smtp_server
 bulkmail.settings.sender = "Team StopStalk <" + current.bulk_sender_mail + ">"
 bulkmail.settings.login = current.bulk_sender_user + ":" + current.bulk_sender_password
 
-from redis import Redis
 from influxdb import InfluxDBClient
+from redis import Redis
 
 # REDIS CLIENT
 current.REDIS_CLIENT = Redis(host=current.redis_server, port=current.redis_port, db=0)
@@ -428,15 +431,27 @@ def notify_institute_users(record):
         @param record (Row): Record having the user details
     """
 
+    new_user_has_atleast_one_handle = any([record[site.lower() + "_handle"] for site in current.SITES])
+    if not new_user_has_atleast_one_handle:
+        return
+
     atable = db.auth_user
     iutable = db.institute_user
     query = (atable.institute == record.institute) & \
             (atable.email != record.email) & \
+            (atable.country == record.country) & \
             (atable.institute != "Other") & \
             (atable.blacklisted == False) & \
             (atable.registration_key == "")
 
+    atleast_one_handle_query = False
+    for site in current.SITES:
+        atleast_one_handle_query |= (atable[site.lower() + "_handle"] != "")
+
+    query &= atleast_one_handle_query
+
     rows = db(query).select(atable.id)
+
     if len(rows):
         for row in rows:
             iutable.insert(send_to_id=row.id,
