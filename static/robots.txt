@@ -14,6 +14,7 @@ Crawl-delay: 20
 Disallow: /static/scripts/
 Disallow: /static/images/gifs/
 Disallow: /static/svg/
+Disallow: /support_us
 Disallow: /xmlrpc.php
 Disallow: /appadmin
 Disallow: /static/js/*.js

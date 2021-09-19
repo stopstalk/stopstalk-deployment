@@ -20,12 +20,14 @@
     THE SOFTWARE.
 """
 
-import time
 import datetime
+import json
+import time
+
 import parsedatetime as pdt
 import requests
 import utilities
-import json
+
 
 # ------------------------------------------------------------------------------
 def status_check():
@@ -85,8 +87,9 @@ def handle_error():
     def _get_failure_message(ticket):
 
         from os import path
-        from gluon.admin import apath
         from pickle import load
+
+        from gluon.admin import apath
 
         failure_message = str(session.user_id) + " " if auth.is_logged_in() else ""
         ticket_file_path = "applications/stopstalk/errors/" + \
@@ -157,6 +160,10 @@ def get_card_html():
                          request.vars["class_name"])(*init_arguments)
 
     return card_class.get_html() if card_class.should_show() else ""
+
+# ----------------------------------------------------------------------------
+def support_us():
+    return dict()
 
 # ----------------------------------------------------------------------------
 @auth.requires_login()
@@ -276,7 +283,7 @@ def user_editorials():
     res = dict(table_rows=table_rows[:10],
                 recent_editorials_table=table,
                 pending_count=pending_count)
-    
+
     # for api request
     if utilities.is_apicall():
         return response.json(res)
@@ -349,7 +356,7 @@ def todo():
     tltable = db.todo_list
 
     res = db(tltable.user_id == session.user_id).select(tltable.problem_link)
-        
+
     table = TABLE(_class="bordered centered")
     table.append(THEAD(TR(TH(T("Problem")),
                           TH(T("Site")),
@@ -372,7 +379,7 @@ def todo():
         for row in rows:
             row['platform'] = utilities.urltosite(row.link)
         return response.json(dict(todos=rows))
-    
+
     def _get_ids(ids):
         ids = ids.split(",")
         return [] if ids[0] == "" else ids
@@ -818,7 +825,7 @@ def contests():
                                   **left_tooltip_attrs),
                         _target="_blank")))
             append(TD(utilities.get_reminder_button(contest)))
-        
+
         tbody.append(tr)
 
     if utilities.is_apicall():
@@ -1694,7 +1701,7 @@ def submissions():
     # Retrieve only some number of submissions from the offset
     rows = db(query).select(orderby=~db.submission.time_stamp,
                             limitby=(offset, offset + PER_PAGE))
-    
+
     if utilities.is_apicall():
         for row in rows:
             row["problem_details"] = utilities.get_problem_details(row["problem_id"])

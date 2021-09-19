@@ -20,14 +20,16 @@
     THE SOFTWARE.
 """
 
-import json
-import utilities
 import datetime
+import json
+
+from gluon import (BR, BUTTON, DIV, FORM, H5, HR, IMG, INPUT, OPTION, SELECT,
+                   SPAN, TABLE, TAG, TBODY, TD, TEXTAREA, TH, THEAD, TR, URL,
+                   A, B, I, P, current)
+
+import utilities
 from stopstalk_constants import *
 
-from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, B, \
-                  TBODY, TR, TH, TD, A, SPAN, INPUT, I, P, FORM, \
-                  TEXTAREA, SELECT, OPTION, URL, BUTTON, TAG, BR
 
 # ==============================================================================
 class BaseCard:
@@ -102,6 +104,43 @@ class BaseCard:
                     (self_obj.sunset_card_date - datetime.datetime.now()).days > 0) and \
                    func(*args)
         return wrapper
+
+# ==============================================================================
+class SupportUsCard(BaseCard):
+    # --------------------------------------------------------------------------
+    def __init__(self, user_id):
+        self.user_id = user_id
+        self.card_title = "Support StopStalk!"
+        self.stats = None
+        self.ctas = [
+            dict(btn_url=URL("default", "support_us"),
+                 btn_text="Show",
+                 btn_class="support-us-card-show")
+        ]
+        BaseCard.__init__(self, user_id)
+
+    # --------------------------------------------------------------------------
+    def get_html(self):
+        card_content = TAG[""](
+                        P("Love StopStalk and interested in things to buy online?"),
+                        P("Click to know more!")
+        )
+
+        card_html = BaseCard.get_html(self, **dict(
+                       card_title=self.card_title,
+                       card_content=card_content,
+                       cta_links=self.get_cta_html(),
+                       card_color_class="purple lighten-5",
+                       card_text_color_class="black-text"
+                    ))
+        return card_html
+
+    def should_show(self):
+        return True
+
+    # --------------------------------------------------------------------------
+    def get_data(self):
+        return None
 
 # ==============================================================================
 class StreakCard(BaseCard):

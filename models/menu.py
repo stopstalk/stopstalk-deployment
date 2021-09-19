@@ -92,13 +92,15 @@ response.menu += [get_menu_tuple("fa-users",
                                  "Nav Filters",
                                  URL("default", "filters")),
                   get_menu_tuple("fa-heart",
-                                 T("Testimonials"),
-                                 "Nav Testimonials",
-                                 URL("testimonials", "index")),
+                                 T("Support us"),
+                                 "Nav Support us",
+                                 URL("default", "support_us"),
+                                 True),
                   get_menu_tuple("fa-bullhorn",
                                  T("Feature Updates"),
                                  "Nav Feature Updates",
-                                 URL("default", "updates"))]
+                                 URL("default", "updates"))
+                  ]
 
 if "auth" in locals(): auth.wikimenu()
 

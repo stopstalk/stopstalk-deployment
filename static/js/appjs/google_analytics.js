@@ -93,6 +93,7 @@
         addEventListener('#problem-difficulty-title a', 'Problem page from Problem difficulty modal', false);
         addEventListener('#onboarding-button', 'Onboarding Button', false);
         addEventListener('#footer-media-kit', 'Footer Media Kit', false);
+        addEventListener('#footer-testimonials', 'Nav Testimonials - in footer now', false);
         addEventListener('#footer-privacy-policy', 'Footer Privacy Policy', false);
         addEventListener('#footer-faqs', 'Footer FAQs', false);
         addEventListener('#footer-contact-us', 'Footer Contact Us', false);
@@ -232,6 +233,8 @@
         addEventListener('.atcoder-handle-card-update-now', 'Cards - Atcoder handle update now', false);
         addEventListener('.recommendations-card-find-me-problems', 'Cards - Recommendations page find me problems', false);
         addEventListener('.recommendations-card-generate-recommendations', 'Cards - Recommendations page generate new recommendations', false);
+        addEventListener('.support-us-card-show', 'Cards - Support Stopstalk show items', false);
+
     };
 
     var addProblemRecommendationsPageToGA = function() {

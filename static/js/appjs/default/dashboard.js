@@ -91,6 +91,12 @@
         "init_arguments": [loggedInUserId]
       },
       {
+        "card_id": "support_us_card",
+        "class_name": "SupportUsCard",
+        "init_arguments": [loggedInUserId],
+        "local_cache": true
+      },
+      {
         "card_id": "linked_accounts_card",
         "class_name": "LinkedAccountsCard",
         "init_arguments": [loggedInUserId]
@@ -134,7 +140,7 @@
     }
 
     cardArguments.forEach(function(cardParams, iter) {
-      var promise = new Promise(function(resolve, reject) {
+      new Promise(function(resolve, reject) {
         var cardCacheValue = cardParams["local_cache"] ? LocalStorageHelper.getCardContent(cardParams["card_id"]) : LocalStorageHelper.defaultNullValue;
         if (!cardParams["local_cache"] || cardCacheValue === LocalStorageHelper.defaultNullValue) {
           $.ajax({

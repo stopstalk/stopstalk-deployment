@@ -21,8 +21,10 @@
     THE SOFTWARE.
 """
 
-import sys, redis
 import datetime
+import sys
+
+import redis
 
 
 def convert_to_min(filename):
@@ -100,7 +102,9 @@ all_image_files = ["images/favicon.ico",
                    "images/todo_onboarding.gif",
                    "images/write-editorials.gif",
                    "images/btn_google_signin.png",
-                   "images/btn_google_signup.png"]
+                   "images/btn_google_signup.png",
+                   "images/amazon_prime.jpg",
+                   "images/amazon_audible.jpg"]
 
 REDIS_CLIENT = redis.Redis(host='localhost', port=6379, db=0)
 
