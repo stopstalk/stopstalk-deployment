@@ -769,10 +769,13 @@ def contests():
 
         tr = TR()
 
-        start_time = datetime.datetime.strptime(contest["start_time"], "%Y-%m-%dT%H:%M:%S.000Z")
-        end_time = datetime.datetime.strptime(contest["end_time"], "%Y-%m-%dT%H:%M:%S.000Z")
-        start_time += datetime.timedelta(minutes=330)
-        end_time += datetime.timedelta(minutes=330)
+        try:
+            start_time = datetime.datetime.strptime(contest["start_time"], "%Y-%m-%dT%H:%M:%S.000Z")
+            end_time = datetime.datetime.strptime(contest["end_time"], "%Y-%m-%dT%H:%M:%S.000Z")
+            start_time += datetime.timedelta(minutes=330)
+            end_time += datetime.timedelta(minutes=330)
+        except Exception as e:
+            print "Unable to parse contest time", contest
 
         contest["start_time"] = start_time
         contest["end_time"] = end_time
