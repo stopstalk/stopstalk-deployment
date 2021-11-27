@@ -20,20 +20,23 @@
     THE SOFTWARE.
 """
 
-import re
 import datetime
-import time
 import json
-from boto3 import client
+import re
+import time
 from socket import gethostname
-from requests.exceptions import ConnectionError
-from health_metrics import MetricHandler
-from gluon import current, IMG, DIV, TABLE, THEAD, HR, H5, \
-                  TBODY, TR, TH, TD, A, SPAN, INPUT, I, \
-                  TEXTAREA, SELECT, OPTION, URL, BUTTON, TAG
+
+from boto3 import client
+from gluon import (BUTTON, DIV, H5, HR, IMG, INPUT, OPTION, SELECT, SPAN,
+                   TABLE, TAG, TBODY, TD, TEXTAREA, TH, THEAD, TR, URL, A, I,
+                   current)
 from gluon.storage import Storage
-from stopstalk_constants import *
+from requests.exceptions import ConnectionError
+
+from health_metrics import MetricHandler
 from influxdb_wrapper import get_series_helper
+from stopstalk_constants import *
+
 
 # -----------------------------------------------------------------------------
 def is_apicall():
@@ -399,8 +402,8 @@ def get_contests():
     today = datetime.datetime.today()
     today = datetime.datetime.strptime(str(today)[:-7],
                                        "%Y-%m-%d %H:%M:%S")
-    from urllib3 import disable_warnings
     import requests
+    from urllib3 import disable_warnings
     disable_warnings()
 
     response = requests.get("https://kontests.net/api/v1/all",
@@ -415,7 +418,7 @@ def get_contests():
                                  ex=ONE_HOUR)
         return contest_list
     else:
-        return None
+        return []
 
 # ------------------------------------------------------------------------------
 def merge_duplicate_problems(original_id, duplicate_id):
@@ -1622,7 +1625,8 @@ def get_category_wise_problems(solved_problems, unsolved_problems,
 
 # ----------------------------------------------------------------------------
 def get_contest_graph_data(user_id, custom):
-    import os, pickle
+    import os
+    import pickle
     custom = (custom == "True")
 
     stopstalk_handle = get_stopstalk_handle(user_id, custom)

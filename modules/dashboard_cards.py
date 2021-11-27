@@ -339,7 +339,7 @@ class UpcomingContestCard(BaseCard):
     # --------------------------------------------------------------------------
     @BaseCard.enabled_check
     def should_show(self):
-        return True
+        return False
 
 # ==============================================================================
 class RecentSubmissionsCard(BaseCard):
