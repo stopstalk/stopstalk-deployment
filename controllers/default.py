@@ -772,10 +772,15 @@ def contests():
         try:
             start_time = datetime.datetime.strptime(contest["start_time"], "%Y-%m-%dT%H:%M:%S.000Z")
             end_time = datetime.datetime.strptime(contest["end_time"], "%Y-%m-%dT%H:%M:%S.000Z")
-            start_time += datetime.timedelta(minutes=330)
-            end_time += datetime.timedelta(minutes=330)
+
         except Exception as e:
+            # This is added temporarily because the API returns a different format for Codechef
             print "Unable to parse contest time", contest
+            start_time = datetime.datetime.strptime(contest["start_time"], "%Y-%m-%d %H:%M:%S %Z")
+            end_time = datetime.datetime.strptime(contest["end_time"], "%Y-%m-%d %H:%M:%S %Z")
+
+        start_time += datetime.timedelta(minutes=330)
+        end_time += datetime.timedelta(minutes=330)
 
         contest["start_time"] = start_time
         contest["end_time"] = end_time

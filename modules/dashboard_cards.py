@@ -280,11 +280,14 @@ class UpcomingContestCard(BaseCard):
             try:
                 start_time = datetime.datetime.strptime(contest["start_time"], "%Y-%m-%dT%H:%M:%S.000Z")
                 end_time = datetime.datetime.strptime(contest["end_time"], "%Y-%m-%dT%H:%M:%S.000Z")
-                start_time += datetime.timedelta(minutes=330)
-                end_time += datetime.timedelta(minutes=330)
+
             except Exception as e:
                 print "Unable to parse datetime", contest
-                continue
+                start_time = datetime.datetime.strptime(contest["start_time"], "%Y-%m-%d %H:%M:%S %Z")
+                end_time = datetime.datetime.strptime(contest["end_time"], "%Y-%m-%d %H:%M:%S %Z")
+
+            start_time += datetime.timedelta(minutes=330)
+            end_time += datetime.timedelta(minutes=330)
 
             contest["start_time"] = start_time
             contest["end_time"] = end_time
@@ -339,7 +342,7 @@ class UpcomingContestCard(BaseCard):
     # --------------------------------------------------------------------------
     @BaseCard.enabled_check
     def should_show(self):
-        return False
+        return True
 
 # ==============================================================================
 class RecentSubmissionsCard(BaseCard):
