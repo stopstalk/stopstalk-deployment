@@ -94,6 +94,8 @@ class Profile(object):
         soup = BeautifulSoup(response.text, "lxml")
         all_as = soup.find_all("a")
         for link in all_as:
+            if len(link.contents) == 0:
+                continue
             url = link.contents[0]
             if url.__contains__("Tutorial"):
                 # Some problems have complete url -_-
