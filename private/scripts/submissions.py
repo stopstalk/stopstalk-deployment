@@ -400,7 +400,7 @@ def populate_and_get_codechef_lr(record_id, custom):
     redis_val = current.REDIS_CLIENT.get(keyname)
     if redis_val is None:
         user_column_name = "custom_user_id" if custom else "user_id"
-        query = (stable[user_column_name] == record_id)
+        query = (stable[user_column_name] == record_id) & (stable.site == "CodeChef")
         submission_record = db(query).select(stable.time_stamp,
                                              orderby=~stable.time_stamp,
                                              limitby=(0, 1)).first()
