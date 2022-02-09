@@ -185,6 +185,8 @@ def recheck_handle_details():
     response += "User added to next refresh queue\n"
 
     utilities.clear_profile_page_cache(user_record.stopstalk_handle)
+    if site == "CodeChef":
+        utilities.get_codechef_last_retrieved_key(user_record.id, False)
     response += "Profile page cache deleted\n"
     return response
 
