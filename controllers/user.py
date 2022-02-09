@@ -186,7 +186,7 @@ def recheck_handle_details():
 
     utilities.clear_profile_page_cache(user_record.stopstalk_handle)
     if site == "CodeChef":
-        utilities.get_codechef_last_retrieved_key(user_record.id, False)
+        current.REDIS_CLIENT.delete(utilities.get_codechef_last_retrieved_key(user_record.id, False))
     response += "Profile page cache deleted\n"
     return response
 
