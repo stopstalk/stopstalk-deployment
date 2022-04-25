@@ -46,7 +46,7 @@ class RetrievalTest:
             "with_tags": {
                 "CodeChef": {
                     "plink": "https://www.codechef.com/PRACTICE/problems/FNCS",
-                    "tags": [u'data-structure', u'devuy11', u'fenwick-tree', u'medium-hard', u'nov14', u'segment-tree', u'sqrt-decomp']
+                    "tags": [u'Segment Trees', u'Fenwick Trees', u'Square Root Decomposition', u'Queries', u'Advanced Data Structures', u'Advanced Tree Structures', u'Advanced Algorithms', u'Algorithms']
                 },
                 "CodeForces": {
                     "plink": "http://www.codeforces.com/problemset/problem/323/A",
