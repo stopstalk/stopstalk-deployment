@@ -86,8 +86,8 @@ class Profile(object):
             @return (List): List of tags
         """
         all_tags = []
-        all_tags.extend(utilities.get_key_from_dict(response, "user_tags", None))
-        all_tags.extend(utilities.get_key_from_dict(response, "computed_tags", None))
+        all_tags.extend(utilities.get_key_from_dict(response, "user_tags", []))
+        all_tags.extend(utilities.get_key_from_dict(response, "computed_tags", []))
 
         return all_tags
 
