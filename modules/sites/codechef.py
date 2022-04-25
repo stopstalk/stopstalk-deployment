@@ -21,7 +21,9 @@
 """
 
 from urllib import urlencode
+
 from stopstalk_constants import *
+
 from .init import *
 
 PER_PAGE_LIMIT = 20
@@ -84,12 +86,8 @@ class Profile(object):
             @return (List): List of tags
         """
         all_tags = []
-        tags = utilities.get_key_from_dict(response, "tags", None)
-
-        if tags is not None:
-            all_as = BeautifulSoup(str(tags), "lxml").find_all("a")
-            for i in all_as:
-                all_tags.append(i.contents[0].strip())
+        all_tags.extend(utilities.get_key_from_dict(response, "user_tags", None))
+        all_tags.extend(utilities.get_key_from_dict(response, "computed_tags", None))
 
         return all_tags
 
