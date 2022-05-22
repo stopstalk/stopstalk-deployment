@@ -234,7 +234,7 @@ class Profile(object):
             return -1
 
         try:
-            return BeautifulSoup(response.text, "lxml").find("pre").text
+            return BeautifulSoup(response.text, "lxml").find(id="program-source-text").text
         except:
             return -1
 
