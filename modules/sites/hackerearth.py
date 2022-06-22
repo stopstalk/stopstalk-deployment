@@ -181,7 +181,7 @@ class Profile(object):
 
         hackerearth_data = {}
         for contest in contest_data:
-            time_stamp = str(datetime.datetime.strptime(contest["event_start"], "%d %b %Y, %I:%M %p"))
+            time_stamp = str(datetime.datetime.strptime(contest["event_start"], "%d %b %Y, %I:%M %p") + datetime.timedelta(minutes=330))
             url = "https://www.hackerearth.com" + contest["event_url"]
             hackerearth_data[time_stamp] = {"name": contest["event_title"],
                                             "rating": contest["rating"],
