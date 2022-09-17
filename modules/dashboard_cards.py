@@ -136,7 +136,7 @@ class SupportUsCard(BaseCard):
         return card_html
 
     def should_show(self):
-        return True
+        return False
 
     # --------------------------------------------------------------------------
     def get_data(self):
