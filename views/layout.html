@@ -59,6 +59,7 @@
         var getNextProblemURL = "{{=URL('problems', 'get_next_problem_to_suggest', extension='json')}}";
         var problemDifficultyModalOpen = false;
         var showProblemDifficultyOnboarding = "False";
+        var showReczeeTalenthubModal = "False";
         var loggedInUserId = parseInt("{{=session.user_id if auth.is_logged_in() else 100000000}}");
         var lastUserId = parseInt("{{=last_record.id if last_record else 0}}");
         var thresholdUserId = lastUserId - 200; // Assuming less than 200 signups per day
@@ -323,6 +324,8 @@
             {{pass}}
 
             showProblemDifficultyOnboarding = "{{=(not (record_data.get('problem_difficulty', None) == True))}}";
+
+            showReczeeTalenthubModal = "{{=(not (record_data.get('talenthub', None) == True))}}";
         </script>
     {{pass}}
     <div class="fixed-action-btn click-to-toggle vertical" style="bottom: 137px; right: 24px;">
@@ -351,6 +354,16 @@
     </div>
     <div class="fixed-action-btn">
         <a class="btn-floating btn-small orange {{=pulse_class['onboarding_button']}}" style="bottom: 26px; right: 10px;" target="_blank" href="{{=URL('default', 'get_started')}}" id="onboarding-button"><i class="fa fa-question-circle"></i></a>
+    </div>
+    <div id="talenthub-launch-modal" style="width: 50%" class="modal center">
+        <div class="modal-content">
+            <h5 style="margin-bottom: 15px;" id="talenthub-launch-modal-header">Are you looking for jobs/internships?</h5>
+            <div>Verify your skills and become a top applicant at the best companies.</div>
+            <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <a href="https://app.reczee.com/talenthub/register?utm_source=website&utm_campaign=stopstalk_announcement&utm_medium=referral" target="_blank" class="waves-effect blue darken-3 white-text btn-flat" style="margin: 16px;">Create TalentHub profile</a>
+                <img src="{{=get_static_url('images/resume-verified.svg')}}" style="width: 420px;"/>
+            </div>
+        </div>
     </div>
     <!-- The javascript =============================== -->
     <script src="{{=URL('static', 'materialize/js/materialize.min.js')}}"></script>

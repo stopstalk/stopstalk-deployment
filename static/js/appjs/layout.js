@@ -240,6 +240,23 @@ var initTooltips = function() {
 
         $('select').material_select();
 
+        $('#talenthub-launch-modal').modal({
+            dismissible: true,
+            opacity: 0.8,
+            complete: function() {
+                showReczeeTalenthubModal = "False";
+                $.ajax({
+                    url: markReadURL,
+                    data: {key: "talenthub"}
+                });
+            }
+        });
+
+
+        if (showReczeeTalenthubModal === "True") {
+            $('#talenthub-launch-modal').modal('open');
+        }
+
         $('#problem-difficulty-modal').modal({
             dismissible: true,
             complete: function() {
@@ -258,7 +275,7 @@ var initTooltips = function() {
 
         initTooltips();
 
-        if(loggedInUserId < thresholdUserId)  openProblemDifficultyModal();
+        // if(loggedInUserId < thresholdUserId)  openProblemDifficultyModal();
 
         initProblemDifficultySubmitHandler();
 

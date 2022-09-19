@@ -39,6 +39,7 @@ def convert_to_min(filename):
 all_image_files = ["images/favicon.ico",
                    "images/favicon.png",
                    "images/StopStalk.png",
+                   "images/resume-verified.svg",
                    "images/svg/users.svg",
                    "images/gifs/friends.gif",
                    "images/svg/inbox.svg",
