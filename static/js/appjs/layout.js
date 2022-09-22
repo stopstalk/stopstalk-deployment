@@ -253,7 +253,7 @@ var initTooltips = function() {
         });
 
 
-        if (showReczeeTalenthubModal === "True") {
+        if (loggedInUserId < thresholdUserId && showReczeeTalenthubModal === "True") {
             $('#talenthub-launch-modal').modal('open');
         }
 
