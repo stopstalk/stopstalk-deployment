@@ -60,6 +60,7 @@
         var problemDifficultyModalOpen = false;
         var showProblemDifficultyOnboarding = "False";
         var showReczeeCertificateModal = "False";
+        var isIndiaCountry = "{{='True' if auth.is_logged_in() and db.auth_user(session.user_id).country == 'India' else 'False'}}";
         var loggedInUserId = parseInt("{{=session.user_id if auth.is_logged_in() else 100000000}}");
         var lastUserId = parseInt("{{=last_record.id if last_record else 0}}");
         var thresholdUserId = lastUserId - 200; // Assuming less than 200 signups per day

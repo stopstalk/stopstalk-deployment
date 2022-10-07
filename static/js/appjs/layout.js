@@ -253,7 +253,7 @@ var initTooltips = function() {
         });
 
 
-        if (loggedInUserId < thresholdUserId && showReczeeCertificateModal === "True") {
+        if (loggedInUserId < thresholdUserId && isIndiaCountry === 'True' && showReczeeCertificateModal === "True") {
             $('#talenthub-launch-modal').modal('open');
         }
 
