@@ -244,16 +244,16 @@ var initTooltips = function() {
             dismissible: true,
             opacity: 0.8,
             complete: function() {
-                showReczeeTalenthubModal = "False";
+                showReczeeCertificateModal = "False";
                 $.ajax({
                     url: markReadURL,
-                    data: {key: "talenthub"}
+                    data: {key: "dsalgo_cert"}
                 });
             }
         });
 
 
-        if (loggedInUserId < thresholdUserId && showReczeeTalenthubModal === "True") {
+        if (loggedInUserId < thresholdUserId && showReczeeCertificateModal === "True") {
             $('#talenthub-launch-modal').modal('open');
         }
 
