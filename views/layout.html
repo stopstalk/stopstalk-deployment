@@ -59,7 +59,8 @@
         var getNextProblemURL = "{{=URL('problems', 'get_next_problem_to_suggest', extension='json')}}";
         var problemDifficultyModalOpen = false;
         var showProblemDifficultyOnboarding = "False";
-        var showReczeeTalenthubModal = "False";
+        var showReczeeCertificateModal = "False";
+        var isIndiaCountry = "{{='True' if auth.is_logged_in() and db.auth_user(session.user_id).country == 'India' else 'False'}}";
         var loggedInUserId = parseInt("{{=session.user_id if auth.is_logged_in() else 100000000}}");
         var lastUserId = parseInt("{{=last_record.id if last_record else 0}}");
         var thresholdUserId = lastUserId - 200; // Assuming less than 200 signups per day
@@ -325,7 +326,7 @@
 
             showProblemDifficultyOnboarding = "{{=(not (record_data.get('problem_difficulty', None) == True))}}";
 
-            showReczeeTalenthubModal = "{{=(not (record_data.get('talenthub', None) == True))}}";
+            showReczeeCertificateModal = "{{=(not (record_data.get('resume_feedback', None) == True))}}";
         </script>
     {{pass}}
     <div class="fixed-action-btn click-to-toggle vertical" style="bottom: 137px; right: 24px;">
@@ -355,13 +356,30 @@
     <div class="fixed-action-btn">
         <a class="btn-floating btn-small orange {{=pulse_class['onboarding_button']}}" style="bottom: 26px; right: 10px;" target="_blank" href="{{=URL('default', 'get_started')}}" id="onboarding-button"><i class="fa fa-question-circle"></i></a>
     </div>
-    <div id="talenthub-launch-modal" style="width: 50%" class="modal center">
-        <div class="modal-content">
-            <h5 style="margin-bottom: 15px;" id="talenthub-launch-modal-header">Are you looking for jobs/internships?</h5>
-            <div>Verify your skills and become a top applicant at the best companies.</div>
-            <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                <a href="https://app.reczee.com/talenthub/register?utm_source=website&utm_campaign=stopstalk_announcement&utm_medium=referral" target="_blank" class="waves-effect blue darken-3 white-text btn-flat" style="margin: 16px;">Create TalentHub profile</a>
-                <img src="{{=get_static_url('images/resume-verified.svg')}}" style="width: 420px;"/>
+    <div id="talenthub-launch-modal" style="width: 55%" class="modal center">
+        <div class="modal-content" style="margin-top: 16px">
+            <h5 style="margin-bottom: 15px;" id="talenthub-launch-modal-header">Is your resume even shortlisted?</h5>
+            <div style="display: flex; justify-content: center; align-items: center;">
+                <div style="width: 40%;"><img src="{{=get_static_url('images/talenthub_certificate.svg')}}" style="width: 190px"/></div>
+                <div style="width: 60%; text-align: left;">
+                    <div class="reczee-certificate-list-item">
+                        <span>👉</span>
+                        <span class="reczee-certificate-list-text">Waiting for responses of your application?</span>
+                    </div>
+                    <div class="reczee-certificate-list-item">
+                        <span>👉</span>
+                        <span class="reczee-certificate-list-text">Do you have the right content?</span>
+                    </div>
+                    <div class="reczee-certificate-list-item">
+                        <span>👉</span>
+                        <span class="reczee-certificate-list-text">Is your resume having red flags?</span>
+                    </div>
+                    <div style="text-align: center;display:flex;flex-direction: column; align-items: center; font-size: 14px;">
+                        Get feedback on your resume by professionals from MAANG/top product companies.
+                        <a href="https://forms.gle/xqs38saW9SV5JDjx8" target="_blank" class="waves-effect blue darken-3 white-text btn-flat" style="margin-top: 8px;">Get feedback</a>
+                        <span>Free for a limited period 🎉</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -244,16 +244,16 @@ var initTooltips = function() {
             dismissible: true,
             opacity: 0.8,
             complete: function() {
-                showReczeeTalenthubModal = "False";
+                showReczeeCertificateModal = "False";
                 $.ajax({
                     url: markReadURL,
-                    data: {key: "talenthub"}
+                    data: {key: "resume_feedback"}
                 });
             }
         });
 
 
-        if (loggedInUserId < thresholdUserId && showReczeeTalenthubModal === "True") {
+        if (loggedInUserId < thresholdUserId && isIndiaCountry === 'True' && showReczeeCertificateModal === "True") {
             $('#talenthub-launch-modal').modal('open');
         }
 

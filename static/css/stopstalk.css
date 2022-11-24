@@ -23,6 +23,19 @@ input.form-control {
     white-space: nowrap;
 }
 
+.reczee-certificate-list-item {
+  text-align: left;
+  font-size: 18px;
+  display: flex;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.reczee-certificate-list-text {
+  margin-left: 8px;
+}
+
+
 .problem-setter-href a {
     color: #424242;
 }
