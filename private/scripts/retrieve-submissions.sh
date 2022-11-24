@@ -1,4 +1,4 @@
-total_iterations=100
+total_iterations=1000
 
 # Edit this according to your local environment
 web2py_directory="/home/www-data/web2py/"
@@ -19,6 +19,6 @@ do
 
     if [ $i != $[$total_iterations - 1] ]
     then
-        sleep 5
+        sleep 3
     fi
 done
