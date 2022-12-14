@@ -38,7 +38,7 @@ GLOBAL_LEADERBOARD_CACHE_KEY = "global_leaderboard_cache"
 
 CONTESTS_SITE_MAPPING = ["CodeChef", "CodeForces", "AtCoder", "HackerEarth", "HackerRank", "LeetCode"]
 
-COMMON_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36"
+COMMON_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
 
 # Constants to be used in case of request failures
 SERVER_FAILURE = "SERVER_FAILURE"
