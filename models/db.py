@@ -249,9 +249,9 @@ def send_mail(to, subject, message, mail_type, bulk=False):
                             subject=subject,
                             message=message)
         else:
-            mail.send(to=to,
-                      subject=subject,
-                      message=message)
+            bulkmail.send(to=to,
+                          subject=subject,
+                          message=message)
 
 current.send_mail = send_mail
 ## configure auth policy
