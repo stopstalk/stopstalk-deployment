@@ -160,7 +160,7 @@ class RetrievalTest:
                 },
                 "CodeForces": {
                     "plink": "http://www.codeforces.com/problemset/problem/1200/B",
-                    "problem_setters": ["djm03178", "no_ng"]
+                    "problem_setters": ["djm03178", "nong"]
                 },
                 "HackerEarth": {
                     "plink": "https://www.hackerearth.com/problem/approximate/lots-of-circles/",
