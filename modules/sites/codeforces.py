@@ -101,7 +101,7 @@ class Profile(object):
                 # Some problems have complete url -_-
                 # Example: http://codeforces.com/problemset/problem/358/C
                 if link["href"][0] == "/":
-                    editorial_link = "http://www.codeforces.com" + link["href"]
+                    editorial_link = "http://codeforces.com" + link["href"]
                 else:
                     editorial_link = link["href"]
                 break
@@ -208,7 +208,7 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def is_invalid_handle(handle):
-        response = get_request("http://www.codeforces.com/api/user.status?handle=" + \
+        response = get_request("http://codeforces.com/api/user.status?handle=" + \
                                handle + "&from=1&count=2")
 
         if response in REQUEST_FAILURES:
@@ -241,7 +241,7 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def rating_graph_data(handle):
-        website = "http://www.codeforces.com/"
+        website = "http://codeforces.com/"
 
         url = "%sapi/contest.list" % website
         response = get_request(url)
@@ -301,7 +301,7 @@ class Profile(object):
         """
 
         handle = self.handle
-        url = "http://www.codeforces.com/api/user.status?handle=" + \
+        url = "http://codeforces.com/api/user.status?handle=" + \
               handle + "&from=1"
         # Timeout for new user submission retrieval
         timeout = 50
@@ -343,7 +343,7 @@ class Profile(object):
 
             if row.has_key("contestId") == False:
                 try:
-                    problem_link = "http://www.codeforces.com/problemsets/" + \
+                    problem_link = "http://codeforces.com/problemsets/" + \
                                    row["problem"]["problemsetName"] + \
                                    "/problem/99999/" + str(row["problem"]["index"])
                 except Exception as e:
@@ -355,7 +355,7 @@ class Profile(object):
                     arg = "gymProblem/"
 
                 # Problem Name/URL
-                problem_link = "http://www.codeforces.com/problemset/" + arg + \
+                problem_link = "http://codeforces.com/problemset/" + arg + \
                                str(row["contestId"]) + "/" + \
                                row["problem"]["index"]
 
@@ -399,7 +399,7 @@ class Profile(object):
                row.has_key("contestId") == False:
                 view_link = ""
             else:
-                view_link = "http://www.codeforces.com/contest/" + \
+                view_link = "http://codeforces.com/contest/" + \
                             str(row["contestId"]) + \
                             "/submission/" + \
                             str(row["id"])
