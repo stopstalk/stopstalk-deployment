@@ -376,7 +376,11 @@ def sanitize_fields(form):
 
             if form.vars[field_handle].__contains__("http:") or \
                  form.vars[field_handle].__contains__("https:") or \
-                 form.vars[field_handle].__contains__("www."):
+                 form.vars[field_handle].__contains__("www.") or \
+                 form.vars[field_handle].__contains__("codechef.com") or \
+                 form.vars[field_handle].__contains__("codeforces.com") or \
+                 form.vars[field_handle].__contains__("hackerearth.com") or \
+                 form.vars[field_handle].__contains__("hackerrank.com"):
                 form.errors[field_handle] = T("Please enter only the handle")
 
     # 2.

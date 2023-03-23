@@ -34,7 +34,7 @@ from collections import OrderedDict
 # OrderedDict is used to maintain the order of insertion
 current.SITES = OrderedDict()
 current.SITES["CodeChef"] = "https://www.codechef.com/"
-current.SITES["CodeForces"] = "http://www.codeforces.com/"
+current.SITES["CodeForces"] = "http://codeforces.com/"
 current.SITES["Spoj"] = "https://www.spoj.com/"
 current.SITES["AtCoder"] = "https://atcoder.jp/"
 current.SITES["HackerEarth"] = "https://www.hackerearth.com/"
