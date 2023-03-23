@@ -214,8 +214,8 @@ class Profile(object):
             try:
                 problem_name = atcoder_problem_dict[submission["problem_id"]]
             except:
-                print "Atcoder server failure for", submission
-                return SERVER_FAILURE
+                print "Atcoder problem not found", submission
+                continue
 
             problem_link = "%scontests/%s/tasks/%s" % (current.SITES["AtCoder"],
                                                        submission["contest_id"],
