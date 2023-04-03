@@ -247,7 +247,7 @@ var initTooltips = function() {
                 showReczeeCertificateModal = "False";
                 $.ajax({
                     url: markReadURL,
-                    data: {key: "resume_feedback"}
+                    data: {key: "resume_guidance"}
                 });
             }
         });
