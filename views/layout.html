@@ -22,6 +22,22 @@
     <link rel="stylesheet" href="{{=get_static_url('css/stopstalk.css')}}"/>
     <link rel="stylesheet" href="{{=URL('static', 'fa/css/font-awesome.min.css')}}" async/>
 
+    <!-- Google tag (gtag.js) -->
+    {{if current.ga4_id:}}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{=current.ga4_id}}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      if("{{=auth.is_logged_in()}}" === "True") {
+        gtag('config', '{{=current.ga4_id}}', {user_id: '{{=session.user_id}}'});
+      } else {
+        gtag('config', '{{=current.ga4_id}}');
+      }
+    </script>
+    {{pass}}
     <link rel="apple-touch-icon" sizes="57x57" href="{{=get_static_url('images/fav_assets/apple-icon-57x57.png')}}">
     <link rel="apple-touch-icon" sizes="60x60" href="{{=get_static_url('images/fav_assets/apple-icon-60x60.png')}}">
     <link rel="apple-touch-icon" sizes="72x72" href="{{=get_static_url('images/fav_assets/apple-icon-72x72.png')}}">
