@@ -211,7 +211,7 @@ class Profile(object):
         response = get_request("http://codeforces.com/api/user.status?handle=" + \
                                handle + "&from=1&count=2")
 
-        if response in REQUEST_FAILURES:
+        if response == NOT_FOUND:
             return True
 
         response = response.json()
