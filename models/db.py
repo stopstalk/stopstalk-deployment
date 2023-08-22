@@ -435,6 +435,8 @@ def notify_institute_users(record):
         @param record (Row): Record having the user details
     """
 
+    # Skip inserting into database
+    return
     new_user_has_atleast_one_handle = any([record[site.lower() + "_handle"] for site in current.SITES])
     if not new_user_has_atleast_one_handle:
         return
