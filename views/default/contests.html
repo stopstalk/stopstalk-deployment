@@ -14,15 +14,6 @@
 
 <body>
   <h1>{{=T("Upcoming Contests")}}</h1>
-  <h6>{{=T("Note: All the time stamps mentioned here are in IST")}}</h6>
 
-  <div class="row">
-    <div class="col offset-s1 s10">
-      {{if retrieved:}}
-        {{=table}}
-      {{else:}}
-        <p>Error retrieving contests! If the problem persists please <a href="{{=URL('default', 'contact_us')}}">{{=T("Contact Us")}}</a></p>
-      {{pass}}
-    </div>
-  </div>
+  <h6>We are facing some issues in fetching the upcoming contests. We will get back soon!</h6>
 </body>
