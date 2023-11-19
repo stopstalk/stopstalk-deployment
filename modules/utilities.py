@@ -394,7 +394,7 @@ def get_boto3_client():
 
 # ------------------------------------------------------------------------------
 def get_contests():
-
+    return []
     cache_value = current.REDIS_CLIENT.get(CONTESTS_CACHE_KEY)
     if cache_value:
         return json.loads(cache_value)
