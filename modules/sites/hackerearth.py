@@ -56,7 +56,7 @@ class Profile(object):
     @staticmethod
     def get_headers(response, referer):
         cookie_value = response.headers["set-cookie"]
-        csrf_token = re.findall(r"csrftoken=\w*", cookie_value)[0][10:]
+        csrf_token = re.findall(r"csrfToken=\w*", cookie_value)[0][10:]
         return {
             "host": "www.hackerearth.com",
             "user-agent": COMMON_USER_AGENT,
