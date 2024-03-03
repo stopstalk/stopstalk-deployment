@@ -2,7 +2,7 @@ parsedatetime==2.1
 gevent==1.1.1
 greenlet==0.4.9
 beautifulsoup4==4.4.1
-lxml==3.6.0
+lxml==4.9.1
 requests==2.20.0
 redis==2.10.5
 boto3==1.5.9
