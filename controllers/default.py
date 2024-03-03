@@ -283,6 +283,12 @@ def user_editorials():
     res = dict(table_rows=table_rows[:10],
                 recent_editorials_table=table,
                 pending_count=pending_count)
+    
+    # for api request
+    if utilities.is_apicall():
+        return response.json(res)
+
+    return res
 
     # for api request
     if utilities.is_apicall():
