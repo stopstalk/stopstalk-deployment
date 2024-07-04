@@ -237,7 +237,7 @@ class Profile(object):
                 all_tds = tr.find_all("td")
                 all_as = tr.find_all("a")
                 time_stamp = all_tds[-1].contents[1]["title"]
-                time_stamp = time.strptime(str(time_stamp), "%Y-%m-%d %H:%M:%S")
+                time_stamp = time.strptime(str(time_stamp), "%Y-%m-%d %H:%M:%S+00:00")
                 # Time of submission
                 time_stamp = datetime.datetime(time_stamp.tm_year,
                                                time_stamp.tm_mon,
