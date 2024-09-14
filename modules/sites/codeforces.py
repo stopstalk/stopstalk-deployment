@@ -86,6 +86,9 @@ class Profile(object):
 
             @return (String/None): Editorial link
         """
+        # Codeforces introduced cloudflare
+        return None
+
         editorial_link = None
         response = Profile.make_codeforces_request(problem_link)
         if response in REQUEST_FAILURES:
@@ -195,8 +198,9 @@ class Profile(object):
         if "problem_setters" in args["update_things"]:
             problem_setters = Profile.get_problem_setters(problem_link)
 
-        if "editorial_link" in args["update_things"]:
-            editorial_link = Profile.get_editorial_link(problem_link)
+        # Codeforces introduced cloudflare
+        # if "editorial_link" in args["update_things"]:
+        #     editorial_link = Profile.get_editorial_link(problem_link)
 
         if "tags" in args["update_things"]:
             all_tags = Profile.get_tags(problem_link)
@@ -241,6 +245,9 @@ class Profile(object):
     # -------------------------------------------------------------------------
     @staticmethod
     def rating_graph_data(handle):
+        # Codeforces introduced Cloudflare
+        return []
+
         website = "http://codeforces.com/"
 
         url = "%sapi/contest.list" % website
