@@ -193,7 +193,7 @@ class Profile(object):
             elif response in REQUEST_FAILURES:
                 return response
 
-        url = "https://kenkoooo.com/atcoder/atcoder-api/results?user=" + self.handle
+        url = "https://kenkoooo.com/atcoder/atcoder-api/v3/user/submissions?user=" + self.handle + "&from_second=0"
         response = get_request(url, is_daily_retrieval=self.is_daily_retrieval)
 
         if response in REQUEST_FAILURES:
