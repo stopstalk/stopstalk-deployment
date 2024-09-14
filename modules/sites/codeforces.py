@@ -218,6 +218,9 @@ class Profile(object):
         if response == NOT_FOUND:
             return True
 
+        if response in REQUEST_FAILURES:
+            return False
+
         response = response.json()
 
         if response["status"] != "ok":
