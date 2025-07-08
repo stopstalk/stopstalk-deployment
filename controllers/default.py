@@ -166,6 +166,10 @@ def support_us():
     return dict()
 
 # ----------------------------------------------------------------------------
+def final_sunset_update():
+    return dict()
+
+# ----------------------------------------------------------------------------
 @auth.requires_login()
 def dashboard():
     session.welcome_shown = True

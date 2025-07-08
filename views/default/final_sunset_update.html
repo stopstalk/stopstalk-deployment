@@ -1,0 +1,246 @@
+{{extend 'layout.html'}} {{block head}}
+<title>{{=T("Final update from StopStalk")}}</title>
+<meta name="description" content="StopStalk is " />
+{{end}}
+
+<body>
+  <h1>{{=T("Final update from StopStalk")}}</h1>
+
+  <p>
+    This is a slightly emotional one. Bear with me and would love to see you
+    read the complete article to learn from my journey of building StopStalk.
+  </p>
+
+  <p>
+    You would have realized from the title that we are sunsetting StopStalk. It
+    will not be available for usage post <strong>1st August 2025</strong>.
+  </p>
+  <h2>Back story of "Why" I built it?</h2>
+  <p>
+    It feels surreal that it has already been 10 years since this. It was back
+    in 2015 when I was in my 3rd year of college in IIIT Hyderabad. Students
+    always used to prepare for internships in the summer of 3rd year. Some of
+    the students also used to prepare for Google Summer of Code. It used to be a
+    common divide that some students were "developers" while others were
+    "coders". I was also one of them while I wasn't best at either in the
+    beginning. I was contributing to an open-source project called Sahana in the
+    hope of applying for a GSoC proposal that summer along with practicing some
+    questions here and there on websites like CodeChef, Codeforces, etc.
+    Leetcode hadn't gotten as popular back then for interview prep (thankfully).
+    I remember it having only a total of 200-300 questions.
+  </p>
+
+  <p>
+    Sahana was built on top of a web framework called Web2py. Their developers
+    also developed another framework on top of Web2py with some more
+    abstractions and modularizations called S3. As a newbie, I was struggling to
+    understand which of the features were part of that core Web2py and which of
+    them were implemented in S3. I decided to create my own Web2py application
+    from scratch so that I could contribute more effectively.
+  </p>
+
+  <p>
+    It was around that time when I also was stalking my friends' coding profiles
+    by remembering their handles/usernames across every platform. This used to
+    be my motivation for practicing more in the vacations when you're at home
+    and you're also looking forward to getting an internship, which almost
+    always asked DSA questions in their coding tests. I thought about writing a
+    Python script that just crawls the recent submissions of some of my friends
+    and shows it in the terminal. Soon I realized that putting a UI on top of
+    this would be phenomenal (I wish I had that ugly screenshot of this v0
+    dashboard). I quickly started building a Web2py dashboard on top of this to
+    also help me learn for my Sahana contributions.
+  </p>
+
+  <p>
+    Very soon, I realized that I can do a lot more on this database of
+    submissions - give analytics, generate streaks, give GitHub calendar kind of
+    graphs, View submissions, and more. This just made it more interesting. I
+    bought the domain
+    <a
+      href="https://www.google.com/url?q=http://stopstalk.com&amp;sa=D&amp;source=editors&amp;ust=1751997820137569&amp;usg=AOvVaw20O6U9sUiJXi9yAyeggKk0"
+      >stopstalk.com</a
+    >&nbsp;and started figuring out all the AWS stuff. When you're building
+    something on your "own", you have a high motivation for figuring out
+    everything. I started giving it to my friends, posting on these competitive
+    programming websites, and more that you can send "Friend Requests" on the
+    platform to follow their coding submissions. I just couldn't stop thinking
+    what else I could build on top of this to make it sweeter by the day.
+  </p>
+
+  <p>
+    My CGPA continuously started degrading as I got addicted to building this.
+    Fast forward 10 years, here we are discussing my journey and how we scaled
+    from a simple Python script to 130k+ users.
+  </p>
+
+  <p><strong>First ever commit of StopStalk</strong></p>
+  <p>
+    <img
+      src="{{=get_static_url('images/StopStalk.png')}}"
+      alt="First ever commit of StopStalk"
+      title="First ever commit of StopStalk"
+    />
+  </p>
+  <h2>How is the traction like today?</h2>
+  <p>
+    This is something that makes me immensely happy - to
+    <strong>build something that people want</strong>. For almost the last 5
+    years, I have done <strong>zero</strong> social media posts, haven't
+    recommended StopStalk to anyone, haven't actively engaged in any marketing
+    activity whatsoever (we never spent a penny in acquiring any user).
+  </p>
+
+  <p>Here is a brief snapshot -</p>
+  <ol>
+    <li>Total of 130k+ users across the globe</li>
+    <li>8 Competitive programming websites integrated</li>
+    <li>54M+ submissions across all these users</li>
+    <li>
+      Multiple colleges using StopStalk rating as their placement criteria
+    </li>
+    <li>90k+ problems fetched from these websites</li>
+    <li>
+      A lot of candidates still linking their StopStalk profile in their resumes
+    </li>
+  </ol>
+  <h2>How did it help me, personally?</h2>
+  <p>
+    StopStalk has helped me grow personally and professionally as a developer
+    (frontend, backend, devops) as well as an entrepreneur.
+  </p>
+
+  <p>
+    Back in the days, I was a newbie developer who had done some self-projects
+    here and there in PHP, MySQL, jQuery.
+  </p>
+
+  <p>
+    As part of building StopStalk, I learnt Web2py framework on the fly while
+    contributing to Sahana as well as StopStalk. Figured out how AWS EC2 works,
+    figured out all the DNS stuff, bought a domain, stitched everything
+    together, and haven't stopped learning ever since.
+  </p>
+
+  <p>
+    Learnt extreme ownership. I was resolving "support tickets" (emails at that
+    time) within a few hours while I was studying computer networks and
+    humanities and science and what not.
+  </p>
+
+  <p>
+    Learnt debugging! This is the hardest skill in tech. Requires patience and
+    sense of urgency at the same time. I still think I am great at debugging
+    because of some of the pressure situations at StopStalk.
+  </p>
+
+  <p>
+    All of this experience was extremely overwhelming and fulfilling at the same
+    time. I remember giving the final hiring manager round for an internship
+    interview with BrowserStack - He asked me how did you deploy StopStalk?
+    Explain how you connected your DNS provider? And more in-depth questions
+    around StopStalk only. I guess he got impressed with these specifically
+    since I wouldn't be able to answer these questions if I had just done course
+    projects.
+  </p>
+
+  <h2>Why did we never monetize StopStalk?</h2>
+  <p>
+    The short answer is we did try. We tried reaching out to companies who could
+    find vetted candidates from StopStalk. We tried reaching out to edtech
+    companies. We tried talking to colleges for premium offerings of
+    leaderboards/score/etc. We tried Ads. And, we also tried donations 🙂
+  </p>
+
+  <p>Some learnings around monetization (in no particular order) -</p>
+  <ol>
+    <li>We were too early for the market</li>
+    <li>
+      The contextual data that we used to provide to companies was pretty niche
+    </li>
+    <li>College Students did not have money to pay (at least in those days)</li>
+    <li>
+      Ads &amp; Donations was the last resort just to pay the StopStalk bills
+      but we stopped them almost immediately once we saw the response.
+    </li>
+    <li>
+      There was a skepticism back in the mind that the data that we were
+      providing was primarily built on crawling (we did have official APIs as
+      well in some cases). A platform can any day choose to block us and we will
+      have to rely on skewed data for new users which would have been a mess. In
+      hindsight, this was definitely a right decision.
+    </li>
+  </ol>
+
+  <p>
+    There could have been some angle for sure in today's market to make some
+    money out of StopStalk but point number 5 was the biggest reason why we
+    didn't aggressively pursue it.
+  </p>
+
+  <p>
+    So for 10 years we have been live, with negligible money coming in from an
+    experiment of donations/ads and AWS bills being completely paid from my own
+    savings.
+  </p>
+  <h2>Why are we sunsetting down StopStalk?</h2>
+  <p>
+    As much as I would have personally loved to continue StopStalk, it really
+    doesn't seem to be helping the users in the current state. Here are some of
+    the concrete reasons why we are shutting it down (from highest to lowest
+    priority) -
+  </p>
+  <ol>
+    <li>
+      The "competitive programming" how it used to be back then has died down in
+      favour of platforms like Leetcode. I personally feel it's unfortunate as
+      now the candidates are just doing "interview prep" and at times just
+      remembering solutions to clear interviews of the top tech companies. 10
+      years ago, competitive programming was sort of a sport (at least in my
+      college). Of course the end goal was still a job, but students used to
+      really dive deeper and the contest ranks were seen as a thing to improve
+      upon.
+    </li>
+    <li>
+      The platforms that we support are also sort of in maintenance mode. This
+      is loosely said but there is a very niche audience who is doing
+      competitive programming for the ICPC sense of it.
+    </li>
+    <li>
+      The APIs/crawling scripts of these websites are breaking more often than
+      what I would expect. This has led to a lot of failure, incorrect data and
+      skewed information.
+    </li>
+    <li>
+      Because of point 3, my own trust of StopStalk rating has dropped as well.
+      I would not want candidates to be judged for their campus placements on
+      StopStalk rating, not because it is not a good number, but because the
+      rating itself is skewed because the crawling might not have happened for
+      some candidates and might give unfair ranking.
+    </li>
+    <li>
+      Monetarily it is not feasible to maintain it anymore. Not just AWS bills,
+      but also the dev effort to work on resolving this. Note that we have also
+      not migrated to a newer framework so we are sort of stuck with a very old
+      web framework called Web2Py (loved it back then though!).
+    </li>
+  </ol>
+  <h2>Final remarks</h2>
+  <p>
+    I genuinely love each and every single user who signed up on StopStalk and
+    want to thank every one of you for helping us come this far. It was the fuel
+    to my motivation of continuing to build more features to give a more
+    detailed analysis of a candidate's competitive programming journey.
+  </p>
+
+  <p>
+    I am sorry that we have to unfortunately shut it down, but trust me, I would
+    have continued it if the platform was able to deliver the same value as it
+    used to 5 years ago in a student's competitive programming journey.
+  </p>
+
+  <p>
+    I also need to thank a lot of my friends and family members who supported me
+    along the way and were also equally proud of me building StopStalk.
+  </p>
+</body>
