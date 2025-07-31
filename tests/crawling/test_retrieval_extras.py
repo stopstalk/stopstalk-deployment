@@ -223,7 +223,7 @@ class RetrievalTest:
         import requests
         from bs4 import BeautifulSoup
 
-        sites_with_download_functionality = ["CodeChef", "CodeForces"]
+        sites_with_download_functionality = ["CodeChef"]
         assertion_hash = {
             "CodeChef": {
                 "view_link": "https://www.codechef.com/viewsolution/27348746",

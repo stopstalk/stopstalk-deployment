@@ -4,7 +4,7 @@
     <link href="{{=get_static_url('css/style.css')}}" rel="stylesheet"/>
     <meta name="description" content="A tool to analyse and improve your Competitive Programming Progress">
 {{end}}
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<!-- <script src="https://accounts.google.com/gsi/client" async defer></script> -->
 <div id="g_id_onload"
      data-client_id="{{=current.CLIENT_ID}}"
      data-auto_select="false"
@@ -18,14 +18,16 @@
         Stop stalking and start StopStalking
     </h5>
 </div>
-<div class="row">
+
+<b style="color: #c52727">[Important update]: StopStalk has officially sunset as of 1st August, 2025. Thank you for being part of our journey. - {{=A("Read more", _href="https://www.stopstalk.com/final_sunset_update", _target="_blank")}}</b>
+<!-- <div class="row">
     <a class="btn-large waves-effect waves-light yellow black-text" href="{{=URL('default', 'user', args=['register'])}}">
         {{=T("Register")}}
     </a>
     <a class="btn-large waves-effect waves-light yellow black-text" href="{{=URL('default', 'user', args=['login'])}}">
         {{=T("Login")}}
     </a>
-</div>
+</div> -->
 <br/>
 <h5>Understanding StopStalk</h5>
 <br/>

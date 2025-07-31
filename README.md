@@ -2,6 +2,8 @@
 
 Stop stalking and Start StopStalking :sunglasses:
 
+⚠️ StopStalk has officially sunset as of 1st August, 2025. Thank you for being part of our journey. [Read more](https://www.stopstalk.com/final_sunset_update) ⚠️
+
 ## Module Requirements
 
 Note: Apply sudo if required for your system.

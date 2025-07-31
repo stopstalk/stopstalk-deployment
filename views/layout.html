@@ -107,9 +107,9 @@
             <li><a href="{{=URL('default', 'unsubscribe')}}" data-analytics-label="Nav Unsubscribe" class="nav-dropdown">{{=T("Unsubscribe")}}</a></li>
             <li class="divider"></li>
             <li><a href="{{=URL('default', 'user', args=['logout'])}}" data-analytics-label="Nav Logout" class="nav-dropdown">{{=T("Logout")}}</a></li>
-        {{else:}}
-            <li><a href="{{=URL('default', 'user', args=['login'])}}" data-analytics-label="Nav Login" class="nav-dropdown">{{=T("Login")}}</a></li>
-            <li><a href="{{=URL('default', 'user', args=['register'])}}" data-analytics-label="Nav Register" class="nav-dropdown">{{=T("Register")}}</a></li>
+        <!-- {{else:}} -->
+            <!-- <li><a href="{{=URL('default', 'user', args=['login'])}}" data-analytics-label="Nav Login" class="nav-dropdown">{{=T("Login")}}</a></li>
+            <li><a href="{{=URL('default', 'user', args=['register'])}}" data-analytics-label="Nav Register" class="nav-dropdown">{{=T("Register")}}</a></li> -->
         {{pass}}
     </ul>
     <ul id="slide-out" class="side-nav">
@@ -135,10 +135,12 @@
             <span class="left">
             </span>
             <a id="job-profile-cta" class="btn btn-default black-text" style="background-color: white; margin-right: 13px;" href="https://app.reczee.com/talenthub/register?utm_source=website&utm_campaign=stopstalk_navbar&utm_medium=referral" target="_blank">Job Profile</a>
+            {{if auth.is_logged_in():}}
             <ul class="right" style="float: left;">
                 <li><a class="dropdown-button left" href="" data-activates="welcome"><i class="fa fa-sort-down fa-2x"></i></a></li>
             <!-- Dropdown Trigger -->
             </ul>
+            {{pass}}
         </div>
     </div>
     </nav>
