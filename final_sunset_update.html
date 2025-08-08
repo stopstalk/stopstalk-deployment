@@ -1,0 +1,1184 @@
+<html
+  class="js flexbox canvas canvastext webgl no-touch geolocation postmessage no-websqldatabase indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers no-applicationcache svg inlinesvg smil svgclippaths"
+  lang="en-us"
+  style=""
+>
+  <!--<!
+  [endif]--><head>
+    <meta charset="utf-8" />
+    <!-- www.phpied.com/conditional-comments-block-downloads/ -->
+    <!-- Always force latest IE rendering engine
+         (even in intranet) & Chrome Frame
+         Remove this if you use the .htaccess -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <!--  Mobile Viewport Fix
+          j.mp/mobileviewport & davidbcalhoun.com/2010/viewport-metatag
+          device-width: Occupy full width of the screen in its current orientation
+          initial-scale = 1.0 retains dimensions instead of zooming out if page height > device height
+          user-scalable = yes allows the user to zoom in -->
+    <!-- http://dev.w3.org/html5/markup/meta.name.html -->
+    <meta name="application-name" content="stopstalk" />
+    <!-- Speaking of Google, don't forget to set your site up:
+         http://google.com/webmasters -->
+    <meta name="google-site-verification" content="" />
+    <!-- include stylesheets -->
+    <link rel="stylesheet" href="/static/materialize/css/materialize.min.css" />
+    <link
+      rel="stylesheet"
+      href="/static/minified_files/css/stopstalk.min.css?_rev=20221007220553"
+    />
+    <link
+      rel="stylesheet"
+      href="/static/fa/css/font-awesome.min.css"
+      async=""
+    />
+
+    <!-- Google tag (gtag.js) -->
+
+    <script async="" src="//www.google-analytics.com/analytics.js"></script>
+    <script
+      async=""
+      src="https://www.googletagmanager.com/gtag/js?id=G-0G985YGE4J"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      if ("False" === "True") {
+        gtag("config", "G-0G985YGE4J", { user_id: "None" });
+      } else {
+        gtag("config", "G-0G985YGE4J");
+      }
+    </script>
+
+    <link
+      rel="apple-touch-icon"
+      sizes="57x57"
+      href="/static/images/fav_assets/apple-icon-57x57.png?_rev=20200425190226"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="60x60"
+      href="/static/images/fav_assets/apple-icon-60x60.png?_rev=20200425190226"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="72x72"
+      href="/static/images/fav_assets/apple-icon-72x72.png?_rev=20200425190226"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="76x76"
+      href="/static/images/fav_assets/apple-icon-76x76.png?_rev=20200425190226"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="114x114"
+      href="/static/images/fav_assets/apple-icon-114x114.png?_rev=20200425190226"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="120x120"
+      href="/static/images/fav_assets/apple-icon-120x120.png?_rev=20200425190226"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="144x144"
+      href="/static/images/fav_assets/apple-icon-144x144.png?_rev=20200425190226"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="152x152"
+      href="/static/images/fav_assets/apple-icon-152x152.png?_rev=20200425190226"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/static/images/fav_assets/apple-icon-180x180.png?_rev=20200425190226"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/static/images/fav_assets/android-icon-192x192.png?_rev=20200425190226"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/static/images/fav_assets/favicon-32x32.png?_rev=20200425190226"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="96x96"
+      href="/static/images/fav_assets/favicon-96x96.png?_rev=20200425190226"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/static/images/fav_assets/favicon-16x16.png?_rev=20200425190226"
+    />
+    <link
+      rel="manifest"
+      href="/static/images/fav_assets/manifest.json?_rev=20200425190226"
+    />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+    <meta
+      name="msapplication-TileImage"
+      content="/static/images/fav_assets/ms-icon-144x144.png?_rev=20200425190226"
+    />
+    <meta name="theme-color" content="#ffffff" />
+
+    <link
+      rel="search"
+      type="application/opensearchdescription+xml"
+      title="StopStalk User Search"
+      href="/static/opensearch.xml"
+    />
+    <!-- All JavaScript at the bottom, except for Modernizr which enables
+         HTML5 elements & feature detects -->
+    <script src="/static/js/modernizr-2.8.3.min.js"></script>
+    <!--[if lt IE 9]>
+      <script src="/static/js/respond-1.4.2.min.js"></script>
+    <![endif]-->
+    <script type="text/javascript">
+      <!--
+      // These variables are used by the web2py_ajax_init function in web2py_ajax.js (which is loaded below).
+      var w2p_ajax_confirm_message =
+        "Are you sure you want to delete this object?";
+      var w2p_ajax_disable_with_message = "Working...";
+      var w2p_ajax_date_format = "%Y-%m-%d";
+      var w2p_ajax_datetime_format = "%Y-%m-%d %H:%M:%S";
+      var ajax_error_500 =
+        'An error occured, please <a href="/final_sunset_update">reload</a> the page';
+      //-->
+    </script>
+
+    <meta
+      name="keywords"
+      content="stopstalk, raj454raj, competitive programming, algorithms, algorithmic progress, codechef, codeforces, spoj, uva, timus, atcoder, hackerearth, hackerrank"
+    />
+    <meta name="generator" content="" />
+    <meta name="author" content="StopStalk admin@stopstalk.com" />
+    <script
+      src="/static/minified_files/js/jquery.min.js?_rev=20201225170526"
+      type="text/javascript"
+    ></script>
+    <link
+      href="/static/minified_files/css/calendar.min.css?_rev=20201225170526"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script
+      src="/static/minified_files/js/web2py.min.js?_rev=20201225170526"
+      type="text/javascript"
+    ></script>
+    <!-- this includes jquery.js, calendar.js/.css and web2py.js -->
+    <script type="text/javascript">
+      var clickedButton = { heart_button: false, onboarding_button: false };
+      var isLoggedIn = "False" === "True";
+      var problemDifficultySubmitURL = "/problems/problem_difficulty";
+      var markReadURL = "/user/mark_read.json";
+      var loveEditorialURL = "/problems/love_editorial.json";
+      var deleteEditorialURL = "/problems/delete_editorial";
+      var getNextProblemURL = "/problems/get_next_problem_to_suggest.json";
+      var problemDifficultyModalOpen = false;
+      var showProblemDifficultyOnboarding = "False";
+      var showReczeeCertificateModal = "False";
+      var isIndiaCountry = "False";
+      var loggedInUserId = parseInt("100000000");
+      var lastUserId = parseInt("133252");
+      var thresholdUserId = lastUserId - 200; // Assuming less than 200 signups per day
+    </script>
+
+    <title>Final update from StopStalk</title>
+    <meta
+      name="description"
+      content="Final update from StopStalk. StopStalk will not be available for usage post 1st August 2025."
+    />
+    <style>
+      .final-title {
+        text-align: center;
+      }
+      .body-wrapper {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+        margin-bottom: 20px;
+        font-family: Arial, sans-serif;
+      }
+      .body-wrapper p {
+        line-height: 1.6;
+        font-size: 18px;
+        color: #333;
+      }
+      li {
+        font-size: 16px;
+      }
+    </style>
+
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.rawgit.com/google/code-prettify/master/loader/prettify.css"
+    />
+    <style>
+      .lottie-animation-container {
+        width: var(--lottie-animation-container-width);
+        height: var(--lottie-animation-container-height);
+        background-color: var(--lottie-animation-container-background-color);
+        overflow: hidden;
+        margin: var(--lottie-animation-margin);
+      }
+      .lottie-animation-container svg {
+        transform: scale(var(--lottie-animation-scale));
+      }
+    </style>
+    <style>
+      .lottie-animation-container {
+        width: var(--lottie-animation-container-width);
+        height: var(--lottie-animation-container-height);
+        background-color: var(--lottie-animation-container-background-color);
+        overflow: hidden;
+        margin: var(--lottie-animation-margin);
+      }
+      .lottie-animation-container svg {
+        transform: scale(var(--lottie-animation-scale));
+      }
+    </style>
+  </head>
+  <body class="center Site">
+    <!--[if lt IE 8
+      ]><p class="browserupgrade">
+        You are using an <strong>outdated</strong> browser. Please
+        <a href="http://browsehappy.com/">upgrade your browser</a> to improve
+        your experience.
+      </p><!
+    [endif]-->
+    <!-- Navbar ======================================= -->
+    <div class="flash alert alert-dismissable" style="display: none"></div>
+    <header>
+      <ul
+        id="welcome"
+        class="dropdown-content"
+        style="min-width: 190px; color: #536dfe"
+      >
+        --&gt;
+        <!-- <li><a href="/default/user/login" data-analytics-label="Nav Login" class="nav-dropdown">Login</a></li>
+            <li><a href="/default/user/register" data-analytics-label="Nav Register" class="nav-dropdown">Register</a></li> -->
+      </ul>
+      <!-- <ul id="slide-out" class="side-nav" style="transform: translateX(-100%)">
+        <table id="side-nav-table">
+          <tbody>
+            <tr
+              class="side-nav-item"
+              data-url="/user_editorials"
+              data-analytics-label="Nav User editorials"
+            >
+              <td><a href="/user_editorials" class="side-nav-links"></a></td>
+              <td>
+                <a href="/user_editorials" class="side-nav-links"
+                  ><i class="fa fa-2x fa-users"></i
+                ></a>
+              </td>
+              <td>
+                <a href="/user_editorials" class="side-nav-links"
+                  >User Editorials</a
+                >
+              </td>
+            </tr>
+
+            <tr
+              class="side-nav-item"
+              data-url="/search"
+              data-analytics-label="Nav Search"
+            >
+              <td><a href="/search" class="side-nav-links"></a></td>
+              <td>
+                <a href="/search" class="side-nav-links"
+                  ><i class="fa fa-2x fa-search"></i
+                ></a>
+              </td>
+              <td>
+                <a href="/search" class="side-nav-links">Search Friends</a>
+              </td>
+            </tr>
+
+            <tr
+              class="side-nav-item"
+              data-url="/contests"
+              data-analytics-label="Nav Contests"
+            >
+              <td><a href="/contests" class="side-nav-links"></a></td>
+              <td>
+                <a href="/contests" class="side-nav-links"
+                  ><i class="fa fa-2x fa-calendar-check-o"></i
+                ></a>
+              </td>
+              <td>
+                <a href="/contests" class="side-nav-links">Upcoming Contests</a>
+              </td>
+            </tr>
+
+            <tr
+              class="side-nav-item"
+              data-url="/problems/search"
+              data-analytics-label="Nav Problem Search"
+            >
+              <td><a href="/problems/search" class="side-nav-links"></a></td>
+              <td>
+                <a href="/problems/search" class="side-nav-links"
+                  ><i class="fa fa-2x fa-tag"></i
+                ></a>
+              </td>
+              <td>
+                <a href="/problems/search" class="side-nav-links"
+                  >Search Problems</a
+                >
+              </td>
+            </tr>
+
+            <tr
+              class="side-nav-item"
+              data-url="/leaderboard"
+              data-analytics-label="Nav Leaderboard"
+            >
+              <td><a href="/leaderboard" class="side-nav-links"></a></td>
+              <td>
+                <a href="/leaderboard" class="side-nav-links"
+                  ><i class="fa fa-2x fa-bar-chart"></i
+                ></a>
+              </td>
+              <td>
+                <a href="/leaderboard" class="side-nav-links">Leaderboard</a>
+              </td>
+            </tr>
+
+            <tr
+              class="side-nav-item"
+              data-url="/problems/trending"
+              data-analytics-label="Nav Trending Problems"
+            >
+              <td><a href="/problems/trending" class="side-nav-links"></a></td>
+              <td>
+                <a href="/problems/trending" class="side-nav-links"
+                  ><i class="fa fa-2x fa-line-chart"></i
+                ></a>
+              </td>
+              <td>
+                <a href="/problems/trending" class="side-nav-links"
+                  >Trending Problems</a
+                >
+              </td>
+            </tr>
+
+            <tr
+              class="side-nav-item"
+              data-url="/filters"
+              data-analytics-label="Nav Filters"
+            >
+              <td><a href="/filters" class="side-nav-links"></a></td>
+              <td>
+                <a href="/filters" class="side-nav-links"
+                  ><i class="fa fa-2x fa-filter"></i
+                ></a>
+              </td>
+              <td>
+                <a href="/filters" class="side-nav-links">Submission Filters</a>
+              </td>
+            </tr>
+
+            <tr
+              class="side-nav-item"
+              data-url="/updates"
+              data-analytics-label="Nav Feature Updates"
+            >
+              <td><a href="/updates" class="side-nav-links"></a></td>
+              <td>
+                <a href="/updates" class="side-nav-links"
+                  ><i class="fa fa-2x fa-bullhorn"></i
+                ></a>
+              </td>
+              <td>
+                <a href="/updates" class="side-nav-links">Feature Updates</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </ul> -->
+      <nav style="background-color: #536dfe">
+        <div
+          class="nav-wrapper"
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+          "
+        >
+          <!-- <a id="open-side-nav" data-activates="slide-out" class="left"
+            ><i class="fa fa-bars fa-2x"></i
+          ></a> -->
+          <a href="/" class="left" style="height: 100%; margin-left: 5px">
+            <img
+              src="/static/images/StopStalk.png?_rev=20201225170526"
+              style="margin-top: 2px; height: 60px; width: 200px; padding: 7px"
+            />
+          </a>
+          <div class="right">
+            <span class="left"> </span>
+            <a
+              id="job-profile-cta"
+              class="btn btn-default black-text"
+              style="background-color: white; margin-right: 13px"
+              href="https://app.reczee.com/talenthub/register?utm_source=website&amp;utm_campaign=stopstalk_navbar&amp;utm_medium=referral"
+              target="_blank"
+              >Job Profile</a
+            >
+          </div>
+        </div>
+      </nav>
+    </header>
+    <!-- Masthead ===================================== -->
+
+    <!-- Main ========================================= -->
+    <!-- Begin page content -->
+    <main class="Site-content">
+      <div class="container-fluid">
+        <div class="col-md-12">
+          <div class="body-wrapper">
+            <h1 class="final-title">Final update from StopStalk</h1>
+
+            <div style="text-align: left">
+              <p>
+                This is a slightly emotional one. Bear with me and would love to
+                see you read the complete article to learn from my journey of
+                building StopStalk.
+              </p>
+
+              <p>
+                You would have realized from the title that we are sunsetting
+                StopStalk. StopStalk will not be available for usage post
+                <b>1st August 2025</b>.
+              </p>
+              <h3>Back story of "Why" I built it?</h3>
+              <p>
+                It feels surreal that it has already been 10 years since this.
+                It was back in 2015 when I was in my 3rd year of college in IIIT
+                Hyderabad. Students always used to prepare for internships in
+                the summer of 3rd year. Some of the students also used to
+                prepare for Google Summer of Code. It used to be a common divide
+                that some students were "developers" while others were "coders".
+                I was also one of them while I wasn't best at either in the
+                beginning. I was contributing to an open-source project called
+                Sahana in the hope of applying for a GSoC proposal that summer
+                along with practicing some questions here and there on websites
+                like CodeChef, Codeforces, etc. Leetcode hadn't gotten as
+                popular back then for interview prep (thankfully). I remember it
+                having only a total of 200-300 questions.
+              </p>
+
+              <p>
+                Sahana was built on top of a web framework called Web2py. Their
+                developers also developed another framework on top of Web2py
+                with some more abstractions and modularizations called S3. As a
+                newbie, I was struggling to understand which of the features
+                were part of that core Web2py and which of them were implemented
+                in S3. I decided to create my own Web2py application from
+                scratch so that I could contribute more effectively.
+              </p>
+
+              <p>
+                It was around that time when I also was stalking my friends'
+                coding profiles by remembering their handles/usernames across
+                every platform. This used to be my motivation for practicing
+                more in the vacations when you're at home and you're also
+                looking forward to getting an internship, which almost always
+                asked DSA questions in their coding tests. I thought about
+                writing a Python script that just crawls the recent submissions
+                of some of my friends and shows it in the terminal. Soon I
+                realized that putting a UI on top of this would be phenomenal (I
+                wish I had that ugly screenshot of this v0 dashboard). I quickly
+                started building a Web2py dashboard on top of this to also help
+                me learn for my Sahana contributions.
+              </p>
+
+              <p>
+                Very soon, I realized that I can do a lot more on this database
+                of submissions - give analytics, generate streaks, give GitHub
+                calendar kind of graphs, View submissions, and more. This just
+                made it more interesting. I bought the domain
+                <a
+                  href="https://www.google.com/url?q=http://stopstalk.com&amp;sa=D&amp;source=editors&amp;ust=1751997820137569&amp;usg=AOvVaw20O6U9sUiJXi9yAyeggKk0"
+                  >stopstalk.com</a
+                >&nbsp;and started figuring out all the AWS stuff. When you're
+                building something on your "own", you have a high motivation for
+                figuring out everything. I started giving it to my friends,
+                posting on these competitive programming websites, and more that
+                you can send "Friend Requests" on the platform to follow their
+                coding submissions. I just couldn't stop thinking what else I
+                could build on top of this to make it sweeter by the day.
+              </p>
+
+              <p>
+                My CGPA continuously started degrading as I got addicted to
+                building this. Fast forward 10 years, here we are discussing my
+                journey and how we scaled from a simple Python script to 130k+
+                users.
+              </p>
+
+              <p><strong>First ever commit of StopStalk</strong></p>
+              <p>
+                <img
+                  src="/static/images/first-commit.png?_rev=None"
+                  alt="First ever commit of StopStalk"
+                  title="First ever commit of StopStalk"
+                />
+              </p>
+              <h3>How is the traction like today?</h3>
+              <p>
+                This is something that makes me immensely happy - to
+                <strong>build something that people want</strong>. For almost
+                the last 5 years, I have done <strong>zero</strong> social media
+                posts, haven't recommended StopStalk to anyone, haven't actively
+                engaged in any marketing activity whatsoever (we never spent a
+                penny in acquiring any user).
+              </p>
+
+              <p>Here is a brief snapshot -</p>
+              <ol>
+                <li>Total of 130k+ users across the globe</li>
+                <li>8 Competitive programming websites integrated</li>
+                <li>54M+ submissions across all these users</li>
+                <li>
+                  Multiple colleges using StopStalk rating as their placement
+                  criteria
+                </li>
+                <li>90k+ problems fetched from these websites</li>
+                <li>
+                  A lot of candidates still linking their StopStalk profile in
+                  their resumes
+                </li>
+              </ol>
+              <h3>How did it help me, personally?</h3>
+              <p>
+                StopStalk has helped me grow personally and professionally as a
+                developer (frontend, backend, devops) as well as an
+                entrepreneur.
+              </p>
+
+              <p>
+                Back in the days, I was a newbie developer who had done some
+                self-projects here and there in PHP, MySQL, jQuery.
+              </p>
+
+              <p>
+                As part of building StopStalk, I learnt Web2py framework on the
+                fly while contributing to Sahana as well as StopStalk. Figured
+                out how AWS EC2 works, figured out all the DNS stuff, bought a
+                domain, stitched everything together, and haven't stopped
+                learning ever since.
+              </p>
+
+              <p>
+                Learnt extreme ownership. I was resolving "support tickets"
+                (emails at that time) within a few hours while I was studying
+                computer networks and humanities and science and what not.
+              </p>
+
+              <p>
+                Learnt debugging! This is the hardest skill in tech. Requires
+                patience and sense of urgency at the same time. I still think I
+                am great at debugging because of some of the pressure situations
+                at StopStalk.
+              </p>
+
+              <p>
+                All of this experience was extremely overwhelming and fulfilling
+                at the same time. I remember giving the final hiring manager
+                round for an internship interview with BrowserStack - He asked
+                me how did you deploy StopStalk? Explain how you connected your
+                DNS provider? And more in-depth questions around StopStalk only.
+                I guess he got impressed with these specifically since I
+                wouldn't be able to answer these questions if I had just done
+                course projects.
+              </p>
+
+              <h3>Why did we never monetize StopStalk?</h3>
+              <p>
+                The short answer is we did try. We tried reaching out to
+                companies who could find vetted candidates from StopStalk. We
+                tried reaching out to edtech companies. We tried talking to
+                colleges for premium offerings of leaderboards/score/etc. We
+                tried Ads. And, we also tried donations 🙂
+              </p>
+
+              <p>
+                Some learnings around monetization (in no particular order) -
+              </p>
+              <ol>
+                <li>We were too early for the market</li>
+                <li>
+                  The contextual data that we used to provide to companies was
+                  pretty niche
+                </li>
+                <li>
+                  College Students did not have money to pay (at least in those
+                  days)
+                </li>
+                <li>
+                  Ads &amp; Donations was the last resort just to pay the
+                  StopStalk bills but we stopped them almost immediately once we
+                  saw the response.
+                </li>
+                <li>
+                  There was a skepticism back in the mind that the data that we
+                  were providing was primarily built on crawling (we did have
+                  official APIs as well in some cases). A platform can any day
+                  choose to block us and we will have to rely on skewed data for
+                  new users which would have been a mess. In hindsight, this was
+                  definitely a right decision.
+                </li>
+              </ol>
+
+              <p>
+                There could have been some angle for sure in today's market to
+                make some money out of StopStalk but point number 5 was the
+                biggest reason why we didn't aggressively pursue it.
+              </p>
+
+              <p>
+                So for 10 years we have been live, with negligible money coming
+                in from an experiment of donations/ads and AWS bills being
+                completely paid from my own savings.
+              </p>
+              <h3>Why are we sunsetting down StopStalk?</h3>
+              <p>
+                As much as I would have personally loved to continue StopStalk,
+                it really doesn't seem to be helping the users in the current
+                state. Here are some of the concrete reasons why we are shutting
+                it down (from highest to lowest priority) -
+              </p>
+              <ol>
+                <li>
+                  The "competitive programming" how it used to be back then has
+                  died down in favour of platforms like Leetcode. I personally
+                  feel it's unfortunate as now the candidates are just doing
+                  "interview prep" and at times just remembering solutions to
+                  clear interviews of the top tech companies. 10 years ago,
+                  competitive programming was sort of a sport (at least in my
+                  college). Of course the end goal was still a job, but students
+                  used to really dive deeper and the contest ranks were seen as
+                  a thing to improve upon.
+                </li>
+                <li>
+                  The platforms that we support are also sort of in maintenance
+                  mode. This is loosely said but there is a very niche audience
+                  who is doing competitive programming for the ICPC sense of it.
+                </li>
+                <li>
+                  The APIs/crawling scripts of these websites are breaking more
+                  often than what I would expect. This has led to a lot of
+                  failure, incorrect data and skewed information.
+                </li>
+                <li>
+                  Because of point 3, my own trust of StopStalk rating has
+                  dropped as well. I would not want candidates to be judged for
+                  their campus placements on StopStalk rating, not because it is
+                  not a good number, but because the rating itself is skewed
+                  because the crawling might not have happened for some
+                  candidates and might give unfair ranking.
+                </li>
+                <li>
+                  Monetarily it is not feasible to maintain it anymore. Not just
+                  AWS bills, but also the dev effort to work on resolving this.
+                  Note that we have also not migrated to a newer framework so we
+                  are sort of stuck with a very old web framework called Web2Py
+                  (loved it back then though!).
+                </li>
+              </ol>
+              <h3>Final remarks</h3>
+              <p>
+                I genuinely love each and every single user who signed up on
+                StopStalk and want to thank every one of you for helping us come
+                this far. It was the fuel to my motivation of continuing to
+                build more features to give a more detailed analysis of a
+                candidate's competitive programming journey.
+              </p>
+
+              <p>
+                I am <b>sorry</b> that we have to unfortunately shut it down,
+                but trust me, I would have continued it if the platform was able
+                to deliver the same value as it used to 5 years ago in a
+                student's competitive programming journey.
+              </p>
+
+              <p>
+                I also need to thank a lot of my friends and family members who
+                supported me along the way and were also equally proud of me
+                building StopStalk.
+              </p>
+
+              <p>
+                Feel free to reach out to me on
+                <a href="https://www.linkedin.com/in/raj454raj/" target="_blank"
+                  >LinkedIn</a
+                >
+                or over email - contactstopstalk@gmail.com or
+                raj454raj@gmail.com
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="download-submission-modal" class="modal">
+        <div class="modal-content">
+          <h4>Download submission</h4>
+          <p>
+            You are just one click away from downloading the solution. Please
+            enter the filename you want the submission to be downloaded as.
+          </p>
+          <div class="row">
+            <div class="input-field col offset-s3 s6">
+              <input id="file_name" type="text" />
+              <label for="file_name">File Name</label>
+            </div>
+          </div>
+          <div class="row">
+            <a
+              class="btn waves-light waves-effect disabled"
+              id="final-download-button"
+              >Download</a
+            >
+          </div>
+        </div>
+      </div>
+
+      <div
+        id="problem-difficulty-modal"
+        class="modal"
+        style="max-height: 80%; width: 60%; z-index: 1005"
+      >
+        <div class="modal-content center">
+          <div id="problem-difficulty-actual-content">
+            <h4 id="problem-difficulty-title"></h4>
+            <form id="problem-difficulty-modal-form" data-problem="">
+              <div style="display: inline-flex">
+                <div class="difficulty-list-item">
+                  <input
+                    name="problem_difficulty_value"
+                    type="radio"
+                    id="difficulty-very-easy"
+                    value="1"
+                    required=""
+                  />
+                  <label for="difficulty-very-easy">Very Easy</label>
+                </div>
+                <div class="difficulty-list-item">
+                  <input
+                    name="problem_difficulty_value"
+                    type="radio"
+                    id="difficulty-easy"
+                    value="2"
+                  />
+                  <label for="difficulty-easy">Easy</label>
+                </div>
+                <div class="difficulty-list-item">
+                  <input
+                    name="problem_difficulty_value"
+                    type="radio"
+                    id="difficulty-medium"
+                    value="3"
+                  />
+                  <label for="difficulty-medium">Medium</label>
+                </div>
+                <div class="difficulty-list-item">
+                  <input
+                    name="problem_difficulty_value"
+                    type="radio"
+                    id="difficulty-hard"
+                    value="4"
+                  />
+                  <label for="difficulty-hard">Hard</label>
+                </div>
+                <div class="difficulty-list-item">
+                  <input
+                    name="problem_difficulty_value"
+                    type="radio"
+                    id="difficulty-very-hard"
+                    value="5"
+                  />
+                  <label for="difficulty-very-hard">Very Hard</label>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div id="problem-difficulty-all-caught-up" class="hide">
+            <h4>All caught up!</h4>
+            <p>Solve more problems and we will show you more here!</p>
+          </div>
+          <div class="modal-footer">
+            <button
+              id="skip-this-problem"
+              class="waves-effect orange lighten-5 waves-blue btn-flat btn btn-default"
+            >
+              Skip this
+            </button>
+            <button
+              id="problem-difficulty-later"
+              class="modal-action modal-close waves-effect blue lighten-5 waves-blue btn-flat btn btn-default"
+            >
+              Later
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-submission-modal" class="modal">
+        <div class="modal-content">
+          <h4>View submission</h4>
+
+          <button
+            id="copy-to-clipboard"
+            class="btn btn-default waves-light waves-effect green hide"
+          >
+            Copy to Clipboard
+          </button>
+          <div
+            id="view-submission-preloader"
+            class="preloader-wrapper big active"
+          >
+            <div class="spinner-layer spinner-blue">
+              <div class="circle-clipper left">
+                <div class="circle"></div>
+              </div>
+              <div class="gap-patch">
+                <div class="circle"></div>
+              </div>
+              <div class="circle-clipper right">
+                <div class="circle"></div>
+              </div>
+            </div>
+
+            <div class="spinner-layer spinner-red">
+              <div class="circle-clipper left">
+                <div class="circle"></div>
+              </div>
+              <div class="gap-patch">
+                <div class="circle"></div>
+              </div>
+              <div class="circle-clipper right">
+                <div class="circle"></div>
+              </div>
+            </div>
+
+            <div class="spinner-layer spinner-yellow">
+              <div class="circle-clipper left">
+                <div class="circle"></div>
+              </div>
+              <div class="gap-patch">
+                <div class="circle"></div>
+              </div>
+              <div class="circle-clipper right">
+                <div class="circle"></div>
+              </div>
+            </div>
+
+            <div class="spinner-layer spinner-green">
+              <div class="circle-clipper left">
+                <div class="circle"></div>
+              </div>
+              <div class="gap-patch">
+                <div class="circle"></div>
+              </div>
+              <div class="circle-clipper right">
+                <div class="circle"></div>
+              </div>
+            </div>
+          </div>
+
+          <br />
+          <pre id="view-submission-pre" class="hide"></pre>
+          <a
+            id="link-to-site"
+            class="btn btn-default waves-light waves-effect"
+            href=""
+            target="_blank"
+          ></a>
+
+          <p>
+            You are just one click away from downloading the solution. Please
+            enter the filename you want the submission to be downloaded as.
+          </p>
+          <div class="row">
+            <div class="input-field col offset-s3 s6">
+              <input id="view_download_file_name" type="text" />
+              <label for="view_download_file_name">File Name</label>
+            </div>
+          </div>
+          <div class="row">
+            <a
+              class="btn waves-light waves-effect disabled"
+              id="final-view-download-button"
+              >Download</a
+            >
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer class="page-footer" style="background-color: #536dfe">
+      <div class="footer-copyright">
+        <div
+          class="container"
+          style="margin: auto; text-align: center; width: 100%"
+        >
+          © 2015-2025 StopStalk
+        </div>
+      </div>
+    </footer>
+
+    <!-- <div
+      class="fixed-action-btn click-to-toggle vertical"
+      style="bottom: 137px; right: 24px"
+    >
+      <a class="btn-floating btn-large pink accent-3 pulse" id="heart-button">
+        <i class="fa fa-heart"></i>
+      </a>
+      <ul style="pointer-events: none">
+        <li>
+          <a
+            id="heart-facebook-group"
+            class="btn-floating"
+            style="
+              background-color: #f7bd0e;
+              pointer-events: all;
+              transform: scaleY(0.4) scaleX(0.4) translateY(0px)
+                translateX(40px);
+              opacity: 0;
+            "
+            target="_blank"
+            href="https://www.facebook.com/groups/stopstalk"
+          >
+            <i class="fa fa-users"></i>
+          </a>
+        </li>
+        <li>
+          <a
+            id="heart-facebook"
+            class="btn-floating indigo darken-4"
+            style="
+              pointer-events: all;
+              transform: scaleY(0.4) scaleX(0.4) translateY(0px)
+                translateX(40px);
+              opacity: 0;
+            "
+            target="_blank"
+            href="https://www.facebook.com/stopstalkcommunity/"
+            ><i class="fa fa-facebook"></i
+          ></a>
+        </li>
+        <li>
+          <a
+            id="heart-twitter"
+            class="btn-floating blue lighten-1"
+            style="
+              pointer-events: all;
+              transform: scaleY(0.4) scaleX(0.4) translateY(0px)
+                translateX(40px);
+              opacity: 0;
+            "
+            target="_blank"
+            href="https://twitter.com/stop_stalk"
+            ><i class="fa fa-twitter"></i
+          ></a>
+        </li>
+        <li>
+          <a
+            id="heart-github"
+            class="btn-floating black"
+            style="
+              pointer-events: all;
+              transform: scaleY(0.4) scaleX(0.4) translateY(0px)
+                translateX(40px);
+              opacity: 0;
+            "
+            target="_blank"
+            href="https://github.com/stopstalk-deployment"
+            ><i class="fa fa-github"></i
+          ></a>
+        </li>
+      </ul>
+    </div>
+    <div class="fixed-action-btn">
+      <a
+        class="btn-floating btn-small green pulse"
+        id="explain-problem-difficulty"
+        style="bottom: 70px; right: 10px"
+        target="_blank"
+        ><i class="fa fa-edit"></i
+      ></a>
+    </div>
+    <div class="fixed-action-btn">
+      <a
+        class="btn-floating btn-small orange pulse"
+        style="bottom: 26px; right: 10px"
+        target="_blank"
+        href="/get_started"
+        id="onboarding-button"
+        ><i class="fa fa-question-circle"></i
+      ></a>
+    </div> -->
+    <div
+      id="talenthub-launch-modal"
+      style="width: 55%; z-index: 1003"
+      class="modal center"
+    >
+      <div class="modal-content" style="margin-top: 16px">
+        <h5 style="margin-bottom: 15px" id="talenthub-launch-modal-header">
+          Is your resume even shortlisted?
+        </h5>
+        <div
+          style="display: flex; justify-content: center; align-items: center"
+        >
+          <div style="width: 40%">
+            <img
+              src="/static/images/talenthub_certificate.svg?_rev=20221007220553"
+              style="width: 190px"
+            />
+          </div>
+          <div style="width: 60%; text-align: left">
+            <div class="reczee-certificate-list-item">
+              <span>👉</span>
+              <span class="reczee-certificate-list-text"
+                >Waiting for responses of your application?</span
+              >
+            </div>
+            <div class="reczee-certificate-list-item">
+              <span>👉</span>
+              <span class="reczee-certificate-list-text"
+                >Do you have the right content?</span
+              >
+            </div>
+            <div class="reczee-certificate-list-item">
+              <span>👉</span>
+              <span class="reczee-certificate-list-text"
+                >Is your resume having red flags?</span
+              >
+            </div>
+            <div
+              style="
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                font-size: 14px;
+              "
+            >
+              <a
+                href="https://topmate.io/raj454raj"
+                target="_blank"
+                class="waves-effect blue darken-3 white-text btn-flat"
+                style="margin-top: 8px"
+                >Schedule call</a
+              >
+              <span style="margin-top: 4px"
+                >Get feedback from StopStalk's founder over a call!</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- The javascript =============================== -->
+    <script src="/static/materialize/js/materialize.min.js"></script>
+    <script src="/static/js/run_prettify.min.js" async=""></script>
+    <script
+      src="/static/minified_files/js/web2py-bootstrap3.min.js?_rev=20201225170526"
+      async=""
+    ></script>
+    <script
+      src="/static/minified_files/js/calendar.min.js?_rev=20201225170526"
+      async=""
+    ></script>
+
+    <!-- Analytics ==================================== -->
+
+    <script>
+      (function (i, s, o, g, r, a, m) {
+        i["GoogleAnalyticsObject"] = r;
+        (i[r] =
+          i[r] ||
+          function () {
+            (i[r].q = i[r].q || []).push(arguments);
+          }),
+          (i[r].l = 1 * new Date());
+        (a = s.createElement(o)), (m = s.getElementsByTagName(o)[0]);
+        a.async = 1;
+        a.src = g;
+        m.parentNode.insertBefore(a, m);
+      })(
+        window,
+        document,
+        "script",
+        "//www.google-analytics.com/analytics.js",
+        "ga"
+      );
+
+      if ("False" === "True") {
+        ga("create", "UA-71263752-1", "auto", { userId: "None" });
+      } else {
+        ga("create", "UA-71263752-1", "auto");
+      }
+      ga("send", "pageview");
+    </script>
+    <script src="/static/minified_files/js/appjs/google_analytics.min.js?_rev=20210919215119"></script>
+
+    <script type="text/javascript">
+      var addTodoURL = "/problems/add_todo_problem";
+    </script>
+    <script src="/static/minified_files/js/main.min.js?_rev=20201225170526"></script>
+    <!-- Resource jQuery -->
+    <script
+      type="text/javascript"
+      src="/static/minified_files/js/appjs/layout.min.js?_rev=20230403123439"
+    ></script>
+    <script type="application/ld+json">
+      {
+        "@context": "http://schema.org",
+        "@type": "Organization",
+        "url": "https://www.stopstalk.com",
+        "logo": "https://www.stopstalk.com/static/images/stopstalk-logo.png",
+        "sameAs": [
+          "https://www.facebook.com/stopstalkcommunity/",
+          "https://twitter.com/stop_stalk",
+          "https://plus.google.com/110575194069678651985",
+          "https://github.com/stopstalk-deployment"
+        ]
+      }
+    </script>
+    <script
+      defer=""
+      src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015"
+      integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ=="
+      data-cf-beacon='{"rayId":"96c00390be776706","version":"2025.7.0","r":1,"token":"77954ddd15c347b9921a2f6308b63930","serverTiming":{"name":{"cfExtPri":true,"cfEdge":true,"cfOrigin":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}}}'
+      crossorigin="anonymous"
+    ></script>
+
+    <div class="hiddendiv common"></div>
+    <div
+      class="drag-target"
+      data-sidenav="slide-out"
+      style="
+        left: 0px;
+        touch-action: pan-y;
+        -webkit-user-drag: none;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+      "
+    ></div>
+  </body>
+</html>
